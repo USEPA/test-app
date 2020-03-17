@@ -1,0 +1,14 @@
+<style>
+    .pop-out
+    {
+        transition: transform .5s;
+    }
+
+    .pop-out:hover
+    {
+        -ms-transform: scale(2, 2);
+        -webkit-transform: scale(2, 2);
+        transform: scale(2, 2);
+        border:1px solid #021a40;
+    }
+</style>

@@ -1,0 +1,12 @@
+/target/
+**webapp**
+.settings*
+*.log
+.classpath
+.project
+TEST deployment/
+mavenlog.txt
+*.db
+mvn-repo/
+*.pdf
+dependency-reduced-pom.xml
