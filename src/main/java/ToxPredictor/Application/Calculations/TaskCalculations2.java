@@ -847,7 +847,7 @@ public class TaskCalculations2 {
 							m.setProperty("Likelihood", cc.data.likelihood);
 							m.setProperty("Accumulation", cc.data.accumulation);
 							
-							String Query="Product of \"" + m.getProperty("Parent") + "\", "+
+							String Query="Product of " + m.getProperty("Parent") + ", "+
 							"Accumulation = "+m.getProperty("Accumulation");
 
 							m.setProperty("Query",Query);
