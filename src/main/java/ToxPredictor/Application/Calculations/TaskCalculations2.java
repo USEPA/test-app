@@ -34,6 +34,8 @@ import org.openscience.cdk.smiles.SmilesGenerator;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.hp.hpl.jena.util.FileUtils;
 
 import AADashboard.Application.TableGenerator;
@@ -476,7 +478,20 @@ public class TaskCalculations2 {
 		DescriptorData dd=null;
 		
 		try {
-			dd=WebTEST4.goDescriptors(ac);			
+			dd=WebTEST4.goDescriptors(ac);
+			
+			
+//			System.out.println(dd.to_JSONVector_String(false));			
+//			JsonArray ja=dd.toJSONVector();
+//			JsonObject jo=new JsonObject();		
+//			jo.addProperty("method", method);
+//			jo.add("csv", ja);			
+//			GsonBuilder builder = new GsonBuilder();
+//			Gson gson = builder.create();
+//			System.out.println(gson.toJson(jo));
+			
+			
+			
 			error=(String) ac.getProperty("Error");
 			
 			listTPV=WebTEST4.go2(ac,dd, params);

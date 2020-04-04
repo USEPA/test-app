@@ -7,6 +7,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -5439,6 +5440,24 @@ public class DescriptorData {
 		
 	}
 	
+	public String to_JSONVector_String(boolean writeMultiline) {
+		
+		try {
+		
+			JsonArray jo=toJSONVector();
+			GsonBuilder builder = new GsonBuilder();
+			if (writeMultiline) builder.setPrettyPrinting().serializeNulls();// makes it multiline and readable
+			Gson gson = builder.create();
+			return (gson.toJson(jo));
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "error";
+		
+	}
+
+	
 	
 	/**
 	 * Converts to JSON and outputs to file
@@ -5527,6 +5546,57 @@ public class DescriptorData {
 			fragmentDescriptors.addProperty("MW_Frag", this.MW_Frag);
 			
             return record;
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	/**
+	 * Converts DescriptorData object to JSON
+	 *
+	 * @param dd
+	 */
+	public JsonArray toJSONVector() {
+
+		try {
+			
+			JsonArray ja=new JsonArray();
+			
+			ja.add(this.ID);
+			ja.add("-9999");//TODO need to store toxicity? add dummy value for now
+			
+			if (Error!=null && !Error.equals("OK")) {
+				return ja;
+			}
+
+			for (int i = 0; i <= this.varlist2d.length - 1; i++) {
+				// System.out.println(dd.varlist2d[i]);
+
+				Field myField =this.getClass().getField(this.varlist2d[i]);
+				String[] names = (String[]) myField.get(this);
+				for (int j = 0; j <= names.length - 1; j++) {
+					Field myField2 = this.getClass().getField(names[j]);
+
+					
+					if (myField2.getType().toString().equals("double")) {
+						ja.add(myField2.getDouble(this));
+					} else if (myField2.getType().toString().equals("int")) {
+						ja.add(myField2.getInt(this));
+					} else {
+						System.out.println(myField2.getType());
+					}
+				}
+			}
+			
+			for (int i = 0; i < DescriptorData.strFragments.length; i++) {
+				String strVar = DescriptorData.strFragments[i];
+				double Val = (Double) this.FragmentList.get(strVar);				
+				ja.add(Val);
+			}
+			
+			
+            return ja;
 
 		} catch (Exception e) {
 			return null;
