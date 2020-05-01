@@ -86,13 +86,14 @@ public class DialogSplash extends javax.swing.JDialog {
 		
 		this.setTitle("T.E.S.T. Version " +TESTConstants.SoftwareVersion);
 		
-//		try {
-//			URL url=this.getClass().getClassLoader().getResource("epa_logo_icon.jpg");
-//			this.setIconImage(new ImageIcon(url).getImage());
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		
+		try {
+			URL url=this.getClass().getClassLoader().getResource("epa_logo_icon.jpg");
+			this.setIconImage(new ImageIcon(url).getImage());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
 //		this.getContentPane().setBackground(Color.black);
 		
