@@ -1,5 +1,4 @@
 package ToxPredictor.MyDescriptors;
-
 //my imports:
 import ToxPredictor.Utilities.*;
 import ToxPredictor.misc.Lookup;

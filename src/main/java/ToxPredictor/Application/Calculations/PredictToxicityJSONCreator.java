@@ -28,6 +28,7 @@ import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import ToxPredictor.Application.Calculations.CreateImageFromTrainingPredictionSDFs;
 
 import QSAR.qsarOptimal.AllResults;
 import QSAR.qsarOptimal.OptimalResults;
@@ -36,6 +37,9 @@ import QSAR.validation2.TestChemical;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
+import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
 import wekalite.Instance;
 
@@ -975,7 +979,9 @@ public class PredictToxicityJSONCreator {
 
 			if (gsid_i == null || !WebTEST4.dashboardStructuresAvailable){
 				// slow???
-				TaskCalculations.CreateStructureImage(CASi, strImageFolder);
+				
+				CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
+				c.CreateStructureImage(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(pr.getEndpoint()));
 
 				if (forGUI) {
 					similarChemical.setImageUrl("../../Images/"+CASi + ".png");
@@ -1008,6 +1014,8 @@ public class PredictToxicityJSONCreator {
 		//		predictionResults.setSimilarChemicals(similarChemicals);
 	}
 
+	
+	
 	private void writeExternalPredChart(PredictionResults pr,Vector<Double> vecExp, Vector<Double> vecPred, Vector<Double> vecSC, String predfilename,
 			String chartname, ReportOptions options, SimilarChemicals similarChemicals) throws Exception {
 

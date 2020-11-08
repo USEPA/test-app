@@ -891,7 +891,12 @@ public class PredictToxicityWebPageCreator {
 
 			if (gsid_i == null) {// TODO- check if image exists online???
 									// slow???
-				TaskCalculations.CreateStructureImage(CASi, strImageFolder);
+//				TaskCalculations.CreateStructureImage(CASi, strImageFolder);
+				
+				CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
+				c.CreateStructureImage(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(endpoint));
+
+				
 				fw.write("<td><a href=\"../../images/" + CASi + ".png\"><img src=\"" + ReportUtils.getImageSrc(options, "../../images", CASi + ".png") + "\" width=" + imgSize
 						+ " border=0></a></td>\n");
 			} else {
@@ -1538,40 +1543,51 @@ public class PredictToxicityWebPageCreator {
 		String sourceTag = null;
 				
 		if (endpoint.equals(TESTConstants.ChoiceFHM_LC50) || endpoint.equals(TESTConstants.ChoiceDM_LC50) || endpoint.equals(TESTConstants.ChoiceGA_EC50)) {
+			//link validated on 11/7/20:
 			sourceTag = ("<br>Source: <a href=\"http://cfpub.epa.gov/ecotox/\" target=\"_blank\">ECOTOX</a>");
 		} else if (endpoint.equals(TESTConstants.ChoiceTP_IGC50)) {
-			sourceTag = ("<br>Source: <a href=\"http://www.vet.utk.edu/TETRATOX/index.php\" target=\"_blank\">TETRATOX</a>");
+			//link validated on 11/7/20:
+			sourceTag = ("<br>Source: <a href=\"https://www.tandfonline.com/doi/abs/10.1080/105172397243079\" target=\"_blank\">TETRATOX</a>");
 		} else if (endpoint.equals(TESTConstants.ChoiceRat_LD50)) {
-			sourceTag = ("<br>Source: <a href=\"http://chem.sis.nlm.nih.gov/chemidplus/\" target=\"_blank\">ChemidPlus</a>");
+//			link validated on 11/7/20:
+			sourceTag = ("<br>Source: <a href=\"https://chem.nlm.nih.gov/chemidplus/\" target=\"_blank\">ChemidPlus</a>");
 		} else if (endpoint.equals(TESTConstants.ChoiceBCF)) {
+//			links validated on 11/7/20:
 			String ref = "<br>Sources: ";
 			ref += "<a href=\"http://www.tandfonline.com/doi/abs/10.1080/10659360500474623\" target=\"_blank\">Dimetrov 2005</a>, ";
 			ref += "<a href=\"http://www.nrcresearchpress.com/doi/abs/10.1139/a06-005\" target=\"_blank\">Arnot 2006</a>, and ";
 			ref += "<a href=\"http://www.sciencedirect.com/science/article/pii/S0045653508011922\" target=\"_blank\">Zhao 2008</a>";
 			sourceTag = (ref);
 		} else if (endpoint.equals(TESTConstants.ChoiceReproTox)) {
+			//link validated on 11/7/20:
 			sourceTag = ("<br>Source: <a href=\"http://www.caesar-project.eu/index.php?page=results&section=endpoint&ne=5\" target=\"_blank\">CAESAR</a>");
 		} else if (endpoint.equals(TESTConstants.ChoiceMutagenicity)) {
+			//link validated on 11/7/20:
 			sourceTag = ("<br>Source: <a href=\"http://doc.ml.tu-berlin.de/toxbenchmark/\" target=\"_blank\">Toxicity Benchmark</a>");
 		} else if (endpoint.equals(TESTConstants.ChoiceDensity) || endpoint.equals(TESTConstants.ChoiceFlashPoint)) {
+//			link validated on 11/7/20:
 			sourceTag = ("<br>Source: <a href=\"http://www.lookchem.com/\" target=\"_blank\">Lookchem.com</a>");
 		} else if (endpoint.equals(TESTConstants.ChoiceViscosity)) {
+//			links validated on 11/7/20:
 			String ref = "<br>Sources: ";
 			ref += "<a href=\"http://www.worldcat.org/title/data-book-on-the-viscosity-of-liquids/oclc/18833753\" target=\"_blank\">Viswanath 1989</a>, ";
-			ref += "<a href=\"http://www.wiley.com/WileyCDA/WileyTitle/productCd-0471084670.html\" target=\"_blank\">Riddick 1996</a>";
+			ref += "<a href=\"https://www.worldcat.org/title/techniques-of-chemistry-2-organic-solvents-physical-properties-and-methods-of-purification-4ed/oclc/472811023\" target=\"_blank\">Riddick 1996</a>";
 			sourceTag = (ref);
 		} else if (endpoint.equals(TESTConstants.ChoiceThermalConductivity)) {
+//			links validated on 11/7/20:
 			String ref = "<br>Sources: ";
 			ref += "<a href=\"http://www.worldcat.org/title/liquid-thermal-conductivity-a-data-survey-to-1973/oclc/3090244\" target=\"_blank\">Jamieson 1975</a>, ";
 			ref += "<a href=\"http://www.worldcat.org/title/handbook-of-thermal-conductivity-of-liquids-and-gases/oclc/28847166&referer=brief_results\" target=\"_blank\">Vargaftik 1994</a>";
 			sourceTag = (ref);
 		} else if (endpoint.equals(TESTConstants.ChoiceSurfaceTension)) {
+//			link validated on 11/7/20:
 			String ref = "<br>Source: ";
-			ref += "<a href=\"http://jpcrd.aip.org/resource/1/jpcrbu/v1/i4/p841_s1?isAuthorized=no\" target=\"_blank\">Jaspar 1972</a>";
+			ref += "<a href=\"https://doi.org/10.1063/1.3253106\" target=\"_blank\">Jaspar 1972</a>";
 			sourceTag = ref;
 		} else if (endpoint.equals(TESTConstants.ChoiceWaterSolubility) || endpoint.equals(TESTConstants.ChoiceBoilingPoint) || endpoint.equals(TESTConstants.ChoiceVaporPressure)
 				|| endpoint.equals(TESTConstants.ChoiceMeltingPoint)) {
-			sourceTag = ("<br>Source: <a href=\"" + "http://www.epa.gov/opptintr/exposure/pubs/episuite.htm\" target=\"_blank\">" + "EPI Suite v 4.00</a> ");
+//			link validated on 11/7/20:
+			sourceTag = ("<br>Source: <a href=\"" + "https://www.epa.gov/tsca-screening-tools/epi-suitetm-estimation-program-interface\" target=\"_blank\">" + "EPI Suite v 4.00</a> ");
 		} else if (endpoint.equals(TESTConstants.ChoiceEstrogenReceptor) || endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
 			String ref = "<br>Source: ";
 			ref += "<a href=\"http://www.worldcat.org/title/predicting-chemical-toxicity-and-fate/oclc/54073110&referer=brief_results\">Cronin and Livingstone, 2004</a>";

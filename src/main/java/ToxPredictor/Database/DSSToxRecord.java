@@ -43,6 +43,8 @@ public class DSSToxRecord {
 		return rec;
 	}
 	
+	
+	
 	public static void assignFromDSSToxRecord(AtomContainer m, DSSToxRecord rec) {
 	
 		m.setProperty(strCAS, rec.cas);

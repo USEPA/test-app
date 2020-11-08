@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import ToxPredictor.Application.TESTConstants;
-import gov.epa.api.Chemical;
+//import gov.epa.api.Chemical;
 
 // Class to store settings for fraMain7
 //Ideally this class would be inside fraMain7 but this is quickest solution

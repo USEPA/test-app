@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import wekalite.*;
 import QSAR.validation2.*;
 import ToxPredictor.Application.ReportOptions;
+import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.misc.Lookup;
 //import ToxPredictor.misc.ParseChemidplus;
 
@@ -79,7 +80,7 @@ public class PredictToxicityNearestNeighbor {
 			if (OutputFolder == null)
 				return 0;
 
-			this.CreateStructureImages(OutputFolder);
+			this.CreateStructureImages(endpoint,OutputFolder);
 
 			// Vector<String>testMatchTable=DescriptorCalculationTask7.FindClosestTestSetChemicals(999,
 			// chemical,testDataSet2d, 0.5,
@@ -182,7 +183,7 @@ public class PredictToxicityNearestNeighbor {
 
 	}
 
-	private void CreateStructureImages(String OutputFolder) {
+	private void CreateStructureImages(String endpoint,String OutputFolder) {
 
 		// ParseChemidplus p=new ParseChemidplus();
 		ToxPredictor.Utilities.GetStructureImagesFromJar g = new ToxPredictor.Utilities.GetStructureImagesFromJar();
@@ -195,7 +196,8 @@ public class PredictToxicityNearestNeighbor {
 		String folder = of1.getParentFile().getParent();
 		// String folder=of1.getParentFile().getAbsolutePath();
 
-		File ImageFolder = new File(folder + "/images");
+		String strImageFolder=folder + "/images";
+		File ImageFolder = new File(strImageFolder);
 		if (!ImageFolder.exists())
 			ImageFolder.mkdir();
 
@@ -203,7 +205,12 @@ public class PredictToxicityNearestNeighbor {
 
 		for (int i = 0; i < nn.cc.numInstances(); i++) {
 			String CASi = nn.cc.instance(i).getName();
-			TaskCalculations.CreateStructureImage(CASi, ImageFolder.getAbsolutePath());
+//			TaskCalculations.CreateStructureImage(CASi, ImageFolder.getAbsolutePath());
+			
+			CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
+			c.CreateStructureImage(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(endpoint));
+
+			
 		}
 	}
 

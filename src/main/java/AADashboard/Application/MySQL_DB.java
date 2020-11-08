@@ -92,6 +92,22 @@ public class MySQL_DB {
 		}
 	}
 	
+	public static ResultSet getRecords(Statement stat,String sql) {
+
+		try {
+			
+//			System.out.println(query);
+			ResultSet rs = stat.executeQuery(sql);
+//			ResultSetMetaData rsmd = rs.getMetaData();
+			
+			return rs;
+//			this.printResultSet(rs);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}	
+	
 	public static void printResultSet(ResultSet rs) {
 		try {
 

@@ -1355,7 +1355,7 @@ public class QSARTest {
 //		q.run_DataSet_WebTEST3_multicore();
 //		q.run_DataSet_WebTEST3_multicore2();
 //		q.run800K_NCCT_Set_Multicore("data\\z NCCT_ID\\qsar-ready_smiles_v2_2019_02_19.txt");
-		q.run800K_NCCT_Set_Multicore_AllEndpoints("data\\0 NCCT structures\\qsar-ready_smiles_v2.txt");
+//		q.run800K_NCCT_Set_Multicore_AllEndpoints("data\\0 NCCT structures\\qsar-ready_smiles_v2.txt");
 		
 //		q.runSingleChemicalAllEndpoints2();
 		

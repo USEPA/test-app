@@ -8,13 +8,13 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 //import java.util.Vector;
 
-import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import gov.epa.api.Score;
 
 /**
  * Class to store hazard profile for a chemical
@@ -347,148 +347,148 @@ public class Chemical {
 		// ***********************************************************************************
 		// Japan NITE data:
 		// TODO: Japan ScoreRecord data should be loaded from NITE json files from Wehage using java code
-		ScoreRecord sr_Acute_Aquatic_Toxicity = new ScoreRecord();
+		ScoreRecord sr_Acute_Aquatic_Toxicity = new ScoreRecord(Chemical.strAcute_Aquatic_Toxicity,c.CAS,c.name);
 		sr_Acute_Aquatic_Toxicity.source = ScoreRecord.sourceJapan;
 		sr_Acute_Aquatic_Toxicity.score = "L";
-		sr_Acute_Aquatic_Toxicity.hazard_code = "Not classified";
-		sr_Acute_Aquatic_Toxicity.hazard_statement = "-";
+		sr_Acute_Aquatic_Toxicity.hazardCode = "Not classified";
+		sr_Acute_Aquatic_Toxicity.hazardStatement = "-";
 		sr_Acute_Aquatic_Toxicity.rationale = "Since 72 hours EC50 of the algae (Skeletonema) was more than the water solubility (EU-RAR (2003)), it was classified into Not classified.";
 		c.scoreAcute_Aquatic_Toxicity.records.add(sr_Acute_Aquatic_Toxicity);
 
-		ScoreRecord sr_Chronic_Aquatic_Toxicity = new ScoreRecord();
+		ScoreRecord sr_Chronic_Aquatic_Toxicity = new ScoreRecord(Chemical.strChronic_Aquatic_Toxicity,c.CAS,c.name);
 		sr_Chronic_Aquatic_Toxicity.source = ScoreRecord.sourceJapan;
 		sr_Chronic_Aquatic_Toxicity.score = "N/A";
-		sr_Chronic_Aquatic_Toxicity.hazard_code = "Not classified";
-		sr_Chronic_Aquatic_Toxicity.hazard_statement = "-";
+		sr_Chronic_Aquatic_Toxicity.hazardCode = "Not classified";
+		sr_Chronic_Aquatic_Toxicity.hazardStatement = "-";
 		sr_Chronic_Aquatic_Toxicity.rationale = "Although it is water-insolubility and acute toxicity was not reported within the aqueous solubility concentrations and there was no rapidly degrading (the decomposition by BOD: 0%(Existing Chemical Safety Inspections Data)), since the bio-accumulation (BCF<50 (Existing Chemical Safety Inspections Data)) was low, it was classified into Not classified.";
 		c.scoreChronic_Aquatic_Toxicity.records.add(sr_Chronic_Aquatic_Toxicity);
 		//
 		 
 		
-		ScoreRecord sr_Acute_Toxicity_Oral=new ScoreRecord();
+		ScoreRecord sr_Acute_Toxicity_Oral=new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityOral,c.CAS,c.name);
 		 sr_Acute_Toxicity_Oral.source=ScoreRecord.sourceJapan;
 		 sr_Acute_Toxicity_Oral.score="L";
-		 sr_Acute_Toxicity_Oral.hazard_code="Not classified";
-		 sr_Acute_Toxicity_Oral.hazard_statement="-";
+		 sr_Acute_Toxicity_Oral.hazardCode="Not classified";
+		 sr_Acute_Toxicity_Oral.hazardStatement="-";
 		 sr_Acute_Toxicity_Oral.rationale="Based on the rat LD50 (oral route) value of > 5,000mg/kg (EHC 162 (1994)).";
 		 sr_Acute_Toxicity_Oral.route="Oral";
 //		 c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Oral);
 		 c.scoreAcute_Mammalian_ToxicityOral.records.add(sr_Acute_Toxicity_Oral);
 		
-		 ScoreRecord sr_Acute_Toxicity_Dermal=new ScoreRecord();
+		 ScoreRecord sr_Acute_Toxicity_Dermal=new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityDermal,c.CAS,c.name);
 		 sr_Acute_Toxicity_Dermal.source=ScoreRecord.sourceJapan;
 		 sr_Acute_Toxicity_Dermal.score="L";
-		 sr_Acute_Toxicity_Dermal.hazard_code="Classification not possible";
-		 sr_Acute_Toxicity_Dermal.hazard_statement="-";
+		 sr_Acute_Toxicity_Dermal.hazardCode="Classification not possible";
+		 sr_Acute_Toxicity_Dermal.hazardStatement="-";
 		 sr_Acute_Toxicity_Dermal.rationale="Insufficient data available";
 		 sr_Acute_Toxicity_Dermal.route="Dermal";
 //		 c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Dermal);
 		 c.scoreAcute_Mammalian_ToxicityDermal.records.add(sr_Acute_Toxicity_Dermal);
 		 
 		 
-		 ScoreRecord sr_Acute_Toxicity_Inhalation_Gas=new ScoreRecord();
+		 ScoreRecord sr_Acute_Toxicity_Inhalation_Gas=new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityInhalation,c.CAS,c.name);
 		 sr_Acute_Toxicity_Inhalation_Gas.source=ScoreRecord.sourceJapan;
 		 sr_Acute_Toxicity_Inhalation_Gas.score="L";
-		 sr_Acute_Toxicity_Inhalation_Gas.hazard_code="Not applicable";
-		 sr_Acute_Toxicity_Inhalation_Gas.hazard_statement="-";
+		 sr_Acute_Toxicity_Inhalation_Gas.hazardCode="Not applicable";
+		 sr_Acute_Toxicity_Inhalation_Gas.hazardStatement="-";
 		 sr_Acute_Toxicity_Inhalation_Gas.rationale="Due to the fact that the substance is \"solid\" according to the GHS definition and inhalation of its gas is not expected.";
 		 sr_Acute_Toxicity_Inhalation_Gas.route="Inhalation gas";
 //		 c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Inhalation_Gas);
 		 c.scoreAcute_Mammalian_ToxicityInhalation.records.add(sr_Acute_Toxicity_Inhalation_Gas);
 		
-		ScoreRecord sr_Carcinogenicity = new ScoreRecord();
+		ScoreRecord sr_Carcinogenicity = new ScoreRecord(Chemical.strCarcinogenicity,c.CAS,c.name);
 		sr_Carcinogenicity.source = ScoreRecord.sourceJapan;
 		sr_Carcinogenicity.score = "L";
-		sr_Carcinogenicity.hazard_code = "Not classified";
-		sr_Carcinogenicity.hazard_statement = "-";
+		sr_Carcinogenicity.hazardCode = "Not classified";
+		sr_Carcinogenicity.hazardStatement = "-";
 		sr_Carcinogenicity.rationale = "Due to the fact that the substance is classified as Group 3 by IARC (1999) and Category C by EPA (1990).";
 		c.scoreCarcinogenicity.records.add(sr_Carcinogenicity);
 		//
-		ScoreRecord sr_Germ_Cell_Mutagenicity = new ScoreRecord();
+		ScoreRecord sr_Germ_Cell_Mutagenicity = new ScoreRecord(Chemical.strGenotoxicity_Mutagenicity,c.CAS,c.name);
 		sr_Germ_Cell_Mutagenicity.source = ScoreRecord.sourceJapan;
 		sr_Germ_Cell_Mutagenicity.score = "M";
-		sr_Germ_Cell_Mutagenicity.hazard_code = "Category 2";
-		sr_Germ_Cell_Mutagenicity.hazard_statement = "Suspected of causing genetic defects";
+		sr_Germ_Cell_Mutagenicity.hazardCode = "Category 2";
+		sr_Germ_Cell_Mutagenicity.hazardStatement = "Suspected of causing genetic defects";
 		sr_Germ_Cell_Mutagenicity.rationale = "Based on the absence of data on multi-generation mutagenicity tests, germ cell mutagenicity tests in vivo and germ cell genotoxicity tests in vivo, and positive data on somatic cell mutagenicity tests in vivo (micronucleus tests), described in NITE Initial Risk Assessment No.56 (2005), CERI-NITE Hazard Assessment No.56 (2005), EU-RAR No.17 (2002) and NTP DB (Access on April 2006).";
 		c.scoreGenotoxicity_Mutagenicity.records.add(sr_Germ_Cell_Mutagenicity);
 
-		ScoreRecord sr_Skin_Corrosion_Irritation = new ScoreRecord();
+		ScoreRecord sr_Skin_Corrosion_Irritation = new ScoreRecord(Chemical.strSkin_Irritation,c.CAS,c.name);
 		sr_Skin_Corrosion_Irritation.source = ScoreRecord.sourceJapan;
 		sr_Skin_Corrosion_Irritation.score = "M";
-		sr_Skin_Corrosion_Irritation.hazard_code = "Category 3";
-		sr_Skin_Corrosion_Irritation.hazard_statement = "Causes mild skin irritation";
+		sr_Skin_Corrosion_Irritation.hazardCode = "Category 3";
+		sr_Skin_Corrosion_Irritation.hazardStatement = "Causes mild skin irritation";
 		sr_Skin_Corrosion_Irritation.rationale = "Based on the description in the report on rabbit skin irritation tests (EHC 162 (1994)): \"The substance initially caused no irritation of the skin. After an observation period of 72 hours, slight erythematous and edematous responses were noted.\"";
 		c.scoreSkin_Irritation.records.add(sr_Skin_Corrosion_Irritation);
 		//
 		//
-		ScoreRecord sr_Serious_Eye_Damage_Irritation = new ScoreRecord();
+		ScoreRecord sr_Serious_Eye_Damage_Irritation = new ScoreRecord(Chemical.strEye_Irritation,c.CAS,c.name);
 		sr_Serious_Eye_Damage_Irritation.source = ScoreRecord.sourceJapan;
 		sr_Serious_Eye_Damage_Irritation.score = "M";
-		sr_Serious_Eye_Damage_Irritation.hazard_code = "Category 2B";
-		sr_Serious_Eye_Damage_Irritation.hazard_statement = "Causes eye irritation";
+		sr_Serious_Eye_Damage_Irritation.hazardCode = "Category 2B";
+		sr_Serious_Eye_Damage_Irritation.hazardStatement = "Causes eye irritation";
 		sr_Serious_Eye_Damage_Irritation.rationale = "Based on the description in the report on rabbit eye irritation tests (EHC 162 (1994), CERI-NITE Hazard Assessment No.56 (2005)): \"Animals treated with the substance showed only transient congestion and edema of the conjunctival membranes. These symptoms subsided by 24 hours,\" \"At 24 hours, only slight redness (4 of 6), only slight edema (2 of 6), and only slight discharge (1 of 6) of the conjunctiva were noted.\" The substance is thus considered a mild eye irritant.";
 		c.scoreEye_Irritation.records.add(sr_Serious_Eye_Damage_Irritation);
 
-		ScoreRecord sr_Skin_Sensitizer = new ScoreRecord();
+		ScoreRecord sr_Skin_Sensitizer = new ScoreRecord(Chemical.strSkin_Sensitization,c.CAS,c.name);
 		sr_Skin_Sensitizer.source = ScoreRecord.sourceJapan;
 		sr_Skin_Sensitizer.score = "L";
-		sr_Skin_Sensitizer.hazard_code = "Not classified";
-		sr_Skin_Sensitizer.hazard_statement = "-";
+		sr_Skin_Sensitizer.hazardCode = "Not classified";
+		sr_Skin_Sensitizer.hazardStatement = "-";
 		sr_Skin_Sensitizer.rationale = "Based on the negative results in human skin sensitization tests (CERI Hazard Data 97-16 (1998) and EHC 162 (1994)).";
 		c.scoreSkin_Sensitization.records.add(sr_Skin_Sensitizer);
 
-		ScoreRecord sr_Reproductive_Toxicity = new ScoreRecord();
+		ScoreRecord sr_Reproductive_Toxicity = new ScoreRecord(Chemical.strReproductive,c.CAS,c.name);
 		sr_Reproductive_Toxicity.source = ScoreRecord.sourceJapan;
 		sr_Reproductive_Toxicity.score = "L";
-		sr_Reproductive_Toxicity.hazard_code = "Not classified";
-		sr_Reproductive_Toxicity.hazard_statement = "-";
+		sr_Reproductive_Toxicity.hazardCode = "Not classified";
+		sr_Reproductive_Toxicity.hazardStatement = "-";
 		sr_Reproductive_Toxicity.rationale = "Based on no definitive evidence of reproductive toxicity observed in reproductive toxicity studies and teratogenicity studies in rats and mice, described in NITE Initial Risk Assessment No.56 (2005) and CERI-NITE Hazard Assessment No.56 (2005).";
 		c.scoreReproductive.records.add(sr_Reproductive_Toxicity);
 		
 		//********************************************************************************************
 		//TEST records
-		sr_Acute_Toxicity_Oral = new ScoreRecord();
+		sr_Acute_Toxicity_Oral = new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityOral,c.CAS,c.name);
 		sr_Acute_Toxicity_Oral.source = ScoreRecord.sourceTEST_Experimental;
 		sr_Acute_Toxicity_Oral.score = "L";
-		sr_Acute_Toxicity_Oral.hazard_code = "";
-		sr_Acute_Toxicity_Oral.hazard_statement = "";
+		sr_Acute_Toxicity_Oral.hazardCode = "";
+		sr_Acute_Toxicity_Oral.hazardStatement = "";
 		sr_Acute_Toxicity_Oral.rationale = "Experimental LD50 > 5,000mg/kg";
 		sr_Acute_Toxicity_Oral.route = "Oral";
 //		c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Oral);
 		c.scoreAcute_Mammalian_ToxicityOral.records.add(sr_Acute_Toxicity_Oral);
 
-		sr_Acute_Toxicity_Oral = new ScoreRecord();
+		sr_Acute_Toxicity_Oral = new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityOral,c.CAS,c.name);
 		sr_Acute_Toxicity_Oral.source = ScoreRecord.sourceTEST_Predicted;
 		sr_Acute_Toxicity_Oral.score = "VH";
-		sr_Acute_Toxicity_Oral.hazard_code = "";
-		sr_Acute_Toxicity_Oral.hazard_statement = "";
+		sr_Acute_Toxicity_Oral.hazardCode = "";
+		sr_Acute_Toxicity_Oral.hazardStatement = "";
 		sr_Acute_Toxicity_Oral.rationale = "Predicted LD50 = 24.2 mg/kg";
 		sr_Acute_Toxicity_Oral.route = "Oral";
 //		c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Oral);
 		c.scoreAcute_Mammalian_ToxicityOral.records.add(sr_Acute_Toxicity_Oral);
 		
-		sr_Germ_Cell_Mutagenicity = new ScoreRecord();
+		sr_Germ_Cell_Mutagenicity = new ScoreRecord(Chemical.strGenotoxicity_Mutagenicity,c.CAS,c.name);
 		sr_Germ_Cell_Mutagenicity.source = ScoreRecord.sourceTEST_Experimental;
 		sr_Germ_Cell_Mutagenicity.score = "L";
-		sr_Germ_Cell_Mutagenicity.hazard_code = "Mutagenicity Negative";
-		sr_Germ_Cell_Mutagenicity.hazard_statement = "";
+		sr_Germ_Cell_Mutagenicity.hazardCode = "Mutagenicity Negative";
+		sr_Germ_Cell_Mutagenicity.hazardStatement = "";
 		sr_Germ_Cell_Mutagenicity.rationale = "Experimental Ames mutagenicity is negative";
 		c.scoreGenotoxicity_Mutagenicity.records.add(sr_Germ_Cell_Mutagenicity);
 		
-		sr_Germ_Cell_Mutagenicity = new ScoreRecord();
+		sr_Germ_Cell_Mutagenicity = new ScoreRecord(Chemical.strGenotoxicity_Mutagenicity,c.CAS,c.name);
 		sr_Germ_Cell_Mutagenicity.source = ScoreRecord.sourceTEST_Predicted;
 		sr_Germ_Cell_Mutagenicity.score = "L";
-		sr_Germ_Cell_Mutagenicity.hazard_code = "Mutagenicity Negative";
-		sr_Germ_Cell_Mutagenicity.hazard_statement = "";
+		sr_Germ_Cell_Mutagenicity.hazardCode = "Mutagenicity Negative";
+		sr_Germ_Cell_Mutagenicity.hazardStatement = "";
 		sr_Germ_Cell_Mutagenicity.rationale = "Experimental Ames mutagenicity is negative";
 		c.scoreGenotoxicity_Mutagenicity.records.add(sr_Germ_Cell_Mutagenicity);
 
 
-		sr_Acute_Aquatic_Toxicity = new ScoreRecord();
+		sr_Acute_Aquatic_Toxicity = new ScoreRecord(Chemical.strAcute_Aquatic_Toxicity,c.CAS,c.name);
 		sr_Acute_Aquatic_Toxicity.source = ScoreRecord.sourceTEST_Predicted;
 		sr_Acute_Aquatic_Toxicity.score = "L";
-		sr_Acute_Aquatic_Toxicity.hazard_code = "";
-		sr_Acute_Aquatic_Toxicity.hazard_statement = "";
+		sr_Acute_Aquatic_Toxicity.hazardCode = "";
+		sr_Acute_Aquatic_Toxicity.hazardStatement = "";
 		sr_Acute_Aquatic_Toxicity.rationale = "Predicted LC50 = 6.44E-04 mg/L is greater than the experimental water solubility of 1E-04 mg/L";
 		c.scoreAcute_Aquatic_Toxicity.records.add(sr_Acute_Aquatic_Toxicity);
 
@@ -723,98 +723,98 @@ public class Chemical {
 		c.scoreBioaccumulation.final_score = "M";
 		
 		// TODO: Japan ScoreRecord data should be loaded from NITE json files from Wehage using java code		
-		ScoreRecord sr_Acute_Aquatic_Toxicity = new ScoreRecord();
+		ScoreRecord sr_Acute_Aquatic_Toxicity = new ScoreRecord(Chemical.strAcute_Aquatic_Toxicity,c.CAS,c.name);
 		sr_Acute_Aquatic_Toxicity.source = ScoreRecord.sourceJapan;
 		sr_Acute_Aquatic_Toxicity.score = "VH";
-		sr_Acute_Aquatic_Toxicity.hazard_code = "Category 1";
-		sr_Acute_Aquatic_Toxicity.hazard_statement = "Very toxic to aquatic life";
+		sr_Acute_Aquatic_Toxicity.hazardCode = "Category 1";
+		sr_Acute_Aquatic_Toxicity.hazardStatement = "Very toxic to aquatic life";
 		sr_Acute_Aquatic_Toxicity.rationale = "It was classified into Category 1 from 96-hour LC50=0.18-0.32mg/L of Crustacea (Mysid shrimp) (EHC111, 1991).";
 		c.scoreAcute_Aquatic_Toxicity.records.add(sr_Acute_Aquatic_Toxicity);
 		
-		ScoreRecord sr_Chronic_Aquatic_Toxicity = new ScoreRecord();
+		ScoreRecord sr_Chronic_Aquatic_Toxicity = new ScoreRecord(Chemical.strChronic_Aquatic_Toxicity,c.CAS,c.name);
 		sr_Chronic_Aquatic_Toxicity.source = ScoreRecord.sourceJapan;
 		sr_Chronic_Aquatic_Toxicity.score = "N/A";//TODO - wehage's scheme needs to be fixed!
-		sr_Chronic_Aquatic_Toxicity.hazard_code = "Category 1";
-		sr_Chronic_Aquatic_Toxicity.hazard_statement = "Very toxic to aquatic life with long lasting effects";
+		sr_Chronic_Aquatic_Toxicity.hazardCode = "Category 1";
+		sr_Chronic_Aquatic_Toxicity.hazardStatement = "Very toxic to aquatic life with long lasting effects";
 		sr_Chronic_Aquatic_Toxicity.rationale = "Classified into Category 1, since acute toxicity is Category 1, and supposedly bioaccumulative (log Kow=4.59(PHYSPROP Database, 2005)), though rapidly degrading (BOD: 90% (existing chemical substances safety inspections data)).";
 		c.scoreChronic_Aquatic_Toxicity.records.add(sr_Chronic_Aquatic_Toxicity);
 		
 		
-		ScoreRecord sr_Acute_Toxicity_Oral = new ScoreRecord();
+		ScoreRecord sr_Acute_Toxicity_Oral = new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityOral,c.CAS,c.name);
 		sr_Acute_Toxicity_Oral.source = ScoreRecord.sourceJapan;
 		sr_Acute_Toxicity_Oral.score = "L";
-		sr_Acute_Toxicity_Oral.hazard_code = "Category 5";
-		sr_Acute_Toxicity_Oral.hazard_statement = "May be harmful if swallowed";
+		sr_Acute_Toxicity_Oral.hazardCode = "Category 5";
+		sr_Acute_Toxicity_Oral.hazardStatement = "May be harmful if swallowed";
 		sr_Acute_Toxicity_Oral.rationale = "Rat LD50 value: 3500mg/kg (MOE Risk Assessment vol.4,  2005, EHC 111, 1991), 3800mg/kg (EHC 111, 1999, ACGIH 7th, 2001, DFGOT vol.2, 1991), 10800mg/kg (EHC 111, 1991, DFGOT vol.2, 1991), >5000mg/kg (EHC 111, 1991) and >6400mg/kg (PATTY 4th, 1994). Calculated based on the data above. Since the calculated values was 3723.1mg/kg, it was classified to category 5.";
 		sr_Acute_Toxicity_Oral.route="Oral";
 //		c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Oral);
 		c.scoreAcute_Mammalian_ToxicityOral.records.add(sr_Acute_Toxicity_Oral);
 
-		ScoreRecord sr_Acute_Toxicity_Dermal = new ScoreRecord();
+		ScoreRecord sr_Acute_Toxicity_Dermal = new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityDermal,c.CAS,c.name);
 		sr_Acute_Toxicity_Dermal.source = ScoreRecord.sourceJapan;
 		sr_Acute_Toxicity_Dermal.score = "L";
-		sr_Acute_Toxicity_Dermal.hazard_code = "Not classified";
-		sr_Acute_Toxicity_Dermal.hazard_statement = "-";
+		sr_Acute_Toxicity_Dermal.hazardCode = "Not classified";
+		sr_Acute_Toxicity_Dermal.hazardStatement = "-";
 		sr_Acute_Toxicity_Dermal.rationale = "Based on rabbit LD50 value: >7900mg/kg (MOE Risk Assessment the 4th volume, 2005, EHC 111, 1991, DFGOT vol.2, 1991), and >10000mg/kg (DFGOT vol.2, 1991), it was set as the outside of Category.";
 		sr_Acute_Toxicity_Dermal.route="Dermal";
 //		c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Dermal);
 		c.scoreAcute_Mammalian_ToxicityDermal.records.add(sr_Acute_Toxicity_Dermal);
 
-		ScoreRecord sr_Acute_Toxicity_Inhalation_Gas = new ScoreRecord();
+		ScoreRecord sr_Acute_Toxicity_Inhalation_Gas = new ScoreRecord(Chemical.strAcute_Mammalian_ToxicityInhalation,c.CAS,c.name);
 		sr_Acute_Toxicity_Inhalation_Gas.source = ScoreRecord.sourceJapan;
 		sr_Acute_Toxicity_Inhalation_Gas.score = "L";
-		sr_Acute_Toxicity_Inhalation_Gas.hazard_code = "Not applicable";
-		sr_Acute_Toxicity_Inhalation_Gas.hazard_statement = "-";
+		sr_Acute_Toxicity_Inhalation_Gas.hazardCode = "Not applicable";
+		sr_Acute_Toxicity_Inhalation_Gas.hazardStatement = "-";
 		sr_Acute_Toxicity_Inhalation_Gas.rationale = "Solid (GHS definition)";
 		sr_Acute_Toxicity_Inhalation_Gas.route="Inhalation gas";
 //		c.scoreAcute_Mammalian_Toxicity.records.add(sr_Acute_Toxicity_Inhalation_Gas);
 		c.scoreAcute_Mammalian_ToxicityInhalation.records.add(sr_Acute_Toxicity_Inhalation_Gas);
 		
 		
-		ScoreRecord sr_Carcinogenicity = new ScoreRecord();
+		ScoreRecord sr_Carcinogenicity = new ScoreRecord(Chemical.strCarcinogenicity,c.CAS,c.name);
 		sr_Carcinogenicity.source = ScoreRecord.sourceJapan;
 		sr_Carcinogenicity.score = "L";
-		sr_Carcinogenicity.hazard_code = "Not classified";
-		sr_Carcinogenicity.hazard_statement = "-";
+		sr_Carcinogenicity.hazardCode = "Not classified";
+		sr_Carcinogenicity.hazardStatement = "-";
 		sr_Carcinogenicity.rationale = "Since it was classified into A4 in ACGIH (ACGIH 7th, 2001), it was considered as the outside of Category.";
 		c.scoreCarcinogenicity.records.add(sr_Carcinogenicity);
 		
-		ScoreRecord sr_Germ_Cell_Mutagenicity = new ScoreRecord();
+		ScoreRecord sr_Germ_Cell_Mutagenicity = new ScoreRecord(Chemical.strGenotoxicity_Mutagenicity,c.CAS,c.name);
 		sr_Germ_Cell_Mutagenicity.source = ScoreRecord.sourceJapan;
 		sr_Germ_Cell_Mutagenicity.score = "N/A";
-		sr_Germ_Cell_Mutagenicity.hazard_code = "Classification not possible";
-		sr_Germ_Cell_Mutagenicity.hazard_statement = "-";
+		sr_Germ_Cell_Mutagenicity.hazardCode = "Classification not possible";
+		sr_Germ_Cell_Mutagenicity.hazardStatement = "-";
 		sr_Germ_Cell_Mutagenicity.rationale = "Classification not possible due to lack of data";
 		c.scoreGenotoxicity_Mutagenicity.records.add(sr_Germ_Cell_Mutagenicity);
 
-		ScoreRecord sr_Skin_Corrosion_Irritation = new ScoreRecord();
+		ScoreRecord sr_Skin_Corrosion_Irritation = new ScoreRecord(Chemical.strSkin_Irritation,c.CAS,c.name);
 		sr_Skin_Corrosion_Irritation.source = ScoreRecord.sourceJapan;
 		sr_Skin_Corrosion_Irritation.score = "L";
-		sr_Skin_Corrosion_Irritation.hazard_code = "Not classified";
-		sr_Skin_Corrosion_Irritation.hazard_statement = "-";
+		sr_Skin_Corrosion_Irritation.hazardCode = "Not classified";
+		sr_Skin_Corrosion_Irritation.hazardStatement = "-";
 		sr_Skin_Corrosion_Irritation.rationale = "From description that irritation was not admitted in the test applied to the skin of the rat for 4 hours on DFGOT (2 vol. 1991) and ACGIH (7th, 2001), it was carried out the outside of Category.";
 		c.scoreSkin_Irritation.records.add(sr_Skin_Corrosion_Irritation);
 
-		ScoreRecord sr_Serious_Eye_Damage_Irritation=new ScoreRecord();
+		ScoreRecord sr_Serious_Eye_Damage_Irritation=new ScoreRecord(Chemical.strEye_Irritation,c.CAS,c.name);
 		sr_Serious_Eye_Damage_Irritation.source=ScoreRecord.sourceJapan;
 		sr_Serious_Eye_Damage_Irritation.score="M";
-		sr_Serious_Eye_Damage_Irritation.hazard_code="Category 2B";
-		sr_Serious_Eye_Damage_Irritation.hazard_statement="Causes eye irritation";	sr_Serious_Eye_Damage_Irritation.rationale="We classified it as Category 2B based on the description that a slight conjunctival reddening was acknowledged and it disappeared within 7 days in the test applied to the eyes of the rabbits (DFGOT(vol.2,1991)).";	
+		sr_Serious_Eye_Damage_Irritation.hazardCode="Category 2B";
+		sr_Serious_Eye_Damage_Irritation.hazardStatement="Causes eye irritation";	sr_Serious_Eye_Damage_Irritation.rationale="We classified it as Category 2B based on the description that a slight conjunctival reddening was acknowledged and it disappeared within 7 days in the test applied to the eyes of the rabbits (DFGOT(vol.2,1991)).";	
 		c.scoreEye_Irritation.records.add(sr_Serious_Eye_Damage_Irritation);
 		
-		ScoreRecord sr_Skin_Sensitizer = new ScoreRecord();
+		ScoreRecord sr_Skin_Sensitizer = new ScoreRecord(Chemical.strSkin_Sensitization,c.CAS,c.name);
 		sr_Skin_Sensitizer.source = ScoreRecord.sourceJapan;
 		sr_Skin_Sensitizer.score = "N/A";
-		sr_Skin_Sensitizer.hazard_code = "Classification not possible";
-		sr_Skin_Sensitizer.hazard_statement = "-";
+		sr_Skin_Sensitizer.hazardCode = "Classification not possible";
+		sr_Skin_Sensitizer.hazardStatement = "-";
 		sr_Skin_Sensitizer.rationale = "ACGIH (7th, 2001) and HSDB (2006) had description of the case report of allergic contact dermatitis, however, both of which were considered to be the same description of one case and did not have the report of two or more cases which is a judging standard of skin sensitization, and we thought the data was insufficient, therefore we presupposed that we could not classify it.";
 		c.scoreSkin_Sensitization.records.add(sr_Skin_Sensitizer);
 		
-		ScoreRecord sr_reproductive_toxicity=new ScoreRecord();
+		ScoreRecord sr_reproductive_toxicity=new ScoreRecord(Chemical.strReproductive,c.CAS,c.name);
 		sr_reproductive_toxicity.source=ScoreRecord.sourceJapan;
 		sr_reproductive_toxicity.score="L";
-		sr_reproductive_toxicity.hazard_code="Not classified";
-		sr_reproductive_toxicity.hazard_statement="-";
+		sr_reproductive_toxicity.hazardCode="Not classified";
+		sr_reproductive_toxicity.hazardStatement="-";
 		sr_reproductive_toxicity.rationale="It was considered as out of Category based on the description that clear reproductive toxicity was not observed at the dose as which general toxicity is observed in parent animals in the test administered orally before mating till the term pregnancy using rat (MOE Risk Assessment 4th volume (2005), ACGIH (7th, 2001), and EHC 111 (1991)).";
 		c.scoreReproductive.records.add(sr_reproductive_toxicity);
 
@@ -976,19 +976,7 @@ public class Chemical {
 		
 	}
 
-	
-	public static Chemical stringArrayToChemical(String header,ArrayList<String>lines) {
-		
-		Chemical chemical=new Chemical();
-		
-		
-		
-				
 
-		
-		
-		return chemical;
-	}
 	
 	public ArrayList<String>toStringArray() {
 		return toStringArray("|");
@@ -1001,36 +989,9 @@ public class Chemical {
 //		System.out.println(FlatFileRecord.getHeader("|"));
 		
 		for (Score score: scores) {
-			for (ScoreRecord sr: score.records) {
-				
-				FlatFileRecord f=new FlatFileRecord();
-				f.CAS=CAS;								
-				f.hazard_name=score.hazard_name;
-				f.name=sr.name;			
-				
-				f.source=sr.source;
-				f.score=sr.score;
-				f.category=sr.category;
-				f.hazard_code=sr.hazard_code;
-				f.hazard_statement=sr.hazard_statement;
-				f.rationale=sr.rationale;
-				f.route=sr.route;
-				f.note=sr.note;
-				f.note2=sr.note2;
-				f.valueMassOperator=sr.valueMassOperator;
-				f.valueActive=sr.valueActive;
-												
-				if (sr.authority==null)	f.authority=ScoreRecord.getListType(sr.source);
-				else f.authority=sr.authority;		
-				
-				
-				if (sr.valueMass!=null)	f.valueMass=sr.valueMass;
-				
-				f.valueMassUnits=sr.valueMassUnits;
-				
+			for (ScoreRecord sr: score.records) {				
 //				System.out.println(f.toString("|"));
-				a.add(f.toString(d));
-				
+				a.add(sr.toString(d));
 			}
 			
 		}
@@ -1040,7 +1001,22 @@ public class Chemical {
 	}
 	
 	
+	public ArrayList<String>toStringArray(String del,String [] fieldNames) {
+		ArrayList<String>a=new ArrayList<>();
+		
+//		System.out.println(FlatFileRecord.getHeader("|"));
+		
+		for (Score score: scores) {
+			for (ScoreRecord sr: score.records) {				
+//				System.out.println(f.toString("|"));
+				a.add(sr.toString(del,fieldNames));
+			}
+			
+		}
+		return a;
 
+	}
+	
 	
 	
 	/**
@@ -1082,8 +1058,8 @@ public class Chemical {
 //			builder.setPrettyPrinting();
 //			Gson gson = builder.create();
 //
-//			System.out.println(gson.toJson(chemical1));
-//			System.out.println(gson.toJson(chemical2));
+//			System.out.println("chemical1="+gson.toJson(chemical1));
+//			System.out.println("chemical2="+gson.toJson(chemical2));
 //		}
 		
 		
@@ -1096,6 +1072,8 @@ public class Chemical {
 				
 				ScoreRecord scoreRecord1=score1.records.get(j);
 				ScoreRecord scoreRecord2=null;
+				
+//				System.out.println(i+"\t"+j);
 				
 				if (scoreRecord1.route==null) {
 					
@@ -1110,6 +1088,7 @@ public class Chemical {
 					for (int k=0;k<score2.records.size();k++) {
 						if (score2.records.get(k).route.equals(scoreRecord1.route)) {
 							scoreRecord2=score2.records.get(k);
+							break;
 						}
 					}
 					
@@ -1125,13 +1104,20 @@ public class Chemical {
 
 //					System.out.println(score1.hazard_name);
 					
-//					if (scoreRecord1.category==null || !scoreRecord1.category.equals(scoreRecord2.category) ) {
+					if (scoreRecord1.category==null || !scoreRecord1.category.equals(scoreRecord2.category) ) {
 //						if (chemical1.CAS.equals("107-02-8"))
 //							System.out.println(chemical1.CAS+"\t"+score1.hazard_name+"\t"+scoreRecord1.category+"\t"+scoreRecord2.category);
-//					}
-					score1.records.remove(j);
-					scoreRecord2.note2=scoreRecord1.note2+"; Revised by "+scoreRecord2.note2;
-					score1.records.add(scoreRecord2);
+					}
+					
+					scoreRecord2.url=scoreRecord1.url+"; Revised by "+scoreRecord2.url;
+					
+					score1.records.set(j,scoreRecord2);
+					
+//					score1.records.add(scoreRecord2);
+
+//					System.out.println(chemical1.CAS+"\t"+scoreRecord1.route+"\t"+scoreRecord2.route+"\t"+
+//							score1.hazard_name+"\t"+scoreRecord1.category+"\t"+scoreRecord2.category+"\t"+scoreRecord2.url);
+
 					
 //					System.out.println(scoreRecord1.category);
 					
@@ -1414,10 +1400,83 @@ public class Chemical {
 		}
 
 	}
+	
+	public void writeChemicalToJsonFile(String filepath) {
+
+		try {
+			GsonBuilder builder = new GsonBuilder();
+			builder.setPrettyPrinting();
+			Gson gson = builder.create();
+			
+			FileWriter fw = new FileWriter(filepath);
+			String strRecords=gson.toJson(this);
+			
+//			getUniqueChars(strRecords);
+			
+			
+			strRecords=fixChars(strRecords);
+			
+			fw.write(strRecords);
+			fw.close();
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	public static String fixChars(String str) {
+		str=str.replace("â€“","-").replace("â€™","'");
+		str=str.replace("\uff08", "(");// ï¼ˆ
+		str=str.replace("\uff09", ")");// ï¼‰
+		str=str.replace("\uff0f", "/");// ï¼�
+		str=str.replace("\u3000", " ");//blank
+		str=str.replace("\u00a0", " ");//blank
+		str=str.replace("\u2003", " ");//blank
+		str=str.replace("\u0009", " ");//blank
+		str=str.replace("\u300c", "");// ã€Œ
+		str=str.replace("\u300d", "");// ã€�
+		str=str.replace("\u2264", "&le;");// <=  for some reason Gson messes this up so need to convert to html so code doesnt get mangled into weird symbol
+		str=str.replace("\u03B1", "&alpha;");//alpha
+
+		return str;
+		
+	}
+
 
 	public void writeToFile(String destFolder) {
 		writeToFile(CAS, destFolder);
 	}
+	
+	public void toFlatFile(String filepath,String delimiter) {
+
+		try {
+
+			
+			FileWriter fw=new FileWriter(filepath);
+
+			fw.write(ScoreRecord.getHeader(delimiter)+"\r\n");
+
+			ArrayList<String>uniqueCAS=new ArrayList<>();
+
+			ArrayList<String>lines=this.toStringArray(delimiter);
+
+			if (!uniqueCAS.contains(this.CAS)) uniqueCAS.add(this.CAS);
+
+
+			for (String line:lines) {
+				line=line.replace("–", "-").replace("’", "'");//TODO use StringEscapeUtils?
+				fw.write(line+"\r\n");
+			}
+
+			fw.flush();
+			fw.close();
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
 	
 	
 	public static void main(String[] args) {

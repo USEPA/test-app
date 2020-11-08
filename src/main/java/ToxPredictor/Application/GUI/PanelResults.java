@@ -26,7 +26,7 @@ import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.smiles.SmilesParser;
 
-import AADashboard.Application.TableGenerator;
+import AADashboard.Application.TableGeneratorExcel;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreator;
@@ -281,7 +281,7 @@ public class PanelResults extends JDialog {
 						
 
 //			XSSFCellStyle styleBold=TableGenerator.getStyleBold(workbook);
-			XSSFCellStyle styleBoldWrap=TableGenerator.getStyleBoldWrap(workbook);
+			XSSFCellStyle styleBoldWrap=TableGeneratorExcel.getStyleBoldWrap(workbook);
 			
 			XSSFRow row0 = sheet.createRow(0);
 			

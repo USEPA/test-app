@@ -683,10 +683,22 @@ public class TaskStructureSearch {
 		
 	}
 	
-	public static void assignIDFromStructure(AtomContainer ac) {
-		String[] inchi = CDKUtilities.generateInChiKey(ac);
+	public static void assignIDFromStructure(AtomContainer m) {
+		String[] inchi = CDKUtilities.generateInChiKey(m);
 		String inchiKey=inchi[1];
-		ac.setProperty("CAS", "C_"+inchiKey);
+		m.setProperty("CAS", "C_"+inchiKey);
+		
+		
+		m.setProperty(DSSToxRecord.strName, null);
+		m.setProperty(DSSToxRecord.strCID,null);
+		m.setProperty(DSSToxRecord.strSID,null);
+		m.setProperty(DSSToxRecord.strGSID,null);
+		m.setProperty(DSSToxRecord.strInchi, inchi[0]);
+		m.setProperty(DSSToxRecord.strInchiKey, inchiKey);
+//		m.setProperty(DSSToxRecord.strInchiKey1, rec.inchiKey1);
+//		m.setProperty(DSSToxRecord.strSmiles, rec.smiles);
+
+		
 	}
 	
 	

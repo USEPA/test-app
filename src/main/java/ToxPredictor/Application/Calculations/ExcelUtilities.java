@@ -15,7 +15,7 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import AADashboard.Application.TableGenerator;
+import AADashboard.Application.TableGeneratorExcel;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Utilities.Utilities;
 
@@ -31,7 +31,7 @@ public class ExcelUtilities {
 
 			int maxNumCols=0;
 			
-			XSSFCellStyle styleBold=TableGenerator.getStyleBold(sheet.getWorkbook());
+			XSSFCellStyle styleBold=TableGeneratorExcel.getStyleBold(sheet.getWorkbook());
 			boolean haveNote=false;
 			
 			while (true) {

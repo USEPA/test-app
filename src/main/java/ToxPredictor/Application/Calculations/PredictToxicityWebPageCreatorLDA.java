@@ -203,7 +203,9 @@ public class PredictToxicityWebPageCreatorLDA {
 
 				// System.out.println("Here1"+method+"\t"+CASi);
 
-				TaskCalculations.CreateStructureImage(CASi, strImageFolder);
+				CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
+				c.CreateStructureImageLDA(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(endpoint));
+
 
 				String strKey = df.format(key);
 				String expVali = df.format(i.classValue());
@@ -859,7 +861,9 @@ public class PredictToxicityWebPageCreatorLDA {
 
 				// System.out.println("Here1"+method+"\t"+CASi);
 
-				TaskCalculations.CreateStructureImage(CASi, strImageFolder);
+				CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
+				c.CreateStructureImageLDA(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(endpoint));
+
 
 				String strKey = df.format(key);
 				String expVali = df.format(i.classValue());

@@ -38,9 +38,9 @@ import ToxPredictor.Utilities.CDKUtilities;
 
 import ToxPredictor.Utilities.ChemicalFinder;
 import ToxPredictor.Utilities.Utilities;
-import gov.epa.api.Chemical;
+//import gov.epa.api.Chemical;
 //import ToxPredictor.misc.ParseChemidplus;
-import gov.epa.api.ScoreRecord;
+//import gov.epa.api.ScoreRecord;
 import uk.ac.ebi.beam.Element;
 
 import javax.swing.table.JTableHeader;

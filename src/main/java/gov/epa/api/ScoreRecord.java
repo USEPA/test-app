@@ -1,11 +1,43 @@
 package gov.epa.api;
 
-public class ScoreRecord {
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Field;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Hashtable;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Vector;
 
+import com.google.gson.Gson;
+
+import AADashboard.Application.AADashboard;
+import ToxPredictor.Utilities.Utilities;
+
+//import gov.epa.ghs_data_gathering.Database.MySQL_DB;
+//import gov.epa.ghs_data_gathering.Utilities.Utilities;
+
+//Revised version of this class removed need to have FlatFileRecord class
+
+public class ScoreRecord {
+	public String hazardName;//used to be in FlatFileRecord
+	public String CAS;////used to be in FlatFileRecord
 	public String name;//chemical name
 	public String source;// where the record came from
+	public String sourceOriginal;// where the record came from
 	public String score;// i.e. L,M,H,VH
-
+	
+	public String listType;
+	
 	// following fields will be a work in progress as we gather data from different
 	// sources:
 
@@ -14,8 +46,8 @@ public class ScoreRecord {
 
 	// String hazard_name;
 	public String category;// i.e. Category 1
-	public String hazard_code;// code for hazard, i.e. "H301"
-	public String hazard_statement;// text based description of what hazard they think it is
+	public String hazardCode;// code for hazard, i.e. "H301"
+	public String hazardStatement;// text based description of what hazard they think it is
 	public String rationale;// why classification was assigned
 	// String signal_word;//
 	// String symbol;
@@ -26,31 +58,46 @@ public class ScoreRecord {
 	
 //	public String listType;//right now dont need this because getListType gets it from the source name
 	
+	public String toxvalID;
+	public String testOrganism;//common name for animal used in testing
+//	public String reported_dose;
+//	public String normalized_dose;
 
+	public String testType;//LC50, LD50 etc
+	
 	// **************************************************************************************
+	public String valueMassOperator;// "<",">", or ""
 	public Double valueMass;// quantitative value in mass units such as mg/L
 	// Should this be concentration instead of mass?
 	public String valueMassUnits;
-	public String valueMassOperator;// "<",">", or ""
 	
-	public Boolean valueActive;// binary value
-	public String authority;
-
-
-	// public static String [] displayFieldNames=
-	// {"Source","Score","Route","Classification","Hazard
-	// Statement","Rationale","Note"};
-	// public static String [] actualFieldNames=
-	// {"source","score","route","classification","hazard_statement","rationale","note"};
-
-	public static String[] displayFieldNames = { "Name","Source", "Score", "Route", "Category", "Hazard Code",
-			"Hazard Statement", "Rationale", "Note" };
-	public static String[] actualFieldNames = { "name","source", "score", "route", "category", "hazard_code",
-			"hazard_statement", "rationale", "note" };
+	public Boolean valueActive;
+	
+	public String effect;
 
 	
-	public static String[] actualFieldNames2 = { "source", "score", "route", "category", "hazard_code",
-			"hazard_statement", "rationale", "note","note2","valueMassOperator","valueMass","valueMassUnits"};
+	public Double duration;
+	public String durationUnits;
+	
+	public String url;
+	public String longRef;
+	
+
+
+//	All the fields in the class in the desired order:	
+		public static String[] allFieldNames= {"CAS","name","hazardName","source","sourceOriginal", 
+				"score", "listType","route", "category", "hazardCode",
+				"hazardStatement", "rationale", "note","note2","toxvalID",
+				"testOrganism","testType","valueMassOperator","valueMass","valueMassUnits","effect",
+				"duration","durationUnits","url","longRef"};
+		
+		//Following for displaying results of hazard comparison in webpage:	
+		public static String[] displayFieldNames = { "Name","Source", "Original Source","Score", "Rationale","Route", "Category", "Hazard Code",
+				"Hazard Statement",  "Test duration","Test organism","Toxicity Type","Toxicity Value","Reference","Note" };
+
+		public static String[] actualFieldNames = { "name","source", "sourceOriginal","score", "rationale","route", "category", "hazardCode",
+				"hazardStatement", "duration","testOrganism", "testType","valueMass","longRef","note" };
+
 
 
 	public static final String scoreVH = "VH";
@@ -101,6 +148,9 @@ public class ScoreRecord {
 	public static final String sourceAcute_Toxicity_Data_from_EPA_HPVIS = "Acute Toxicity Data from EPA HPVIS";
 	public static final String sourceReproductive_Toxicity_Data_In_Vitro_from_EPA_HPVIS = "Reproductive Toxicity Data in Vitro from EPA HPVIS";
 
+	public static final String sourceToxVal="ToxVal";
+	
+	
 //	public static final float weightECHA_CLP = 20.0f;
 //	public static final float weightIRIS = 20.0f;
 //
@@ -288,23 +338,29 @@ public class ScoreRecord {
 //public static final String listTypeDenmark = typeScreeningOth; // don't see it on the GreenScreen list
 
 	
-	public ScoreRecord(String source,String score,String category,String hazard_code,String hazard_statement,
-			String rationale,String route,String note,String note2) {
+	public ScoreRecord(String CAS,String name,String hazard_name,String source,String score,String category,String hazard_code,String hazard_statement,
+			String rationale,String route,String note,String note2,String url) {
 		
+		this.CAS=CAS;
+		this.name=name;
+		this.hazardName=hazard_name;		
 		this.source=source;
 		this.score=score;
 		this.category=category;
-		this.hazard_code=hazard_code;
-		this.hazard_statement=hazard_statement;
+		this.hazardCode=hazard_code;
+		this.hazardStatement=hazard_statement;
 		this.rationale=rationale;
 		this.route=route;
 		this.note=note;
 		this.note2=note2;
+		this.url=url;
 		
 	}
 	
-	public ScoreRecord() {
-		
+	public ScoreRecord(String hazard_name,String CAS,String name) {
+		this.hazardName=hazard_name;
+		this.CAS=CAS;
+		this.name=name;
 	}
 
 	
@@ -312,15 +368,247 @@ public class ScoreRecord {
 		return getAuthorityWeight(getListType());
 	}
 
-	public static String getHeader2() {
-		String header="";
-		for (int i=0;i<actualFieldNames2.length;i++) {
-			header+=actualFieldNames2[i];
-			if (i<actualFieldNames2.length-1) header+="\t";
+	
+
+	/**
+	 * Create record based on header list and data list in csv using reflection to assign by header name
+	 * 
+	 * @param hlist
+	 * @param list
+	 * @return
+	 */
+	public static ScoreRecord createRecord(List<String> hlist, List<String> list) {
+		ScoreRecord r=new ScoreRecord(null,null,null);
+		//convert to record:
+		try {
+			for (int i=0;i<list.size();i++) {
+				Field myField =r.getClass().getField(hlist.get(i));
+				
+				
+				if (myField.getType().getName().contains("Double")) {
+					if (!list.get(i).isEmpty())
+						myField.set(r, Double.parseDouble(list.get(i)));					
+				} else {
+					myField.set(r, list.get(i));	
+				}
+				
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
-		return header;
+		return r;
 	}
 
+
+	//convert to string by reflection:
+	public String toString(String d) {
+		
+		String Line = "";
+		for (int i = 0; i < allFieldNames.length; i++) {
+			try {
+			
+				
+				Field myField = this.getClass().getDeclaredField(allFieldNames[i]);
+				
+				String val=null;
+				
+//				System.out.println(myField.getType().getName());
+				
+				if (myField.getType().getName().contains("Double")) {
+					if (myField.get(this)==null) {
+						val="";	
+					} else {
+						val=(Double)myField.get(this)+"";
+					}
+					
+				} else {
+					if (myField.get(this)==null) {
+//						val="\"\"";
+						val="";
+					} else {
+//						val="\""+(String)myField.get(this)+"\"";
+						val=(String)myField.get(this);
+					} 
+				}
+				
+				val=val.replace("\r\n","<br>");
+				val=val.replace("\n","<br>");
+				
+//				while(val.contains("<br><br>")) {
+//					val=val.replace("<br><br>", "<br>");
+//				}
+				
+//				if (fieldNames[i].equals("note")) {
+//					System.out.println(CAS+"\t"+source+"\t"+hazard_name+"\t"+val);
+//				}
+
+				if (val.contains(d)) {
+					System.out.println(this.CAS+"\t"+allFieldNames[i]+"\t"+val+"\thas delimiter");
+				}
+				
+				Line += val;
+				if (i < allFieldNames.length - 1) {
+					Line += d;
+				}
+			
+			
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+		}
+
+		return Line;
+	}
+
+	
+	//convert to string by reflection:
+		public String toString(String del,String [] fieldNames) {
+			
+			String Line = "";
+			for (int i = 0; i < fieldNames.length; i++) {
+				try {
+				
+					
+					Field myField = this.getClass().getDeclaredField(fieldNames[i]);
+					
+					String val=null;
+					
+//					System.out.println(myField.getType().getName());
+					
+					if (myField.getType().getName().contains("Double")) {
+						if (myField.get(this)==null) {
+							val="";	
+						} else {
+							val=(Double)myField.get(this)+"";
+						}
+						
+					} else {
+						if (myField.get(this)==null) {
+//							val="\"\"";
+							val="";
+						} else {
+//							val="\""+(String)myField.get(this)+"\"";
+							val=(String)myField.get(this);
+						} 
+					}
+					
+					val=val.replace("\r\n","<br>");
+					val=val.replace("\n","<br>");
+					
+//					while(val.contains("<br><br>")) {
+//						val=val.replace("<br><br>", "<br>");
+//					}
+					
+//					if (fieldNames[i].equals("note")) {
+//						System.out.println(CAS+"\t"+source+"\t"+hazard_name+"\t"+val);
+//					}
+
+					if (val.contains(del)) {
+						System.out.println(this.CAS+"\t"+fieldNames[i]+"\t"+val+"\thas delimiter");
+					}
+					
+					Line += val;
+					if (i < fieldNames.length - 1) {
+						Line += del;
+					}
+				
+				
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+
+			return Line;
+		}
+	
+//	void createFlatFileFromAllSources() {
+//	AADashboard a=new AADashboard();
+//	String d="|";
+//	
+//	try {
+//		
+//		FileWriter fw=new FileWriter("AA Dashboard\\Data\\dictionary\\text output\\flat file 2018-05-10.txt");
+//		
+//		fw.write(FlatFileRecord.getHeader(d)+"\r\n");
+//		
+//		int NOCAScount=0;
+//		
+//		for (String jsonFolder:a.jsonFolders) {
+//			
+//			System.out.println(jsonFolder);
+//			
+//			File Folder = new File(jsonFolder);
+//			
+//			File[] files = Folder.listFiles();
+//
+//			int counter=0;
+//			for (File file:files) {
+//				
+//				if (counter%1000==0) {
+//					System.out.println(counter);
+//				}
+//				
+//				Chemical chemical=Chemical.loadFromJSON(file);
+//				
+//				if (chemical.CAS==null || chemical.CAS.isEmpty()) {
+//					NOCAScount++;
+//					chemical.CAS="NOCAS"+NOCAScount;
+//				}
+//				
+//				ArrayList<String>lines=chemical.toStringArray(d);
+//				
+//				for(String line:lines) {
+//					fw.write(line+"\r\n");
+//				}
+//				fw.flush();
+//				
+//				counter++;
+//			}
+//		}
+//		
+//		fw.close();
+//		
+//	
+//	} catch (Exception ex) {
+//		ex.printStackTrace();
+//	}
+//
+//	
+//}
+
+	
+	public static Vector <ScoreRecord> loadRecordsFromFile(String filepath,String ID,String del) {
+		
+		Vector <ScoreRecord>records=new Vector();
+		
+		String Line="";
+		
+		try {
+			Scanner scanner = new Scanner(new File(filepath));
+			String header=scanner.nextLine();
+			List <String>hlist=Utilities.Parse(header, del);
+			 
+			while (scanner.hasNext()) {
+				Line=scanner.nextLine();
+				if (Line==null) break;
+				List <String>list=Utilities.Parse(Line, del);
+				ScoreRecord r=ScoreRecord.createRecord(hlist,list);
+				
+//				String valueID=list.get(hlist.indexOf(ID));
+//				records.put(valueID, r);
+				records.add(r);
+				
+	        }
+			scanner.close();
+			
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage()+"\t"+Line);
+			ex.printStackTrace();
+		}
+		return records;
+	}
 	
 	
 	
@@ -491,29 +779,19 @@ public class ScoreRecord {
 		}
 	}
 	
-	public ScoreRecord clone() {
-		ScoreRecord clone=new ScoreRecord();
-		clone.source=source;
-		clone.score=score;
-		clone.category=category;
-		clone.hazard_code=hazard_code;
-		clone.hazard_statement=hazard_statement;
-		clone.rationale=rationale;
-		clone.route=route;
-		clone.note=note;
-		clone.note2=note2;
-		clone.valueMass=valueMass;
-		clone.valueMassUnits=valueMassUnits;
-		clone.valueMassOperator=valueMassOperator;
-		return clone;
-		
+	public ScoreRecord clone() {		
+		Gson gson= new Gson();
+		String tmp = gson.toJson(this);
+		ScoreRecord sr = gson.fromJson(tmp, ScoreRecord.class);		
+		return sr;		
 	}
 	
 	public String getListType() {
+		if (listType!=null) return listType;
 		return getListType(source);
 	}
 	
-	public static String getListType(String source) {
+	public String getListType(String source) {
 		String listType ="";
 
 		if (source.equals(ScoreRecord.sourceJapan)) {
@@ -570,7 +848,9 @@ public class ScoreRecord {
 			listType=listTypeReproductiveCanada;
 		} else if (source.equals(ScoreRecord.sourceChemIDplus)) {
 			listType=listTypeChemidplus;
+		} else if (source.contentEquals(ScoreRecord.sourceToxVal)) {
 		}
+
 
 		if (!source.equals("") && listType.equals(""))
 			System.out.println(source + "\tmissing list type");
@@ -578,25 +858,346 @@ public class ScoreRecord {
 		return listType;
 
 	}
+
 	
-		
-	public static String getHeader() {
+	public static String getHeader(String del,String [] fieldNames) {
 		// TODO Auto-generated method stub
 
 		String Line = "";
-		for (int i = 0; i < displayFieldNames.length; i++) {
-			Line += displayFieldNames[i];
-			if (i < displayFieldNames.length - 1) {
-				Line += "\t";
-			} else {
-				Line += "\r\n";
+		for (int i = 0; i < fieldNames.length; i++) {
+			Line += fieldNames[i];
+			if (i < fieldNames.length - 1) {
+				Line += del;
 			}
+			
+//			} else {
+//				Line += "\r\n";
+//			}
 		}
 
-		return null;
+		return Line;
 	}
 
 
+	public static String getHeader(String del) {
+		return getHeader(del,allFieldNames);		
+	}
+
+	
+	
+	public static String getHeader() {
+		// TODO Auto-generated method stub
+		return getHeader("\t");
+	}
+
+	
+	
+	
+	/**
+	 * Get count of records per score for all chemicals
+	 * 
+	 * @param outputPath
+	 */
+	public static void analyzeRecords(String filePath,String outputFilePath) {
+
+		ArrayList<String>lines=Utilities.readFileToArray(filePath);
+
+		String header=lines.remove(0);
+
+		Chemical chemical=new Chemical();
+
+		FileWriter fw;
+		try {
+			fw = new FileWriter(outputFilePath);
+
+			String d="|";
+					
+
+			fw.write("CAS"+d+"name"+d);
+			for (Score score:chemical.scores) {
+				fw.write(score.hazard_name+d);
+			}
+			fw.write("\n");
+
+			for (String line:lines) {
+				ScoreRecord sr=createScoreRecord(line);
+
+				//			System.out.println(line);
+
+				if (chemical.CAS==null) {
+					chemical.CAS=sr.CAS;
+					chemical.name=sr.name;
+//				} else if ( !f.CAS.equals(chemical.CAS) || !f.name.equals(chemical.name)) {
+				} else if ( !sr.CAS.equals(chemical.CAS)) {
+					
+					fw.write(chemical.CAS+d+chemical.name+d);
+					for (Score score:chemical.scores) {
+						fw.write(score.records.size()+d);
+					}
+					fw.write("\n");
+					chemical=new Chemical();
+				}
+
+				Score score=chemical.getScore(sr.hazardName);
+				
+				score.records.add(sr);
+
+
+			}
+			fw.close();
+
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+	
+	public static void createFlatFileFromAllSources(String outputPath) {
+		AADashboard a=new AADashboard();
+		String d="|";
+		
+		try {
+			
+			FileWriter fw=new FileWriter(outputPath);
+			fw.write(ScoreRecord.getHeader(d)+"\r\n");
+			
+			Hashtable<String,String>htCASName=new Hashtable<>();
+			
+			for (String source:a.sources) {
+				
+				String filePathFlatChemicalRecords = AADashboard.dataFolder+File.separator+source+File.separator+source +" Chemical Records.txt";
+
+				File file=new File(filePathFlatChemicalRecords);
+				
+				if (!file.exists())  {
+					System.out.println("*** "+source+" text file missing");
+					continue;
+				} else {
+					System.out.println(source);
+				}
+				
+				ArrayList<String>lines=Utilities.readFileToArray(filePathFlatChemicalRecords);
+				
+				String header=lines.remove(0);
+
+				for (String line:lines) {
+					
+//					FlatFileRecord f=FlatFileRecord.createFlatFileRecord(line);
+					
+					String CAS=line.substring(0,line.indexOf(d));
+					line=line.substring(line.indexOf(d)+1,line.length());
+					String name=line.substring(0,line.indexOf(d));
+					line=line.substring(line.indexOf(d)+1,line.length());
+					
+					if (CAS.isEmpty()) {
+						if (name.isEmpty()) {
+							System.out.println("CAS and name =null: "+line);
+							continue;
+						}
+						
+						if (htCASName.get(name)==null) {
+							String newCAS="NOCAS"+(htCASName.size()+1);
+							htCASName.put(name,newCAS);
+							CAS=newCAS;
+						} else {
+							CAS=htCASName.get(name);
+						}
+						
+					}
+					
+					line=line.replace("<br><br><br>","<br><br>");
+					fw.write(CAS+d+name+d+line+"\r\n");
+
+				}
+				fw.flush();
+			}
+			
+			fw.close();
+			
+		
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+	}
+	
+	
+	public static ScoreRecord createScoreRecord(String line) {
+		ScoreRecord f = new ScoreRecord(null,null,null);
+		LinkedList<String> list = Utilities.Parse(line, "|");
+//		if (list.getFirst().isEmpty()) System.out.println(line);
+		
+		for (int i = 0; i < allFieldNames.length; i++) {
+
+			try {
+				String val = list.get(i);
+				
+				Field myField = f.getClass().getDeclaredField(allFieldNames[i]);
+				
+				if (myField.getType().getName().contains("Double")) {
+														
+					if (!val.isEmpty()) {
+						myField.set(f, Double.parseDouble(val));						
+					}
+				} else {
+					if (!val.isEmpty()) {
+						
+//						System.out.println(fieldNames[i]+"\t"+val);
+						myField.set(f, val);
+					}
+				}
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return f;
+
+	}
+	
+
+	
+	public static void createFlatFileFromAllSourcesSortedByCAS(String outputPath) {
+		AADashboard a=new AADashboard();
+		String d="|";
+		
+		try {
+						
+			Hashtable<String,String>htCASName=new Hashtable<>();
+			
+			ArrayList<String>overallLines=new ArrayList<>();
+			
+			for (String source:a.sources) {
+				
+				String filePathFlatChemicalRecords = AADashboard.dataFolder+File.separator+source+File.separator+source +" Chemical Records.txt";
+
+				File file=new File(filePathFlatChemicalRecords);
+				
+								
+				
+				if (!file.exists())  {
+					System.out.println("*** "+source+" text file missing");
+					continue;
+				} else {
+					
+					Path path = Paths.get(file.getAbsolutePath());
+		            BasicFileAttributes attr =
+		                Files.readAttributes(path, BasicFileAttributes.class);
+		           		           
+					System.out.println(source+"\t"+attr.lastModifiedTime());
+				}
+				
+				ArrayList<String>lines=Utilities.readFileToArray(filePathFlatChemicalRecords);
+				
+				String header=lines.remove(0);
+				
+				LinkedList<String>hlist=Utilities.Parse(header, "|");
+
+				for (String line:lines) {
+					
+					line=line.replace("<br><br><br>","<br><br>");
+					
+//					FlatFileRecord f=FlatFileRecord.createFlatFileRecord(line);
+					
+					LinkedList<String>list=Utilities.Parse(line, "|");
+					
+					if (list.size()!=hlist.size()) {
+						System.out.println("mismatch in num columns:"+line);
+						continue;
+					}
+					
+					
+					ScoreRecord sr=ScoreRecord.createRecord(hlist, list);
+										
+					if (sr.CAS.isEmpty()) {
+						if (sr.name.isEmpty()) {
+							System.out.println("CAS and name =null: "+line);
+							continue;
+						}
+						
+						if (htCASName.get(sr.name)==null) {
+							String newCAS="NOCAS"+(htCASName.size()+1);
+							htCASName.put(sr.name,newCAS);
+							sr.CAS=newCAS;
+						} else {
+							sr.CAS=htCASName.get(sr.name);
+						}
+						
+					}
+					
+					
+					overallLines.add(sr.toString("|"));
+				}
+			}
+			
+			Collections.sort(overallLines);
+			
+			FileWriter fw=new FileWriter(outputPath);
+			fw.write(ScoreRecord.getHeader(d)+"\r\n");
+
+			for (String Line:overallLines) {
+				fw.write(Line+"\r\n");
+			}
+			fw.flush();
+			fw.close();
+			
+		
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+	}
+			
+	static void deleteExtraFiles() {
+		
+//		String folder="L:\\Priv\\Cin\\NRMRL\\CompTox\\javax\\web-test\\AA Dashboard\\Data\\Chemidplus\\Inhalation LC50 searches";
+//		String folder="L:\\Priv\\Cin\\NRMRL\\CompTox\\javax\\web-test\\AA Dashboard\\Data\\Chemidplus\\Oral LD50 searches";
+		String folder="L:\\Priv\\Cin\\NRMRL\\CompTox\\javax\\web-test\\AA Dashboard\\Data\\Chemidplus\\Skin LD50 searches";
+		
+		File Folder=new File(folder);
+		
+		File [] files=Folder.listFiles();
+		
+		for (File file:files) {
+			if (!file.getName().contains("_files")) continue;
+			
+			file.deleteOnExit();
+			
+			File [] files2=file.listFiles();
+			
+			if (files2==null) continue;
+		
+			for (File file2:files2) {
+				file2.deleteOnExit();
+			}
+			
+			
+			
+			System.out.println(file.getName());
+		}
+		
+		
+	}
+
+	static void deleteExtraFiles2() {
+		
+//		String folder="L:\\Priv\\Cin\\NRMRL\\CompTox\\javax\\web-test\\AA Dashboard\\Data\\Chemidplus\\Oral LD50 webpages";
+		String folder="L:\\Priv\\Cin\\NRMRL\\CompTox\\javax\\web-test\\AA Dashboard\\Data\\Chemidplus\\Inhalation LC50 webpages";
+		
+		File Folder=new File(folder);
+		
+		File [] files=Folder.listFiles();
+		
+		for (File file:files) {
+			file.deleteOnExit();
+			System.out.println(file.getName());
+		}
+		
+		
+	}
 	// TODO add static strings for above field names
 
 	// /**

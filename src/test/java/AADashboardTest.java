@@ -1,16 +1,9 @@
 
 import static org.junit.Assert.*;
 
-import java.io.BufferedInputStream;
-
-import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
-import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Future;
@@ -19,7 +12,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -31,7 +23,6 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
-import gov.epa.api.FlatFileRecord;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 
@@ -224,15 +215,15 @@ public class AADashboardTest {
 				System.out.println("size mismatch:"+score1.hazard_name+"\t"+score2.hazard_name);
 				
 				for (int j=0;j<score1.records.size();j++) {
-					FlatFileRecord ffr=getFFR(c1, score1, score1.records.get(j));
+					ScoreRecord ffr=score1.records.get(j);
 					System.out.println(ffr);
 				}
 
 				System.out.println("\n");
 				System.out.println("Todd's Java records:");
 				for (int j=0;j<score2.records.size();j++) {
-					FlatFileRecord ffr=getFFR(c2, score2, score2.records.get(j));
-					System.out.println(ffr);
+					ScoreRecord ffr2=score2.records.get(j);
+					System.out.println(ffr2);
 				}
 				return false;
 			} else {
@@ -252,10 +243,8 @@ public class AADashboardTest {
 
 	private Vector<String> getStringRecords(Chemical c, Score score) {
 		Vector<String>strRecords=new Vector<>();
-		for (ScoreRecord sr:score.records) {
-			
-			FlatFileRecord ffr1=getFFR(c, score, sr);	
-			String rec=ffr1.toString("|");
+		for (ScoreRecord sr:score.records) {			
+			String rec=sr.toString("|");
 			strRecords.add(rec);
 		}
 		return strRecords;
@@ -386,30 +375,30 @@ public class AADashboardTest {
 		}
 	}
 
-	FlatFileRecord getFFR(Chemical chemical,Score score,ScoreRecord sr) {
-		FlatFileRecord f=new FlatFileRecord();
-		f.CAS=chemical.CAS;
-		f.name=chemical.name;
-
-		f.hazard_name=score.hazard_name;
-		
-		f.source=sr.source;
-		f.score=sr.score;
-		f.category=sr.category;
-		f.hazard_code=sr.hazard_code;
-		f.hazard_statement=sr.hazard_statement;
-		f.rationale=sr.rationale;
-		f.route=sr.route;
-		f.note=sr.note;
-		f.note2=sr.note2;
-		f.valueMassOperator=sr.valueMassOperator;
-		
-		if (sr.valueMass!=null)	f.valueMass=sr.valueMass;
-		
-		f.valueMassUnits=sr.valueMassUnits;
-		
-		return f;
-	}
+//	FlatFileRecord getFFR(Chemical chemical,Score score,ScoreRecord sr) {
+//		FlatFileRecord f=new FlatFileRecord();
+//		f.CAS=chemical.CAS;
+//		f.name=chemical.name;
+//
+//		f.hazard_name=score.hazard_name;
+//		
+//		f.source=sr.source;
+//		f.score=sr.score;
+//		f.category=sr.category;
+//		f.hazard_code=sr.hazard_code;
+//		f.hazard_statement=sr.hazard_statement;
+//		f.rationale=sr.rationale;
+//		f.route=sr.route;
+//		f.note=sr.note;
+//		f.note2=sr.note2;
+//		f.valueMassOperator=sr.valueMassOperator;
+//		
+//		if (sr.valueMass!=null)	f.valueMass=sr.valueMass;
+//		
+//		f.valueMassUnits=sr.valueMassUnits;
+//		
+//		return f;
+//	}
 	
 	
 	private void printChemicals(Chemicals chemicals) {

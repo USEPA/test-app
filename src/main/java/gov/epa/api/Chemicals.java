@@ -1,25 +1,13 @@
 package gov.epa.api;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
-
-import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-
-import AADashboard.Application.TableGenerator;
 
 /**
  * Class to store chemicals
@@ -29,23 +17,6 @@ import AADashboard.Application.TableGenerator;
  */
 public class Chemicals extends ArrayList<Chemical> {
 
-	public class CustomComparator implements Comparator<Chemical>{
-	    public int compare(Chemical c1,Chemical c2) {	        
-	    	try {
-		    	int CAS1=Integer.parseInt(c1.CAS.replace("-", ""));
-		    	int CAS2=Integer.parseInt(c2.CAS.replace("-", ""));
-		    	return CAS1-CAS2;	
-	    	} catch (Exception ex) {
-	    		return c1.CAS.compareTo(c2.CAS);
-	    	}
-	    	
-	    }
-	}
-	
-	public void sortByCAS() {
-		Collections.sort(this,new CustomComparator());
-	}
-	
 	public JsonElement toJsonElement() {
 		String strJSON=this.toJSON();
 		Gson gson = new Gson();
@@ -84,7 +55,7 @@ public class Chemicals extends ArrayList<Chemical> {
 				Chemicals chemicals=new Chemicals();
 
 				//Create array of chemicals that have the cas number (including ones with underscore):
-				for (int i=1;i<=3;i++) {
+				for (int i=1;i<=5;i++) {
 					String casSeek="";
 
 					if (i==1 ) casSeek=CAS;
@@ -170,15 +141,14 @@ public class Chemicals extends ArrayList<Chemical> {
 
 	}
 	
-	public void toFlatFile(String filepath) {
+	public void toFlatFile(String filepath,String del) {
 		
 		try {
 			
-			String del="|";
-			
+						
 			FileWriter fw=new FileWriter(filepath);
 			
-			fw.write(FlatFileRecord.getHeader(del)+"\r\n");
+			fw.write(ScoreRecord.getHeader(del)+"\r\n");
 			
 			ArrayList<String>uniqueCAS=new ArrayList<>();
 			
@@ -261,46 +231,10 @@ public class Chemicals extends ArrayList<Chemical> {
 		}
 	}
 
-	void testWriteToExcel() {
-		String folder="D:\\MyToxicity5\\HazardProfiles\\";
-		Chemicals chemicals = loadFromJSON(folder +"HazardProfiles7.json");
-		toExcelFile(chemicals, folder+"HazardProfilesEdit.xlsx");
-	}
-	
-	
-	static void toExcelFile(Chemicals chemicals,String excelFilePath) {
-		XSSFWorkbook workbook = new XSSFWorkbook();		
-		TableGenerator tg=new TableGenerator();
-		
-		tg.writeFinalScoresToWorkbook(chemicals, workbook);
-		tg.writeScoreRecordsToWorkbook(chemicals,workbook);
-		
-		try {
-			FileOutputStream out=new FileOutputStream(new File(excelFilePath));
-	        workbook.write(out);
-	        out.close();
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-	}
-	
-	
 	public static void main(String[] args) {
-//		Chemicals chemicals=new Chemicals();
-//		chemicals.testWriteToExcel();
-		
-		String folder="AADashboard calcs\\";
-		Chemicals chemicalsApplication = loadFromJSON(folder +"output AADashboard top 20-TESTApplication.json");
-		chemicalsApplication.toFlatFile(folder+"output AADashboard top 20-TESTApplication.txt");
-		Chemicals.toExcelFile(chemicalsApplication,folder+"output AADashboard top 20-TESTApplication.xlsx");
-		
-		Chemicals chemicalsWebTEST = loadFromJSON(folder +"output AADashboard top 20-webtest2.json");
-		chemicalsWebTEST.toFlatFile(folder+"output AADashboard top 20-webtest2.txt");
-		Chemicals.toExcelFile(chemicalsWebTEST, folder+"output AADashboard top 20-webtest2.xlsx");
-		
+		Chemicals chemicals = loadFromJSON("todd\\AA dashboard\\Records from NITE.json");
+//		System.out.println(chemicals.toJSON());
+//		chemicals.toJSONElement();
 	}
 
 	

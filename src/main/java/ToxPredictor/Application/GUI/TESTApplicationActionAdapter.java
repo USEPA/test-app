@@ -37,7 +37,7 @@ import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 
-import AADashboard.Application.TableGenerator;
+import AADashboard.Application.TableGeneratorExcel;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST;
 import ToxPredictor.Application.WebTEST4;
@@ -225,7 +225,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			Vector<String> newProps = getOutputProps(acs);
 			XSSFWorkbook workbook = new XSSFWorkbook();
 			
-			TableGenerator tg=new TableGenerator();
+			TableGeneratorExcel tg=new TableGeneratorExcel();
 			tg.writeBatchChemicalsToExcel(acs,newProps,workbook);
 
 			FileOutputStream out = new FileOutputStream(new File(inFile.getAbsolutePath()));

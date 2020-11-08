@@ -10,6 +10,7 @@ import ToxPredictor.Application.Calculations.PredictToxicityNearestNeighbor;
 import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJSON;
 import ToxPredictor.Application.Calculations.TaskCalculations;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
+import ToxPredictor.Application.GUI.Miscellaneous.DangerousPathChecker;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.MyDescriptors.DescriptorData;
@@ -42,6 +43,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -636,11 +638,34 @@ public class WebTEST4 {
 
 		String fileNameNoExtension = getResultFileNameNoExtension(d.endpoint, tpv.method, d.CAS);
 
+		String reportBase=d.reportOptions.reportBase;
+
+		
+//		reportBase="\\\\MYSERVER\\MYFOLDER\\MYFOLDER\\MYPICTURE.JPG";
+		
+//		if (DangerousPathChecker.isDangerous(new File(reportBase))) {
+//			reportBase="\\\\"+reportBase;
+//			
+//			try {
+//		        // First try to resolve as URL (file:...)
+//		        Path path = Paths.get(new URL(reportBase).toURI());		        
+//		        reportBase=path.toFile().getAbsolutePath();
+//		        
+//		    } catch (Exception ex) {
+//		        // If given file string isn't an URL, fall back to using a normal file 
+//		        ex.printStackTrace();
+//		    	return;
+//		    }
+			
+//			System.out.println(reportBase);
+//		}
+		
+		
+		
 		if (d.reportTypes.contains(WebReportType.HTML)) {
 //			String outputFileName="PredictionResults"+method.replace(" ","")+".html";
 			String outputFileName = fileNameNoExtension + ".html";
-			String outputFilePath = d.reportOptions.reportBase + File.separator + outputFileName;
-
+			String outputFilePath = reportBase + File.separator + outputFileName;
 			htmlCreator.writeResultsWebPages(tpv.predictionResults, outputFilePath);
 		}
 
@@ -649,7 +674,7 @@ public class WebTEST4 {
 		if (d.reportTypes.contains(WebReportType.JSON)) {
 //			String outputFileName="PredictionResults"+method.replace(" ","")+".json";				
 			String outputFileName = fileNameNoExtension + ".json";
-			String outputFilePath = d.reportOptions.reportBase + File.separator + outputFileName;
+			String outputFilePath = reportBase + File.separator + outputFileName;
 			writeJSON(outputFilePath, tpv.predictionResults);
 		}
 	}
@@ -910,6 +935,8 @@ public class WebTEST4 {
 		} else {
 			DescriptorData dd = new DescriptorData();
 			dd.Error = error;
+			dd.ID = ac.getProperty("CAS");
+			dd.gsid = ac.getProperty("gsid");
 			return dd;
 		}
 

@@ -1,6 +1,8 @@
 package ToxPredictor.Application.Calculations;
 
+import java.beans.XMLDecoder;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.ArrayList;
@@ -12,8 +14,10 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 
 import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
+import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -1053,49 +1057,52 @@ public class TaskCalculations {
 
 	}
 
-	public static void CreateStructureImage(String CAS, String DestFolder) {
-
-		ToxPredictor.Utilities.GetStructureImagesFromJar g = new ToxPredictor.Utilities.GetStructureImagesFromJar();
-		ParseChemidplus p = new ParseChemidplus();
-		File ImageFolder = new File(DestFolder);
-		if (!ImageFolder.exists())
-			ImageFolder.mkdirs();
-
-		IAtomContainer moleculei = null;
-
-		File imageFile = new File(ImageFolder.getAbsolutePath() + "/" + CAS + ".png");
-
-		if (!imageFile.exists()) {
-			int ret = g.GetImageFileFromJar(CAS, ImageFolder.getAbsolutePath());
-
-			// System.out.println(CAS+"\t"+ret);
-			if (ret == -1) {
-				moleculei = p.LoadChemicalFromMolFileInJar("ValidatedStructures2d/" + CAS + ".mol");
-				if (moleculei != null) {
+//	public static void CreateStructureImage(String CAS, String DestFolder) {
+//
+//		ToxPredictor.Utilities.GetStructureImagesFromJar g = new ToxPredictor.Utilities.GetStructureImagesFromJar();
+//		ParseChemidplus p = new ParseChemidplus();
+//		File ImageFolder = new File(DestFolder);
+//		if (!ImageFolder.exists())
+//			ImageFolder.mkdirs();
+//
+//		IAtomContainer moleculei = null;
+//
+//		File imageFile = new File(ImageFolder.getAbsolutePath() + "/" + CAS + ".png");
+//
+//		if (!imageFile.exists()) {
+//			int ret = g.GetImageFileFromJar(CAS, ImageFolder.getAbsolutePath());
+//
+//			// System.out.println(CAS+"\t"+ret);
+//			if (ret == -1) {
+//				moleculei = p.LoadChemicalFromMolFileInJar("ValidatedStructures2d/" + CAS + ".mol");
+//				if (moleculei != null) {
 					// ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(
 					// moleculei, CAS, ImageFolder.getAbsolutePath(),
 					// false, true, true, 200);
+//
+//					ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(moleculei, CAS, ImageFolder.getAbsolutePath());
+//
+//				} else {
+//					moleculei = p.GetBestMolecule(CAS);
+//					if (moleculei != null) {
+//						// ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(moleculei,
+//						// CAS, ImageFolder.getAbsolutePath(), false, true,
+//						// true,200);
+//						ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(moleculei, CAS, ImageFolder.getAbsolutePath());
+//					}
+//				}
+//			}
+//
+//		} else {
+//			// System.out.println("Image for "+CAS+" exists");
+//		}
+//
+//		// System.out.print("done\n");
+//	}
+	
+	
 
-					ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(moleculei, CAS, ImageFolder.getAbsolutePath());
-
-				} else {
-					moleculei = p.GetBestMolecule(CAS);
-					if (moleculei != null) {
-						// ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(moleculei,
-						// CAS, ImageFolder.getAbsolutePath(), false, true,
-						// true,200);
-						ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(moleculei, CAS, ImageFolder.getAbsolutePath());
-					}
-				}
-			}
-
-		} else {
-			// System.out.println("Image for "+CAS+" exists");
-		}
-
-		// System.out.print("done\n");
-	}
-
+		
 	public void init(IAtomContainerSet moleculeSet, boolean WriteResultsToFile, boolean useFragmentsConstraint, boolean FindFragments, File fileOutputFolder, Object gui, boolean Use3D,
 			boolean is3Dpresent, String endpoint, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String DescriptorSet, String method, int taskType) {
 

@@ -2,9 +2,10 @@ package AADashboard.Application;
 
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
-import gov.epa.api.FlatFileRecord;
+//import gov.epa.api.FlatFileRecord;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+//import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval.ParseToxVal;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,6 +16,7 @@ import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -51,7 +53,7 @@ import org.openscience.cdk.AtomContainerSet;
  * @author Todd Martin
  *
  */
-public class TableGenerator {
+public class TableGeneratorHTML {
 
 	String[] humanHealthEffectsEndpoints = { Chemical.strAcute_Mammalian_Toxicity, 
 			Chemical.strCarcinogenicity,Chemical.strGenotoxicity_Mutagenicity,Chemical.strEndocrine_Disruption,
@@ -67,55 +69,7 @@ public class TableGenerator {
 	public static int width=20;
 
 
-	XSSFCellStyle getStyleBorder(XSSFWorkbook wb) {
-		XSSFCellStyle style=wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.MEDIUM);
-		style.setBorderTop(BorderStyle.MEDIUM);
-		style.setBorderRight(BorderStyle.MEDIUM);
-		style.setBorderLeft(BorderStyle.MEDIUM);    	
-		return style;
-	}
-
-	public static XSSFCellStyle getStyleBold(XSSFWorkbook wb) {
-		XSSFCellStyle style=wb.createCellStyle();
-		XSSFFont font= wb.createFont();
-		font.setBold(true);
-		style.setFont(font);    	
-		return style;
-	}
-
 	
-	public static XSSFCellStyle getStyleWrap(XSSFWorkbook wb) {
-		XSSFCellStyle style=wb.createCellStyle();
-		style.setWrapText(true);
-		return style;
-	}
-	
-	public static XSSFCellStyle getStyleBoldWrap(XSSFWorkbook wb) {
-		XSSFCellStyle style=wb.createCellStyle();
-		XSSFFont font= wb.createFont();
-		font.setBold(true);
-		style.setFont(font);
-		style.setWrapText(true);
-		return style;
-	}
-
-	
-	XSSFCellStyle getStyleBorderWithRotate(XSSFWorkbook wb) {
-		XSSFCellStyle style=wb.createCellStyle();
-		style.setBorderBottom(BorderStyle.MEDIUM);
-		style.setBorderTop(BorderStyle.MEDIUM);
-		style.setBorderRight(BorderStyle.MEDIUM);
-		style.setBorderLeft(BorderStyle.MEDIUM);
-		style.setRotation((short)90);
-		return style;
-	}
-
-	XSSFCellStyle getStyleRotate(XSSFWorkbook wb) {
-		XSSFCellStyle style=wb.createCellStyle();
-		style.setRotation((short)90);
-		return style;
-	}
 
 
 	void generateComparisonTable() {
@@ -440,7 +394,7 @@ public class TableGenerator {
 						} else if (fieldName.equals("source")) {
 							fw.write("\t\t<td bgcolor="+getColor(val)+" align=center>"+val);
 
-							fw.write("<BR>("+ScoreRecord.getListType(val)+")");
+							fw.write("<BR>("+record.getListType()+")");
 
 							fw.write("</td>\r\n");
 
@@ -515,6 +469,28 @@ public class TableGenerator {
 			ex.printStackTrace();
 		}
 	}
+	
+
+	public static String formatDoubleValue(double dose) {
+		DecimalFormat df = new DecimalFormat("0.00");
+		DecimalFormat df2 = new DecimalFormat("0");
+		DecimalFormat dfSci = new DecimalFormat("0.00E00");
+
+		double doseRoundDown = Math.floor(dose);
+
+		double percentDifference = Math.abs(doseRoundDown - dose) / dose * 100.0;
+
+		if (dose < 0.01) {
+			return dfSci.format(dose);
+		} else {
+			if (percentDifference > 0.1) {
+				return df.format(dose);
+			} else {
+				return df2.format(dose);
+			}
+		}
+
+	}
 
 	private void createSourcesTable(Score score, FileWriter fw)
 			throws IOException, NoSuchFieldException, IllegalAccessException {
@@ -584,7 +560,19 @@ public class TableGenerator {
 				if (myField.get(record)==null) {
 					fw.write("\t<td><BR></td>\r\n");
 				} else {
-					String val=(String)myField.get(record);
+					String val="";
+					
+					if (myField.getType().toString().contains("Double")) {
+						DecimalFormat df=new DecimalFormat("0.000");
+						val=formatDoubleValue((Double)myField.get(record));
+												
+					} else {
+						val=(String)myField.get(record);						
+					}
+					
+//					System.out.println(myField.getType());
+
+					
 
 					if (fieldName.equals("score")) {
 						fw.write("\t\t<td bgcolor="+getColor(val)+" align=center>"+val+"</td>\r\n");
@@ -592,6 +580,50 @@ public class TableGenerator {
 						//							fw.write("\t\t<td align=center>"+val);
 						//							fw.write("<BR>("+ScoreRecord.getListType(val)+")");
 						//							fw.write("</td>\r\n");
+					 					
+
+					} else if (fieldName.contentEquals("valueMass")) {
+						
+						if (record.valueMassOperator==null || record.valueMassOperator.contentEquals("=")) {
+							fw.write("\t<td>"+val+" "+record.valueMassUnits+"</td>\r\n");
+						} else {
+							fw.write("\t<td>"+record.valueMassOperator+" "+val+" "+record.valueMassUnits+"</td>\r\n");							
+						}
+						
+
+					
+					} else if (fieldName.contentEquals("duration")) {
+						fw.write("\t<td>"+val+" "+record.durationUnits+"</td>\r\n");
+					
+					} else if (fieldName.contentEquals("source")) {
+						
+						if (record.source.contentEquals(ScoreRecord.sourceJapan)) {
+							
+							String []urls=record.url.replace(" Revised by ", "").split(";");
+							
+							fw.write("\t<td>Japan:<br>");								
+							fw.write("<a href=\""+urls[0]+"\">New Classification</a>");
+							
+							for (int ii=1;ii<urls.length;ii++) {
+								fw.write("<br><a href=\""+urls[ii]+"\">Revision "+ii+"</a>");
+							}
+							
+							fw.write("</td>\r\n");
+							
+						} else if (record.url!=null && !record.url.isEmpty() && !record.source.contentEquals(ScoreRecord.sourceToxVal)) {
+							fw.write("\t<td><a href=\""+record.url+"\">"+val+"</a></td>\r\n");
+						} else {
+							fw.write("\t<td>"+val+"</td>\r\n");
+						}
+					
+					} else if (fieldName.contentEquals("sourceOriginal")) {
+
+						if (record.url!=null && record.url.length()>1)
+							fw.write("\t<td><a href=\""+record.url+"\">"+val+"</a></td>\r\n");
+						else
+							fw.write("\t<td>"+val+"</td>\r\n");
+
+					
 					} else {
 						fw.write("\t<td>"+val+"</td>\r\n");	
 					}
@@ -612,29 +644,29 @@ public class TableGenerator {
 		fw.write("</table>\r\n");
 	}
 
-	private void createFinalScoreTable(Score score, FileWriter fw) throws IOException {
-		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
-
-		fw.write("<tr>\n");
-		fw.write("\t<td bgcolor=lightgrey>Final Score</td>\r\n");	
-		fw.write("\t<td bgcolor=\""+getColor(score.final_score)+"\" align=center>"+score.final_score+"</td>\r\n");
-		fw.write("</tr>\n");
-
-		if (score.final_score_source!=null) {
-
-			fw.write("<tr>\n");
-			fw.write("\t<td bgcolor=lightgrey>Final Score Source</td>\r\n");	
-			fw.write("\t<td>"+score.final_score_source+"</td>\r\n");
-			fw.write("</tr>\n");
-
-			fw.write("<tr>\n");
-			fw.write("\t<td bgcolor=lightgrey>Final Score List Type</td>\r\n");	
-			fw.write("\t<td>"+ScoreRecord.getListType(score.final_score_source)+"</td>\r\n");
-			fw.write("</tr>\n");
-		}
-
-		fw.write("</table><p>\r\n");
-	}
+//	private void createFinalScoreTable(Score score, FileWriter fw) throws IOException {
+//		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
+//
+//		fw.write("<tr>\n");
+//		fw.write("\t<td bgcolor=lightgrey>Final Score</td>\r\n");	
+//		fw.write("\t<td bgcolor=\""+getColor(score.final_score)+"\" align=center>"+score.final_score+"</td>\r\n");
+//		fw.write("</tr>\n");
+//
+//		if (score.final_score_source!=null) {
+//
+//			fw.write("<tr>\n");
+//			fw.write("\t<td bgcolor=lightgrey>Final Score Source</td>\r\n");	
+//			fw.write("\t<td>"+score.final_score_source+"</td>\r\n");
+//			fw.write("</tr>\n");
+//
+//			fw.write("<tr>\n");
+//			fw.write("\t<td bgcolor=lightgrey>Final Score List Type</td>\r\n");	
+//			fw.write("\t<td>"+score.final_score_authority+"</td>\r\n");
+//			fw.write("</tr>\n");
+//		}
+//
+//		fw.write("</table><p>\r\n");
+//	}
 
 
 	String getColor(String val) {
@@ -654,20 +686,6 @@ public class TableGenerator {
 		return color;
 	}
 
-	short getColorShort(String val) {
-		if (val.equals("L")) {
-			return IndexedColors.LIGHT_GREEN.getIndex();
-		} else if (val.equals("M")) {
-			return IndexedColors.LIGHT_YELLOW.getIndex();
-		} else if (val.equals("H")) {
-			return IndexedColors.LIGHT_ORANGE.getIndex();
-		} else if (val.equals("VH")) {
-			return IndexedColors.RED.getIndex();
-		} else {
-			return IndexedColors.GREY_25_PERCENT.getIndex();
-		}
-
-	}
 
 	void writeStyle(FileWriter fw) throws Exception {
 		int width=100;
@@ -880,197 +898,14 @@ public class TableGenerator {
 	//				ex.printStackTrace();
 	//			}
 	//		}
-	void createMergedRegion(XSSFSheet sheet,String range,String value,XSSFCellStyle styleNoBorderWithRotate) {
-		XSSFWorkbook wb = sheet.getWorkbook();
-		createCell(sheet,range,value,wb,styleNoBorderWithRotate);
-
-		CellRangeAddress region=org.apache.poi.ss.util.CellRangeAddress.valueOf(range);		
-		sheet.addMergedRegion(region);
-		RegionUtil.setBorderBottom(BorderStyle.MEDIUM, region, sheet);
-		RegionUtil.setBorderLeft(BorderStyle.MEDIUM, region, sheet);
-		RegionUtil.setBorderRight(BorderStyle.MEDIUM, region, sheet);
-		RegionUtil.setBorderTop(BorderStyle.MEDIUM, region, sheet);
-
-	}
-
-	void createCell(XSSFSheet sheet,int row,int col,String value,boolean addBorders,XSSFWorkbook wb,XSSFCellStyle style) {
-		XSSFCell cell = sheet.getRow(row).getCell(col);
-		createCell(cell, value, wb,style);
-	}
-
-	void createCell(XSSFSheet sheet,String range,String value,XSSFWorkbook wb,XSSFCellStyle style) {
-		CellRangeAddress cra=org.apache.poi.ss.util.CellRangeAddress.valueOf(range);
-		XSSFCell cell = sheet.getRow(cra.getFirstRow()).getCell(cra.getFirstColumn());
-		createCell(cell,value,wb,style);
-	}
+	
 
 
-	void createCell(XSSFCell cell,String value,XSSFWorkbook wb,XSSFCellStyle style) {
-		cell.setCellValue(value);
-		cell.setCellStyle(style);
-		CellUtil.setVerticalAlignment(cell,VerticalAlignment.CENTER);
-		CellUtil.setAlignment(cell,HorizontalAlignment.CENTER);
-	}
-
-	//	void createCell(XSSFCell cell,String value,boolean addBorders,short color) {
-	//        
-	//        cell.setCellValue(value);
-	//        CellUtil.setVerticalAlignment(cell,VerticalAlignment.CENTER);
-	//        CellUtil.setAlignment(cell,HorizontalAlignment.CENTER);
-	//
-	//        if (addBorders) {
-	//        	XSSFCellStyle style=(XSSFCellStyle) cell.getCellStyle();
-	//        	style.setBorderBottom(BorderStyle.MEDIUM);
-	//        	style.setBorderTop(BorderStyle.MEDIUM);
-	//        	style.setBorderRight(BorderStyle.MEDIUM);
-	//        	style.setBorderLeft(BorderStyle.MEDIUM);
-	//        	style.setFillForegroundColor(color);
-	//        	style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-	//        }
-	//        
-	//	}
-
-	void createCell(XSSFCell cell,String value,CellStyle cs,short color) {
-		cs.setFillForegroundColor(color);
-		cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-		cell.setCellStyle(cs);
-		cell.setCellValue(value);
-	}
+	
 
 
-	/**
-	 * This version has Acute Mammalian Toxicity broken out by route
-	 * 
-	 * @param jsonFilePath
-	 * @param outputFolder
-	 * @param outputFileName
-	 */
-	void generateComparisonTableFromJSONFileAsExcel(Chemicals chemicals,String outputFolder,String outputFileName) {
-
-		String[] humanHealthEffectsEndpoints = { Chemical.strAcute_Mammalian_Toxicity, 
-				Chemical.strCarcinogenicity,Chemical.strGenotoxicity_Mutagenicity,Chemical.strEndocrine_Disruption,
-				Chemical.strReproductive,Chemical.strDevelopmental,
-				Chemical.strNeurotoxicity,
-				Chemical.strSystemic_Toxicity,
-				Chemical.strSkin_Sensitization,Chemical.strSkin_Irritation, Chemical.strEye_Irritation};
-
-
-		String [] ecotoxEndpoints={Chemical.strAcute_Aquatic_Toxicity,Chemical.strChronic_Aquatic_Toxicity};
-		String [] fateEndpoints={Chemical.strPersistence,Chemical.strBioaccumulation};
-
-		try {
-
-			//Blank workbook
-			XSSFWorkbook workbook = new XSSFWorkbook();
-
-			writeFinalScoresToWorkbook(chemicals, workbook);
-
-			FileOutputStream out = new FileOutputStream(new File(outputFolder+File.separator+outputFileName));
-			workbook.write(out);
-			out.close();
-
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-	}
-
-
-	public void toFlatFileXLS(Chemicals chemicals,String filepath) {
-
-		try {
-			String del="|";
-			ArrayList<String>uniqueCAS=new ArrayList<>();
-
-			//Blank workbook
-			XSSFWorkbook workbook = new XSSFWorkbook();
-			writeScoreRecordsToWorkbook(chemicals,workbook);
-
-			FileOutputStream out = new FileOutputStream(new File(filepath));
-			workbook.write(out);
-			out.close();
-
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-	}
-	public void writeScoreRecordsToWorkbook(Chemicals chemicals,XSSFWorkbook workbook) {
-		try {
-			String del="|";
-
-			ArrayList<String>uniqueCAS=new ArrayList<>();
-
-			//Create a blank sheet
-			XSSFSheet sheet = workbook.createSheet("Hazard Records");
-
-			int rowNum=0;
-			XSSFRow row = sheet.createRow(rowNum);
-
-			XSSFCellStyle styleBold=getStyleBold(workbook);
-
-			//Write header
-			for (int i=0;i<FlatFileRecord.displayFieldNames.length;i++)	{
-				XSSFCell cell=row.createCell(i);
-				cell.setCellValue(FlatFileRecord.displayFieldNames[i]);
-				cell.setCellStyle(styleBold);
-			}
-
-
-			for (Chemical chemical:chemicals) {
-
-				ArrayList<String>lines=chemical.toStringArray();
-
-				if (!uniqueCAS.contains(chemical.CAS)) uniqueCAS.add(chemical.CAS);
-
-
-				for (String line:lines) {
-					rowNum++;
-					row = sheet.createRow(rowNum);
-
-					line=line.replace("–", "-").replace("’", "'").trim();//TODO use StringEscapeUtils?
-
-
-					LinkedList<String>list=ToxPredictor.Utilities.Utilities.Parse3(line, del);
-
-					for (int i=0;i<list.size();i++) {
-						XSSFCell cell=row.createCell(i);
-
-						String value="";
-
-						if (list.get(i).length()>32000) {
-							value=list.get(i).substring(0,32000)+"...";	
-
-						} else {
-							value=list.get(i);
-						}
-						cell.setCellValue(value);
-
-					}
-				}
-
-				//				fw.write(chemical.to);
-			}
-
-			for (int i=0;i<17;i++) {
-				if (i!=1 & i!=7 & i!=9 && i!=10 && i!=11 && i!=12)
-					sheet.autoSizeColumn(i);
-				else
-					sheet.setColumnWidth(i, 50*256);
-			}
-
-			sheet.createFreezePane( 1, 1, 1, 1 );
-
-			//			for (String CAS:uniqueCAS) {
-			//				System.out.println(CAS);
-			//			}
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-	}
+	
+	
 
 
 
@@ -1079,104 +914,7 @@ public class TableGenerator {
 	
 	
 
-	public void writeFinalScoresToWorkbook(Chemicals chemicals, XSSFWorkbook workbook) {
-		//Create a blank sheet
-		XSSFSheet sheet = workbook.createSheet("Hazard Profiles");
-
-		int rowNum=0;
-
-		for (int i=1;i<=3;i++)	{
-			XSSFRow row = sheet.createRow(i-1);	    
-			for (int j=1;j<=20;j++)	{
-				row.createCell(j-1);
-			}
-		}
-
-		sheet.getRow(2).setHeightInPoints(120);	  
-
-		XSSFCellStyle styleBorderWithRotate=getStyleBorderWithRotate(workbook);
-		//		XSSFCellStyle styleRotate=getStyleRotate(workbook);
-		XSSFCellStyle styleBorder=getStyleBorder(workbook);
-
-		createMergedRegion(sheet, "$A$1:$A$3", "CAS",styleBorder);
-		createMergedRegion(sheet, "$B$1:$P$1", "Human Health Effects",styleBorder);
-		createMergedRegion(sheet, "$Q$1:$R$1", "Ecotoxicity",styleBorder);
-		createMergedRegion(sheet, "$S$1:$T$1", "Fate",styleBorder);
-
-		createMergedRegion(sheet, "$B$2:$D$2", Chemical.strAcute_Mammalian_Toxicity,styleBorder);
-		createMergedRegion(sheet, "$J$2:$K$2", Chemical.strNeurotoxicity,styleBorder);
-		createMergedRegion(sheet, "$L$2:$M$2", Chemical.strSystemic_Toxicity,styleBorder);
-
-		createCell(sheet,"$B$3","Oral",workbook,styleBorderWithRotate);
-		createCell(sheet,"$C$3","Inhalation",workbook,styleBorderWithRotate);
-		createCell(sheet,"$D$3","Dermal",workbook,styleBorderWithRotate);
-
-		createMergedRegion(sheet, "$E$2:$E$3", Chemical.strCarcinogenicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$F$2:$F$3", Chemical.strGenotoxicity_Mutagenicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$G$2:$G$3", Chemical.strEndocrine_Disruption,styleBorderWithRotate);
-		createMergedRegion(sheet, "$H$2:$H$3", Chemical.strReproductive,styleBorderWithRotate);
-		createMergedRegion(sheet, "$I$2:$I$3", Chemical.strDevelopmental,styleBorderWithRotate);
-
-		createCell(sheet,"$J$3","Repeat Exposure",workbook,styleBorderWithRotate);
-		createCell(sheet,"$K$3","Single Exposure",workbook,styleBorderWithRotate);
-
-		createCell(sheet,"$L$3","Repeat Exposure",workbook,styleBorderWithRotate);
-		createCell(sheet,"$M$3","Single Exposure",workbook,styleBorderWithRotate);
-
-		createMergedRegion(sheet, "$N$2:$N$3", Chemical.strSkin_Sensitization,styleBorderWithRotate);
-		createMergedRegion(sheet, "$O$2:$O$3", Chemical.strSkin_Irritation,styleBorderWithRotate);
-		createMergedRegion(sheet, "$P$2:$P$3", Chemical.strEye_Irritation,styleBorderWithRotate);
-
-		createMergedRegion(sheet, "$Q$2:$Q$3", Chemical.strAcute_Aquatic_Toxicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$R$2:$R$3", Chemical.strChronic_Aquatic_Toxicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$S$2:$S$3", Chemical.strPersistence,styleBorderWithRotate);
-		createMergedRegion(sheet, "$T$2:$T$3", Chemical.strBioaccumulation,styleBorderWithRotate);
-
-		Hashtable<String,CellStyle>htStyles=new Hashtable<>();
-
-		String []finalScores= {"VH","H","M","L","N/A"};
-
-		for (String score:finalScores) {
-			CellStyle cs=workbook.createCellStyle();
-			cs.setVerticalAlignment(VerticalAlignment.CENTER);
-			cs.setAlignment(HorizontalAlignment.CENTER);
-			cs.setBorderBottom(BorderStyle.MEDIUM);
-			cs.setBorderTop(BorderStyle.MEDIUM);
-			cs.setBorderRight(BorderStyle.MEDIUM);
-			cs.setBorderLeft(BorderStyle.MEDIUM);
-			cs.setFillForegroundColor(getColorShort(score));
-			cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-			htStyles.put(score, cs);
-		}
-
-		//	        for (int i=0;i<1000;i++) {
-		for (int i=0;i<chemicals.size();i++) {
-			XSSFRow row=sheet.createRow(i+3);	 
-
-			//	        	if (i%100==0) {
-			//	        		System.out.println(i);	        		
-			//	        	}
-
-			Chemical chemical=chemicals.get(i);
-			ArrayList<Score> scores=chemical.scores;
-
-			XSSFCell cell0=row.createCell(0);
-			cell0.setCellValue(chemical.CAS);
-			//	        	createCell(cell0, chemical.CAS, true);
-
-			for (int j=0;j<scores.size();j++) {	
-				Score score=scores.get(j);
-				String final_score=score.final_score;
-				XSSFCell cell=row.createCell(j+1);
-				//    				createCell(cell,final_score,cs,getColorShort(final_score));
-				cell.setCellValue(final_score);
-				cell.setCellStyle(htStyles.get(final_score));
-			}
-		}
-
-		sheet.createFreezePane( 0, 3, 0, 3 );
-
-	}
+	
 
 	/**
 	 * This version has Acute Mammalian Toxicity broken out by route
@@ -1363,8 +1101,7 @@ public class TableGenerator {
 	}
 
 	public static void main(String[] args) throws Exception {
-		TableGenerator t=new TableGenerator();
-
+		//		TableGeneratorHTML t=new TableGeneratorHTML();
 		//		String outputFolder="AA dashboard/Output/realtime";
 		//		String jsonFilePath = outputFolder + "/flame retardant records.json";
 		//		String outputFileName="flame retardant records.html";
@@ -1374,41 +1111,6 @@ public class TableGenerator {
 		//		
 	}
 
-	public void writeBatchChemicalsToExcel(AtomContainerSet acs, Vector<String> newProps,XSSFWorkbook workbook) {
-
-		XSSFSheet sheet = workbook.createSheet("Batch chemicals");
-
-		int rowNum=0;
-		XSSFRow row0 = sheet.createRow(rowNum);
-
-		XSSFCellStyle styleBold=getStyleBold(workbook);
-
-		//Write header
-		for (int i=0;i<newProps.size();i++) {
-			XSSFCell cell=row0.createCell(i);
-			cell.setCellValue(newProps.get(i));
-			cell.setCellStyle(styleBold);
-		}
-
-		for (int i=0;i<acs.getAtomContainerCount();i++) {
-			
-			XSSFRow row = sheet.createRow(i+1);
-			AtomContainer ac=(AtomContainer)acs.getAtomContainer(i);
-
-			for (int j=0;j<newProps.size();j++) {
-				XSSFCell cell=row.createCell(j);
-				
-				if (ac.getProperty(newProps.get(j))!=null) {
-					cell.setCellValue(ac.getProperty(newProps.get(j))+"");					
-				} else {
-					cell.setCellValue("");
-				}
-			}			
-		}
-		
-		sheet.createFreezePane( 0, 1, 0, 1 );
-		
-	}
 
 
 }

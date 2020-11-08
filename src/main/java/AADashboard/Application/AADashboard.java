@@ -5,28 +5,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
 import java.util.jar.Attributes;
-import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
-import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
@@ -37,19 +32,16 @@ import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import AADashboard.Utilities.FileUtilities;
 import ToxPredictor.Application.CalculationParameters;
 import ToxPredictor.Application.WebTEST;
-import ToxPredictor.Application.WebTEST2;
-import ToxPredictor.Database.ChemistryDashboardRecord;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.Utilities.CDKUtilities;
-import ToxPredictor.Utilities.HueckelAromaticityDetector;
 import ToxPredictor.Utilities.IndigoUtilities;
 import ToxPredictor.misc.MolFileUtilities;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
-import gov.epa.api.FlatFileRecord;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 /**
  * This class generates AA reports from a list of chemicals
@@ -666,7 +658,7 @@ public class AADashboard {
 		chemicals.writeToFile(jsonFilePath);//Necessary to write to json file? or just send chemicals class to html generator?
 		
 		// Create web pages:
-		TableGenerator tg = new TableGenerator();
+		TableGeneratorHTML tg = new TableGeneratorHTML();
 		
 //		tg.generateComparisonTableFromJSONFile2(jsonFilePath, outputFolder, outputHTMLFileName);
 		if (generateComparisonTable) tg.generateComparisonTableFromJSONFile2(chemicals, outputFolder, outputHTMLFileName,"Hazard Record Pages",writeRecordPages);
@@ -697,62 +689,62 @@ public class AADashboard {
 		chemicals.writeToFile(jsonFilePath);//Necessary to write to json file? or just send chemicals class to html generator?
 		
 		// Create web pages:
-		TableGenerator tg = new TableGenerator();
+		TableGeneratorHTML tg = new TableGeneratorHTML();
 		
 //		tg.generateComparisonTableFromJSONFile2(jsonFilePath, outputFolder, outputHTMLFileName);
 		if (generateComparisonTable) tg.generateComparisonTableFromJSONFile2(chemicals, outputFolder, outputHTMLFileName,recordPageFolderName,writeRecordPages);
 
 	}
 	
-	void mergeAADashboardResults() {
-		String outputFolder="AADashboard calcs";
-		
-//		String jsonFilePath=folder+"/sample.json";		
-//		Chemicals chemicals=Chemicals.loadFromJSON(jsonFilePath);
-//		System.out.println(chemicals.size());
+//	void mergeAADashboardResults() {
+//		String outputFolder="AADashboard calcs";
+//		
+////		String jsonFilePath=folder+"/sample.json";		
+////		Chemicals chemicals=Chemicals.loadFromJSON(jsonFilePath);
+////		System.out.println(chemicals.size());
+////		Chemicals chemicalsOverall=new Chemicals();
+////		chemicalsOverall.addAll(chemicals);
+//		
+//		
 //		Chemicals chemicalsOverall=new Chemicals();
-//		chemicalsOverall.addAll(chemicals);
-		
-		
-		Chemicals chemicalsOverall=new Chemicals();
-		for (int i=1;i<=13;i++) {
-			String jsonFilePath="AADashboard calcs\\NCCT structures\\NCCT structures "+i+".json";
-			Chemicals chemicals=Chemicals.loadFromJSON(jsonFilePath);
-			chemicalsOverall.addAll(chemicals);
-			System.out.println(i+"\t"+chemicals.size());
-		}
-		
-		for (int i=1;i<=12;i++) {
-			
-			String jsonFilePath="AADashboard calcs\\chemidplus structures\\chemidplus3d"+i+".json";
-			File file=new File(jsonFilePath);
-			if (!file.exists()) continue;
-			
-			Chemicals chemicals=Chemicals.loadFromJSON(jsonFilePath);
-			chemicalsOverall.addAll(chemicals);
-			System.out.println(i+"\t"+chemicals.size());
-		}
-
-		
-		chemicalsOverall.sortByCAS();
-		
-//		for (Chemical chemical:chemicalsOverall) {
-//			System.out.println(chemical.CAS);
+//		for (int i=1;i<=13;i++) {
+//			String jsonFilePath="AADashboard calcs\\NCCT structures\\NCCT structures "+i+".json";
+//			Chemicals chemicals=Chemicals.loadFromJSON(jsonFilePath);
+//			chemicalsOverall.addAll(chemicals);
+//			System.out.println(i+"\t"+chemicals.size());
 //		}
-		
-		TableGenerator tg = new TableGenerator();
-		
-//		chemicalsOverall.writeToFile(outputFolder+"/overallChemicals.json");
-//		chemicalsOverall.toFlatFile(outputFolder+"/overallChemicals.txt");
-		tg.toFlatFileXLS(chemicalsOverall,outputFolder+"/overallChemicals.xlsx");
-				
-		
-		String htmlFileName="NCCT structures.html";
-//		tg.generateComparisonTableFromJSONFile2(chemicalsOverall, folder, htmlFileName,null,false);
-		tg.generateComparisonTableFromJSONFileAsExcel(chemicalsOverall, outputFolder, "overallChemicalsFinalScores.xlsx");
-		
-		
-	}
+//		
+//		for (int i=1;i<=12;i++) {
+//			
+//			String jsonFilePath="AADashboard calcs\\chemidplus structures\\chemidplus3d"+i+".json";
+//			File file=new File(jsonFilePath);
+//			if (!file.exists()) continue;
+//			
+//			Chemicals chemicals=Chemicals.loadFromJSON(jsonFilePath);
+//			chemicalsOverall.addAll(chemicals);
+//			System.out.println(i+"\t"+chemicals.size());
+//		}
+//
+//		
+//		chemicalsOverall.sortByCAS();
+//		
+////		for (Chemical chemical:chemicalsOverall) {
+////			System.out.println(chemical.CAS);
+////		}
+//		
+//		TableGenerator tg = new TableGenerator();
+//		
+////		chemicalsOverall.writeToFile(outputFolder+"/overallChemicals.json");
+////		chemicalsOverall.toFlatFile(outputFolder+"/overallChemicals.txt");
+//		tg.toFlatFileXLS(chemicalsOverall,outputFolder+"/overallChemicals.xlsx");
+//				
+//		
+//		String htmlFileName="NCCT structures.html";
+////		tg.generateComparisonTableFromJSONFile2(chemicalsOverall, folder, htmlFileName,null,false);
+//		tg.generateComparisonTableFromJSONFileAsExcel(chemicalsOverall, outputFolder, "overallChemicalsFinalScores.xlsx");
+//		
+//		
+//	}
 	
 	
 	public Chemicals generateDashboard(IAtomContainerSet acs, String nameField) {
@@ -840,6 +832,105 @@ public class AADashboard {
 		}
 	}
 	
+	
+
+	
+	public static Chemical getChemicalFromRecords(Statement stat,String CAS) {
+		
+		Chemical chemical=new Chemical();
+		
+		ArrayList<ScoreRecord>array=getRecords(stat,CAS,"HazardRecords");
+		if (array.size()==0) return null;
+		
+		ScoreRecord r0=array.get(0);
+		
+		chemical.CAS=r0.CAS;
+		chemical.name=r0.name;
+		
+		for (ScoreRecord sr:array) {
+			Score score=chemical.getScore(sr.hazardName);			
+			score.records.add(sr);
+		}
+		return chemical;
+	}
+	
+	public static ArrayList<ScoreRecord> getRecords(Statement stat,String CAS,String tableName) {
+
+		ArrayList<ScoreRecord>array=new ArrayList<>();
+
+		long t1=System.currentTimeMillis();
+		ResultSet rs=MySQL_DB.getRecords(stat, tableName, "CAS", CAS);
+		long t2=System.currentTimeMillis();
+
+		//   	 System.out.println("time to pull AA records= "+(t2-t1)+" milliseconds");
+
+		try {
+			while (rs.next()) {
+				ScoreRecord sr=createScoreRecord(rs);
+				fixNote(sr);
+				array.add(sr);
+			}
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		return array;
+
+	}
+	
+	/**
+	 * Gets rid of too many breaks for compact display
+	 * @param sr
+	 */
+	private static void fixNote(ScoreRecord sr) {
+		if (sr.note==null) return;
+		
+		while (sr.note.contains("<br><br>")) {
+			sr.note=sr.note.replace("<br><br>", "<br>");
+		}
+	
+	}
+	
+	/**
+	 * Gets scorerecord from AA Dashboard- it assumes columns are in the same order as allFieldNames
+	 * 
+	 * @param rs
+	 * @return
+	 */
+	public  static ScoreRecord createScoreRecord(ResultSet rs) {
+		ScoreRecord f=new ScoreRecord(null,null,null);
+		
+		
+		 for (int i = 0; i < f.allFieldNames.length; i++) {
+				try {
+				
+					Field myField = f.getClass().getDeclaredField(f.allFieldNames[i]);
+					
+					if (myField.getType().getName().contains("Double")) {
+						double val=rs.getDouble(i+1);
+//						System.out.println("*"+val);
+						
+						if (val!=0)	myField.set(f, val);
+						
+					} else {
+						String val=rs.getString(i+1);
+						
+						if (val!=null) {
+							myField.set(f, val);
+						} 
+					}
+				
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+		 return f;
+		 
+	}
+	
+
+	
 	private Chemical runChemicalUsingSQLiteDB(String CAS,String name, IAtomContainer ac) {
 
 		long t1_AA=System.currentTimeMillis();
@@ -850,7 +941,7 @@ public class AADashboard {
 		//100x faster if use AA dashboard with primary key (only 1 db record per CAS):
 //		Chemical chemical=CreateGHS_Database.getChemicalFromRecordsUsingPrimaryKey(statAA_Dashboard_Records,CAS);
 		
-		Chemical chemical=CreateGHS_Database.getChemicalFromRecords(statAA_Dashboard_Records,CAS);
+		Chemical chemical=getChemicalFromRecords(statAA_Dashboard_Records,CAS);
 		
 		long t2_AA=System.currentTimeMillis();
 		if (debug) System.out.println("done in "+(t2_AA-t1_AA)+ " milliseconds");
@@ -892,14 +983,11 @@ public class AADashboard {
 
 		long t1_AA=System.currentTimeMillis();
 		if (debug) System.out.print("Getting AA dashboard records from GHS database..."); 		
+						
+		//**********************************************************************
+
+		Chemical chemical=getChemicalFromRecords(statAA_Dashboard_Records,CAS);
 				
-//		int iCAS=Integer.parseInt(CAS.replace("-", ""));
-				
-		//100x faster if use AA dashboard with primary key (only 1 db record per CAS):
-//		Chemical chemical=CreateGHS_Database.getChemicalFromRecordsUsingPrimaryKey(statAA_Dashboard_Records,CAS);
-		
-		Chemical chemical=CreateGHS_Database.getChemicalFromRecords(statAA_Dashboard_Records,CAS);
-		
 		long t2_AA=System.currentTimeMillis();
 		if (debug) System.out.println("done in "+(t2_AA-t1_AA)+ " milliseconds");
 		
@@ -909,13 +997,15 @@ public class AADashboard {
 		chemical.name=name;
 		chemical.molecularWeight=CDKUtilities.calculateMolecularWeight(ac);
 		chemical.atomContainer=ac;
-		
+
+		//**********************************************************************
 		// Get from TEST:
 		if (debug) System.out.println("Start getting records from TEST..."); 
 		long t1=System.currentTimeMillis();
 //		generateRecordsFromTEST.createRecords(chemical, WebTEST2.DB_Path_TEST_Predictions);
 		generateRecordsFromTEST.createRecordsForGUI(chemical, ac,cp);
 		
+		//**********************************************************************
 				
 		long t2=System.currentTimeMillis();
 		if (debug) System.out.println("Done getting records from TEST in "+(t2-t1)+" milliseconds");
@@ -923,6 +1013,15 @@ public class AADashboard {
 		if (filterRecords) {
 			filterRecords(chemical);
 		}
+
+		//**********************************************************************
+		//Get records from ToxVal:
+		ParseToxValDB p=new ParseToxValDB();
+		p.getDataFromToxValDB(chemical);
+		//**********************************************************************
+
+		
+		removeDuplicateRecords(chemical);
 		
 		//Use trumping algorithm to assign final scores:
 		if (finalScoreScheme.equals(finalScoreSchemeTrumping)) {
@@ -934,6 +1033,51 @@ public class AADashboard {
 		}
 		
 		return chemical;
+	}
+	
+	
+	void deleteDuplicateScoreRecord(Score score,String source,String sourceOriginal) {
+		
+		for (int i=0;i<score.records.size();i++) {
+						
+			ScoreRecord sr=score.records.get(i);
+			boolean bSource=sr.source.contentEquals(source);
+			boolean bSourceOriginal=false;
+			
+			if (sourceOriginal==null && (sr.sourceOriginal==null || sr.sourceOriginal.isEmpty())) {
+				bSourceOriginal=true;
+			} else if (sourceOriginal!=null && sr.sourceOriginal!=null) {
+				if (sourceOriginal.contentEquals(sr.sourceOriginal)) bSourceOriginal=true;
+			}
+						
+//			if (score.getHazardName().contentEquals(HazardConstants.strCarcinogenicity))
+//				System.out.println(sr.source+"\t"+bSource+"\t"+bSourceOriginal+"\t"+sourceOriginal+"\t"+sr.sourceOriginal);
+			
+//			boolean bTestOrganism=test_organism==null  || test_organism.contentEquals(sr.test_organism.toLowerCase());
+			
+			if (bSource && bSourceOriginal) {
+				System.out.println("Deleted duplicate score record: "+sr.toString("|", ScoreRecord.actualFieldNames));
+				score.records.remove(i--);	//it is possible for more than duplicate to exist so can't just exit method when find one			
+			}			
+		}
+			
+		
+	}
+	
+			
+	void removeDuplicateRecords(Chemical chemical) {
+		//Delete TEST experimental value since covered by chemidplus record for acute mammalian tox
+		deleteDuplicateScoreRecord(chemical.scoreAcute_Mammalian_ToxicityOral, ScoreRecord.sourceTEST_Experimental,null);//Delete TEST experimental value since covered by chemidplus record for acute mammalian tox
+		deleteDuplicateScoreRecord(chemical.scoreAcute_Mammalian_ToxicityOral, ScoreRecord.sourceToxVal,"TEST");//ToxVal has duplicate of TEST experimental value
+		
+		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceROC,null);
+		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceNIOSH_Potential_Occupational_Carcinogens,null);
+		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceProp65,null);
+		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceIARC,null);
+		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceIRIS,null);//we have more info in Note field, but CHA database is using 2008 spreadsheet for IRIS
+		
+		deleteDuplicateScoreRecord(chemical.scoreAcute_Aquatic_Toxicity, ScoreRecord.sourceTEST_Experimental,null);//Delete TEST experimental values since covered by ECOTOX values
+		
 	}
 	
 	
@@ -1270,6 +1414,8 @@ public class AADashboard {
 		
 		int numChemicals=0;
 
+		ScoreRecord sr=new ScoreRecord(null,null,null);
+		
 		for (int i=1;i<=11;i++) {
 //		for (int i=1;i<=2;i++) {	
 			
@@ -1296,7 +1442,7 @@ public class AADashboard {
 					
 					String authority="";
 							
-					if (score.final_score_source!=null) authority=ScoreRecord.getListType(score.final_score_source);
+					if (score.final_score_source!=null) authority=sr.getListType(score.final_score_source);
 
 					if (!authority.isEmpty() && !authority.equals("QSAR Model")) {
 //						System.out.println(chemical.CAS+"\t"+score.hazard_name+"\t"+score.final_score+"\t"+score.final_score_source+"\t"+authority);
@@ -1318,74 +1464,74 @@ public class AADashboard {
 	}
 	
 	
-	private void TEST_Comparison() {
-		
-		
-		
-		int numSplit=11;
-		
-		String folder="AA Dashboard\\Output\\TSCA 17K\\trumping";
-		
-//		String hazard=Chemical.strAcute_Mammalian_ToxicityOral;
-		String hazard=Chemical.strGenotoxicity_Mutagenicity;
-		
-		
-		int numChemicals=0;
-
-		for (int i=1;i<=11;i++) {
-//		for (int i=1;i<=2;i++) {	
-			
-			
-			String filename="TSCA 17K "+i+" of "+numSplit+".json";
-			
-			Chemicals chemicals=Chemicals.loadFromJSON(folder+"\\"+filename);
-			
-			for (int j=0;j<chemicals.size();j++) {
-				Chemical chemical=chemicals.get(j);
-			
-//				System.out.println(chemical.CAS);
-				
-//				System.out.println(numChemicals+"\t"+chemical.CAS+"\t"+chemical.name);
-				
-				for (int k=0;k<19;k++) {
-					
-					Score score=chemical.scores.get(k);
-					
-					if (!score.hazard_name.equals(hazard)) continue;
-					
-					
-					String authority="";
-							
-					if (score.final_score_source!=null) authority=ScoreRecord.getListType(score.final_score_source);
-
-					if (authority.isEmpty() || authority.equals("QSAR Model")) continue;
-						
-					for (int l=0;l<score.records.size();l++) {
-						ScoreRecord sr=score.records.get(l);
-						String currentauthority=ScoreRecord.getListType(sr.source);
-						
-						
-//						System.out.println(chemical.CAS+"\t"+sr.source+"\t"+sr.score);
-						
-						
-						if (sr.source.equals(ScoreRecord.sourceTEST_Predicted) && !sr.score.equals("N/A")) {
-							numChemicals++;
-							System.out.println(chemical.CAS+"\t"+score.final_score_source+"\t"+score.final_score+"\t"+sr.score);
-//							break;
-						} else {
-//							System.out.println(chemical.CAS+"\t"+sr.source+"\t"+sr.score);
-						}
-					}
-						
-//						System.out.println(chemical.CAS+"\t"+score.hazard_name+"\t"+score.final_score+"\t"+score.final_score_source+"\t"+authority);
-					
-				}
-			}
-		}
-		System.out.println("NumChemicals="+numChemicals);
-		
-		
-	}
+//	private void TEST_Comparison() {
+//		
+//		
+//		
+//		int numSplit=11;
+//		
+//		String folder="AA Dashboard\\Output\\TSCA 17K\\trumping";
+//		
+////		String hazard=Chemical.strAcute_Mammalian_ToxicityOral;
+//		String hazard=Chemical.strGenotoxicity_Mutagenicity;
+//		
+//		
+//		int numChemicals=0;
+//
+//		for (int i=1;i<=11;i++) {
+////		for (int i=1;i<=2;i++) {	
+//			
+//			
+//			String filename="TSCA 17K "+i+" of "+numSplit+".json";
+//			
+//			Chemicals chemicals=Chemicals.loadFromJSON(folder+"\\"+filename);
+//			
+//			for (int j=0;j<chemicals.size();j++) {
+//				Chemical chemical=chemicals.get(j);
+//			
+////				System.out.println(chemical.CAS);
+//				
+////				System.out.println(numChemicals+"\t"+chemical.CAS+"\t"+chemical.name);
+//				
+//				for (int k=0;k<19;k++) {
+//					
+//					Score score=chemical.scores.get(k);
+//					
+//					if (!score.hazard_name.equals(hazard)) continue;
+//					
+//					
+//					String authority="";
+//							
+//					if (score.final_score_source!=null) authority=ScoreRecord.getListType(score.final_score_source);
+//
+//					if (authority.isEmpty() || authority.equals("QSAR Model")) continue;
+//						
+//					for (int l=0;l<score.records.size();l++) {
+//						ScoreRecord sr=score.records.get(l);
+//						String currentauthority=sr.getListType();
+//						
+//						
+////						System.out.println(chemical.CAS+"\t"+sr.source+"\t"+sr.score);
+//						
+//						
+//						if (sr.source.equals(ScoreRecord.sourceTEST_Predicted) && !sr.score.equals("N/A")) {
+//							numChemicals++;
+//							System.out.println(chemical.CAS+"\t"+score.final_score_source+"\t"+score.final_score+"\t"+sr.score);
+////							break;
+//						} else {
+////							System.out.println(chemical.CAS+"\t"+sr.source+"\t"+sr.score);
+//						}
+//					}
+//						
+////						System.out.println(chemical.CAS+"\t"+score.hazard_name+"\t"+score.final_score+"\t"+score.final_score_source+"\t"+authority);
+//					
+//				}
+//			}
+//		}
+//		System.out.println("NumChemicals="+numChemicals);
+//		
+//		
+//	}
 	
 	
 
@@ -1487,7 +1633,7 @@ public class AADashboard {
 //		a.runSdfFile(args[0]);
 //		a.runMostRecords();
 //		a.runChemicalsWithGHSRecords();
-		a.mergeAADashboardResults();
+//		a.mergeAADashboardResults();
 //		a.runTSCA_17K();
 //		a.runBadChemical();
 //		a.lookAtCoverage();
