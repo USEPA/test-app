@@ -36,6 +36,7 @@ import com.epam.indigo.IndigoException;
 import com.epam.indigo.IndigoObject;
 import com.epam.indigo.IndigoInchi;
 
+import ToxPredictor.Application.Calculations.NameToStructureOpsin;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.ChemInfToolkit;
 import ToxPredictor.Utilities.FileUtils;
@@ -48,6 +49,8 @@ public class ResolverDb {
 	private static final int BATCH_SIZE = 10000;
 	private static final String TABLE_NAME = "ncct_lookup";
 	private static String sqlitePath = "databases/ncct_lookup.db";
+	
+	NameToStructureOpsin nameToStructureOpsin=new NameToStructureOpsin(); 
 
 	public static String getSqlitePath() {
 		return sqlitePath;
@@ -281,6 +284,7 @@ public class ResolverDb {
 
 	private static ArrayList<DSSToxRecord> executeQuery(String query) {
 		assureDbIsOpen();
+//		System.out.println(query);
 
 		ResultSet rs = null;
 		try {
@@ -324,10 +328,21 @@ public class ResolverDb {
 		name=name.replace("'", "''");
 		return executeQuery("select * from " + TABLE_NAME + " where name = '" + name + "';");
 	}
+	
+	
+	public static ArrayList<DSSToxRecord> lookupByNameToStructure(String name) {				
+		String smiles=NameToStructureOpsin.nameToSmiles(name);
+		
+		if (smiles==null) return new ArrayList<DSSToxRecord>(); 
+		
+		return lookupBySMILES(smiles);
+	}
+
 
 	public static synchronized ArrayList<DSSToxRecord> lookupByInChIKey(String inchiKey) {
 		return executeQuery("select * from " + TABLE_NAME + " where inchi_key = '" + inchiKey + "';");
 	}
+	
 
 	public static synchronized ArrayList<DSSToxRecord> lookupByInChIKey1(String inchiKey) {
 		return lookupByInChIKey1(inchiKey, true);
@@ -384,7 +399,6 @@ public class ResolverDb {
 			String[] inchi = CDKUtilities.generateInChiKey(m);
 			String inchiKey=inchi[1];
 			
-//			System.out.println(inchiKey);
 
 			String [] inchi2 = IndigoUtilities.generateInChiKey(m);
 			String inchiKey2=inchi2[1];
@@ -394,6 +408,8 @@ public class ResolverDb {
 			
 			String inchiKeyN = getInchiN(inchiKey);
 			
+//			System.out.println("inchiKey="+inchiKey);
+//			System.out.println("inchiKeyN="+inchiKeyN);
 			
 			ArrayList<DSSToxRecord> res=null;
 
@@ -429,6 +445,58 @@ public class ResolverDb {
 				
 				if (res.size()!=0) {
 					if (debug) System.out.println("Found by CDK indigo inchikey with S changed to N");
+					return res;
+				}
+			}
+			
+			return res;
+		
+		} catch (Exception ex) {
+			System.out.println(ex.getMessage());
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Look up in database by structure using inchi keys
+	 * 
+	 * Current database has a lot of nonstandard inchi keys- TODO- should they be nonstandard?
+	 * 
+	 * @param m
+	 * @return
+	 */
+	public static synchronized ArrayList<DSSToxRecord> lookupByAtomContainer2dConnectivity(AtomContainer m) {
+		
+		try {
+
+			if (m.getAtomCount()==0) return null;
+			
+			boolean debug=true;
+			
+			String[] inchi = CDKUtilities.generateInChiKey(m);
+			String inchiKey=inchi[1];
+			
+
+			String [] inchi2 = IndigoUtilities.generateInChiKey(m);
+			String inchiKey2=inchi2[1];
+
+						
+			ArrayList<DSSToxRecord> res=null;
+
+			if (inchiKey!=null) {				
+				res=lookupByInChIKey1(inchiKey,false);				
+				if (res.size()!=0) {
+					if (debug) System.out.println("Found by CDK inchikey");
+					return res;
+				}								
+			}
+			
+								
+			if(inchiKey2!=null) {
+				res=lookupByInChIKey1(inchiKey2,false);				
+				if (res.size()!=0) {
+					if (debug) System.out.println("Found by CDK indigo inchikey");
 					return res;
 				}
 			}

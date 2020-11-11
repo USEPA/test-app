@@ -343,7 +343,7 @@ public class TaskCalculations2 {
 				
 		Set<WebReportType> wrt = WebReportType.getNone();
 		wrt.add(WebReportType.HTML);
-		if (WebTEST4.createReports) wrt.add(WebReportType.JSON);
+//		if (WebTEST4.createReports) wrt.add(WebReportType.JSON);
 		
 		params.reportTypes=wrt;
 		

@@ -1347,33 +1347,26 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 		if (!isMoleculeOK(som)) return;
 
 		AtomContainer myMolecule = (AtomContainer)som.getAtomContainer(0);
-		
+				
 		//TODO ask user when we dont have a match and not blank
 		
 		ArrayList<DSSToxRecord>recs=ResolverDb.lookupByAtomContainer(myMolecule);
 		
 		if (recs.size()>0)	{
-			String oldCAS=f.panelSingleStructureDatabaseSearch.jtfCAS.getText().trim();
-
-			if (Strings.isBlank(oldCAS)) {
-				ResolverDb.assignDSSToxInfoFromFirstRecord(myMolecule, recs);
+			assignRecord(myMolecule, recs);			
+		}else  {			
+			ArrayList<DSSToxRecord>recs2=ResolverDb.lookupByAtomContainer2dConnectivity(myMolecule);
+//			System.out.println("searching by inchikey short # recs="+recs2.size());
+			
+			if (recs2.size()>0)	{
+//				System.out.println("Assigning record from inchikey short");
+				assignRecord(myMolecule, recs2);
 			} else {
-				boolean match=false;
-				for (DSSToxRecord rec:recs) {
-					if (rec.cas.contentEquals(oldCAS)) {
-						DSSToxRecord.assignFromDSSToxRecord(myMolecule, rec);
-//						System.out.println("old CAS is ok!");
-						match=true;
-						break;
-					}
-				}
-				if (!match) ResolverDb.assignDSSToxInfoFromFirstRecord(myMolecule, recs);
-				
+				TaskStructureSearch.assignIDFromStructure(myMolecule);	
 			}
 			
-		}else  {
 //			myMolecule.setProperty("CAS", "C_"+System.currentTimeMillis());	
-			TaskStructureSearch.assignIDFromStructure(myMolecule);
+			
 		}
 		f.panelSingleStructureDatabaseSearch.jtfCAS.setText(myMolecule.getProperty(DSSToxRecord.strCAS));
 		
@@ -1431,6 +1424,26 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			f.task.initForAA(ms, useFragmentsConstraint, OutputFolder, f, TESTConstants.typeTaskSingle, TESTConstants.typeRunAA,runCTS);
 			f.task.go();
 			f.timerCalculations.start();
+		}
+	}
+
+	private void assignRecord(AtomContainer myMolecule, ArrayList<DSSToxRecord> recs) {
+		String oldCAS=f.panelSingleStructureDatabaseSearch.jtfCAS.getText().trim();
+
+		if (Strings.isBlank(oldCAS)) {
+			ResolverDb.assignDSSToxInfoFromFirstRecord(myMolecule, recs);
+		} else {
+			boolean match=false;
+			for (DSSToxRecord rec:recs) {
+				if (rec.cas.contentEquals(oldCAS)) {
+					DSSToxRecord.assignFromDSSToxRecord(myMolecule, rec);
+//						System.out.println("old CAS is ok!");
+					match=true;
+					break;
+				}
+			}
+			if (!match) ResolverDb.assignDSSToxInfoFromFirstRecord(myMolecule, recs);
+			
 		}
 	}
 

@@ -49,6 +49,8 @@ import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.GUI.Miscellaneous.FileFilterStructure;
 import ToxPredictor.Application.GUI.Miscellaneous.FileFilterText;
 import ToxPredictor.Application.GUI.Miscellaneous.FileFilterText2;
+import ToxPredictor.Database.DSSToxRecord;
+import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.Application.Calculations.TaskCalculations2;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
@@ -1447,14 +1449,15 @@ public class TESTApplication extends JFrame{
 		fs.setVisible(false);
 		fs.dispose();
 		f.setVisible(true);
-
+				
+		
 		if (defaultToSingleChemicalMode) {
 			f.aa.switchToSingleChemicalMode();
 //			f.loadChemicalForDebug("71-43-2");
 //			f.loadChemicalForDebug("115-86-6");
 //			f.loadChemicalForDebug("perchloroethane");
 //			f.loadChemicalForDebug("61-94-9");
-			
+//			f.loadChemicalForDebug("N,N'-Dimethyl-N,N'-bis(3-(3',4',5'-trimethoxybenzoxy)propyl)ethylenediamine dihydrochloride");
 //			f.loadChemicalForDebug("triphenyl phosphate");
 //			f.panelCalculationOptions.panelCTSOptions.jcbRunCTS.setSelected(true);
 			

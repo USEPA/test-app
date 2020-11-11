@@ -41,6 +41,12 @@ import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.Utilities;
 
+//import uk.ac.cam.ch.wwmm.opsin.NameToStructure;// uk\ac\cam\ch\opsin\opsin-core\2.5.0
+//import uk.ac.cam.ch.wwmm.opsin.NameToStructureConfig;
+//import uk.ac.cam.ch.wwmm.opsin.OpsinResult;
+
+
+
 public class TaskStructureSearch {
 
 	private static final Logger logger = LogManager.getLogger(TaskStructureSearch.class);
@@ -75,6 +81,7 @@ public class TaskStructureSearch {
 
 	DescriptorFactory df=new DescriptorFactory(false);
 	static StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+	NameToStructureOpsin nameToStructureOpsin=new NameToStructureOpsin(); 
 	
 	public TaskStructureSearch() {
 	}
@@ -445,9 +452,13 @@ public class TaskStructureSearch {
 		if (!CASfield.equals("")) {
 			CAS=(String)m.getProperty(CASfield);
 			if (CAS != null) {
+//				System.out.println("CAS="+CAS);
+				
 				CAS=CAS.trim();
 				CAS=CAS.replace("/", "_");
 				m.setProperty("CAS", CAS);
+				
+//				System.out.println(m.getProperty("gsid")+"");
 				
 				ArrayList<DSSToxRecord>recs=ResolverDb.lookupByCAS(CAS);
 				if (recs.size()>0)	ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
@@ -462,7 +473,7 @@ public class TaskStructureSearch {
 				assignIDFromStructure(m);
 			}
 		}
-		m.setProperty("Query", m.getProperty("CAS"));//store ID number as the string used in the query for export later so users can match up results
+//		m.setProperty("Query", m.getProperty("CAS"));//store ID number as the string used in the query for export later so users can match up results
 //		System.out.println(m.getProperty("CAS")+"");
 	}
 	
@@ -558,8 +569,10 @@ public class TaskStructureSearch {
 						
 						m=CleanUpMolecule(m);
 						m.setProperty("Error", "");
+						m.setProperty("Source","CAS in database");
 						WebTEST4.checkAtomContainer(m);
 						ResolverDb.assignDSSToxInfoFromFirstRecord(m, records);
+						logger.info("Record from CAS in database: "+rec);
 					}					
 					
 //					System.out.println(CAS+"\t"+rec.gsid+"\t"+m.getAtomCount());
@@ -597,7 +610,7 @@ public class TaskStructureSearch {
 	 */
 	private static AtomContainerSet LoadFromNameList(String listName) {
 		AtomContainerSet moleculeSet = new AtomContainerSet();		
-		
+//		System.out.println("enter load from name list");
 		
 		try {
 			InChIGeneratorFactory factory = InChIGeneratorFactory.getInstance();//TODO use indigo instead???
@@ -625,47 +638,78 @@ public class TaskStructureSearch {
 
 				AtomContainer m=null;
 				
-				//first search actor
-				DSSToxRecord d=MoleculeUtilities.getDSSToxRecordFromDashboard(Name);
-				
-				if (d!=null) {
-					try {
-						m = WebTEST4.prepareSmilesMolecule(d.smiles);
-						m = CleanUpMolecule(m);					
-						DSSToxRecord.assignFromDSSToxRecord(m, d);
-						System.out.println("Actor record found: "+d);
-					} catch (Exception ex) {
-						System.out.println("Error cleaning up molecule for smiles from actor="+d.smiles);
-					}
-				}
-				
-				if (m==null) {
-					ArrayList<DSSToxRecord> records=ResolverDb.lookupByName(Name);
+				ArrayList<DSSToxRecord> records=ResolverDb.lookupByName(Name);
 
-					if (records.size()>0) {
-						DSSToxRecord rec=records.get(0);
+				if (records.size()>0 && records.get(0).inchi!=null) {
+					m=getMoleculeFromDSSToxRecords(records, factory);
+					logger.info("Record from name in database: "+records.get(0));
+					m.setProperty("Source","Name");
+					
+					//					System.out.println(CAS+"\t"+rec.gsid+"\t"+m.getAtomCount());
+				} else {					
+					//Try name to structure via OPSIN:
+					long t1=System.currentTimeMillis();
+					ArrayList<DSSToxRecord>recs=ResolverDb.lookupByNameToStructure(Name);
+					
+					if (recs.size()>0) {
+						m=getMoleculeFromDSSToxRecords(recs, factory);
+						long t2=System.currentTimeMillis();
+						logger.info("Record from name to structure: "+recs.get(0));
+						m.setProperty("Source","Name to structure");
+						
+//						System.out.println((t2-t1)+"\t"+recs.size());
 
-						InChIToStructure gen = factory.getInChIToStructure(rec.inchi, DefaultChemObjectBuilder.getInstance());
-						m=(AtomContainer)gen.getAtomContainer();
-
-						m=CleanUpMolecule(m);
-
-						m.setProperty("Error", "");					
-						WebTEST4.checkAtomContainer(m);
-
-						ResolverDb.assignDSSToxInfoFromFirstRecord(m, records);
-
-						//					System.out.println(CAS+"\t"+rec.gsid+"\t"+m.getAtomCount());
 					} else {
-						m = new AtomContainer();
-						m.setProperty("Error", "Name: "+Name+" not found");
-						m.setProperty("CAS", "C_"+System.currentTimeMillis());
-						m.setProperty("Query", Name);
-						moleculeSet.addAtomContainer(m);
-						continue;
-
+						//Search actor if cant find by exact name:														
+						DSSToxRecord d=MoleculeUtilities.getDSSToxRecordFromDashboard(Name);
+						long t3=System.currentTimeMillis();
+						
+//						System.out.println((t3-t2)+"\ttime for actor");
+						
+												
+						if (d!=null) {
+//							System.out.println("smiles="+d.smiles+"");
+							if (d.smiles.isEmpty()) {
+								m = new AtomContainer();
+								m.setProperty("Error", "Smiles unavailable: "+Name);
+								logger.info("Actor record found but no smiles available: "+d);
+								
+								m.setProperty("CAS", d.cas);
+								m.setProperty("Query", Name);
+								moleculeSet.addAtomContainer(m);
+								continue;
+																
+							} else {
+								
+								try {
+									m = WebTEST4.prepareSmilesMolecule(d.smiles);
+									m = CleanUpMolecule(m);
+									m.setProperty("Error", "");					
+									WebTEST4.checkAtomContainer(m);
+									DSSToxRecord.assignFromDSSToxRecord(m, d);
+									logger.info("Actor record found: "+d);
+									m.setProperty("Source","Actor record from name");
+									
+								} catch (Exception ex) {
+									System.out.println("Error cleaning up molecule for smiles from actor="+d.smiles);
+								}
+								
+							}
+							
+						} else {
+							m = new AtomContainer();
+							m.setProperty("Error", "Name: "+Name+" not found");
+							m.setProperty("CAS", "C_"+System.currentTimeMillis());
+							m.setProperty("Query", Name);
+							moleculeSet.addAtomContainer(m);
+							continue;
+						}
 					}
+					
+					
+					
 				}
+				
 				
 				m.setProperty("Query", Name);//store name as the string used in the query for export later so users can match up results
 				moleculeSet.addAtomContainer(m);
@@ -681,6 +725,23 @@ public class TaskStructureSearch {
 
 		return moleculeSet;
 		
+	}
+	
+	private static AtomContainer getMoleculeFromDSSToxRecords(ArrayList<DSSToxRecord>recs,InChIGeneratorFactory factory) {
+		DSSToxRecord rec=recs.get(0);
+		
+		try {
+			InChIToStructure gen = factory.getInChIToStructure(rec.inchi, DefaultChemObjectBuilder.getInstance());
+			AtomContainer m=(AtomContainer)gen.getAtomContainer();
+			m=CleanUpMolecule(m);
+			m.setProperty("Error", "");					
+			WebTEST4.checkAtomContainer(m);
+			ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
+			return m;
+			
+		} catch (Exception ex) {
+			return null;
+		}
 	}
 	
 	public static void assignIDFromStructure(AtomContainer m) {
@@ -1029,106 +1090,95 @@ public class TaskStructureSearch {
 			else return false;
 		}
 		
-		
+		AtomContainer getFromCAS(String search,TESTApplication f) {
+			
+			if (!isAllNumbers(search)) return null;
+
+			if (!isCAS(search)) {				
+				JOptionPane.showMessageDialog(f, "Text contains only numbers but is invalid CAS");
+				done=true;
+				return null;
+			}
+			
+			String CAS=parseSearchCAS(search.replace("\n", ""));
+			//						System.out.println("*"+CAS+"*");
+			return (AtomContainer)LoadFromCASList(CAS+"\n").getAtomContainer(0);
+			
+		}
 		
 		private void runSingle() {
-//			AtomContainerSet acs=null;
+			//			AtomContainerSet acs=null;
 			TESTApplication f=((TESTApplication) gui);
-			
-			
 			AtomContainer molecule=null;
 
-//			First search actor
-			DSSToxRecord d=MoleculeUtilities.getDSSToxRecordFromDashboard(filepath.replace("\n", ""));
-			//TODO search using v2 actor
-					
-			if (d!=null) {
-				try {
-					molecule = WebTEST4.prepareSmilesMolecule(d.smiles);//TODO should we do it based on smiles or inchi?
-					molecule = CleanUpMolecule(molecule);					
-					DSSToxRecord.assignFromDSSToxRecord(molecule, d);
-//					acs=new AtomContainerSet();
-//					acs.addAtomContainer(m);
-					System.out.println("Actor record found: "+d+", smiles: "+d.smiles);
+			//Try to get from CAS:
+			molecule=getFromCAS(filepath, f);
+						
+			if (molecule==null) {				
+				//Try to get from name:				
+				molecule=(AtomContainer)LoadFromNameList(filepath).getAtomContainer(0);			
+				String err=molecule.getProperty("Error");				
 				
-				} catch (Exception ex) {
-					System.out.println("Error cleaning up molecule for smiles from actor="+d.smiles);
-				}
-			} 
-			
-			
-			if (molecule==null) {
-				
-				if (isAllNumbers(filepath)) {
-					if (isCAS(filepath)) {
-//						System.out.println("is cas!");		
-						String CAS=parseSearchCAS(filepath.replace("\n", ""));
-//						System.out.println("*"+CAS+"*");
-						molecule=(AtomContainer)LoadFromCASList(CAS+"\n").getAtomContainer(0);
+				if (err.contains("Name:") || err.contains("Smiles unavailable")) molecule=null;
+														
+				if(molecule==null) {
+					if (filepath.contains("'")) {//TODO add more invalid chars for smiles
+						molecule=null;					
 					} else {
-						
-						JOptionPane.showMessageDialog(f, "Text contains only numbers but is invalid CAS");
-						done=true;
-						return;
-					}
-				} else {
-
-					//Try loading by smiles next:
-					molecule=(AtomContainer)LoadFromSmilesList(filepath).getAtomContainer(0);
-					
-
-					if (molecule.getProperty("ErrorCode")==WebTEST.ERROR_CODE_STRUCTURE_ERROR) {
-						//Cant parse the smiles, so try searching by name:
-						molecule=(AtomContainer)LoadFromNameList(filepath).getAtomContainer(0);
-						
-
-						String err=molecule.getProperty("Error");
-						if (err.contentEquals("Name not found")) {
-							JOptionPane.showMessageDialog(f, filepath.replace("\n", "")+" is not found");
-							done=true;
-							return;
-						}
-					} 
+						//try to get from smiles:										
+						molecule=(AtomContainer)LoadFromSmilesList(filepath).getAtomContainer(0);
+						String errorCode=molecule.getProperty("ErrorCode");						
+//						System.out.println("errorCode="+errorCode);						
+						if (errorCode==WebTEST.ERROR_CODE_STRUCTURE_ERROR) molecule=null; 						
+					}					
 				}
+								
 			}
 			
-			
-			done = true;
-
-			String error=molecule.getProperty("Error");
-			if (error.contentEquals("Multiple molecules")) {
-				JOptionPane.showMessageDialog(f,"Molecule not connected, please select another mol file");
+//			System.out.println("Source="+molecule.getProperty("Source"));
+					
+			if (molecule==null) {
+				JOptionPane.showMessageDialog(f, filepath.replace("\n", "")+" is not found");
 				return;
 			}
-						
-			molecule=f.configureModel(molecule);
+																							
+			done = true;
+
+			WebTEST4.checkAtomContainer(molecule);
 			
+			String error=molecule.getProperty("Error");
+			if (error.contentEquals("Multiple molecules")) {
+				JOptionPane.showMessageDialog(f,"Molecule consists of multiple structural fragments, please select another compound");
+				return;
+			}
+
+			molecule=f.configureModel(molecule);
+
 			if (molecule.getAtomCount()==0) {
 				JOptionPane.showMessageDialog(f, filepath.replace("\n", "")+" is not found");
 				f.panelSingleStructureDatabaseSearch.jtfCAS.setText("");
 				f.panelSingleStructureDatabaseSearch.jtfName.setText("");
 			} else {
-				setCAS(molecule);
+//				setCAS(molecule);
+				
+				
 				f.panelSingleStructureDatabaseSearch.jtfCAS.setText(molecule.getProperty(DSSToxRecord.strCAS));
-								
+
 				if (molecule.getProperty(DSSToxRecord.strName)!=null) {
 					f.panelSingleStructureDatabaseSearch.jtfName.setText(molecule.getProperty(DSSToxRecord.strName));
 				} else {
 					f.panelSingleStructureDatabaseSearch.jtfName.setText("");
 				}
-				
+
 			}
-			
-			
+
 			String Query=filepath.replace("\n", "");
 			molecule.setProperty("Query", Query);
+			//			f.setNameCAS(molecule);
 
-			
-//			f.setNameCAS(molecule);
-			
 			f.setTitle(TESTConstants.SoftwareTitle);			
 			f.panelSingleStructureDatabaseSearch.jtfIdentifier.requestFocus();
-			
+
 		}
 		
 		private void runBatch() {

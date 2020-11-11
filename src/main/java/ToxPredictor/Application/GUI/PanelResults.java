@@ -403,9 +403,9 @@ public class PanelResults extends JDialog {
 							htmlCreator.writeResultsWebPages(tpv.predictionResults, outputFilePath);
 							fw.write("<td><a href=\""+outputFilePath+"\">"+val+"</a></td>");
 														
-							outputFileName=WebTEST4.getResultFileNameNoExtension(tpv.endpoint, tpv.method, tpv.id)+".json";
-							outputFilePath=outputFolder+File.separator+outputFileName;
-							WebTEST4.writeJSON(outputFilePath, tpv.predictionResults);
+//							outputFileName=WebTEST4.getResultFileNameNoExtension(tpv.endpoint, tpv.method, tpv.id)+".json";
+//							outputFilePath=outputFolder+File.separator+outputFileName;
+//							WebTEST4.writeJSON(outputFilePath, tpv.predictionResults);
 							
 						} else {
 							fw.write("<td>"+val+"</td>");

@@ -1239,24 +1239,16 @@ public class DialogEditChemical extends JDialog {
 //			}
 			
 			if (recs.size()>0)	{
-				String oldCAS=jtfCAS.getText().trim();
-
-				if (Strings.isBlank(oldCAS) || oldCAS.contains("C_")) {
-					ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
-				} else {
-					boolean match=false;
-					for (DSSToxRecord rec:recs) {
-						if (rec.cas.contentEquals(oldCAS)) {
-							DSSToxRecord.assignFromDSSToxRecord(m, rec);
-//							System.out.println("old CAS is ok!");
-							match=true;
-							break;
-						}
-					}
-					if (!match) ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
-				}
+				assignRecord(m, recs);
 			}else  {				
-				DSSToxRecord.clearProperties(m);
+				
+				ArrayList<DSSToxRecord>recs2=ResolverDb.lookupByAtomContainer2dConnectivity(m);
+				
+				if (recs2.size()>0)	{
+					assignRecord(m, recs2);
+				} else {
+					DSSToxRecord.clearProperties(m);	
+				}
 			}
 			
 								
@@ -1279,6 +1271,25 @@ public class DialogEditChemical extends JDialog {
 		}
 
 
+	}
+
+	private void assignRecord(AtomContainer m, ArrayList<DSSToxRecord> recs) {
+		String oldCAS=jtfCAS.getText().trim();
+
+		if (Strings.isBlank(oldCAS) || oldCAS.contains("C_")) {
+			ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
+		} else {
+			boolean match=false;
+			for (DSSToxRecord rec:recs) {
+				if (rec.cas.contentEquals(oldCAS)) {
+					DSSToxRecord.assignFromDSSToxRecord(m, rec);
+//							System.out.println("old CAS is ok!");
+					match=true;
+					break;
+				}
+			}
+			if (!match) ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
+		}
 	}
 	
 	
