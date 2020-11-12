@@ -330,13 +330,15 @@ public class ResolverDb {
 	}
 	
 	
-	public static ArrayList<DSSToxRecord> lookupByNameToStructure(String name) {				
-		String smiles=NameToStructureOpsin.nameToSmiles(name);
-		
-		if (smiles==null) return new ArrayList<DSSToxRecord>(); 
-		
-		return lookupBySMILES(smiles);
-	}
+//	public static ArrayList<DSSToxRecord> lookupByNameToStructure(String Name) {				
+//		String smiles=NameToStructureOpsin.nameToSmiles(Name);
+//
+////		System.out.println(smiles);
+//		
+//		if (smiles==null) return new ArrayList<DSSToxRecord>(); 
+//		
+//		return lookupBySMILES(smiles);
+//	}
 
 
 	public static synchronized ArrayList<DSSToxRecord> lookupByInChIKey(String inchiKey) {
@@ -472,7 +474,7 @@ public class ResolverDb {
 
 			if (m.getAtomCount()==0) return null;
 			
-			boolean debug=true;
+			boolean debug=false;
 			
 			String[] inchi = CDKUtilities.generateInChiKey(m);
 			String inchiKey=inchi[1];

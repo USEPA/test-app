@@ -638,6 +638,7 @@ public class TaskStructureSearch {
 
 				AtomContainer m=null;
 				
+				//1. Look up by name in database:
 				ArrayList<DSSToxRecord> records=ResolverDb.lookupByName(Name);
 
 				if (records.size()>0 && records.get(0).inchi!=null) {
@@ -647,70 +648,83 @@ public class TaskStructureSearch {
 					
 					//					System.out.println(CAS+"\t"+rec.gsid+"\t"+m.getAtomCount());
 				} else {					
-					//Try name to structure via OPSIN:
-					long t1=System.currentTimeMillis();
-					ArrayList<DSSToxRecord>recs=ResolverDb.lookupByNameToStructure(Name);
-					
-					if (recs.size()>0) {
-						m=getMoleculeFromDSSToxRecords(recs, factory);
-						long t2=System.currentTimeMillis();
-						logger.info("Record from name to structure: "+recs.get(0));
-						m.setProperty("Source","Name to structure");
-						
-//						System.out.println((t2-t1)+"\t"+recs.size());
 
-					} else {
-						//Search actor if cant find by exact name:														
-						DSSToxRecord d=MoleculeUtilities.getDSSToxRecordFromDashboard(Name);
-						long t3=System.currentTimeMillis();
-						
-//						System.out.println((t3-t2)+"\ttime for actor");
-						
-												
-						if (d!=null) {
-//							System.out.println("smiles="+d.smiles+"");
-							if (d.smiles.isEmpty()) {
-								m = new AtomContainer();
-								m.setProperty("Error", "Smiles unavailable: "+Name);
-								logger.info("Actor record found but no smiles available: "+d);
+					long t1=System.currentTimeMillis();
+										
+					//2. Search actor by name:														
+					DSSToxRecord d=MoleculeUtilities.getDSSToxRecordFromDashboard(Name.toLowerCase());
+					long t3=System.currentTimeMillis();
+					
+//					System.out.println((t3-t2)+"\ttime for actor");
+					
+											
+					if (d!=null) {
+//						System.out.println("smiles="+d.smiles+"");
+						if (d.smiles.isEmpty()) {
+							m = new AtomContainer();
+							m.setProperty("Error", "Smiles unavailable: "+Name);
+							logger.info("Actor record found but no smiles available: "+d);
+							
+							m.setProperty("CAS", d.cas);
+															
+						} else {
+							
+							try {
+								m = WebTEST4.prepareSmilesMolecule(d.smiles);
+								m = CleanUpMolecule(m);
+								m.setProperty("Error", "");					
+								WebTEST4.checkAtomContainer(m);
+								DSSToxRecord.assignFromDSSToxRecord(m, d);
+								logger.info("Actor record found: "+d);
+								m.setProperty("Source","Actor record from name");
 								
-								m.setProperty("CAS", d.cas);
-								m.setProperty("Query", Name);
-								moleculeSet.addAtomContainer(m);
-								continue;
-																
-							} else {
-								
-								try {
-									m = WebTEST4.prepareSmilesMolecule(d.smiles);
-									m = CleanUpMolecule(m);
-									m.setProperty("Error", "");					
-									WebTEST4.checkAtomContainer(m);
-									DSSToxRecord.assignFromDSSToxRecord(m, d);
-									logger.info("Actor record found: "+d);
-									m.setProperty("Source","Actor record from name");
-									
-								} catch (Exception ex) {
-									System.out.println("Error cleaning up molecule for smiles from actor="+d.smiles);
-								}
-								
+							} catch (Exception ex) {
+								System.out.println("Error cleaning up molecule for smiles from actor="+d.smiles);
 							}
 							
-						} else {
+						}
+						
+					} else {
+						//Use OPSIN name to structure:						
+						String smiles=NameToStructureOpsin.nameToSmiles(Name);
+						
+						if (smiles!=null) {
+
+							ArrayList<DSSToxRecord>recs=ResolverDb.lookupBySMILES(smiles);
+
+							
+							if (recs.size()>0) {
+								//3. Opsin name to structure match in database:
+								m=getMoleculeFromDSSToxRecords(recs, factory);
+								long t2=System.currentTimeMillis();
+								logger.info("Record from name to structure: "+recs.get(0));
+								m.setProperty("Source","Name to structure");							
+//								System.out.println((t2-t1)+"\t"+recs.size());													
+							} else {
+								//4. Opsin name to structure but no match in database:
+								m=(AtomContainer)LoadFromSmilesList(smiles+"\n").getAtomContainer(0);
+								String errorCode=m.getProperty("ErrorCode");						
+//								System.out.println("errorCode="+errorCode);	
+								m.setProperty(DSSToxRecord.strName, Name);
+								
+								if (errorCode==WebTEST.ERROR_CODE_STRUCTURE_ERROR) {
+									m = new AtomContainer();
+									m.setProperty("Error", "Name: "+Name+" not found");
+									m.setProperty("CAS", "C_"+System.currentTimeMillis());
+								} else logger.info("Structure from name to structure");
+																
+							}
+														
+						} else {//cant generate smiles from name to structure						
 							m = new AtomContainer();
 							m.setProperty("Error", "Name: "+Name+" not found");
-							m.setProperty("CAS", "C_"+System.currentTimeMillis());
-							m.setProperty("Query", Name);
-							moleculeSet.addAtomContainer(m);
-							continue;
+							m.setProperty("CAS", "C_"+System.currentTimeMillis());														
 						}
+						
 					}
-					
-					
-					
+																						
 				}
-				
-				
+								
 				m.setProperty("Query", Name);//store name as the string used in the query for export later so users can match up results
 				moleculeSet.addAtomContainer(m);
 				
@@ -1129,9 +1143,12 @@ public class TaskStructureSearch {
 						molecule=(AtomContainer)LoadFromSmilesList(filepath).getAtomContainer(0);
 						String errorCode=molecule.getProperty("ErrorCode");						
 //						System.out.println("errorCode="+errorCode);						
-						if (errorCode==WebTEST.ERROR_CODE_STRUCTURE_ERROR) molecule=null; 						
+						if (errorCode==WebTEST.ERROR_CODE_STRUCTURE_ERROR) molecule=null;
+						
+
 					}					
 				}
+				
 								
 			}
 			

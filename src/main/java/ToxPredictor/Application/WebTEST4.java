@@ -1131,7 +1131,17 @@ public class WebTEST4 {
 			// (i.e. dont
 			// get overwritten each time a new smiles file is ran):
 //			m.setProperty("CAS", "C_" + System.currentTimeMillis());
-			TaskStructureSearch.assignIDFromStructure(m);
+			
+			//Try finding matching using first part of inchikey (connectivity):
+			ArrayList<DSSToxRecord>recs2=ResolverDb.lookupByAtomContainer2dConnectivity(m);
+			
+			if (recs2.size()>0)	{
+				ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs2);
+			} else {
+				TaskStructureSearch.assignIDFromStructure(m);	
+			}
+			
+			
 		} else {
 			ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
 		}
