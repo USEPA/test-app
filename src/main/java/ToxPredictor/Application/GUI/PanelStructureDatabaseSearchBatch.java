@@ -167,7 +167,7 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		this.setSize(width,height);
 //		this.setBorder(BorderFactory.createLineBorder(Color.black));
 		
-		TitledBorder border = new TitledBorder("Search the database by CAS, SMILES, or Name");
+		TitledBorder border = new TitledBorder("Search the database by CAS, SMILES, or Name (one per line)");
 	    border.setTitleJustification(TitledBorder.LEFT);
 	    border.setTitlePosition(TitledBorder.TOP);
 	    this.setBorder(border);

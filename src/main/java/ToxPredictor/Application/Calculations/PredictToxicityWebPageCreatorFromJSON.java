@@ -1,5 +1,6 @@
 package ToxPredictor.Application.Calculations;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -953,7 +954,9 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		// ***********************************************************
 		// write out table of exp and pred values for nearest chemicals:
 		fw.write("<table border=1 cellpadding=3 cellspacing=0>\n");
-
+		
+		fw.write("<caption>Results for similar chemicals</caption>\n");
+		
 		fw.write("\n<tr bgcolor=\"#D3D3D3\">\n");
 		fw.write("<th>CAS</th>\n");
 		fw.write("<th>Structure</th>\n");
@@ -1041,9 +1044,9 @@ public class PredictToxicityWebPageCreatorFromJSON {
 
 		fw.write("</tr>\r\n");
 
-		fw.write("</table><br><br>\r\n");
-
-
+		fw.write("</table>\r\n");
+		this.writeSimilarityLegend(fw);
+		fw.write("<br><br>\n");
 	}
 	
 	
@@ -1191,7 +1194,8 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	}
 	
 	private void writeExternalPredChart(PredictionResults pr,ExternalPredChart epc,String units,FileWriter fw) throws Exception {
-
+//		System.out.println("writeExternalPredChart");
+		
 		if (epc==null) {
 			fw.write("<font color=red>*** No similar chemicals in the could be predicted***</font><br><br>\n");
 			return;
@@ -1207,7 +1211,9 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		fw.write("<td>\n");
 
 		fw.write("\t<table border=1 cellpadding=10 cellspacing=0>\n");
-
+		
+		fw.write("\t<caption>Results for entire set vs<br>results for similar chemicals</caption>\n");
+		
 		fw.write("\t<tr bgcolor=\"#D3D3D3\">\n");
 		fw.write("\t<th>Chemicals</th>\n");
 		fw.write("\t<th>MAE*</th>\n");
@@ -1235,13 +1241,64 @@ public class PredictToxicityWebPageCreatorFromJSON {
 
 		fw.write("*Mean absolute error in " + units + "\n");
 
+		writeSimilarityLegend(fw);
+		
 		fw.write("</td>\n");
 
+		
 		fw.write("</tr></table>\n");
 
 	}
 
+	void writeSimilarityLegend(FileWriter fw) throws Exception {
+//		System.out.println("writeSimilarityLegend");
+		
+//		fw.write("<td>\n");
+		fw.write("<br><br>\r\n");
+		
+		fw.write("\t<table border=1 cellpadding=1 cellspacing=0>\n");
+		fw.write("\t<caption>Color legend</caption>\n");
+		
+		fw.write("\t<tr bgcolor=\"#D3D3D3\">\n");		
+		fw.write("\t<th>Color</th>\n");
+		fw.write("\t<th>Range*</th>\n");		
+		fw.write("\t</tr>\n");
+		
+		fw.write("\t<tr>\n");		
+		fw.write("\t<td><font color=green>Green</font></td>\n");
+		fw.write("\t<td>SC &#8805; 0.9 </td>\n");
+		fw.write("\t</tr>\n");
+		
+		fw.write("\t<tr>\n");		
+		fw.write("\t<td><font color=blue>Blue</font></td>\n");
+		fw.write("\t<td>0.8 &#8804; SC < 0.9</td>\n");
+		fw.write("\t</tr>\n");
+		
+		fw.write("\t<tr>\n");		
+		fw.write("\t<td><font color=yellow>Yellow</font></td>\n");
+		fw.write("\t<td>0.7 &#8804; SC < 0.8</td>\n");
+		fw.write("\t</tr>\n");
 
+		fw.write("\t<tr>\n");		
+		fw.write("\t<td><font color=orange>Orange</font></td>\n");
+		fw.write("\t<td>0.6 &#8804; SC < 0.7</td>\n");
+		fw.write("\t</tr>\n");
+		
+		fw.write("\t<tr>\n");		
+		fw.write("\t<td><font color=red>Red</font></td>\n");
+		fw.write("\t<td>0.6 < SC</td>\n");
+		fw.write("\t</tr>\n");
+
+		
+		fw.write("\t</table>\n");
+		fw.write("*SC = similarity coefficient\n");
+		
+			
+		
+//		fw.write("</td>\n");
+		
+	}
+	 
 	
 
 	public static void main(String[] args) {

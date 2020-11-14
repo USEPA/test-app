@@ -30,6 +30,8 @@ import org.openscience.cdk.smiles.SmilesParser;
 
 import AADashboard.Application.MoleculeUtilities;
 import ToxPredictor.misc.MolFileUtilities;
+import uk.ac.cam.ch.wwmm.opsin.OpsinResult;
+import uk.ac.cam.ch.wwmm.opsin.OpsinWarning;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST;
 import ToxPredictor.Application.WebTEST4;
@@ -686,9 +688,17 @@ public class TaskStructureSearch {
 						
 					} else {
 						//Use OPSIN name to structure:						
-						String smiles=NameToStructureOpsin.nameToSmiles(Name);
+						OpsinResult or=NameToStructureOpsin.nameToSmiles(Name);
+						String smiles=or.getSmiles();
+						List<OpsinWarning>warnings=or.getWarnings();
+
+						//TODO implement OpsinWarning
 						
-						if (smiles!=null) {
+//						for (OpsinWarning warning:warnings) {
+//							System.out.println(warning.getMessage());
+//						}
+						
+						if (or.getSmiles()!=null) {
 
 							ArrayList<DSSToxRecord>recs=ResolverDb.lookupBySMILES(smiles);
 
