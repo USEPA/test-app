@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -3574,6 +3575,31 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 
 	}
 
+	
+	public static AtomContainerSet loadFromSdfString(String mol) {
+
+		//https://stackoverflow.com/questions/5720524/how-does-one-create-an-inputstream-from-a-string
+
+		try {
+//			For multi-byte support use:
+			InputStream is = new ByteArrayInputStream(StandardCharsets.UTF_8.encode(mol).array());
+
+			//TODO- make sure encoding is right- 8 or 16
+
+			IteratingSDFReader isr = new IteratingSDFReader(is, DefaultChemObjectBuilder.getInstance());
+
+			AtomContainerSet acs = new AtomContainerSet();
+
+			while ( isr.hasNext() ) {
+				acs.addAtomContainer(isr.next());
+			}
+
+			return acs;
+
+		} catch ( Exception ex ) {
+			return null;
+		}
+	}
 }
 
 

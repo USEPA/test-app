@@ -1136,6 +1136,8 @@ public class TaskCalculations2 {
 			String strOutputFolder3 = strOutputFolder2 + File.separator + "StructureData";
 			String strOutputFolder4 = strOutputFolder2 + File.separator + endpoint;
 
+			
+			
 			String filename = "";
 			if (endpoint.equals(TESTConstants.ChoiceDescriptors)) {
 				filename = "DescriptorData_"+CAS+".html";

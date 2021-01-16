@@ -35,12 +35,14 @@ import ToxPredictor.Application.WebTEST;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.Utilities.CDKUtilities;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.IndigoUtilities;
 import ToxPredictor.misc.MolFileUtilities;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+//import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 /**
@@ -770,16 +772,16 @@ public class AADashboard {
 						if (recs.size() > 0)
 							rec = recs.get(0);
 					} else {
-						String[] inchi = CDKUtilities.generateInChiKey(m);
-						if (!"N/A".equals(inchi[1]) & !StringUtils.isEmpty(inchi[1])) {
-							ArrayList<DSSToxRecord> recs = ResolverDb.lookupByInChIKey(inchi[1]);
+						Inchi inchi = CDKUtilities.generateInChiKey(m);
+						if (!"N/A".equals(inchi.inchiKey) & !StringUtils.isEmpty(inchi.inchiKey)) {
+							ArrayList<DSSToxRecord> recs = ResolverDb.lookupByInChIKey(inchi.inchiKey);
 							if (recs.size() > 0)
 								rec = recs.get(0);
 							else {
 								// Fallback to Indigo 
 								inchi = IndigoUtilities.generateInChiKey(m);
-								if ( inchi != null && !StringUtils.isEmpty(inchi[1])) {
-									recs = ResolverDb.lookupByInChIKey(inchi[1]);
+								if ( inchi != null && !StringUtils.isEmpty(inchi.inchiKey)) {
+									recs = ResolverDb.lookupByInChIKey(inchi.inchiKey);
 									if (recs.size() > 0)
 										rec = recs.get(0);
 								}

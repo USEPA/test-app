@@ -49,6 +49,7 @@ import ToxPredictor.Utilities.ChemicalFinder;
 import ToxPredictor.Utilities.FileUtils;
 import ToxPredictor.Utilities.FormatUtils;
 import ToxPredictor.Utilities.HtmlUtils;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.StringCompression;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.misc.Lookup;
@@ -861,9 +862,9 @@ public class WebTEST3 {
 //			tr=new TESTRecord(CAS,gsid,DSSTOXSID,DSSTOXCID,null,null,null,null);
 			tr=new TESTRecord(CAS,gsid,DSSTOXSID,DSSTOXCID,null,null,null);
 		} else {
-			String [] result=CDKUtilities.generateInChiKey(m);
-			String InChi=result[0];
-			String InChiKey=result[1];
+			Inchi result=CDKUtilities.generateInChiKey(m);
+			String InChi=result.inchi;
+			String InChiKey=result.inchiKey;
 //			String warning=result[2];
 			
 			//TODO use warning message
@@ -1389,11 +1390,12 @@ public class WebTEST3 {
 			
 			if (ac.getAtomCount()>0) {
 //				long t1=System.currentTimeMillis();
-				String [] result=CDKUtilities.generateInChiKey(ac);
+				Inchi result=CDKUtilities.generateInChiKey(ac);
 				
-				InChi=result[0];
-				InChi_Warning=result[2];			
-				InChiKey=result[1];
+				InChi=result.inchi;
+				InChiKey=result.inchiKey;
+				InChi_Warning=result.warning;			
+				
 //				long t2=System.currentTimeMillis();
 //				System.out.println("Inchi time="+(t2-t1));
 								

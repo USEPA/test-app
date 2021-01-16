@@ -10,13 +10,17 @@ import ToxPredictor.Application.Calculations.PredictToxicityNearestNeighbor;
 import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJSON;
 import ToxPredictor.Application.Calculations.TaskCalculations;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
+import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.Application.GUI.Miscellaneous.DangerousPathChecker;
 import ToxPredictor.Database.DSSToxRecord;
-import ToxPredictor.Database.ResolverDb;
+//import ToxPredictor.Database.ResolverDb;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.FormatUtils;
+import ToxPredictor.Utilities.HueckelAromaticityDetector;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.misc.Lookup;
 import ToxPredictor.misc.MolFileUtilities;
@@ -56,6 +60,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
+
+import javax.swing.JOptionPane;
 
 public class WebTEST4 {
 	public static boolean dashboardStructuresAvailable = true;
@@ -150,6 +156,99 @@ public class WebTEST4 {
 	public WebTEST4() {
 	}
 
+	
+	public static DescriptorData runDescriptors(String identifier) {
+
+		DescriptorData dd=null;
+
+		try {
+
+			AtomContainer ac = WebTEST4.getMoleculeFromIdentifier(identifier);
+			
+			if (ac==null) {
+				dd=new DescriptorData();
+				dd.Error="Invalid identifier:"+identifier;
+				dd.ID=identifier;
+				return dd;
+			}
+			
+			WebTEST4.createReports = false;// whether to reports at all for batch run
+			WebTEST4.createDetailedReports = false;
+			HueckelAromaticityDetector.debug=false;
+
+			dd=WebTEST4.goDescriptors(ac);//generate molecular descriptors
+			if (dd.Error.contentEquals("OK")) dd.Error="";			
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			TESTPredictedValue tpv=new TESTPredictedValue();
+			tpv.error=ex.getMessage();
+		}
+
+		return dd;//consensus is first prediction when running consensus, when running other methods will only have 1 prediction						
+
+	}
+
+	
+	private static CalculationParameters createCalculationParameters(String method, String endpoint) {
+		CalculationParameters params=new CalculationParameters();
+
+		params.endpoints= new String[1];
+		params.endpoints[0]=endpoint;			
+		params.methods= new String[1];
+		params.methods[0]=method;
+		return params;
+	}
+	
+	public static TESTPredictedValue run(String identifier,String endpointAbbrev,String methodAbbrev) {
+
+		DescriptorData dd=null;
+
+		try {
+
+			AtomContainer ac = WebTEST4.getMoleculeFromIdentifier(identifier);//requires snapshot db
+//			AtomContainer ac = WebTEST4.loadSMILES(identifier);
+
+			if (ac==null) {
+				TESTPredictedValue tpv=new TESTPredictedValue();
+				tpv.error="Invalid identifier:"+identifier;
+				return tpv;
+			}
+			
+			
+			String method=TESTConstants.getFullMethod(methodAbbrev);
+			String endpoint=TESTConstants.getFullEndpoint(endpointAbbrev);
+			
+			CalculationParameters params = createCalculationParameters(method, endpoint);
+			
+			WebTEST4.createReports = false;// whether to reports at all for batch run
+			WebTEST4.createDetailedReports = false;
+			HueckelAromaticityDetector.debug=false;
+
+			WebTEST4.loadTrainingData(endpoint, method);
+
+			String error=(String)ac.getProperty("Error");
+			
+
+			dd=WebTEST4.goDescriptors(ac);//generate molecular descriptors
+			List<TESTPredictedValue>listTPV=WebTEST4.go2(ac,dd, params);
+			
+			TESTPredictedValue tpv=listTPV.get(0);
+			tpv.error=error;
+			
+			return tpv;//consensus is first prediction when running consensus, when running other methods will only have 1 prediction						
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			TESTPredictedValue tpv=new TESTPredictedValue();
+			tpv.error=ex.getMessage();
+			return tpv;
+		}
+
+
+	}
+	
+	
 	private static void LoadTrainingDataSet(String endpoint) {
 		logger.debug("Loading training dataset for '{}'...", endpoint);
 
@@ -754,14 +853,14 @@ public class WebTEST4 {
 
 //			System.out.println("try to look up");
 
-			if (ResolverDb.isAvailable()) {
+			if (ResolverDb2.isAvailable()) {
 				if (!Strings.isEmpty(CAS) && !CAS.matches("C\\d*_\\d{8,}")) {
-					ArrayList<DSSToxRecord> recs = ResolverDb.lookupByCAS(CAS);
+					ArrayList<DSSToxRecord> recs = ResolverDb2.lookupByCAS(CAS);
 					if (recs.size() > 0) {
 						rec = recs.get(0);
 					}
 				} else {
-					ArrayList<DSSToxRecord> recs = ResolverDb.lookupByAtomContainer(m);
+					ArrayList<DSSToxRecord> recs = ResolverDb2.lookupByAtomContainer(m);
 					if (recs.size() > 0) {
 						rec = recs.get(0);
 						CAS = rec.cas;
@@ -1048,7 +1147,7 @@ public class WebTEST4 {
 		PredictToxicityJSONCreator.forGUI = true;
 
 		if (areDashboardStructuresAvailable()) {
-			ResolverDb.assureDbIsOpen();
+			ResolverDb2.assureDbIsOpen();
 		}
 
 		DescriptorData dd = goDescriptors(ac);
@@ -1092,6 +1191,7 @@ public class WebTEST4 {
 		try {
 			// m=sp.parseSmiles(Smiles);
 			m = (AtomContainer) sp.parseSmiles(Smiles);
+			
 
 			m.setProperty("Error", "");
 
@@ -1112,6 +1212,16 @@ public class WebTEST4 {
 		return m;
 	}
 
+	public static AtomContainer getMoleculeFromIdentifier(String identifier) {
+		//			AtomContainerSet acs=null;
+		ArrayList<DSSToxRecord>recs=ResolverDb2.lookup(identifier.trim());
+		
+		if (recs.size()>0)
+			return TaskStructureSearch.getMoleculeFromDSSToxRecords(recs);
+		else 
+			return null;
+	}
+	
 	public static AtomContainer loadSMILES(String smiles) {
 
 		AtomContainer m = prepareSmilesMolecule(smiles);
@@ -1124,26 +1234,12 @@ public class WebTEST4 {
 			return m;
 		}
 
-		ArrayList<DSSToxRecord> recs = ResolverDb.lookupByAtomContainer(m);
+		ArrayList<DSSToxRecord> recs = ResolverDb2.lookupByAtomContainer(m);
 
-		if (recs == null || recs.size() == 0) {
-			// generates unique ID so that output files can be stored in unique folders
-			// (i.e. dont
-			// get overwritten each time a new smiles file is ran):
-//			m.setProperty("CAS", "C_" + System.currentTimeMillis());
-			
-			//Try finding matching using first part of inchikey (connectivity):
-			ArrayList<DSSToxRecord>recs2=ResolverDb.lookupByAtomContainer2dConnectivity(m);
-			
-			if (recs2.size()>0)	{
-				ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs2);
-			} else {
-				TaskStructureSearch.assignIDFromStructure(m);	
-			}
-			
-			
+		if (recs.size() == 0) {		
+			ResolverDb2.assignRecordByStructureNotInDB(m);	
 		} else {
-			ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
+			DSSToxRecord.assignDSSToxInfoFromFirstRecord(m, recs);
 		}
 
 		return m;
@@ -1166,7 +1262,7 @@ public class WebTEST4 {
 //		dashboardStructuresAvailable=false;
 
 		if (areDashboardStructuresAvailable()) {
-			ResolverDb.assureDbIsOpen();
+			ResolverDb2.assureDbIsOpen();
 		}
 
 		return doPredictions(ac, dd, params);

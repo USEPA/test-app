@@ -46,7 +46,8 @@ import ToxPredictor.Application.Calculations.TaskCalculations2;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Application.GUI.PanelBatchChemicals.MyTableModel;
 import ToxPredictor.Database.DSSToxRecord;
-import ToxPredictor.Database.ResolverDb;
+//import ToxPredictor.Database.ResolverDb;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.MolFileUtilities;
@@ -572,43 +573,43 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 
 	}
 
-	/**
-	 * This method handles when the user selects jmiGenerateFromSmilesOnClipboard
-	 * from the File menu.<br>
-	 * This method uses the generateFromSmiles method to generate a molecule
-	 * from the smiles string on the clipboard.
-	 */
-	private void jmiGenerateFromSmilesOnClipboard_actionPerformed() {
-
-		String smiles="";
-		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-		Transferable contents = clipboard.getContents(null);
-		boolean hasTransferableText =
-				(contents != null) &&
-				contents.isDataFlavorSupported(DataFlavor.stringFlavor);
-		if ( hasTransferableText ) {
-			try {
-				smiles = (String)contents.getTransferData(DataFlavor.stringFlavor);
-				//        System.out.println(smiles);
-				//OCC(Cl)CCCO
-			}
-			catch (Exception ex) {	        
-				ex.printStackTrace();
-			}
-		} else {
-			JOptionPane.showMessageDialog(f, "Invalid object on clipboard");
-			return;
-		}
-
-		if (smiles==null || smiles.length() == 0) {
-			JOptionPane.showMessageDialog(f, "No Smiles entered");
-			return;
-		} 
-
-		generateFromSmiles(smiles);
-
-
-	}
+//	/**
+//	 * This method handles when the user selects jmiGenerateFromSmilesOnClipboard
+//	 * from the File menu.<br>
+//	 * This method uses the generateFromSmiles method to generate a molecule
+//	 * from the smiles string on the clipboard.
+//	 */
+//	private void jmiGenerateFromSmilesOnClipboard_actionPerformed() {
+//
+//		String smiles="";
+//		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+//		Transferable contents = clipboard.getContents(null);
+//		boolean hasTransferableText =
+//				(contents != null) &&
+//				contents.isDataFlavorSupported(DataFlavor.stringFlavor);
+//		if ( hasTransferableText ) {
+//			try {
+//				smiles = (String)contents.getTransferData(DataFlavor.stringFlavor);
+//				//        System.out.println(smiles);
+//				//OCC(Cl)CCCO
+//			}
+//			catch (Exception ex) {	        
+//				ex.printStackTrace();
+//			}
+//		} else {
+//			JOptionPane.showMessageDialog(f, "Invalid object on clipboard");
+//			return;
+//		}
+//
+//		if (smiles==null || smiles.length() == 0) {
+//			JOptionPane.showMessageDialog(f, "No Smiles entered");
+//			return;
+//		} 
+//
+//		generateFromSmiles(smiles);
+//
+//
+//	}
 
 
 
@@ -659,61 +660,62 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			JOptionPane.showMessageDialog(f, ex);
 		}
 	}
-	/**
-	 * Generates a molecule from smiles string and then checks to see if the
-	 * molecule is in the structure database. If it is, the CAS is added to the
-	 * Molecule ID field.
-	 */
-	void generateFromSmiles(String smiles) {
-		try {
-
-			if (smiles.indexOf(".") > -1) {
-				JOptionPane.showMessageDialog(f,
-						"Please enter a single structure without a \".\" in the SMILES string");
-				return;
-			}
-
-			f.setCursor(Utilities.waitCursor);
-
-			String Smiles = smiles.trim();
-			//		Smiles = CDKUtilities.FixSmiles(Smiles);//TODO
-
-			AtomContainer molecule=null;
-
-			molecule=WebTEST4.loadSMILES(Smiles);
-
-			//		System.out.println(molecule==null);
-
-			if (molecule.getProperty("ErrorCode")==WebTEST.ERROR_CODE_STRUCTURE_ERROR) {
-				JOptionPane.showMessageDialog(f,
-						"Invalid SMILES = \"" + smiles + "\"");
-				f.setCursor(Utilities.defaultCursor);
-				return;
-			}
-
-
-
-			StructureDiagramGenerator sdg=new StructureDiagramGenerator();
-			sdg.setMolecule(molecule);
-			sdg.generateCoordinates();
-			molecule = (AtomContainer) sdg.getMolecule();
-
-			//		f.df.Normalize(molecule);
-
-			f.configureModel(molecule);
-
-			String CAS = molecule.getProperty("CAS");
-			f.panelSingleStructureDatabaseSearch.jtfCAS.setText(CAS);
-			//		JOptionPane.showMessageDialog(f, "Match found in database, Molecule ID: " + CAS);
-			f.setCursor(Utilities.defaultCursor);
-
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-			JOptionPane.showMessageDialog(f, ex);
-		}
-
-	}
+	
+//	/**
+//	 * Generates a molecule from smiles string and then checks to see if the
+//	 * molecule is in the structure database. If it is, the CAS is added to the
+//	 * Molecule ID field.
+//	 */
+//	void generateFromSmiles(String smiles) {
+//		try {
+//
+//			if (smiles.indexOf(".") > -1) {
+//				JOptionPane.showMessageDialog(f,
+//						"Please enter a single structure without a \".\" in the SMILES string");
+//				return;
+//			}
+//
+//			f.setCursor(Utilities.waitCursor);
+//
+//			String Smiles = smiles.trim();
+//			//		Smiles = CDKUtilities.FixSmiles(Smiles);//TODO
+//
+//			AtomContainer molecule=null;
+//
+//			molecule=WebTEST4.loadSMILES(Smiles);
+//
+//			//		System.out.println(molecule==null);
+//
+//			if (molecule.getProperty("ErrorCode")==WebTEST.ERROR_CODE_STRUCTURE_ERROR) {
+//				JOptionPane.showMessageDialog(f,
+//						"Invalid SMILES = \"" + smiles + "\"");
+//				f.setCursor(Utilities.defaultCursor);
+//				return;
+//			}
+//
+//
+//
+//			StructureDiagramGenerator sdg=new StructureDiagramGenerator();
+//			sdg.setMolecule(molecule);
+//			sdg.generateCoordinates();
+//			molecule = (AtomContainer) sdg.getMolecule();
+//
+//			//		f.df.Normalize(molecule);
+//
+//			f.configureModel(molecule);
+//
+//			String CAS = molecule.getProperty("CAS");
+//			f.panelSingleStructureDatabaseSearch.jtfCAS.setText(CAS);
+//			//		JOptionPane.showMessageDialog(f, "Match found in database, Molecule ID: " + CAS);
+//			f.setCursor(Utilities.defaultCursor);
+//
+//
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//			JOptionPane.showMessageDialog(f, ex);
+//		}
+//
+//	}
 
 
 		/**
@@ -924,20 +926,11 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 		
 		AtomContainer ac=f.taskStructureFile.loadFromMolFile(inFile,f);
 		
-		
-		ArrayList<DSSToxRecord> records=null;
-		
-		if (ac.getProperty("CAS")!=null) {
-			records=ResolverDb.lookupByCAS(ac.getProperty("CAS"));
-		} else {
-			records=ResolverDb.lookupByAtomContainer(ac);	
-		}
-		
-		if (records.size()>0) {
-			ResolverDb.assignDSSToxInfoFromFirstRecord(ac, records);			
-		}
+					
 		
 		if (ac!=null) {
+			
+			TaskStructureSearch.setCAS(ac);			
 			ac=f.configureModel(ac);
 			
 			f.panelSingleStructureDatabaseSearch.jtfCAS.setText(ac.getProperty("CAS"));
@@ -949,47 +942,6 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 		
 		f.setCursor(Utilities.defaultCursor);
 
-		//		/*
-		//		 * Have the ReaderFactory determine the file format
-		//		 */
-		//		try {
-		//			cor = jcpPanel.getChemObjectReader(new FileReader(inFile));
-		//		} catch (IOException ioExc) {
-		//			JOptionPane.showMessageDialog(this,
-		//					"IOException while determining file format.");
-		//
-		//		} catch (Exception exc) {
-		//			JOptionPane.showMessageDialog(this,
-		//					"Exception while determining file format.");
-		//
-		//		}
-		//
-		//		if (cor == null) {
-		//			this.GetReader(inFile);
-		//		}
-		//
-		//		if (cor == null) {
-		//			JOptionPane.showMessageDialog(jcpPanel,
-		//					"Could not determine file format.");
-		//			return;
-		//		}
-		//
-		//		String error = null;
-		//		
-		//
-		//		if (cor.accepts(IChemFile.class)) {
-		//			error = this.ReadChemFile(cor, jcpPanel, inFile);
-		//		}
-		//
-		//		
-		//		if (error != null) {
-		//			JOptionPane.showMessageDialog(jcpPanel, error);
-		//			return;
-		//		}
-		//		
-		//		if (cor.accepts(ChemModel.class)) {
-		//			error = this.ReadChemModel(cor,jcpPanel,inFile);
-		//		}
 	}
 
 
@@ -1123,28 +1075,28 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 	 * This method prompts the user to enter a smiles string then calls
 	 * generateFromSmiles to generate a molecule from the string
 	 */
-	private void jmiGenerateFromSmiles_actionPerformed() {
-
-
-		String smiles=JOptionPane.showInputDialog(f,"Enter a SMILES string",f.currentSmiles);
-
-		if (smiles==null) {
-			return;
-		} 
-
-		f.currentSmiles=smiles;
-
-
-
-		if (smiles.length() == 0) {			 					
-			JOptionPane.showMessageDialog(f, "No Smiles entered");
-			return;
-		}
-
-		generateFromSmiles(smiles);
-
-
-	}
+//	private void jmiGenerateFromSmiles_actionPerformed() {
+//
+//
+//		String smiles=JOptionPane.showInputDialog(f,"Enter a SMILES string",f.currentSmiles);
+//
+//		if (smiles==null) {
+//			return;
+//		} 
+//
+//		f.currentSmiles=smiles;
+//
+//
+//
+//		if (smiles.length() == 0) {			 					
+//			JOptionPane.showMessageDialog(f, "No Smiles entered");
+//			return;
+//		}
+//
+//		generateFromSmiles(smiles);
+//
+//
+//	}
 
 	/**
 	 * This method handles when jbSaveSDF is clicked. It saves the chemicals in 
@@ -1350,24 +1302,8 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 				
 		//TODO ask user when we dont have a match and not blank
 		
-		ArrayList<DSSToxRecord>recs=ResolverDb.lookupByAtomContainer(myMolecule);
-		
-		if (recs.size()>0)	{
-			assignRecord(myMolecule, recs);			
-		}else  {			
-			ArrayList<DSSToxRecord>recs2=ResolverDb.lookupByAtomContainer2dConnectivity(myMolecule);
-//			System.out.println("searching by inchikey short # recs="+recs2.size());
-			
-			if (recs2.size()>0)	{
-//				System.out.println("Assigning record from inchikey short");
-				assignRecord(myMolecule, recs2);
-			} else {
-				TaskStructureSearch.assignIDFromStructure(myMolecule);	
-			}
-			
-//			myMolecule.setProperty("CAS", "C_"+System.currentTimeMillis());	
-			
-		}
+		ResolverDb2.assignRecordByStructureViaInchis(myMolecule, f.panelSingleStructureDatabaseSearch.jtfCAS.getText());
+				
 		f.panelSingleStructureDatabaseSearch.jtfCAS.setText(myMolecule.getProperty(DSSToxRecord.strCAS));
 		
 		if (myMolecule.getProperty(DSSToxRecord.strName)!=null) {
@@ -1427,25 +1363,6 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 		}
 	}
 
-	private void assignRecord(AtomContainer myMolecule, ArrayList<DSSToxRecord> recs) {
-		String oldCAS=f.panelSingleStructureDatabaseSearch.jtfCAS.getText().trim();
-
-		if (Strings.isBlank(oldCAS)) {
-			ResolverDb.assignDSSToxInfoFromFirstRecord(myMolecule, recs);
-		} else {
-			boolean match=false;
-			for (DSSToxRecord rec:recs) {
-				if (rec.cas.contentEquals(oldCAS)) {
-					DSSToxRecord.assignFromDSSToxRecord(myMolecule, rec);
-//						System.out.println("old CAS is ok!");
-					match=true;
-					break;
-				}
-			}
-			if (!match) ResolverDb.assignDSSToxInfoFromFirstRecord(myMolecule, recs);
-			
-		}
-	}
 
 	/**
 	 * Triggers the cleanup event in jchempaint to fix the structure layout

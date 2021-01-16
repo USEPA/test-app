@@ -29,6 +29,7 @@ import org.openscience.cdk.smiles.SmilesParser;
 import AADashboard.Application.MySQL_DB;
 import ToxPredictor.Database.ChemistryDashboardRecord;
 import ToxPredictor.Utilities.CDKUtilities;
+import ToxPredictor.Utilities.Inchi;
 
 public class GetChemistryDashboardIDs {
 
@@ -595,11 +596,10 @@ int loadFromSDF2(File file,FileWriter fw) {
 					try {
 					
 						AtomContainer molecule = (AtomContainer)sp.parseSmiles(smiles);					
-						String [] result=CDKUtilities.generateInChiKey(molecule);
-						String InChi=result[0];
-						String InChiKey=result[1];
-						list.add(InChi);
-						list.add(InChiKey);
+						Inchi inchi=CDKUtilities.generateInChiKey(molecule);
+						
+						list.add(inchi.inchi);
+						list.add(inchi.inchiKey);
 					
 					} catch (InvalidSmilesException ex) {
 						list.add("");

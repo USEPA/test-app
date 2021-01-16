@@ -21,7 +21,7 @@ import ToxPredictor.Application.model.SimilarChemical;
 import ToxPredictor.Application.model.SimilarChemicals;
 import ToxPredictor.Database.DSSToxRecord;
 //import ToxPredictor.Database.ChemistryDashboardRecord;
-import ToxPredictor.Database.ResolverDb;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.Utilities.ReportUtils;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
@@ -958,7 +958,7 @@ public class PredictToxicityJSONCreator {
 			//				DSSTOXSID = htChemistryDashboardInfo.get(CASi).dsstox_substance_id;
 			//			}
 
-			ArrayList<DSSToxRecord> records=ResolverDb.lookupByCAS(CASi);
+			ArrayList<DSSToxRecord> records=ResolverDb2.lookupByCAS(CASi);
 
 			if(records.size()>0) {
 				DSSToxRecord record=records.get(0);

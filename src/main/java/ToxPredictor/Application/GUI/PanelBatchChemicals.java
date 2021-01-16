@@ -143,7 +143,7 @@ public class PanelBatchChemicals extends JPanel {
 
 //		setBorder(BorderFactory.createLineBorder(Color.black));
 		
-		TitledBorder border = new TitledBorder("Batch list of chemicals");
+		TitledBorder border = new TitledBorder("Batch list of chemicals (double click a row to edit a chemical)");
 	    border.setTitleJustification(TitledBorder.LEFT);
 	    border.setTitlePosition(TitledBorder.TOP);
 	    this.setBorder(border);

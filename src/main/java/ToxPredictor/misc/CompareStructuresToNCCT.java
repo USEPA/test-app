@@ -18,6 +18,7 @@ import AADashboard.Application.MoleculeUtilities;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.Utilities.CDKUtilities;
+import ToxPredictor.Utilities.Inchi;
 
 public class CompareStructuresToNCCT {
 
@@ -73,8 +74,8 @@ public class CompareStructuresToNCCT {
 		        	smiles=((String)ac.getProperty("SMILES")).trim();
 		        
 		        
-				String[] inchi = CDKUtilities.generateInChiKey(ac);
-				String inchiKeyNRMRL=inchi[1];
+				Inchi inchi = CDKUtilities.generateInChiKey(ac);
+				String inchiKeyNRMRL=inchi.inchiKey;
 				
 				DSSToxRecord dssToxRecordActor=MoleculeUtilities.getDSSToxRecordFromDashboard(CAS);				
 				

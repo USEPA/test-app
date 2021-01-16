@@ -22,6 +22,7 @@ import AADashboard.Application.MySQL_DB;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST2;
 import ToxPredictor.Utilities.CDKUtilities;
+import ToxPredictor.Utilities.Inchi;
 import wekalite.CSVLoader;
 import wekalite.Instance;
 import wekalite.Instances;
@@ -264,8 +265,8 @@ void compareInChiKey(String CAS,String endpoint) {
 			
 			
 			if(ac.getProperty("CAS").equals(CAS)) {
-				String [] results=CDKUtilities.generateInChiKey(ac);
-				String inchiKeyOld=results[1];
+				Inchi inchi=CDKUtilities.generateInChiKey(ac);
+				String inchiKeyOld=inchi.inchiKey;
 				
 				System.out.println(inchiKeyOld+"\t"+tr.InChiKey+"\t"+inchiKeyOld.compareTo(tr.InChiKey));
 				break;

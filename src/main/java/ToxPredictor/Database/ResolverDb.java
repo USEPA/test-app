@@ -37,9 +37,11 @@ import com.epam.indigo.IndigoObject;
 import com.epam.indigo.IndigoInchi;
 
 import ToxPredictor.Application.Calculations.NameToStructureOpsin;
+import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.ChemInfToolkit;
 import ToxPredictor.Utilities.FileUtils;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.IndigoUtilities;
 
 public class ResolverDb {
@@ -154,13 +156,13 @@ public class ResolverDb {
 				prep.setString(5, cas);
 
 				if (tk == ChemInfToolkit.CDK) {
-					String[] inchis = CDKUtilities.generateInChiKey(cdkRec);
+					Inchi inchi = CDKUtilities.generateInChiKey(cdkRec);
 					String smiles = CDKUtilities.generateSmiles(cdkRec, SmiFlavor.Absolute);
 
 					prep.setString(6, smiles);
-					prep.setString(7, inchis[1]);
-					prep.setString(8, inchis[1].substring(0, 14));
-					prep.setString(9, inchis[0]);
+					prep.setString(7, inchi.inchiKey);
+					prep.setString(8, inchi.inchiKey.substring(0, 14));
+					prep.setString(9, inchi.inchi);
 				} else if (tk == ChemInfToolkit.Indigo) {
 					String inchi = null;
 					String inchiKey = null;
@@ -345,7 +347,7 @@ public class ResolverDb {
 		return executeQuery("select * from " + TABLE_NAME + " where inchi_key = '" + inchiKey + "';");
 	}
 	
-
+	
 	public static synchronized ArrayList<DSSToxRecord> lookupByInChIKey1(String inchiKey) {
 		return lookupByInChIKey1(inchiKey, true);
 	}
@@ -364,10 +366,10 @@ public class ResolverDb {
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 		try {
 			IAtomContainer m = sp.parseSmiles(smiles);
-			String[] inchi = CDKUtilities.generateInChiKey(m);
-			ArrayList<DSSToxRecord> res = lookupByInChIKey(inchi[1]);
+			Inchi inchi = CDKUtilities.generateInChiKey(m);
+			ArrayList<DSSToxRecord> res = lookupByInChIKey(inchi.inchiKey);
 			if ( res.size() == 0 )
-				res = lookupByInChIKey1(inchi[1]);
+				res = lookupByInChIKey1(inchi.inchiKey);
 			return res;
 		} catch (InvalidSmilesException ex) {
 			return null;
@@ -375,12 +377,6 @@ public class ResolverDb {
 	}
 	
 	
-	public static void  assignDSSToxInfoFromFirstRecord(AtomContainer m,ArrayList<DSSToxRecord> recs) {
-		if ( recs.size()> 0 ) {
-			DSSToxRecord.assignFromDSSToxRecord(m, recs.get(0));
-		}
-		
-	}
 
 	/**
 	 * Look up in database by structure using inchi keys
@@ -398,12 +394,12 @@ public class ResolverDb {
 			
 			boolean debug=false;
 			
-			String[] inchi = CDKUtilities.generateInChiKey(m);
-			String inchiKey=inchi[1];
+			Inchi inchi = CDKUtilities.generateInChiKey(m);
+			String inchiKey=inchi.inchiKey;
 			
 
-			String [] inchi2 = IndigoUtilities.generateInChiKey(m);
-			String inchiKey2=inchi2[1];
+			Inchi inchi2 = IndigoUtilities.generateInChiKey(m);
+			String inchiKey2=inchi2.inchiKey;
 
 			//TODO is it ok just to change S (standard) to N (nonstandard) to get a hit in NCCT's db???
 			//TODO redo the database so that the NCCT records are all standard? Are they all standard?
@@ -476,12 +472,12 @@ public class ResolverDb {
 			
 			boolean debug=false;
 			
-			String[] inchi = CDKUtilities.generateInChiKey(m);
-			String inchiKey=inchi[1];
+			Inchi inchi = CDKUtilities.generateInChiKey(m);
+			String inchiKey=inchi.inchiKey;
 			
 
-			String [] inchi2 = IndigoUtilities.generateInChiKey(m);
-			String inchiKey2=inchi2[1];
+			Inchi inchi2 = IndigoUtilities.generateInChiKey(m);
+			String inchiKey2=inchi2.inchiKey;
 
 						
 			ArrayList<DSSToxRecord> res=null;

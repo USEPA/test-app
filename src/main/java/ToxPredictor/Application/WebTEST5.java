@@ -15,10 +15,12 @@ import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Database.ChemistryDashboardRecord;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.FormatUtils;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.misc.Lookup;
 import ToxPredictor.misc.MolFileUtilities;
@@ -384,9 +386,8 @@ public class WebTEST5 {
 		if (m.getAtomCount()==0) {
 			tr=new TESTRecord(CAS,gsid,DSSTOXSID,DSSTOXCID,null,null,null);
 		} else {
-			String [] result=CDKUtilities.generateInChiKey(m);
-			String InChi=result[0];
-			String InChiKey=result[1];
+			Inchi inchi=CDKUtilities.generateInChiKey(m);
+			
 			//			String warning=result[2];
 
 			String SMILES=null;
@@ -396,7 +397,7 @@ public class WebTEST5 {
 				logger.catching(e);
 			}
 
-			tr=new TESTRecord(CAS,gsid,DSSTOXSID,DSSTOXCID,null,InChiKey,SMILES);//TODO add MW somehow
+			tr=new TESTRecord(CAS,gsid,DSSTOXSID,DSSTOXCID,null,inchi.inchiKey,SMILES);//TODO add MW somehow
 		}
 
 		tr.error=error;
@@ -1128,9 +1129,6 @@ public class WebTEST5 {
 		String error = (String) ac.getProperty("Error");
 		String CAS=(String) ac.getProperty("CAS");
 
-		String InChiKey=null;
-		String InChi=null;
-		String InChi_Warning=null;
 		String smiles = null;
 
 		String strOutputFolderStructureData=null;
@@ -1144,10 +1142,7 @@ public class WebTEST5 {
 				}
 			}
 
-			String [] result=CDKUtilities.generateInChiKey(ac);
-			InChi=result[0];
-			InChi_Warning=result[2];			
-			InChiKey=result[1];
+			Inchi inchi=CDKUtilities.generateInChiKey(ac);
 
 			try {
 				smiles = CDKUtilities.generateSmiles(ac);
@@ -1156,8 +1151,8 @@ public class WebTEST5 {
 			}
 
 			String searchString="";
-			if (searchKey.equals(DSSToxRecord.strInchi)) searchString=InChi;
-			else if (searchKey.equals(DSSToxRecord.strInchiKey)) searchString=InChiKey;
+			if (searchKey.equals(DSSToxRecord.strInchi)) searchString=inchi.inchi;
+			else if (searchKey.equals(DSSToxRecord.strInchiKey)) searchString=inchi.inchiKey;
 			else if (searchKey.equals(DSSToxRecord.strCAS)) searchString=CAS;
 
 			if (addDescriptorsToDatabase) {
@@ -1200,9 +1195,9 @@ public class WebTEST5 {
 			}		
 
 			//////////////////////////////////////////
-			dd.InChiKey=InChiKey;
-			dd.InChi=InChi;
-			dd.InChi_Warning=InChi_Warning;
+			dd.InChiKey=inchi.inchiKey;
+			dd.InChi=inchi.inchi;
+			dd.InChi_Warning=inchi.warning;
 			dd.SmilesRan=smiles;
 			//			System.out.println(error+"\t"+df.errorMsg);
 
@@ -1397,9 +1392,9 @@ public class WebTEST5 {
 			// generates unique ID so that output files can be stored in unique folders (i.e. dont
 			// get overwritten each time a new smiles file is ran):
 			//			m.setProperty("CAS", "C_" + System.currentTimeMillis());
-			TaskStructureSearch.assignIDFromStructure(m);
+			ResolverDb2.assignRecordByStructureNotInDB(m);
 		} else {
-			ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
+			DSSToxRecord.assignDSSToxInfoFromFirstRecord(m, recs);
 		}
 
 		return m;

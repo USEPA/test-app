@@ -67,11 +67,11 @@ public class RunFromCommandLine {
 		IAtomContainerSet acs=null;
 		
 		if (ext.contentEquals("smi")) {
-			acs=TaskStructureSearch.LoadFromSmilesList(inputFilePath);
+			acs=TaskStructureSearch.LoadFromList(inputFilePath,TaskStructureSearch.TypeSmiles);
 		} else if (ext.contentEquals("sdf") || ext.contentEquals("mol")) {
 			acs=TaskStructureSearch.LoadFromSDF(inputFilePath);				
 		} else if (ext.contentEquals("txt")) {
-			acs=TaskStructureSearch.LoadFromCASList(inputFilePath);
+			acs=TaskStructureSearch.LoadFromList(inputFilePath,TaskStructureSearch.TypeAny);
 		}
 
 		if (acs==null || acs.getAtomContainerCount()==0) {

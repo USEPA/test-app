@@ -9,6 +9,9 @@ import java.awt.*;
 
 import javax.swing.border.*;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.zip.*;
 
 public class Utilities {
@@ -45,6 +48,15 @@ public class Utilities {
 		
 	}
 
+	
+	public static String toJson(Object object) {
+		GsonBuilder builder = new GsonBuilder();
+		builder.serializeSpecialFloatingPointValues();//allow NaN values for chemicals that have no prediction
+		builder.setPrettyPrinting();			
+		Gson gson = builder.create();
+		String json=gson.toJson(object);			
+		return json;
+	}
   
   public static LinkedList<String> Parse(String Line, String Delimiter) {
     // parses a delimited string into a list
@@ -172,12 +184,16 @@ public class Utilities {
 	    		
 	    		if (Line.length()==0) break;
 	    		
-	    		myList.add(Line.substring(0, Line.indexOf("\"")));
+	    		if (Line.indexOf("\"")>-1) {
+	    			myList.add(Line.substring(0, Line.indexOf("\"")));
+
+		    		if (Line.indexOf("\"")<Line.length()-1)
+		    			Line = Line.substring(Line.indexOf("\"") + 2, Line.length());
+		    		else 
+		    			break;
+	    		}
 	    		
-	    		if (Line.indexOf("\"")<Line.length()-1)
-	    			Line = Line.substring(Line.indexOf("\"") + 2, Line.length());
-	    		else 
-	    			break;
+	    		
 	    	} else {
 				
 

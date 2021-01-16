@@ -13,6 +13,7 @@ import org.openscience.cdk.smiles.SmilesParser;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.Utilities.CDKUtilities;
+import ToxPredictor.Utilities.Inchi;
 
 public class ResolverDbTests {
 
@@ -41,8 +42,8 @@ public class ResolverDbTests {
 	public void bySMILES() throws ClassNotFoundException, SQLException, InvalidSmilesException {
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 		IAtomContainer m = sp.parseSmiles("CC(C)(CO)N1CC1C(O)=O");
-		String[] inchi = CDKUtilities.generateInChiKey(m);
-		ArrayList<DSSToxRecord> cdrs = ResolverDb.lookupByInChIKey(inchi[1]);
+		Inchi inchi = CDKUtilities.generateInChiKey(m);
+		ArrayList<DSSToxRecord> cdrs = ResolverDb.lookupByInChIKey(inchi.inchiKey);
 		assertTrue(cdrs.size() == 1);
 		assertEquals("DTXCID20336575", cdrs.get(0).cid);
 	}

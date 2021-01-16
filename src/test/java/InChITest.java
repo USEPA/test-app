@@ -19,6 +19,7 @@ import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.smiles.SmiFlavor;
 
 import ToxPredictor.Utilities.CDKUtilities;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.ResourceLoader;
 import net.sf.jniinchi.INCHI_OPTION;
 import net.sf.jniinchi.INCHI_RET;
@@ -41,8 +42,8 @@ public class InChITest extends ResourceLoader {
 			smiles = CDKUtilities.generateSmiles(sdfRec, SmiFlavor.Absolute);
 			System.out.println("Absolute: " + smiles);
 			
-			String[] inchis = CDKUtilities.generateInChiKey(sdfRec);
-			System.out.println("InChI: " + inchis[0]);
+			Inchi inchis = CDKUtilities.generateInChiKey(sdfRec);
+			System.out.println("InChI: " + inchis.inchi);
 		}
 		
 		System.out.println("done");

@@ -106,16 +106,16 @@ public class TableGeneratorExcel {
 			XSSFCellStyle styleBold=getStyleBold(workbook);
 
 			//Write header
-			for (int i=0;i<ScoreRecord.displayFieldNames.length;i++)	{
+			for (int i=0;i<ScoreRecord.allFieldNames.length;i++)	{
 				XSSFCell cell=row.createCell(i);
-				cell.setCellValue(ScoreRecord.displayFieldNames[i]);
+				cell.setCellValue(ScoreRecord.allFieldNames[i]);
 				cell.setCellStyle(styleBold);
 			}
 
 
 			for (Chemical chemical:chemicals) {
 
-				ArrayList<String>lines=chemical.toStringArray(del,ScoreRecord.actualFieldNames);
+				ArrayList<String>lines=chemical.toStringArray(del,ScoreRecord.allFieldNames);
 
 				if (!uniqueCAS.contains(chemical.CAS)) uniqueCAS.add(chemical.CAS);
 

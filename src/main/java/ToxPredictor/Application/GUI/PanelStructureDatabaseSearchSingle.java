@@ -124,7 +124,7 @@ public class PanelStructureDatabaseSearchSingle extends JPanel {
 		add(jtfIdentifier);
 		jbSearch.addActionListener(aa);
 		
-		TitledBorder border = new TitledBorder("Enter a CAS, SMILES, or name and click Search");
+		TitledBorder border = new TitledBorder("Enter a CAS, SMILES, Name, InChi, InChiKey, or DTXSID and click Search");
 	    border.setTitleJustification(TitledBorder.LEFT);
 	    border.setTitlePosition(TitledBorder.TOP);
 	    this.setBorder(border);

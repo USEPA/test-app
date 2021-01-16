@@ -28,6 +28,7 @@ import ToxPredictor.Application.WebTEST2;
 import ToxPredictor.Application.WebTESTDBs;
 import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.Utilities.CDKUtilities;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.misc.MolFileUtilities;
 import wekalite.CSVLoader;
 import wekalite.Instance;
@@ -197,11 +198,11 @@ public class DescriptorsTest {
 				String SMILES1 = CDKUtilities.generateSmiles(ac1);
 				String SMILES2 = CDKUtilities.generateSmiles(ac2);
 				
-				String [] results1=CDKUtilities.generateInChiKey(ac1);
-				String [] results2=CDKUtilities.generateInChiKey(ac2);
+				Inchi results1=CDKUtilities.generateInChiKey(ac1);
+				Inchi results2=CDKUtilities.generateInChiKey(ac2);
 				
-				System.out.println(CAS1+"\t"+SMILES1+"\t"+results1[0]);
-				System.out.println(CAS2+"\t"+SMILES2+"\t"+results2[0]);
+				System.out.println(CAS1+"\t"+SMILES1+"\t"+results1.inchiKey);
+				System.out.println(CAS2+"\t"+SMILES2+"\t"+results2.inchiKey);
 				
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -318,9 +319,9 @@ public class DescriptorsTest {
 			String molFilePath="E:\\MyToxicity\\ToxRuns\\ToxRun_"+CAS1+"\\StructureData\\"+CAS1+".mol";
 			AtomContainerSet acs=WebTEST2.LoadFromSDF(molFilePath);
 			AtomContainer ac=(AtomContainer)acs.getAtomContainer(0);
-			String [] results=CDKUtilities.generateInChiKey(ac);
-			inchiKeyGUI=results[1];
-			System.out.println(results[1]);
+			Inchi results=CDKUtilities.generateInChiKey(ac);
+			inchiKeyGUI=results.inchiKey;
+			System.out.println(inchiKeyGUI);
 			
 
 			String folder="data/descriptors";		

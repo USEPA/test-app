@@ -12,6 +12,7 @@ import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.HueckelAromaticityDetector;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.misc.MolFileUtilities;
 import wekalite.CSVLoader;
@@ -1280,8 +1281,8 @@ public class QSARTest {
 			for (int j=0;j<acs.getAtomContainerCount();j++) {
 				AtomContainer ac=(AtomContainer)acs.getAtomContainer(j);				
 				String CAS=ac.getProperty("CAS");
-				String []results=CDKUtilities.generateInChiKey(ac);
-				String InChiKey=results[1];				
+				Inchi results=CDKUtilities.generateInChiKey(ac);
+				String InChiKey=results.inchiKey;				
 				fw.write(CAS+"\t"+InChiKey+"\r\n");				
 			}
 			fw.close();

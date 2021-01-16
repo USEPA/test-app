@@ -4,13 +4,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
-import javax.vecmath.Vector2d;
+
 
 import org.apache.logging.log4j.util.Strings;
 //import org.jmol.api.JmolViewer;
@@ -32,7 +30,8 @@ import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Application.GUI.PanelBatchChemicals.MyTableModel;
 import ToxPredictor.Database.DSSToxRecord;
-import ToxPredictor.Database.ResolverDb;
+//import ToxPredictor.Database.ResolverDb;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.MyDescriptors.*;
 import ToxPredictor.Utilities.*;
 //import ToxPredictor.descriptors.DescriptorGenerator;
@@ -697,7 +696,7 @@ public class DialogEditChemical extends JDialog {
 		jlCAS.setLocation(15, loc1);
 
 
-		jtfCAS.setSize(120, 20);
+		jtfCAS.setSize(220, 20);
 		jtfCAS.setLocation(130, loc1);
 		jtfCAS.setName("jtfCAS");
 		jtfCAS.setEditable(false);
@@ -1211,47 +1210,9 @@ public class DialogEditChemical extends JDialog {
 				return;
 			}
 
+			ResolverDb2.assignRecordByStructureViaInchis(m, jtfCAS.getText());
 			
-			ArrayList<DSSToxRecord> recs = ResolverDb.lookupByAtomContainer(m);
-
-//			if ( recs.size() > 0 ) {
-//				
-//				if (!recs.get(0).cas.contentEquals(jtfCAS.getText().trim())) {
-//					
-//					if (jtfCAS.getText().contains("C_")){
-//						ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);		
-//					} else {
-//						String message="The ID ("+jtfCAS.getText().trim()+ ") does not match the CAS ("+recs.get(0).cas+") for the structure in the database, do you wish to update it?";
-//						int Result = JOptionPane.showConfirmDialog(this, message, "Update CAS", JOptionPane.OK_CANCEL_OPTION);
-//						if (Result == JOptionPane.OK_OPTION) {
-//							ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);		
-//						} else if (Result==JOptionPane.CANCEL_OPTION) {
-//							m.setProperty("CAS", jtfCAS.getText().trim());
-//						}
-//					}
-//					
-//				} else if (jtfCAS.getText().contains("C_")){
-//					ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
-//				}
-//					
-//			} else {
-//				m.setProperty("CAS", jtfCAS.getText().trim());	
-//			}
-			
-			if (recs.size()>0)	{
-				assignRecord(m, recs);
-			}else  {				
-				
-				ArrayList<DSSToxRecord>recs2=ResolverDb.lookupByAtomContainer2dConnectivity(m);
-				
-				if (recs2.size()>0)	{
-					assignRecord(m, recs2);
-				} else {
-					DSSToxRecord.clearProperties(m);	
-				}
-			}
-			
-								
+										
 			m.setProperty("Error", "");
 			WebTEST4.checkAtomContainer(m);
 
@@ -1273,24 +1234,6 @@ public class DialogEditChemical extends JDialog {
 
 	}
 
-	private void assignRecord(AtomContainer m, ArrayList<DSSToxRecord> recs) {
-		String oldCAS=jtfCAS.getText().trim();
-
-		if (Strings.isBlank(oldCAS) || oldCAS.contains("C_")) {
-			ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
-		} else {
-			boolean match=false;
-			for (DSSToxRecord rec:recs) {
-				if (rec.cas.contentEquals(oldCAS)) {
-					DSSToxRecord.assignFromDSSToxRecord(m, rec);
-//							System.out.println("old CAS is ok!");
-					match=true;
-					break;
-				}
-			}
-			if (!match) ResolverDb.assignDSSToxInfoFromFirstRecord(m, recs);
-		}
-	}
 	
 	
 	

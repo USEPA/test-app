@@ -23,6 +23,7 @@ import ToxPredictor.Utilities.CsvWriter;
 import ToxPredictor.Utilities.FileUtils;
 import ToxPredictor.Utilities.FormatUtils;
 import ToxPredictor.Utilities.HtmlUtils;
+import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.IndigoUtilities;
 import ToxPredictor.Utilities.JsonResultsWriter;
 import ToxPredictor.Utilities.MemUtils;
@@ -2174,16 +2175,17 @@ public class WebTEST {
 						if (recs.size() > 0)
 							rec = recs.get(0);
 					} else {
-						String[] inchi = CDKUtilities.generateInChiKey(m);
-						if (!"N/A".equals(inchi[1]) & !Strings.isEmpty(inchi[1])) {
-							ArrayList<DSSToxRecord> recs = ResolverDb.lookupByInChIKey(inchi[1]);
+						Inchi inchi = Inchi.generateInChiKeyCDK(m);
+						
+						if (!"N/A".equals(inchi.inchiKey) & !Strings.isEmpty(inchi.inchiKey)) {
+							ArrayList<DSSToxRecord> recs = ResolverDb.lookupByInChIKey(inchi.inchiKey);
 							if (recs.size() > 0)
 								rec = recs.get(0);
 							else {
 								// Fallback to Indigo 
 								inchi = IndigoUtilities.generateInChiKey(m);
-								if (!Strings.isEmpty(inchi[1])) {
-									recs = ResolverDb.lookupByInChIKey(inchi[1]);
+								if (!Strings.isEmpty(inchi.inchiKey)) {
+									recs = ResolverDb.lookupByInChIKey(inchi.inchiKey);
 									if (recs.size() > 0)
 										rec = recs.get(0);
 								}

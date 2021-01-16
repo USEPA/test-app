@@ -10,3 +10,5 @@ mavenlog.txt
 mvn-repo/
 *.pdf
 dependency-reduced-pom.xml
+ToxRuns/
+*.zip

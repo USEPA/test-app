@@ -17,6 +17,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.logging.Handler;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -35,6 +36,8 @@ import javax.swing.JToolBar;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.ChemModel;
@@ -49,8 +52,7 @@ import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.GUI.Miscellaneous.FileFilterStructure;
 import ToxPredictor.Application.GUI.Miscellaneous.FileFilterText;
 import ToxPredictor.Application.GUI.Miscellaneous.FileFilterText2;
-import ToxPredictor.Database.DSSToxRecord;
-import ToxPredictor.Database.ResolverDb;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.Application.Calculations.TaskCalculations2;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
@@ -570,6 +572,9 @@ public class TESTApplication extends JFrame{
 	 */
 	public AtomContainer configureModel(AtomContainer molecule) {
 
+
+		TaskStructureSearch.fixNullBondStereo(molecule);
+		
 		ChemModel chemModel = new ChemModel();
 		AtomContainerSet ms = new AtomContainerSet();
 		ms.addAtomContainer(molecule);
@@ -1450,6 +1455,15 @@ public class TESTApplication extends JFrame{
 		fs.dispose();
 		f.setVisible(true);
 				
+		ResolverDb2.assureDbIsOpen();
+		
+		File file=new File("webtest.log");
+		
+		try {
+			file.delete();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		
 		if (defaultToSingleChemicalMode) {
 			f.aa.switchToSingleChemicalMode();
@@ -1465,9 +1479,15 @@ public class TESTApplication extends JFrame{
 		else {
 			f.aa.switchToBatchMode();
 
-			f.panelBatchStructureDatabaseSearch.jrbSmiles.doClick();
-			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("c1ccccc1\n"
-					+ "CCCCOCC\nqwerty\nCCCOCCCCCCCCCCCOCC\nCCCOCCCCOCCCCCOCCOCOC");
+			f.panelBatchStructureDatabaseSearch.jcbOptions.setSelectedItem(PanelStructureDatabaseSearchBatch.strOptionSmiles);
+//			f.panelBatchStructureDatabaseSearch.jrbName.doClick();
+//			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("c1ccccc1\n"
+//					+ "CCCCOCC\nqwerty\nCCCOCCCCCCCCCCCOCC\nCCCOCCCCOCCCCCOCCOCOC");
+			
+//			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("xylenes");
+			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("COCOCOCCCCCOCCCCCOCCCOCCCCOCC");
+			
+			
 			f.panelBatchStructureDatabaseSearch.jbSearch.doClick();
 			
 			
@@ -1475,8 +1495,7 @@ public class TESTApplication extends JFrame{
 			//f.loadBatchForDebugFromString();
 		}
 		HueckelAromaticityDetector.debug=false;
-		
-		
+				
 		f.repaint();
 	}
 

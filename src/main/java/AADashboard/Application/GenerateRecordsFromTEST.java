@@ -245,136 +245,7 @@ public class GenerateRecordsFromTEST {
 	}
 	
 
-	/**
-	 * Since not in the database, need to run them:
-	 * @param chemical
-	 * @param wt
-	 */
-	@Deprecated
-	private void createRecordFromNewCalculation(Chemical chemical,WebTEST wt) {
-
-		
-		//if have all preds:
-//		if (haveTESTPrediction(chemical.scoreAcute_Mammalian_Toxicity)
-		if (haveTESTPrediction(chemical.scoreAcute_Mammalian_ToxicityOral)		
-				&& haveTESTPrediction(chemical.scoreAcute_Aquatic_Toxicity)
-				&& haveTESTPrediction(chemical.scoreGenotoxicity_Mutagenicity)
-				&& haveTESTPrediction(chemical.scoreDevelopmental)
-				&& haveTESTPrediction(chemical.scoreEndocrine_Disruption)
-				&& haveTESTPrediction(chemical.scoreBioaccumulation)) {
-//			System.out.println("Have all vals, returning for "+chemical.CAS);
-			return;
-		}		
-		
-		
-//		if (chemical.atomContainer==null) {
-//			if (chemical.molFileV3000!=null) {
-//				AtomContainerSet acs=MolFileUtilities.LoadFromSdfString(chemical.molFileV3000);
-////				System.out.println(chemicali.CAS+"\t"+acs.getAtomContainer(0).getAtomCount());
-//				acs.getAtomContainer(0).setProperty("CAS", chemical.CAS);
-//				chemical.atomContainer=(AtomContainer)acs.getAtomContainer(0);
-//			}
-//		}
-		
-		String error=this.checkStructure(chemical.CAS, chemical.atomContainer);
-		
-		if (!error.equals("OK")) {
-			System.out.println(error);
-			return;
-		}
-				
-		
-		//Calculate descriptors once:
-		
-		DescriptorData dd=runTESTDescriptors(chemical.atomContainer);
-		
-		if (!dd.Error.equals("OK")) {
-			return;
-		}
-
-		String method=TESTConstants.ChoiceConsensus; //method for TEST calc
-		
-//		if (!haveTESTPrediction(chemical.scoreAcute_Mammalian_Toxicity)) {
-		if (!haveTESTPrediction(chemical.scoreAcute_Mammalian_ToxicityOral)) {	
-			String endpoint=TESTConstants.ChoiceRat_LD50;
-			
-			TESTPredictedValue v = runTESTCalculation(dd, method, endpoint);
-			TESTRecord tr = createTestRecord(chemical, v);
-
-			//create record in chemical JSON file: 
-			this.createAcute_Mammalian_ToxicityRecord(chemical, tr);
-			
-		}
-		
-		if (!haveTESTPrediction(chemical.scoreAcute_Aquatic_Toxicity)) {
-			String endpoint=TESTConstants.ChoiceFHM_LC50;
-			TESTPredictedValue v = runTESTCalculation(dd, method, endpoint);
-			TESTRecord tr = createTestRecord(chemical, v);
-			//create record in chemical JSON file: 
-			this.createAcute_Aquatic_ToxicityRecord(chemical, tr,endpoint);
-			
-			endpoint=TESTConstants.ChoiceDM_LC50;
-			
-			v = runTESTCalculation(dd, method, endpoint);
-			tr = createTestRecord(chemical, v);
-			//create record in chemical JSON file: 
-			this.createAcute_Aquatic_ToxicityRecord(chemical, tr,endpoint);
-			
-		}
-
-		
-		if (!haveTESTPrediction(chemical.scoreGenotoxicity_Mutagenicity)) {
-			String endpoint=TESTConstants.ChoiceMutagenicity;
-			
-			TESTPredictedValue v = runTESTCalculation(dd, method, endpoint);
-			TESTRecord tr = createTestRecord(chemical, v);
-			//create record in chemical JSON file: 
-			this.createMutagenicityRecord(chemical, tr);
-			
-		}
-		
-		if (!haveTESTPrediction(chemical.scoreDevelopmental)) {
-			String endpoint=TESTConstants.ChoiceReproTox;
-			
-			TESTPredictedValue v = runTESTCalculation(dd, method, endpoint);
-			TESTRecord tr = createTestRecord(chemical, v);
-			//create record in chemical JSON file: 
-			this.createDevelopmentalRecord(chemical, tr);
-		}
-		
-		if (!haveTESTPrediction(chemical.scoreBioaccumulation)) {
-			String endpoint=TESTConstants.ChoiceBCF;
-			
-			TESTPredictedValue v = runTESTCalculation(dd, method, endpoint);
-			TESTRecord tr = createTestRecordLog(chemical, v);
-			//create record in chemical JSON file: 
-			this.createBioconcentrationRecord(chemical, tr);
-
-		}
-		
-		if (!haveTESTPrediction(chemical.scoreEndocrine_Disruption)) {
-			String endpoint=TESTConstants.ChoiceEstrogenReceptor;
-			
-			TESTPredictedValue v = runTESTCalculation(dd, method, endpoint);
-			TESTRecord tr = createTestRecord(chemical, v);
-				
-			//create record in chemical JSON file: 
-			this.createEndocrine_Disruption(chemical, tr);
-
-			//***********************************************************************************
-			endpoint=TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity;
-			
-			v = runTESTCalculation(dd, method, endpoint);
-			tr = createTestRecordLog(chemical, v);
-				
-			//create record in chemical JSON file: 
-			this.createEndocrine_Disruption_RBA(chemical, tr);
-
-		}
-		
-
-		
-	}
+	
 
 
 	private TESTRecord createTestRecord(Chemical chemical, TESTPredictedValue v) {
@@ -495,163 +366,9 @@ public class GenerateRecordsFromTEST {
 		}
 	}
 
-	@Deprecated
-	private void createAcute_Mammalian_ToxicityRecord(Chemical chemical, TESTRecord tr) {
-
-		// System.out.println(chemical.CAS+"\t"+tr.ExpToxValue+"\t"+tr.Consensus);
-
-		
-		//Chemidplus is now a separate source of data, should we omit T.E.S.T experimental since redundant?
-		//For now keeping TEST experimental for completeness and to be consistent with other endpoints
-		
-		Score score=chemical.scoreAcute_Mammalian_ToxicityOral;
-		
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-						
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Experimental;
-
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "Oral";
-
-			String strExpVal = tr.ExpToxValue;
-			double expValMolar = Double.parseDouble(strExpVal);
-			double expValMass = PredictToxicityWebPageCreator.getToxValMass(TESTConstants.ChoiceRat_LD50, expValMolar,
-					chemical.molecularWeight);
-
-			// Set score and rationale:
-			setAcuteMammalianToxicityScore(expValMass, sr);
-
-//			chemical.scoreAcute_Mammalian_Toxicity.records.add(sr);
-			score.records.add(sr);
-
-		}
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "Oral";
-
-			String strVal = tr.Consensus;
-			double valMolar = Double.parseDouble(strVal);
-			double valMass = PredictToxicityWebPageCreator.getToxValMass(TESTConstants.ChoiceRat_LD50, valMolar,
-					chemical.molecularWeight);
-
-			setAcuteMammalianToxicityScore(valMass, sr);
-
-//			chemical.scoreAcute_Mammalian_Toxicity.records.add(sr);
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "Oral";
-			
-			sr.score = "N/A";
-			sr.rationale = TESTConstants.ChoiceRat_LD50+" could not be predicted using T.E.S.T.";
-
-//			chemical.scoreAcute_Mammalian_Toxicity.records.add(sr);
-			score.records.add(sr);
-			
-		}
-		
-	}
 	
-	@Deprecated
-	private void createAcute_Aquatic_ToxicityRecord(Chemical chemical, TESTRecord tr,String endpoint) {
-
-		// System.out.println(chemical.CAS+"\t"+trAcuteAquaticToxicity.ExpToxValue+"\t"+trAcuteAquaticToxicity.Consensus);
-
-		Score score=chemical.scoreAcute_Aquatic_Toxicity;
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Experimental;
-
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strExpVal = tr.ExpToxValue;
-			double expValMolar = Double.parseDouble(strExpVal);
-			double expValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, expValMolar,
-					chemical.molecularWeight);
-
-			DecimalFormat df=new DecimalFormat("0.00E00");
-			String strMass=df.format(expValMass);		
-			sr.valueMass=Double.parseDouble(strMass);
-			sr.valueMassUnits="mg/L";
-			
-			// Set score and rationale:
-			setAcuteAquaticToxicityScore(sr.valueMass, sr,endpoint);
-
-			score.records.add(sr);
-
-		}
-		
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-			
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			
-			String strPredVal = tr.Consensus;
-			double predValMolar = Double.parseDouble(strPredVal);
-			
-//			long t1=System.currentTimeMillis();
-//			double bob=Math.pow(10, -expValMolar) * chemical.molecularWeight * 1000.0;
-//			long t2=System.currentTimeMillis();
-//			System.out.println(chemical.CAS+"\t"+bob+"\t"+(t2-t1));
-			
-			long t1=System.currentTimeMillis();
-			double predValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, predValMolar,
-					chemical.molecularWeight);
-			
-			DecimalFormat df=new DecimalFormat("0.00E00");
-			String strMass=df.format(predValMass);		
-			sr.valueMass=Double.parseDouble(strMass);
-			sr.valueMassUnits="mg/L";
-			
-//			System.out.println(chemical.CAS+"\t"+predValMass);
-			
-//			double expValMass=Math.pow(10, -expValMolar) * chemical.molecularWeight * 1000.0;
-			
-			long t2=System.currentTimeMillis();
-//			System.out.println(chemical.CAS+"\t"+expValMass+"\t"+(t2-t1));
-			
-			
-			setAcuteAquaticToxicityScore(sr.valueMass, sr,endpoint);
-
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			sr.source = ScoreRecord.sourceTEST_Predicted;
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-			sr.score = "N/A";
-			sr.rationale = TESTConstants.ChoiceFHM_LC50+" could not be predicted using T.E.S.T.";
-			score.records.add(sr);
-		}
-		
-
-	}
+	
+	
 	
 	private void setAcuteAquaticToxicityScore(double LC50_mg_L, ScoreRecord sr,String endpoint) {
 
@@ -837,67 +554,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 //	}
 
 
-	/**
-	 * Old way based on TESTRecord
-	 * 
-	 * @param chemical
-	 * @param stat
-	 */
-@Deprecated
-	private void createRecord_From_TEST_Prediction_Database(Chemical chemical,Statement stat) {
 
-		long t1 = System.currentTimeMillis();
-		
-		String CAS = chemical.CAS;
-		
-		//TODO change it so that pulls record by InChiKey
-		
-		TESTRecord trWS = getTESTRecord(stat, TESTConstants.abbrevChoiceWaterSolubility, "CAS", CAS);
-		if (trWS != null)
-			createWaterSolubility(chemical, trWS);
-		
-		
-		TESTRecord trAMT = getTESTRecord(stat, TESTConstants.abbrevChoiceRat_LD50, "CAS", CAS);
-		if (trAMT != null)
-			createAcute_Mammalian_ToxicityRecord(chemical, trAMT);
-
-		TESTRecord trAAT = getTESTRecord(stat, TESTConstants.abbrevChoiceFHM_LC50, "CAS", CAS);
-		if (trAAT != null)
-			createAcute_Aquatic_ToxicityRecord(chemical, trAAT,TESTConstants.ChoiceFHM_LC50);
-		
-		TESTRecord trAAT2 = getTESTRecord(stat, TESTConstants.abbrevChoiceDM_LC50, "CAS", CAS);
-		if (trAAT != null)
-			createAcute_Aquatic_ToxicityRecord(chemical, trAAT2,TESTConstants.ChoiceDM_LC50);
-
-		
-		TESTRecord trMut =getTESTRecord(stat, TESTConstants.abbrevChoiceMutagenicity, "CAS", CAS);
-		if (trMut != null)
-			createMutagenicityRecord(chemical, trMut);
-
-		TESTRecord trDevTox = getTESTRecord(stat, TESTConstants.abbrevChoiceReproTox, "CAS", CAS);
-		if (trDevTox != null)
-			createDevelopmentalRecord(chemical, trDevTox);
-		
-
-		TESTRecord trBioacc = getTESTRecord(stat, TESTConstants.abbrevChoiceBCF, "CAS", CAS);
-		if (trBioacc != null)
-			createBioconcentrationRecord(chemical, trBioacc);
-		
-		
-		TESTRecord trER = getTESTRecord(stat, TESTConstants.abbrevChoiceER_Binary, "CAS", CAS);
-		if (trER != null)
-			createEndocrine_Disruption(chemical, trER);
-		
-		TESTRecord trER_RBA = getTESTRecord(stat, TESTConstants.abbrevChoiceER_LogRBA, "CAS", CAS);
-		if (trER_RBA != null)
-			createEndocrine_Disruption_RBA(chemical, trER_RBA);
-
-
-		long t2 = System.currentTimeMillis();
-//		System.out.println((t2 - t1));
-
-
-	}
 		
 	private void createRecords_From_TEST(Chemical chemical,List<TESTPredictedValue>vecTPV) {
 
@@ -960,117 +617,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 
 	}
 
-	@Deprecated
-	private void createWaterSolubility(Chemical chemical, TESTRecord tr) {
-		
-		DecimalFormat df=new DecimalFormat("0.00E00");
-		
-		Score score=chemical.scoreWaterSolubility;
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			
-			sr.source = ScoreRecord.sourceTEST_Experimental;
-			String strExpVal = tr.ExpToxValue;
-			double expValMolar = Double.parseDouble(strExpVal);
-			double expValMass = PredictToxicityWebPageCreator.getToxValMass(TESTConstants.ChoiceWaterSolubility, expValMolar,
-					chemical.molecularWeight);
-
-			sr.score=df.format(expValMass);
-			
-			score.records.add(sr);
-
-		}
-		
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-			String strPredVal = tr.Consensus;
-			double predValMolar = Double.parseDouble(strPredVal);
-			
-			long t1=System.currentTimeMillis();
-			double predValMass = PredictToxicityWebPageCreator.getToxValMass(TESTConstants.ChoiceWaterSolubility, predValMolar,
-					chemical.molecularWeight);
-			
-			sr.score=df.format(predValMass);
-			
-			long t2=System.currentTimeMillis();
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-			sr.hazardStatement = null;
-			sr.route = null;
-			score.records.add(sr);
-			sr.score="N/A";
-		}
 	
-}
-
-	@Deprecated
-	private void createEndocrine_Disruption_RBA(Chemical chemical, TESTRecord tr) {
-		
-		Score score=chemical.scoreEndocrine_Disruption;
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			
-			sr.source = ScoreRecord.sourceTEST_Experimental;
-
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strExpVal = tr.ExpToxValue;
-
-//			System.out.println("***"+chemical.CAS+"\t"+strExpVal);
-
-			double dExpVal=Double.parseDouble(strExpVal);
-			
-			setEstrogenReceptorRBAScore(dExpVal,sr);
-			//
-			score.records.add(sr);
-
-		}
-
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-
-			//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strPredVal = tr.Consensus;
-			double dPredVal = Double.parseDouble(strPredVal);
-			
-//			System.out.println("***"+chemical.CAS+"\t"+strPredVal);
-
-			setEstrogenReceptorRBAScore(dPredVal,sr);
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-			//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-			sr.score = "N/A";
-			sr.rationale = TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity+" could not be predicted using T.E.S.T.";
-			score.records.add(sr);
-		}
-	
-}
 
 
 	private void setEstrogenReceptorRBAScore(double val,ScoreRecord sr) {
@@ -1087,128 +634,6 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 	}
 
 
-	/***
-	 * Creates endocrine_disruption record based on estrogen receptor binding
-	 * 
-	 * TODO - have it also consider relative binding affinity or in vivo binding for mice (endpoint to be added)
-	 * 
-	 * @param chemical
-	 * @param tr
-	 */
-	@Deprecated
-	private void createEndocrine_Disruption(Chemical chemical, TESTRecord tr) {
-
-		Score score=chemical.scoreEndocrine_Disruption;
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			sr.source = ScoreRecord.sourceTEST_Experimental;
-
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strExpVal = tr.ExpToxValue;
-
-//			System.out.println("***"+chemical.CAS+"\t"+strExpVal);
-
-			double dExpVal=Double.parseDouble(strExpVal);
-
-			if (dExpVal==0) {
-				sr.score="L";
-				sr.rationale="Experimentally this chemical DOES NOT BIND to the estrogen receptor";
-			} else {
-				sr.score="H";
-				sr.rationale="Experimentally this chemical DOES BIND to the estrogen receptor";
-			}
-			//
-			score.records.add(sr);
-
-		}
-
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			sr.source = ScoreRecord.sourceTEST_Predicted;
-
-			//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strPredVal = tr.Consensus;
-			double dPredVal = Double.parseDouble(strPredVal);
-
-			if (dPredVal<0.5) {
-				sr.score="L";
-				sr.rationale="T.E.S.T. predicts that this chemical DOES NOT bind to the estrogen receptor";
-			} else {
-				sr.score="M";
-				sr.rationale="T.E.S.T. predicts that this chemical DOES bind to the estrogen receptor";
-			}
-
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			sr.source = ScoreRecord.sourceTEST_Predicted;
-			//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-			sr.score = "N/A";
-			sr.rationale = TESTConstants.ChoiceEstrogenReceptor+" could not be predicted using T.E.S.T.";
-			score.records.add(sr);
-		}
-	}
-
-	@Deprecated
-	private void createBioconcentrationRecord(Chemical chemical, TESTRecord tr) {
-
-		Score score=chemical.scoreBioaccumulation;
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			sr.source = ScoreRecord.sourceTEST_Experimental;
-
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strExpVal = tr.ExpToxValue;
-			double expVal=Double.parseDouble(strExpVal);
-			
-			// Set score and rationale:
-			setBioconcentrationScore(expVal, sr);
-
-			score.records.add(sr);
-
-		}
-		
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			sr.source = ScoreRecord.sourceTEST_Predicted;
-			
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strPredVal = tr.Consensus;
-			double predVal = Double.parseDouble(strPredVal);
-			
-			// Set score and rationale:
-			setBioconcentrationScore(predVal, sr);
-
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);			sr.source = ScoreRecord.sourceTEST_Predicted;
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-			sr.score = "N/A";
-			sr.rationale = TESTConstants.ChoiceBCF+" could not be predicted using T.E.S.T.";
-			score.records.add(sr);
-		}
-		
-	}
 	
 
 	private void setBioconcentrationScore(double logBCF, ScoreRecord sr) {
@@ -1231,80 +656,6 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		
 	}
 	
-	@Deprecated
-	private void createDevelopmentalRecord(Chemical chemical, TESTRecord tr) {
-//		System.out.println(chemical.CAS+"\t"+tr.Consensus);
-		
-		Score score=chemical.scoreDevelopmental;
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Experimental;
-
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strExpVal = tr.ExpToxValue;
-			
-			double expValue=Double.parseDouble(strExpVal);
-			
-			if (expValue==0) {
-				sr.score="L";
-				sr.rationale="Developmental toxicity negative";
-			} else if (expValue==1) {
-				sr.score="H";
-				sr.rationale="Developmental toxicity positive";
-			}
-
-			score.records.add(sr);
-
-		}
-		
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-			
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strPredVal = tr.Consensus;
-			
-			double predValue=Double.parseDouble(strPredVal);
-			
-//			System.out.println(predValue);
-			
-			
-			if (predValue<0.5) {
-				sr.score="L";
-				sr.rationale="Developmental toxicity negative";
-			} else {
-				sr.score="H";
-				sr.rationale="Developmental toxicity positive";
-			}
-
-			
-//			System.out.println(sr.toJSON());
-			
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-			sr.score = "N/A";
-			sr.rationale = TESTConstants.ChoiceReproTox+" could not be predicted using T.E.S.T.";
-			score.records.add(sr);
-		}
-		
-		
-	}
 	
 
 	private void createRecordContinuousLogMolar(Chemical chemical, TESTPredictedValue tpv,Score score) {
@@ -1317,7 +668,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		
 		
 		if (!tpv.expValMass.equals(Double.NaN)) {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
+			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.source = ScoreRecord.sourceTEST_Experimental;
 			sr.name=chemical.name;
 
@@ -1347,7 +698,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		
 
 		if (!tpv.predValMass.equals(Double.NaN)) {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
+			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.name=chemical.name;
 			sr.source = ScoreRecord.sourceTEST_Predicted;
 			
@@ -1376,7 +727,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 			score.records.add(sr);
 
 		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
+			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.name=chemical.name;
 			sr.source = ScoreRecord.sourceTEST_Predicted;
 //			sr.classification = "";
@@ -1395,7 +746,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		
 		if (!tpv.expValLogMolar.equals(Double.NaN)) {
 
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
+			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.source = ScoreRecord.sourceTEST_Experimental;
 			sr.name=chemical.name;
 			
@@ -1420,7 +771,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		
 
 		if (!tpv.predValLogMolar.equals(Double.NaN)) {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
+			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.source = ScoreRecord.sourceTEST_Predicted;
 			sr.name=chemical.name;
 			
@@ -1443,7 +794,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 			score.records.add(sr);
 
 		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
+			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.name=chemical.name;
 			sr.source = ScoreRecord.sourceTEST_Predicted;
 //			sr.classification = "";
@@ -1455,74 +806,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		}
 	}
 
-	@Deprecated
-	private void createMutagenicityRecord(Chemical chemical, TESTRecord tr) {
-		
-		Score score=chemical.scoreGenotoxicity_Mutagenicity;
-		
-		if (!tr.ExpToxValue.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Experimental;
-
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strExpVal = tr.ExpToxValue;
-			
-			double expValue=Double.parseDouble(strExpVal);
-			
-			if (expValue==0) {
-				sr.score="L";
-				sr.rationale="Ames mutagenicity negative";
-			} else if (expValue==1) {
-				sr.score="H";
-				sr.rationale="Ames mutagenicity positive";
-			}
-			
-			score.records.add(sr);
-
-		}
-		
-
-		if (!tr.Consensus.equals("N/A")) {
-
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-			
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-
-			String strPredVal = tr.Consensus;
-			
-			double predValue=Double.parseDouble(strPredVal);
-			
-//			System.out.println(predValue);
-			
-			if (predValue<0.5) {
-				sr.score="L";
-				sr.rationale="Ames mutagenicity negative";
-			} else {
-				sr.score="H";
-				sr.rationale="Ames mutagenicity positive";
-			}
-
-			score.records.add(sr);
-
-		} else {
-			ScoreRecord sr = new ScoreRecord(chemical.CAS,chemical.name,score.hazard_name);
-			sr.source = ScoreRecord.sourceTEST_Predicted;
-//			sr.classification = "";
-			sr.hazardStatement = "";
-			sr.route = "";
-			sr.score = "N/A";
-			sr.rationale = TESTConstants.ChoiceMutagenicity+" could not be predicted using T.E.S.T.";
-			score.records.add(sr);
-		}
-		
-	}
+	
 
 	static TESTPredictedValue runTESTCalculation (AtomContainer ac,String endpoint) {
 		DescriptorData dd=runTESTDescriptors(ac);
@@ -1810,7 +1094,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 			Statement stat=conn.createStatement();
 			
 //			Old way based on TESTRecord
-			g.createRecord_From_TEST_Prediction_Database(chemical,stat);
+//			g.createRecord_From_TEST_Prediction_Database(chemical,stat);
 		
 		} catch (Exception ex) {
 			ex.printStackTrace();

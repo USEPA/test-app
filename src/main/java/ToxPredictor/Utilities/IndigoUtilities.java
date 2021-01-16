@@ -4,10 +4,12 @@ import java.io.IOException;
 import java.io.StringWriter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLV2000Writer;
 import com.epam.indigo.Indigo;
+import com.epam.indigo.IndigoException;
 import com.epam.indigo.IndigoInchi;
 import com.epam.indigo.IndigoObject;
 
@@ -42,6 +44,8 @@ public class IndigoUtilities {
 		}
 	}
 	
+	
+	
 	public static String generateSmiles(IAtomContainer ac) {
 		IndigoObject mol = toMol(ac);
 		if ( mol == null )
@@ -50,18 +54,48 @@ public class IndigoUtilities {
 		return mol.canonicalSmiles();
 	}
 
-	public static String[] generateInChiKey(IAtomContainer ac) {
+	public static Inchi generateInChiKey(IAtomContainer ac) {
 		IndigoObject mol = toMol(ac);
 		if ( mol == null )
 			return null;
 		
 		IndigoInchi indigoInchi = new IndigoInchi(indigo);
+			
+		Inchi inchi=new Inchi();
 		
-		String[] inchis = new String[3];
-		inchis[0] = indigoInchi.getInchi(mol);
-		inchis[1] = indigoInchi.getInchiKey(inchis[0]);
+		try {
 		
-		return inchis;
+			inchi.inchi = indigoInchi.getInchi(mol);
+			inchi.inchiKey = indigoInchi.getInchiKey(inchi.inchi);
+			inchi.inchiKey1 = inchi.inchiKey != null ? inchi.inchiKey.substring(0, 14) : null;
+			
+			return inchi;
+		} catch (Exception ex) {
+			return null;
+		}
+				
+	}
+	
+	public static Inchi toInchiIndigo(String mol) {
+		try {
+			Indigo indigo = new Indigo();
+			indigo.setOption("ignore-stereochemistry-errors", true);
+
+			IndigoInchi indigoInchi = new IndigoInchi(indigo);
+
+			IndigoObject m = indigo.loadMolecule(mol);
+
+			Inchi inchi=new Inchi();
+			inchi.inchi = indigoInchi.getInchi(m);
+			inchi.inchiKey = indigoInchi.getInchiKey(inchi.inchi);
+			inchi.inchiKey1 = inchi.inchiKey != null ? inchi.inchiKey.substring(0, 14) : null;
+			
+			return inchi;
+			
+		} catch ( IndigoException ex ) {
+//			log.error(ex.getMessage());
+			return null;
+		}
 	}
 
 }

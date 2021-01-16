@@ -1,19 +1,22 @@
 package ToxPredictor.Database;
 
+import java.util.ArrayList;
+
 import org.openscience.cdk.AtomContainer;
 
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 
 public class DSSToxRecord {
-	public String cas = "";
-	public String name = "";
-	public String cid = "";
-	public String sid = "";
-	public String gsid = "";
-	public String smiles = "";
-	public String inchi = "";
-	public String inchiKey = "";
-	public String inchiKey1 = "";
+	public String cas;
+	public String name;
+	public String cid;
+	public String sid;
+	public String gsid;
+	public String smiles;
+	public String inchi;
+	public String inchiKey;
+	public String inchiKey1;
+	public String mol="";
 
 	public static String strCAS = "CAS";//Need it to be capitalized for things like the batch table
 	public static String strName = "name";
@@ -24,9 +27,10 @@ public class DSSToxRecord {
 	public static String strInchi = "inchi";
 	public static String strInchiKey = "inchiKey";
 	public static String strInchiKey1 = "inchiKey1";
+	public static String strMol = "mol";
 
 	public static String[] fieldNames = { strCAS, strName, strCID, strSID, strGSID, strSmiles, strInchi, strInchiKey,
-			strInchiKey1 };
+			strInchiKey1 ,strMol};
 	
 	public static DSSToxRecord createDSSToxRecord(AtomContainer m) throws Exception {
 		DSSToxRecord rec;
@@ -43,7 +47,13 @@ public class DSSToxRecord {
 		return rec;
 	}
 	
-	
+	public static void  assignDSSToxInfoFromFirstRecord(AtomContainer m,ArrayList<DSSToxRecord> recs) {
+		if ( recs.size()> 0 ) {
+			DSSToxRecord.assignFromDSSToxRecord(m, recs.get(0));
+		}
+		
+	}
+
 	
 	public static void assignFromDSSToxRecord(AtomContainer m, DSSToxRecord rec) {
 	
@@ -60,16 +70,7 @@ public class DSSToxRecord {
 
 	public static void clearProperties(AtomContainer m) {
 //		m.setProperty(strCAS, "C_"+System.currentTimeMillis());
-		TaskStructureSearch.assignIDFromStructure(m);
-		
-		m.setProperty(strName, null);
-		m.setProperty(strCID,null);//store gsid so dont need to look up later
-		m.setProperty(strSID,null);//store gsid so dont need to look up later
-		m.setProperty(strGSID,null);//store gsid so dont need to look up later
-		m.setProperty(strInchi, null);
-		m.setProperty(strInchiKey, null);
-		m.setProperty(strInchiKey1, null);
-		m.setProperty(strSmiles, null);
+		ResolverDb2.assignRecordByStructureNotInDB(m);		
 	}
 	
 	public String toString() {

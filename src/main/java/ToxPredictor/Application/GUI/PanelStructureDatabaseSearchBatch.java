@@ -6,6 +6,8 @@ import java.awt.event.*;
 import javax.vecmath.Point2d;
 
 import java.util.ArrayList;
+import java.util.Vector;
+
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
@@ -13,6 +15,7 @@ import javax.swing.table.AbstractTableModel;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Application.GUI.PanelBatchChemicals.MyTableModel;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.Utilities.*;
 
 
@@ -22,20 +25,27 @@ import org.openscience.cdk.interfaces.*;
 
 public class PanelStructureDatabaseSearchBatch extends JPanel {
 
+	public final static String strOptionAutomatic="Automatic";
+	public final static String strOptionCAS="CAS (e.g. 71-43-2)";
+	public final static String strOptionName="Name (e.g benzene)";
+	public final static String strOptionSmiles="Smiles (e.g. CCO)";
 
 	public JTextArea jtfIdentifiers = new JTextArea();
 
-	public ButtonGroup bg=new ButtonGroup();
-	public JRadioButton jrbCAS=new JRadioButton();
-	public JRadioButton jrbSmiles = new JRadioButton();
-	public JRadioButton jrbName = new JRadioButton();
+	public JComboBox jcbOptions=new JComboBox();
+	
+//	public ButtonGroup bg=new ButtonGroup();
+//	public JRadioButton jrbAutomatic=new JRadioButton();
+//	public JRadioButton jrbCAS=new JRadioButton();
+//	public JRadioButton jrbSmiles = new JRadioButton();
+//	public JRadioButton jrbName = new JRadioButton();
 //	public JRadioButton jrbExtraOption=new JRadioButton();	
 	JButton jbDrawChemical=new JButton();
 	JButton jbDelete=new JButton();
 	JButton jbClear=new JButton();
 	
 	
-	JLabel jlBatchNote=new JLabel("Double click to edit batch list chemicals");
+//	JLabel jlBatchNote=new JLabel("Double click to edit batch list chemicals");
 	JScrollPane scrollPane;
 	JButton jbSearch=new JButton();
 	
@@ -65,40 +75,29 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		int textHeight=20;
 		
 //		int vspacing=15;
-		int vspacing=(this.getHeight()-7*textHeight)/10;
+		int vspacing=(this.getHeight()-5*textHeight)/10;
 		
+		
+		Vector<String>options=new Vector<>();
+		options.add(strOptionAutomatic);
+		options.add(strOptionCAS);
+		options.add(strOptionName);
+		options.add(strOptionSmiles);
+		
+		jcbOptions=new JComboBox(options);
+		
+	
 		jtfIdentifiers.setName("jtfIdentifiers");
 		scrollPane= new JScrollPane(jtfIdentifiers);
         scrollPane.setSize(this.getWidth()-3*inset-radialwidth,6*textHeight+6*vspacing);
         scrollPane.setLocation(this.getWidth()-inset-scrollPane.getWidth(),inset);
-
         
-		jrbCAS.setText("CAS (e.g. 71-43-2):");
-		jrbCAS.setSize(radialwidth, textHeight);
-		jrbCAS.setLocation(20, 30);
-	    jrbCAS.addActionListener(aa);
-		jrbCAS.setActionCommand("jrbCAS");
+		jcbOptions.setSize(radialwidth, textHeight);
+		jcbOptions.setLocation(20, 30);
+		jcbOptions.addActionListener(aa);
+		jcbOptions.setActionCommand("jrbAutomatic");
 
-
-		jrbSmiles.setText("Smiles (e.g. CCO):");
-		jrbSmiles.setSize(radialwidth, textHeight);
-		jrbSmiles.setLocation(20, (int)jrbCAS.getLocation().getY()+textHeight+vspacing);
-	    jrbSmiles.addActionListener(aa);
-		jrbSmiles.setActionCommand("jrbSmiles");
-
-		
-		jrbName.setText("Name (e.g benzene):");
-		jrbName.setSize(radialwidth, textHeight);
-		jrbName.setLocation(20, (int)jrbSmiles.getLocation().getY()+textHeight+vspacing);
-	    jrbName.addActionListener(aa);
-		jrbName.setActionCommand("jrbName");
-
-//		jrbExtraOption.setSize(radialwidth, 20);		
-//		jrbExtraOption.setText("Extra option");
-//		jrbExtraOption.setLocation(20, (int)jrbName.getLocation().getY()+inset);
-//	    jrbExtraOption.addActionListener(aa);
-//		jrbExtraOption.setActionCommand("jrbExtraOption");
-//		jrbExtraOption.setToolTipText("Add tooltip");
+       
 				
 		jbSearch.setSize(120,textHeight);
 		jbSearch.setLocation(getWidth()-inset-jbSearch.getWidth(),getHeight()-vspacing-textHeight);
@@ -117,7 +116,7 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		jbDrawChemical.addActionListener(aa);
 
 		jbDrawChemical.setSize(radialwidth,20);
-		jbDrawChemical.setLocation(inset,(int)jrbName.getLocation().getY()+vspacing+textHeight);
+		jbDrawChemical.setLocation(inset,(int)jcbOptions.getLocation().getY()+vspacing+textHeight);
 		jbDrawChemical.setText("Draw chemical");
 		
 		jbDelete.setSize(radialwidth,20);
@@ -132,14 +131,12 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		jbClear.setActionCommand("jbClear");
 		jbClear.addActionListener(aa);
 
-		jlBatchNote.setSize(350,20);
-		jlBatchNote.setLocation(20,this.getHeight()-jlBatchNote.getHeight()-vspacing);
-		jlBatchNote.setForeground(Color.blue);
+//		jlBatchNote.setSize(350,20);
+//		jlBatchNote.setLocation(20,this.getHeight()-jlBatchNote.getHeight()-vspacing);
+//		jlBatchNote.setForeground(Color.blue);
 		
-		add(this.jrbCAS);
-		add(this.jrbSmiles);
-		add(this.jrbName);
-		this.add(jlBatchNote);
+		add(this.jcbOptions);
+//		this.add(jlBatchNote);
 		
 		this.add(jbDrawChemical);
 		this.add(jbDelete);
@@ -167,7 +164,7 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		this.setSize(width,height);
 //		this.setBorder(BorderFactory.createLineBorder(Color.black));
 		
-		TitledBorder border = new TitledBorder("Search the database by CAS, SMILES, or Name (one per line)");
+		TitledBorder border = new TitledBorder("Search the database by CAS, SMILES, Name, InChi, InChiKey, or DTXSID (one per line)");
 	    border.setTitleJustification(TitledBorder.LEFT);
 	    border.setTitlePosition(TitledBorder.TOP);
 	    this.setBorder(border);
@@ -187,14 +184,9 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		
 		this.SetupSimpleControls();
 		
-		
-		bg.add(jrbCAS);
-		bg.add(jrbSmiles);
-		bg.add(jrbName);
-//		bg.add(jrbExtraOption);
-		
+				
 		add(this.scrollPane);
-		this.jrbCAS.doClick();			
+		this.jcbOptions.setSelectedIndex(0);			
 		this.setVisible(false);
 		
 	}
@@ -218,11 +210,15 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
     	
     	int type=-1;
     	
-    	if (this.jrbSmiles.isSelected()) {
+    	String option=(String)this.jcbOptions.getSelectedItem();
+    	
+    	if (option.contentEquals(strOptionAutomatic)) {
+    		type=TaskStructureSearch.TypeAny;
+    	} else if (option.contentEquals(strOptionSmiles)) {
     		type=TaskStructureSearch.TypeSmiles;
-    	} else if (this.jrbCAS.isSelected()) {
+    	} else if (option.contentEquals(strOptionCAS)) {
     		type=TaskStructureSearch.TypeCAS;
-    	} else if (this.jrbName.isSelected()) {
+    	} else if (option.contentEquals(strOptionName)) {
     		type=TaskStructureSearch.TypeName;
     	}
     	
@@ -253,12 +249,13 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 				
 			if (identifier.isEmpty()) continue;
 			
-			if (jrbCAS.isSelected()) {
-				ids+=parseSearchCAS(identifier);
-			} else {
-				ids+=identifier;
-			}
-			ids+="\n";
+			String option=(String)jcbOptions.getSelectedItem();
+			
+			if (option.contentEquals(strOptionCAS) && ResolverDb2.isCAS(identifier)) 
+				identifier=ResolverDb2.parseSearchCAS(identifier);
+														
+			ids+=identifier+"\n";			
+			
 		}
     	
     	
@@ -299,37 +296,7 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 	}
 	
 	
-	public static String parseSearchCAS(String CAS) {
-		String srchCAS = CAS.trim();
-		
-		if (srchCAS.indexOf("-")>-1) {	//kill off zeros in front:
-			String part1, part2;
-			part1 = (Integer.parseInt(srchCAS.substring(0, srchCAS.indexOf("-"))))
-					+ "";
-			part2 = srchCAS.substring(srchCAS.indexOf("-"), srchCAS.length());
-			srchCAS = part1 + part2;
-		
-		} else { //missing dashes- try to convert it:
-			String temp=srchCAS;
-			String part1,part2,part3;
-			
-			if (temp.length()>=4) {
-				part3=temp.substring(temp.length()-1,temp.length());
-				temp=temp.substring(0,temp.length()-1);
-
-				part2=temp.substring(temp.length()-2,temp.length());
-				temp=temp.substring(0,temp.length()-2);
-
-				part1=temp;
-				srchCAS=part1+"-"+part2+"-"+part3;
-			} else {
-				return CAS;
-			}
-		}
-
-		return srchCAS;
-		
-	}
+	
 	
 	
 

@@ -13,6 +13,7 @@ import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.inchi.InChIGenerator;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
+import org.openscience.cdk.inchi.InChIToStructure;
 import org.openscience.cdk.interfaces.IAtom;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IBond;
@@ -22,6 +23,12 @@ import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.CDKHydrogenAdder;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
+
+import com.epam.indigo.Indigo;
+import com.epam.indigo.IndigoException;
+import com.epam.indigo.IndigoInchi;
+import com.epam.indigo.IndigoObject;
+
 
 import net.sf.jniinchi.INCHI_OPTION;
 import net.sf.jniinchi.INCHI_RET;
@@ -46,7 +53,11 @@ public class CDKUtilities {
 		return null;
 	}
 
-	public static String[] generateInChiKey(IAtomContainer ac) {
+	
+	
+	
+	
+	public static Inchi generateInChiKey(IAtomContainer ac) {
 		String warning = "";
 
 		try {
@@ -85,22 +96,55 @@ public class CDKUtilities {
 				warning = "InChI failed: " + ret.toString() + " [" + gen.getMessage() + "]";
 			}
 
-			String inchi = gen.getInchi();
-			String inchiKey = gen.getInchiKey();
-			String[] result = { inchi, inchiKey, warning };
+			Inchi inchi=new Inchi();
+			inchi.inchi = gen.getInchi();
+			inchi.inchiKey = gen.getInchiKey();
+			inchi.warning=warning;
+			
 
-			return result;
+			return inchi;
 
 			// TODO: distinguish between singlet and undefined spin multiplicity
 			// TODO: double bond and allene parities
 			// TODO: problem recognising bond stereochemistry
 
 		} catch (CDKException | IllegalArgumentException ex) {
-			String[] result = { null, null, ex.getMessage() };
-			return result;
+			Inchi inchi=new Inchi();
+			inchi.warning=ex.getMessage();					
+			return inchi;
 		}
 	}
 
+	public static AtomContainer getAtomContainer(String inchi) {
+		// Generate factory - throws CDKException if native code does not load
+		InChIGeneratorFactory factory;
+		try {
+			factory = InChIGeneratorFactory.getInstance();
+			
+			// Get InChIToStructure
+			InChIToStructure intostruct = factory.getInChIToStructure(inchi, DefaultChemObjectBuilder.getInstance());
+
+			INCHI_RET ret = intostruct.getReturnStatus();
+			if (ret == INCHI_RET.WARNING) {
+			// Structure generated, but with warning message
+			System.out.println("InChI warning: " + intostruct.getMessage());
+			} else if (ret != INCHI_RET.OKAY) {
+			// Structure generation failed
+			throw new CDKException("Structure generation failed failed: " + ret.toString()
+			+ " [" + intostruct.getMessage() + "]");
+			}
+
+			AtomContainer container = (AtomContainer) intostruct.getAtomContainer();
+			return container;
+
+		} catch (CDKException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
 	public static String FixSmiles(String Smiles) {
 		Smiles = Smiles.replace("CL", "Cl");
 		Smiles = Smiles.replace("(H)", "([H])");
@@ -293,9 +337,10 @@ public class CDKUtilities {
 			String smiles = "CC(=O)OC1=CC=CC=C1C(=O)O";// aspirin
 			SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 			AtomContainer molecule = (AtomContainer) sp.parseSmiles(smiles);
-			String[] result = CDKUtilities.generateInChiKey(molecule);
-			String InChi = result[0];
-			String InChiKey = result[1];
+			Inchi inchi = CDKUtilities.generateInChiKey(molecule);
+			
+			String InChi = inchi.inchi;
+			String InChiKey = inchi.inchiKey;
 
 			System.out.println("SMILES:\t" + smiles);
 			System.out.println("InChI:\t" + InChi);
@@ -321,5 +366,7 @@ public class CDKUtilities {
 		CDKUtilities.testINCHI();
 
 	}
+	
+	
 
 }

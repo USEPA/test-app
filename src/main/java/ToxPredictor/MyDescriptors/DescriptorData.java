@@ -3595,6 +3595,48 @@ public class DescriptorData {
 	}
 	
 	/**
+	 * Writes out descriptors to readable file for looking at all descriptors in
+	 * a single vertical table
+	 * 
+	 * @param m
+	 * @param dd
+	 */
+	public Vector<String> toStringVector(String Delimiter) {
+		Vector<String>vals=new Vector<>();
+		
+		try {
+			
+			DecimalFormat myD8 = new DecimalFormat("0.########");
+			String[] varlist = varlist2d;
+
+			
+			for (int i = 0; i <= varlist.length - 1; i++) {
+				Field myField = this.getClass().getField(varlist[i]);
+				String[] names = (String[]) myField.get(this);
+				for (int j = 0; j <= names.length - 1; j++) {
+					Field myField2 = this.getClass().getField(names[j]);
+
+					String val = myD8.format(myField2.getDouble(this));
+
+					vals.add(names[j] + Delimiter + val);
+				}
+			}
+
+			for (int i = 0; i < this.strFragments.length; i++) {
+				String strVar = this.strFragments[i];
+				double Val = (Double) this.FragmentList.get(strVar);
+				vals.add(strVar + Delimiter + Val);
+			}
+			
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return vals;
+	}
+	
+	/**
 	 * Store as LinkedHashMap so values are in the same order as we put them in
 	 * Also great for exporting later to csv
 	 * 	 * 
