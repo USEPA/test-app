@@ -72,7 +72,7 @@ public class GenerateRecordsFromTEST {
 			
 			DescriptorData dd=WebTEST4.goDescriptors(ac);			
 						
-			List<TESTPredictedValue>vecTPV=WebTEST4.go2(ac, dd,cp);
+			List<TESTPredictedValue>vecTPV=WebTEST4.go2(true,ac, dd,cp);
 		
 			
 			long t1=System.currentTimeMillis();

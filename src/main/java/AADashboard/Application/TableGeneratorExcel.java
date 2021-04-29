@@ -1,7 +1,9 @@
 package AADashboard.Application;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -280,10 +282,78 @@ public class TableGeneratorExcel {
 
 		sheet.getRow(2).setHeightInPoints(120);	  
 
+		writeHeaderFinalScoreTab(workbook, sheet);
+
+		Hashtable<String, CellStyle> htStyles = createScoreStylesHashtable(workbook);
+
+		//	        for (int i=0;i<1000;i++) {
+		for (int i=0;i<chemicals.size();i++) {
+			XSSFRow row=sheet.createRow(i+3);	 
+
+			//	        	if (i%100==0) {
+			//	        		System.out.println(i);	        		
+			//	        	}
+
+			Chemical chemical=chemicals.get(i);
+			ArrayList<Score> scores=chemical.scores;
+
+			XSSFCell cell0=row.createCell(0);
+			cell0.setCellValue(chemical.CAS);
+			//	        	createCell(cell0, chemical.CAS, true);
+
+			for (int j=0;j<scores.size();j++) {	
+				Score score=scores.get(j);
+				String final_score=score.final_score;
+				XSSFCell cell=row.createCell(j+1);
+				//    				createCell(cell,final_score,cs,getColorShort(final_score));
+				
+				if (score.records.size()>0) {
+					if (final_score.contentEquals("N/A")) final_score="I";
+					cell.setCellValue(final_score);
+					cell.setCellStyle(htStyles.get(final_score));
+
+				} else {
+//					fw.write("\t\t<td bgcolor="+getColor(final_score)+" align=center width="+width+"px>"+final_score+"</td>\r\n");
+					cell.setCellValue("");
+					cell.setCellStyle(htStyles.get(final_score));
+				}
+
+				
+				
+			}
+		}
+
+		sheet.createFreezePane( 0, 3, 0, 3 );
+
+	}
+
+	private Hashtable<String, CellStyle> createScoreStylesHashtable(XSSFWorkbook workbook) {
+		Hashtable<String,CellStyle>htStyles=new Hashtable<>();
+
+		String []finalScores= {"VH","H","M","L","N/A","I"};
+
+		for (String score:finalScores) {
+			CellStyle cs=workbook.createCellStyle();
+			cs.setVerticalAlignment(VerticalAlignment.CENTER);
+			cs.setAlignment(HorizontalAlignment.CENTER);
+			cs.setBorderBottom(BorderStyle.MEDIUM);
+			cs.setBorderTop(BorderStyle.MEDIUM);
+			cs.setBorderRight(BorderStyle.MEDIUM);
+			cs.setBorderLeft(BorderStyle.MEDIUM);
+			cs.setFillForegroundColor(getColorShort(score));
+			cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+			htStyles.put(score, cs);
+		}
+		return htStyles;
+	}
+
+	private void writeHeaderFinalScoreTab(XSSFWorkbook workbook, XSSFSheet sheet) {
+		
 		XSSFCellStyle styleBorderWithRotate=getStyleBorderWithRotate(workbook);
 		//		XSSFCellStyle styleRotate=getStyleRotate(workbook);
 		XSSFCellStyle styleBorder=getStyleBorder(workbook);
 
+		
 		createMergedRegion(sheet, "$A$1:$A$3", "CAS",styleBorder);
 		createMergedRegion(sheet, "$B$1:$P$1", "Human Health Effects",styleBorder);
 		createMergedRegion(sheet, "$Q$1:$R$1", "Ecotoxicity",styleBorder);
@@ -317,51 +387,6 @@ public class TableGeneratorExcel {
 		createMergedRegion(sheet, "$R$2:$R$3", Chemical.strChronic_Aquatic_Toxicity,styleBorderWithRotate);
 		createMergedRegion(sheet, "$S$2:$S$3", Chemical.strPersistence,styleBorderWithRotate);
 		createMergedRegion(sheet, "$T$2:$T$3", Chemical.strBioaccumulation,styleBorderWithRotate);
-
-		Hashtable<String,CellStyle>htStyles=new Hashtable<>();
-
-		String []finalScores= {"VH","H","M","L","N/A"};
-
-		for (String score:finalScores) {
-			CellStyle cs=workbook.createCellStyle();
-			cs.setVerticalAlignment(VerticalAlignment.CENTER);
-			cs.setAlignment(HorizontalAlignment.CENTER);
-			cs.setBorderBottom(BorderStyle.MEDIUM);
-			cs.setBorderTop(BorderStyle.MEDIUM);
-			cs.setBorderRight(BorderStyle.MEDIUM);
-			cs.setBorderLeft(BorderStyle.MEDIUM);
-			cs.setFillForegroundColor(getColorShort(score));
-			cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-			htStyles.put(score, cs);
-		}
-
-		//	        for (int i=0;i<1000;i++) {
-		for (int i=0;i<chemicals.size();i++) {
-			XSSFRow row=sheet.createRow(i+3);	 
-
-			//	        	if (i%100==0) {
-			//	        		System.out.println(i);	        		
-			//	        	}
-
-			Chemical chemical=chemicals.get(i);
-			ArrayList<Score> scores=chemical.scores;
-
-			XSSFCell cell0=row.createCell(0);
-			cell0.setCellValue(chemical.CAS);
-			//	        	createCell(cell0, chemical.CAS, true);
-
-			for (int j=0;j<scores.size();j++) {	
-				Score score=scores.get(j);
-				String final_score=score.final_score;
-				XSSFCell cell=row.createCell(j+1);
-				//    				createCell(cell,final_score,cs,getColorShort(final_score));
-				cell.setCellValue(final_score);
-				cell.setCellStyle(htStyles.get(final_score));
-			}
-		}
-
-		sheet.createFreezePane( 0, 3, 0, 3 );
-
 	}
 	
 	public static short getColorShort(String val) {
@@ -373,8 +398,10 @@ public class TableGeneratorExcel {
 			return IndexedColors.LIGHT_ORANGE.getIndex();
 		} else if (val.equals("VH")) {
 			return IndexedColors.RED.getIndex();
-		} else {
+		} else if (val.equals("I")) {
 			return IndexedColors.GREY_25_PERCENT.getIndex();
+		} else {
+			return IndexedColors.WHITE.getIndex();
 		}
 
 	}
@@ -436,5 +463,67 @@ public class TableGeneratorExcel {
 		cs.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 		cell.setCellStyle(cs);
 		cell.setCellValue(value);
+	}
+	
+	public static void writeExcelFile(File inFile,XSSFWorkbook workbook) throws FileNotFoundException, IOException {
+		FileOutputStream out = new FileOutputStream(new File(inFile.getAbsolutePath()));
+		workbook.write(out);
+		out.close();
+	}
+	
+	public static void main(String[] args) {
+		TableGeneratorExcel tgExcel = new TableGeneratorExcel();
+		XSSFWorkbook workbook = new XSSFWorkbook();
+		
+		Chemicals chemicals=new Chemicals();
+		Chemical chemical = createSampleChemical();
+		chemicals.add(chemical);
+		
+		tgExcel.writeFinalScoresToWorkbook(chemicals, workbook);
+        tgExcel.writeScoreRecordsToWorkbook(chemicals,workbook);
+        
+        File inFile=new File("test.xlsx");
+        
+        try {
+			writeExcelFile(inFile, workbook);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+
+	}
+
+	public static Chemical createSampleChemical() {
+		Chemical chemical=new Chemical();
+		chemical.CAS="71-43-2";
+		chemical.name="Benzene";
+		//TODO store SID so can retrieve dashboard URL later
+				
+		chemical.scores.get(0).final_score="M";
+		chemical.scores.get(1).final_score="L";
+		chemical.scores.get(2).final_score="VH";
+		chemical.scores.get(3).final_score="VH";
+		chemical.scores.get(4).final_score="VH";
+		chemical.scores.get(5).final_score="H";
+		chemical.scores.get(6).final_score="H";
+		chemical.scores.get(7).final_score="H";
+		chemical.scores.get(8).final_score="H";
+		chemical.scores.get(9).final_score="N/A";
+		chemical.scores.get(10).final_score="H";
+		chemical.scores.get(11).final_score="H";
+		chemical.scores.get(12).final_score="I";
+		chemical.scores.get(13).final_score="H";
+		chemical.scores.get(14).final_score="H";
+		chemical.scores.get(15).final_score="H";
+		chemical.scores.get(16).final_score="M";
+		chemical.scores.get(17).final_score="H";
+		chemical.scores.get(18).final_score="H";
+		
+		for (int i=0;i<chemical.scores.size();i++) {
+			Score score=chemical.scores.get(i);
+			ScoreRecord sr=new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);//dummy score record
+			score.records.add(sr);
+		}
+		return chemical;
 	}
 }

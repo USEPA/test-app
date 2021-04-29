@@ -1,4 +1,4 @@
-package ToxPredictor.Application.GUI;
+package ToxPredictor.Application.GUI.Table;
 
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -9,6 +9,8 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+
+import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableCellRenderer;
 
 public class TestJTableMultiline extends JFrame {
 	

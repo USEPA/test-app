@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
+import javax.swing.table.TableModel;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -456,7 +457,7 @@ public class TaskCalculations2 {
 		statMessage = message;
 	}
 
-	private AtomContainer calculate(String CAS, AtomContainer ac) {
+	private AtomContainer calculate(String CAS, AtomContainer ac,boolean areDashboardStructuresAvailable) {
 				
 		TESTApplication ta=(TESTApplication)gui;
 		
@@ -482,8 +483,7 @@ public class TaskCalculations2 {
 		
 		try {
 			dd=WebTEST4.goDescriptors(ac);
-			
-			
+
 //			System.out.println(dd.to_JSONVector_String(false));			
 //			JsonArray ja=dd.toJSONVector();
 //			JsonObject jo=new JsonObject();		
@@ -492,12 +492,11 @@ public class TaskCalculations2 {
 //			GsonBuilder builder = new GsonBuilder();
 //			Gson gson = builder.create();
 //			System.out.println(gson.toJson(jo));
-			
-			
-			
+						
 			error=(String) ac.getProperty("Error");
-			
-			listTPV=WebTEST4.go2(ac,dd, params);
+			listTPV=WebTEST4.go2(areDashboardStructuresAvailable,ac,dd, params);
+
+
 
 			
 		} catch (Exception ex) {
@@ -519,6 +518,7 @@ public class TaskCalculations2 {
 			ex.printStackTrace();
 		}
 
+
 		
 		if (!endpoint.equals(TESTConstants.ChoiceDescriptors)) {
 
@@ -528,11 +528,14 @@ public class TaskCalculations2 {
 			tpv.index=new Integer(index);
 			tpv.query=query;			
 			
+//			long t1=System.currentTimeMillis();
 			ta.panelResults.addPrediction(tpv);
 				
 			if (method.contentEquals(TESTConstants.ChoiceConsensus)) {
 				ta.panelResults.addPredictionAllMethods(tpv);
 			} 
+//			long t2=System.currentTimeMillis();
+//			System.out.println("Time to update table:"+(t2-t1)+ " milliseconds");
 			
 			
 //			if (!TESTConstants.isBinary(endpoint)) {
@@ -572,6 +575,8 @@ public class TaskCalculations2 {
 
 
 		}
+		
+		
 		return ac;
 
 	}
@@ -641,51 +646,49 @@ public class TaskCalculations2 {
 					taskType=TESTConstants.typeTaskBatch;
 				}
 			}
-			
-			TableGeneratorHTML tgHTML = new TableGeneratorHTML();
-			
+			TESTApplication ta=(TESTApplication)gui;
 
-			String outputHTMLFileName=null;
-			String outputHTMLFilePath=null;
-			
-			String outputHTMLFolder=fileOutputFolder.getAbsolutePath()+File.separator+"HazardProfiles";
-
-			String str1="HazardRecords"+File.separator+"HazardRecords_";
-
-			
-			
-			if (taskType==TESTConstants.typeTaskBatch) {
-				String runNumber = GetRunNumberAA();
-				//e.g. MyToxicity/HazardProfiles/HazardProfiles1.html:
-				outputHTMLFileName="HazardProfiles"+runNumber+".html";
-
-			} else {
-				AtomContainer ac=(AtomContainer)moleculeSet.getAtomContainer(0);
-				String CAS=ac.getProperty("CAS");
-				//e.g. MyToxicity/HazardProfiles/HazardProfile_CAS.html
-				outputHTMLFileName="HazardProfile_"+CAS+".html";
-			}
-			
-			outputHTMLFilePath=outputHTMLFolder+File.separator+outputHTMLFileName;
-			
-			String excelFileName=outputHTMLFileName.replace(".html", ".xlsx");
-	        String excelFilePath=outputHTMLFolder+File.separator+excelFileName;
+//			TableGeneratorHTML tgHTML = new TableGeneratorHTML();
+//			
+//			String outputHTMLFileName=null;
+//			String outputHTMLFilePath=null;
+//			
+//			String outputHTMLFolder=fileOutputFolder.getAbsolutePath()+File.separator+"HazardProfiles";
+//			String str1="HazardRecords"+File.separator+"HazardRecords_";
+//
+//			
+//			if (taskType==TESTConstants.typeTaskBatch) {
+//				String runNumber = GetRunNumberAA();
+//				//e.g. MyToxicity/HazardProfiles/HazardProfiles1.html:
+//				outputHTMLFileName="HazardProfiles"+runNumber+".html";
+//
+//			} else {
+//				AtomContainer ac=(AtomContainer)moleculeSet.getAtomContainer(0);
+//				String CAS=ac.getProperty("CAS");
+//				//e.g. MyToxicity/HazardProfiles/HazardProfile_CAS.html
+//				outputHTMLFileName="HazardProfile_"+CAS+".html";
+//			}
+//			
+//			outputHTMLFilePath=outputHTMLFolder+File.separator+outputHTMLFileName;
+//			
+//			String excelFileName=outputHTMLFileName.replace(".html", ".xlsx");
+//	        String excelFilePath=outputHTMLFolder+File.separator+excelFileName;
 
 
 			try {
-				Path directory = Paths.get(outputHTMLFolder);
-
-				if (!Files.exists(directory)) {
-					Files.createDirectories(directory);
-				}
-
-				//***************************************************************************************
-				// Create writer for comparison webpage:
-				FileWriter fw=new FileWriter(outputHTMLFilePath);
-				
-				//***************************************************************************************
-				// Write header of comparison table webpage:
-				tgHTML.writeHeaderForGUI(fw);
+//				Path directory = Paths.get(outputHTMLFolder);
+//
+//				if (!Files.exists(directory)) {
+//					Files.createDirectories(directory);
+//				}
+//
+//				//***************************************************************************************
+//				// Create writer for comparison webpage:
+//				FileWriter fw=new FileWriter(outputHTMLFilePath);
+//				
+//				//***************************************************************************************
+//				// Write header of comparison table webpage:
+//				tgHTML.writeHeaderForGUI(fw);
 				//***************************************************************************************
 
 				Chemicals chemicals=new Chemicals();
@@ -719,7 +722,6 @@ public class TaskCalculations2 {
 					error=error.trim();
 					ac.setProperty("Error", error);
 
-					
 
 					statMessage = "Molecule ID = " + CAS + " (" + (i + 1) + " of " + moleculeSet.getAtomContainerCount() + ")";
 					Chemical chemical=aad.runChemicalForGUI(CAS, name, ac,cp);
@@ -727,89 +729,80 @@ public class TaskCalculations2 {
 					//Get records from toxval database:
 					
 
-					String relativeRecordFolderPath=str1+CAS;
-					String recordFolderPath=outputHTMLFolder+File.separator+relativeRecordFolderPath;
+//					String relativeRecordFolderPath=str1+CAS;
+//					String recordFolderPath=outputHTMLFolder+File.separator+relativeRecordFolderPath;
+//					
+//					//***************************************************************************************
+//					// Write separate webpage for records for each score
+//					for (Score score:chemical.getScores()) {
+//						tgHTML.writeRecordPage2(CAS, score,recordFolderPath);	
+//					}
+//					//***************************************************************************************
+//					// Write a row in comparison table webpage:
+//					tgHTML.WriteRowInComparisonTable(fw, ac,chemical, relativeRecordFolderPath);
+//					//***************************************************************************************
+//
+//					SaveStructureToFile.CreateImageFile(ac, "structure_"+CAS,recordFolderPath);
 					
-					//***************************************************************************************
-					// Write separate webpage for records for each score
-					for (Score score:chemical.getScores()) {
-						tgHTML.writeRecordPage2(CAS, score,recordFolderPath);	
-					}
-					//***************************************************************************************
-					// Write a row in comparison table webpage:
-					tgHTML.WriteRowInComparisonTable(fw, ac,chemical, relativeRecordFolderPath);
-					//***************************************************************************************
-
-					SaveStructureToFile.CreateImageFile(ac, "structure_"+CAS,recordFolderPath);
 					chemicals.add(chemical);
+					ta.panelResults.addChemical(chemical);
 
 					//WebTEST4.printJSON(chemical);
 					if (done)
 						return;
 
 				}
-				//***************************************************************************************
-				// Finish comparison webpage:
-				tgHTML.WriteRestOfComparisonTable(fw);
-				fw.close();
-				//***************************************************************************************
-				
-				
-				TableGeneratorExcel tgExcel = new TableGeneratorExcel();
-
-				
-		        XSSFWorkbook workbook = new XSSFWorkbook();
-		        tgExcel.writeFinalScoresToWorkbook(chemicals, workbook);
-		        tgExcel.writeScoreRecordsToWorkbook(chemicals,workbook);
+//				//***************************************************************************************
+//				// Finish comparison webpage:
+//				tgHTML.WriteRestOfComparisonTable(fw);
+//				fw.close();
+//				//***************************************************************************************
+//				
+//				
+//				TableGeneratorExcel tgExcel = new TableGeneratorExcel();
+//
+//				
+//		        XSSFWorkbook workbook = new XSSFWorkbook();
+//		        tgExcel.writeFinalScoresToWorkbook(chemicals, workbook);
+//		        tgExcel.writeScoreRecordsToWorkbook(chemicals,workbook);
+//		        
+//		        //TODO add option for json output
+//		        String jsonFilePath=outputHTMLFilePath.replace(".html", ".json");
+//		        chemicals.writeToFile(jsonFilePath);
+//		        
+//		        if (isExcelOpen(excelFilePath)) {
+////		        	System.out.println("open");
+//		        	JOptionPane.showMessageDialog((TESTApplication)gui, "Please close "+excelFilePath);
+//		        	done = true;
+//		        	return;
+//		        			        	
+//		        } else {
+//		        	
+////		        	System.out.println("closed");
+//					FileOutputStream out = new FileOutputStream(new File(excelFilePath));
+//		            workbook.write(out);
+//		            out.close();
+//		        }
 		        
-		        //TODO add option for json output
-		        String jsonFilePath=outputHTMLFilePath.replace(".html", ".json");
-		        chemicals.writeToFile(jsonFilePath);
-			
-		        
-		        //TODO- add flag if we are generate excel or html...
-		        
-		        if (isExcelOpen(excelFilePath)) {
-//		        	System.out.println("open");
-		        	JOptionPane.showMessageDialog((TESTApplication)gui, "Please close "+excelFilePath);
-		        	done = true;
-		        	return;
-		        			        	
-		        } else {
-		        	
-//		        	System.out.println("closed");
-					FileOutputStream out = new FileOutputStream(new File(excelFilePath));
-		            workbook.write(out);
-		            out.close();
-		        }
-		        
-				
-				
 				if (done)
 					return;
 
 				done = true;
 
-//				URL myURL;
-				File htmlFile=new File(outputHTMLFilePath);
-//				File htmlFile=new File(excelFilePath);
-//				myURL=htmlFile.toURI().toURL();
-//				String strURL=myURL.toString();
-
-				if (taskType == TESTConstants.typeTaskBatch) {
-					TESTApplication f=((TESTApplication) gui);
-					f.as.addBatchFilePath(htmlFile.getAbsolutePath());
-					f.as.saveSettingsToFile();
-//					f.setupRecentBatchFiles();
-				}
-				
-				
-				//	Fix for files on EPA's network drive:
-//				strURL=strURL.replace("file:////", "file://///");
-//				BrowserLauncher launcher = new BrowserLauncher(null);
-//				launcher.openURLinBrowser(strURL);//doesnt seem to work for applet!
-				
-				MyBrowserLauncher.launch(htmlFile.toURI());
+//				File htmlFile=new File(outputHTMLFilePath);
+////				File htmlFile=new File(excelFilePath);
+////				myURL=htmlFile.toURI().toURL();
+////				String strURL=myURL.toString();
+//
+//				if (taskType == TESTConstants.typeTaskBatch) {
+//					TESTApplication f=((TESTApplication) gui);
+//					f.as.addBatchFilePath(htmlFile.getAbsolutePath());
+//					f.as.saveSettingsToFile();
+////					f.setupRecentBatchFiles();
+//				}
+//				
+//				
+//				MyBrowserLauncher.launch(htmlFile.toURI());
 
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -952,6 +945,8 @@ public class TaskCalculations2 {
 						
 			loadTrainingData(params);
 
+			boolean areDashboardStructuresAvailable=WebTEST4.areDashboardStructuresAvailable();
+			
 			for (int i = 0; i < moleculeSet.getAtomContainerCount(); i++) {
 
 				// if (i==10) break;//for debug
@@ -969,7 +964,7 @@ public class TaskCalculations2 {
 				m.setProperty("Error", error);
 				
 				
-				m=calculate(CAS, m);
+				m=calculate(CAS, m,areDashboardStructuresAvailable);
 				
 				// System.out.println("Total
 				// Memory"+Runtime.getRuntime().totalMemory());
@@ -1042,11 +1037,22 @@ public class TaskCalculations2 {
 			try {
 				
 				String ext=FileUtils.getFilenameExt(commandLineOutputFile.getName()).toLowerCase();
-								
+				
+				String tabName=f.panelResults.jtabbedPane.getTitleAt(0);
+
+				TableModel model=null;
+				if (tabName.contentEquals("Descriptors")) {
+					model=f.panelResults.tableDescriptors.getModel();			
+				} else if (tabName.contentEquals("Results")) {
+					model=f.panelResults.tableMethod.getModel();
+				} else if (tabName.contentEquals("Individual methods")) {
+					model=f.panelResults.tableAllMethods.getModel();
+				} 
+				
 				if (ext.contains("xls")) {
 					f.panelResults.writeToExcelFile(commandLineOutputFile,endpoint,method);
 				} else if (ext.contains("csv")) {
-					f.panelResults.writeToTextFile(commandLineOutputFile,endpoint);
+					f.panelResults.writeResultsToText(commandLineOutputFile,model);
 				} else if (ext.contains("htm")) {
 					f.panelResults.writeToHTMLFile(commandLineOutputFile,endpoint);
 				} else {

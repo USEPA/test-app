@@ -1042,10 +1042,13 @@ public class TableGeneratorHTML {
 			Score score=chemical.getScores().get(i);
 			String final_score=score.final_score;
 			String hazard_name=score.hazard_name;			
-			if (score.records.size()>0) {	
+			
+			if (score.records.size()>0) {
+				if (final_score.contentEquals("N/A")) final_score="I";			
 				fw.write("\t\t<td bgcolor="+getColor(final_score)+" align=center width="+width+"px><a href=\""+relativePathRecordFolder+"/"+hazard_name+"_"+chemical.CAS+".html\">"+final_score+"</a></td>\r\n");
 			} else {
-				fw.write("\t\t<td bgcolor="+getColor(final_score)+" align=center width="+width+"px>"+final_score+"</td>\r\n");
+//				fw.write("\t\t<td bgcolor="+getColor(final_score)+" align=center width="+width+"px>"+final_score+"</td>\r\n");
+				fw.write("\t\t<td bgcolor=white align=center width="+width+"px><br></td>\r\n");
 				fw.flush();
 			}
 		}

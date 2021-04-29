@@ -1,4 +1,4 @@
-package ToxPredictor.Application.GUI;
+package ToxPredictor.Application.GUI.Table;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -20,6 +20,7 @@ import javax.swing.table.TableColumnModel;
 import org.apache.logging.log4j.util.Strings;
 
 import ToxPredictor.Application.TESTConstants;
+import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableHeaderRenderer;
 import ToxPredictor.MyDescriptors.DescriptorData;
 
 
@@ -47,7 +48,7 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 		table.repaint();
 	}
 
-	MyTableModelDescriptors(String [] colNames) {
+	public MyTableModelDescriptors(String [] colNames) {
 		vecDD=new Vector<>();
 		columnNames=colNames;		
 	}
@@ -95,7 +96,7 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 
 	}
 	
-	void setupTable(JTable table) {
+	public void setupTable(JTable table) {
 		this.table=table;
 		
 		JTableHeader header = table.getTableHeader();

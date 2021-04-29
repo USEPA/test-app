@@ -1,4 +1,4 @@
-package ToxPredictor.Application.GUI;
+package ToxPredictor.Application.GUI.Table.Renderer;
 
 import java.awt.Component;
 
@@ -7,7 +7,7 @@ import javax.swing.JTextArea;
 import javax.swing.LookAndFeel;
 import javax.swing.table.TableCellRenderer;
 
-class MultiLineTableHeaderRenderer extends JTextArea implements TableCellRenderer
+public class MultiLineTableHeaderRenderer extends JTextArea implements TableCellRenderer
 {
   public MultiLineTableHeaderRenderer() {
     setEditable(false);

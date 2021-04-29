@@ -4,6 +4,7 @@ package ToxPredictor.Application.GUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.awt.image.*;
@@ -15,6 +16,7 @@ import java.io.IOException;
 
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 import org.apache.logging.log4j.util.Strings;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -33,6 +35,11 @@ import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreator;
 import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJSON;
 import ToxPredictor.Application.Calculations.TaskCalculations2;
 import ToxPredictor.Application.Calculations.WriteBatchResults;
+import ToxPredictor.Application.GUI.Table.MyTableModel;
+import ToxPredictor.Application.GUI.Table.MyTableModelAllQSARMethods;
+import ToxPredictor.Application.GUI.Table.MyTableModelDescriptors;
+import ToxPredictor.Application.GUI.Table.MyTableModelHCD;
+import ToxPredictor.Application.GUI.Table.MyTableModelHCD_ScoreRecords;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
 import ToxPredictor.MyDescriptors.DescriptorData;
@@ -40,6 +47,9 @@ import ToxPredictor.MyDescriptors.DescriptorData;
 
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
+import gov.epa.api.Chemical;
+import gov.epa.api.Chemicals;
+import gov.epa.api.Score;
 
 public class PanelResults extends JDialog {
 
@@ -47,17 +57,23 @@ public class PanelResults extends JDialog {
 	 * @param args
 	 */
 
-//	public boolean Locked=false;
+public //	public boolean Locked=false;
 	
 	JTable tableMethod = new JTable();
-	JTable tableAllMethods = new JTable();
-	JTable tableDescriptors = new JTable();
+	public JTable tableAllMethods = new JTable();
+	public JTable tableDescriptors = new JTable();
+	JTable tableHCD = new JTable();
+	JTable tableHCDScoreRecords = new JTable();
+	JTable tableHCDScoreRecords2 = new JTable();
 
-	JTabbedPane jtabbedPane;
+	public JTabbedPane jtabbedPane;
 	
 	JScrollPane scrollPane;
 	JScrollPane scrollPane2;
 	JScrollPane scrollPane3;
+	JScrollPane scrollPane4;
+	JScrollPane scrollPane5;
+	JScrollPane scrollPane6;
 	
 //	keyAdapter ka=new keyAdapter();
 	actionAdapter aa=new actionAdapter();
@@ -146,6 +162,22 @@ public class PanelResults extends JDialog {
 		scrollPane3.setLocation(scrollPane.getLocation()); //shift it over a bit
 		scrollPane3.setSize(scrollPane.getSize());
 
+		scrollPane4 = new JScrollPane(tableHCD);
+		scrollPane4.setLocation(scrollPane.getLocation()); //shift it over a bit
+		scrollPane4.setSize(scrollPane.getSize());
+
+		
+		tableHCDScoreRecords.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		tableHCDScoreRecords2.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		
+		scrollPane5 = new JScrollPane(tableHCDScoreRecords);
+		scrollPane5.setLocation(scrollPane.getLocation()); //shift it over a bit
+		scrollPane5.setSize(scrollPane.getSize());
+
+		scrollPane6 = new JScrollPane(tableHCDScoreRecords2);
+		scrollPane6.setLocation(scrollPane.getLocation()); //shift it over a bit
+		scrollPane6.setSize(scrollPane.getSize());
+
 		
 		jtabbedPane=new JTabbedPane();
 		jtabbedPane.setSize(scrollPane.getSize());
@@ -185,28 +217,74 @@ public class PanelResults extends JDialog {
 		MyTableModelDescriptors tableModelDescriptors=new MyTableModelDescriptors(colNamesDescriptors);
 		tableModelDescriptors.setupTable(tableDescriptors);
 
-//		table3.getColumnModel().getColumn(0).setPreferredWidth(25);
-
-
 	}
 	
-	
+	public void initTableModelHCD() {
+		jtabbedPane.removeAll();
+
+		jtabbedPane.add("Final Scores", scrollPane4);				
+		MyTableModelHCD tableModel=new MyTableModelHCD();
+		tableModel.setupTable(tableHCD);
+		tableHCD.getTableHeader().setPreferredSize(new Dimension(scrollPane4.getWidth(), 250));
+		
+		jtabbedPane.add("Score Records", scrollPane5);				
+		MyTableModelHCD_ScoreRecords tableModelSR=new MyTableModelHCD_ScoreRecords();
+		tableModelSR.setupTable(tableHCDScoreRecords);
+		
+		tableHCD.addMouseListener(new java.awt.event.MouseAdapter() {
+		    @Override
+		    public void mouseClicked(java.awt.event.MouseEvent evt) {
+		        int row = tableHCD.rowAtPoint(evt.getPoint());
+		        int col = tableHCD.columnAtPoint(evt.getPoint());
+		        		        
+		        if (col>=2) {
+		        	
+			        Chemical chemical=tableModel.getChemical(row);
+			        String scoreName=tableModel.getColumnName(col).trim();
+
+//		        	System.out.println(jtabbedPane.getComponentCount());
+		        	
+		        	Score score=chemical.getScore(scoreName);
+		        	
+		        	if (score.records.size()==0) return;
+		        	
+		    		jtabbedPane.add("Score Records "+scoreName+" "+chemical.CAS, scrollPane6);				
+		    		MyTableModelHCD_ScoreRecords tableModelSR=new MyTableModelHCD_ScoreRecords();
+		    		tableModelSR.setupTable(tableHCDScoreRecords2);
+		        	
+		        	for (int i=0;i<score.records.size();i++) {
+		        		tableModelSR.addScoreRecord(score.records.get(i));
+		        	}
+		        	jtabbedPane.setSelectedIndex(jtabbedPane.getComponentCount()-1);
+//		    		System.out.println(chemical.CAS+"\t"+scoreName);	
+		        }
+		    }
+		});
+		
+		
+		
+	}
+
 	
 	private void saveToExcel() {
 		
-		String filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
-		
-		if (f.endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
-			filename = "Batch_Descriptors.xlsx";
+		String filename=null;
+		String tabName0=jtabbedPane.getTitleAt(0);
+
+		if (tabName0.contentEquals("Descriptors")) {
+			filename = "Batch_Descriptors.xlsx";				
+		} else if (tabName0.contentEquals("Final Scores")) {
+			filename = "HCD Results.xlsx";
+		} else if (tabName0.contentEquals("Results")) {
+			filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
+		} else {
+			JOptionPane.showMessageDialog(f, "Invalid selection");
+			return;
 		}
 		
-		String filepath=f.as.getOutputFolderPath()+File.separator+filename;
-		
+		String filepath=f.as.getOutputFolderPath()+File.separator+filename;		
 		File of=new File(filepath);
 		
-//		System.out.println(filepath);
-		
-//		f.chooserExcel.setCurrentDirectory(of);
 		f.chooserExcel.setSelectedFile(of);
 		
 		int returnVal = f.chooserExcel.showSaveDialog(f);
@@ -242,7 +320,30 @@ public class PanelResults extends JDialog {
 		try {
 
 			this.setCursor(Utilities.waitCursor);
-			writeToExcelFile(inFile,f.endpoint,f.method);
+			
+			XSSFWorkbook workbook = new XSSFWorkbook();
+			
+			if (tabName0.contentEquals("Descriptors")) {				
+				writeResultsToExcel(workbook,tableDescriptors.getModel(),"Descriptors");
+			} else if (tabName0.contentEquals("Final Scores")) {
+				MyTableModelHCD model=(MyTableModelHCD)tableHCD.getModel();
+				Chemicals chemicals=model.getChemicals();				
+
+				TableGeneratorExcel tgExcel = new TableGeneratorExcel();
+				tgExcel.writeFinalScoresToWorkbook(chemicals, workbook);
+		        tgExcel.writeScoreRecordsToWorkbook(chemicals,workbook);
+		        
+			} else if (tabName0.contentEquals("Results")) {
+				filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
+				writeResultsToExcel(workbook,tableMethod.getModel(),f.method);
+				if (f.method.contentEquals(TESTConstants.ChoiceConsensus))
+					writeResultsToExcel(workbook,tableAllMethods.getModel(),"Individual methods");
+			} else {
+				JOptionPane.showMessageDialog(f, "Invalid selection");
+				return;
+			}
+
+			writeExcelFile(inFile, workbook);//write to file
 			this.setCursor(Utilities.defaultCursor);
 			
 //            JOptionPane.showMessageDialog(f,
@@ -274,7 +375,17 @@ public class PanelResults extends JDialog {
 		out.close();
 	}
 	
-	private void writeResultsToExcel (XSSFWorkbook workbook,AbstractTableModel tableModel,String tabName) {
+	
+	
+	public void writeExcelFile(File inFile,XSSFWorkbook workbook) throws FileNotFoundException, IOException {
+		FileOutputStream out = new FileOutputStream(new File(inFile.getAbsolutePath()));
+		workbook.write(out);
+		out.close();
+	}
+
+
+	
+	private void writeResultsToExcel (XSSFWorkbook workbook,TableModel tableModel,String tabName) {
 		try {
 			
 			XSSFSheet sheet = workbook.createSheet(tabName);
@@ -318,17 +429,17 @@ public class PanelResults extends JDialog {
 	}
 	
 	
-	void writeResultsToText (File file,AbstractTableModel tableModel) {
+	public void writeResultsToText (File file,TableModel model) {
 		try {
 			
 			FileWriter fw=new FileWriter(file);
 			
 			String header="";
-			for (int col=0;col<tableModel.getColumnCount();col++) {				
-				String colName=tableModel.getColumnName(col);
+			for (int col=0;col<model.getColumnCount();col++) {				
+				String colName=model.getColumnName(col);
 				colName=colName.replace("\n", "_");
 				header+="\""+colName+"\"";				
-				if (col<tableModel.getColumnCount()-1) header+=",";
+				if (col<model.getColumnCount()-1) header+=",";
 				
 			}
 			fw.write(header+"\r\n");
@@ -336,15 +447,15 @@ public class PanelResults extends JDialog {
 									
 //			System.out.println("rowCount="+tableModel.getRowCount());
 						
-			for (int row=0;row<tableModel.getRowCount();row++) {								
+			for (int row=0;row<model.getRowCount();row++) {								
 				String Line="";
 				
 				long t1=System.currentTimeMillis();
-				for (int col=0;col<tableModel.getColumnCount();col++) {
-					String val=tableModel.getValueAt(row, col)+"";
+				for (int col=0;col<model.getColumnCount();col++) {
+					String val=model.getValueAt(row, col)+"";
 					Line+="\""+val+"\"";
 
-					if (col<tableModel.getColumnCount()-1) Line+=",";
+					if (col<model.getColumnCount()-1) Line+=",";
 				}
 				long t2=System.currentTimeMillis();
 //				System.out.println("row="+row+" "+(t2-t1)+"ms");
@@ -697,14 +808,44 @@ public class PanelResults extends JDialog {
 		
 		String filename=null;
 		
-		if (f.endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
+		String tabNameSelected=jtabbedPane.getTitleAt(jtabbedPane.getSelectedIndex());
+		
+		TableModel model=null;
+		
+//		if (endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
+//			writeResultsToText(inFile,(MyTableModelDescriptors)this.tableDescriptors.getModel());
+//		} else {
+//			if (jtabbedPane.getSelectedIndex()==0) {
+//				writeResultsToText(inFile,(MyTableModel)this.tableMethod.getModel());	
+//			} else if (jtabbedPane.getSelectedIndex()==1) {
+//				writeResultsToText(inFile,(MyTableModelAllQSARMethods)this.tableAllMethods.getModel());
+//			}
+////				if (f.method.contentEquals(TESTConstants.ChoiceConsensus))
+////					writeResultsToExcel(workbook,(MyTableModelAllQSARMethods)this.table2.getModel(),"Individual methods");
+//		}
+				
+		
+		if (tabNameSelected.contentEquals("Descriptors")) {
 			filename = "Batch_Descriptors.csv";
+			model=tableDescriptors.getModel();			
+		} else if (tabNameSelected.contentEquals("Final Scores")) {
+			filename = "HCD Final Scores.csv";
+			model=tableHCD.getModel();
+		} else if (tabNameSelected.contentEquals("Score Records")) {
+			filename = tabNameSelected+".csv";
+			model=tableHCDScoreRecords.getModel();
+		} else if (tabNameSelected.contains("Score Records")) {
+			filename = tabNameSelected+".csv";
+			model=tableHCDScoreRecords2.getModel();
+		} else if (tabNameSelected.contentEquals("Results")) {
+			filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".csv";
+			model=tableMethod.getModel();
+		} else if (tabNameSelected.contentEquals("Individual methods")) {
+			filename = "Batch_" + f.endpoint.replace(" ", "_") + "_AllMethods.csv";
+			model=tableAllMethods.getModel();
 		} else {
-			if (jtabbedPane.getSelectedIndex()==0) {
-				filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".csv";
-			} else if (jtabbedPane.getSelectedIndex()==1) {
-				filename = "Batch_" + f.endpoint.replace(" ", "_") + "_AllMethods.csv";
-			}
+			JOptionPane.showMessageDialog(f, "Invalid selection");
+			return;
 		}
 		
 		String filepath=f.as.getOutputFolderPath()+File.separator+filename;
@@ -750,7 +891,7 @@ public class PanelResults extends JDialog {
 			
 			
 			this.setCursor(Utilities.waitCursor);
-			writeToTextFile(inFile,f.endpoint);
+			writeResultsToText(inFile,model);
 			this.setCursor(Utilities.defaultCursor);
 			            
 //            JOptionPane.showMessageDialog(f,
@@ -765,20 +906,32 @@ public class PanelResults extends JDialog {
 		}
 		
 	}
-
-	public void writeToTextFile(File inFile,String endpoint) {
-		if (endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
-			writeResultsToText(inFile,(MyTableModelDescriptors)this.tableDescriptors.getModel());
-		} else {
-			if (jtabbedPane.getSelectedIndex()==0) {
-				writeResultsToText(inFile,(MyTableModel)this.tableMethod.getModel());	
-			} else if (jtabbedPane.getSelectedIndex()==1) {
-				writeResultsToText(inFile,(MyTableModelAllQSARMethods)this.tableAllMethods.getModel());
-			}
-//				if (f.method.contentEquals(TESTConstants.ChoiceConsensus))
-//					writeResultsToExcel(workbook,(MyTableModelAllQSARMethods)this.table2.getModel(),"Individual methods");
-		}
+	
+	public List<Component> getAllComponents(Container container) {
+	    Component[] components = container.getComponents();
+	    List <Component> result = new ArrayList<Component>();
+	    for (Component component : components) {
+	        result.add(component);
+	        if (component instanceof Container) {
+	            result.addAll(getAllComponents((Container) component));
+	        }
+	    }
+	    return result;
 	}
+
+//	public void writeToTextFile(File inFile,String endpoint) {
+//		if (endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
+//			writeResultsToText(inFile,(MyTableModelDescriptors)this.tableDescriptors.getModel());
+//		} else {
+//			if (jtabbedPane.getSelectedIndex()==0) {
+//				writeResultsToText(inFile,(MyTableModel)this.tableMethod.getModel());	
+//			} else if (jtabbedPane.getSelectedIndex()==1) {
+//				writeResultsToText(inFile,(MyTableModelAllQSARMethods)this.tableAllMethods.getModel());
+//			}
+////				if (f.method.contentEquals(TESTConstants.ChoiceConsensus))
+////					writeResultsToExcel(workbook,(MyTableModelAllQSARMethods)this.table2.getModel(),"Individual methods");
+//		}
+//	}
 
 	/**
 	 * Convenience method so dont need to access model from other classes
@@ -790,6 +943,29 @@ public class PanelResults extends JDialog {
 		tableModel.addPrediction(dd);
 	}
 
+	/**
+	 * Convenience method so dont need to access model from other classes
+	 * 
+	 * @param newPredictions
+	 */
+	public void addChemical(Chemical chemical) {
+		MyTableModelHCD tableModel=(MyTableModelHCD)tableHCD.getModel();
+		tableModel.addChemical(chemical);
+		
+		MyTableModelHCD_ScoreRecords tableModelScoreRecords=(MyTableModelHCD_ScoreRecords)tableHCDScoreRecords.getModel();
+		
+		for (int i=0;i<chemical.scores.size();i++) {
+			Score scorei=chemical.scores.get(i);
+			for (int j=0;j<scorei.records.size();j++) {
+				tableModelScoreRecords.addScoreRecord(scorei.records.get(j));		
+			}
+		}
+		
+		
+
+	}
+	
+	
 	
 	
 	/**
@@ -901,6 +1077,9 @@ public class PanelResults extends JDialog {
 			setVisible(false);
 		}
 	}
+
+
+
 
 	
 //	/**

@@ -1,4 +1,4 @@
-package ToxPredictor.Application.GUI;
+package ToxPredictor.Application.GUI.Table;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -20,6 +20,7 @@ import org.apache.logging.log4j.util.Strings;
 
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.Calculations.TaskCalculations2;
+import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableHeaderRenderer;
 import ToxPredictor.Application.model.IndividualPredictionsForConsensus.PredictionIndividualMethod;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
 import ToxPredictor.Utilities.TESTPredictedValue;
@@ -49,7 +50,7 @@ public class MyTableModelAllQSARMethods extends AbstractTableModel {
 
 	}
 
-	MyTableModelAllQSARMethods(String [] colNames) {
+	public MyTableModelAllQSARMethods(String [] colNames) {
 		vecTPV=new Vector<>();
 		columnNames=colNames;		
 	}
@@ -75,7 +76,7 @@ public class MyTableModelAllQSARMethods extends AbstractTableModel {
 	}
 	
 	
-	void setupTable(JTable table) {
+	public void setupTable(JTable table) {
 		this.table=table;
 		
 		JTableHeader header = table.getTableHeader();

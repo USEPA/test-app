@@ -1058,7 +1058,7 @@ public class AADashboard {
 //			boolean bTestOrganism=test_organism==null  || test_organism.contentEquals(sr.test_organism.toLowerCase());
 			
 			if (bSource && bSourceOriginal) {
-				System.out.println("Deleted duplicate score record: "+sr.toString("|", ScoreRecord.actualFieldNames));
+//				System.out.println("Deleted duplicate score record: "+sr.toString("|", ScoreRecord.actualFieldNames));
 				score.records.remove(i--);	//it is possible for more than duplicate to exist so can't just exit method when find one			
 			}			
 		}

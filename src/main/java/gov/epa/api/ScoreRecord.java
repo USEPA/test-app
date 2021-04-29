@@ -522,6 +522,53 @@ public class ScoreRecord {
 
 			return Line;
 		}
+		
+		
+		//convert to string by reflection:
+		public Vector<String> toStringArray(String [] fieldNames) {
+
+			Vector<String>vals=new Vector<>();
+
+			for (int i = 0; i < fieldNames.length; i++) {
+				try {
+
+
+					Field myField = this.getClass().getDeclaredField(fieldNames[i]);
+
+					String val=null;
+
+					//							System.out.println(myField.getType().getName());
+
+					if (myField.getType().getName().contains("Double")) {
+						if (myField.get(this)==null) {
+							val="";	
+						} else {
+							val=(Double)myField.get(this)+"";
+						}
+
+					} else {
+						if (myField.get(this)==null) {
+							//									val="\"\"";
+							val="";
+						} else {
+							//									val="\""+(String)myField.get(this)+"\"";
+							val=(String)myField.get(this);
+						} 
+					}
+
+					val=val.replace("\r\n","<br>");
+					val=val.replace("\n","<br>");
+
+					vals.add(val);
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+			}
+
+			return vals;
+		}
 	
 //	void createFlatFileFromAllSources() {
 //	AADashboard a=new AADashboard();

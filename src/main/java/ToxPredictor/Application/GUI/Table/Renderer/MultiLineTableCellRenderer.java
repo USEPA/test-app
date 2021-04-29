@@ -1,4 +1,4 @@
-package ToxPredictor.Application.GUI;
+package ToxPredictor.Application.GUI.Table.Renderer;
 
 import java.awt.Component;
 import java.awt.Dimension;

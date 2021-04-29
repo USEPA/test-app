@@ -1,4 +1,4 @@
-package ToxPredictor.Application.GUI;
+package ToxPredictor.Application.GUI.Table;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -19,7 +19,8 @@ import org.apache.logging.log4j.util.Strings;
 
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.Calculations.PredictToxicityJSONCreator;
-import ToxPredictor.Application.GUI.MyTableModel.ColumnListener;
+import ToxPredictor.Application.GUI.Table.MyTableModel.ColumnListener;
+import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableHeaderRenderer;
 //import ToxPredictor.Application.GUI.PanelResults.mouseAdapter;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
 import ToxPredictor.Utilities.TESTPredictedValue;
@@ -38,7 +39,7 @@ public class MyTableModel extends AbstractTableModel {
 	int sortCol;
 	boolean isSortAsc=true;
 
-	MyTableModel(String [] colNames) {
+	public MyTableModel(String [] colNames) {
 		vecTPV=new Vector<>();
 		columnNames=colNames;		
 	}
@@ -124,7 +125,7 @@ public class MyTableModel extends AbstractTableModel {
 
 	}
 	
-	void setupTable(JTable table) {
+	public void setupTable(JTable table) {
 		this.table=table;
 		
 		JTableHeader header = table.getTableHeader();
