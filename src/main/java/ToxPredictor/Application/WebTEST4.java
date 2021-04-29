@@ -231,7 +231,7 @@ public class WebTEST4 {
 			
 
 			dd=WebTEST4.goDescriptors(ac);//generate molecular descriptors
-			List<TESTPredictedValue>listTPV=WebTEST4.go2(ac,dd, params);
+			List<TESTPredictedValue>listTPV=WebTEST4.go2(areDashboardStructuresAvailable(),ac,dd, params);
 			
 			TESTPredictedValue tpv=listTPV.get(0);
 			tpv.error=error;
@@ -1254,14 +1254,14 @@ public class WebTEST4 {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<TESTPredictedValue> go2(AtomContainer ac, DescriptorData dd, CalculationParameters params)
+	public static List<TESTPredictedValue> go2(boolean areDashboardStructuresAvailable, AtomContainer ac, DescriptorData dd, CalculationParameters params)
 			throws Exception {
 		Statement statRecords = null;
 		PredictToxicityJSONCreator.forGUI = true;
 
 //		dashboardStructuresAvailable=false;
-
-		if (areDashboardStructuresAvailable()) {
+		
+		if (areDashboardStructuresAvailable) {
 			ResolverDb2.assureDbIsOpen();
 		}
 
