@@ -89,7 +89,7 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 	
 		jtfIdentifiers.setName("jtfIdentifiers");
 		scrollPane= new JScrollPane(jtfIdentifiers);
-        scrollPane.setSize(this.getWidth()-3*inset-radialwidth,6*textHeight+6*vspacing);
+        scrollPane.setSize(this.getWidth()-3*inset-radialwidth,getHeight()-textHeight-3*inset);
         scrollPane.setLocation(this.getWidth()-inset-scrollPane.getWidth(),inset);
         
 		jcbOptions.setSize(radialwidth, textHeight);
@@ -100,7 +100,7 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
        
 				
 		jbSearch.setSize(120,textHeight);
-		jbSearch.setLocation(getWidth()-inset-jbSearch.getWidth(),getHeight()-vspacing-textHeight);
+		jbSearch.setLocation(getWidth()-inset-jbSearch.getWidth(),getHeight()-inset-textHeight);
 		jbSearch.setText("Search");
         jbSearch.addActionListener(aa);
 		jbSearch.setActionCommand("jbSearch");

@@ -35,7 +35,11 @@ import ch.qos.logback.classic.Logger;
 public class CTS_Generate_Breakdown_Products {
 
 	public static int numGenerations=4;
-	public static String urlCTS="https://qed.epacdx.net/cts/rest/metabolizer/run";
+	
+		
+//	public static String urlCTS="https://qed.epacdx.net/cts/rest/metabolizer/run";
+	public static String urlCTS="https://qed.epa.gov/cts/rest/metabolizer/run";
+	
 	public static String strLibraryHydrolysis="hydrolysis";
 	public static String strLibraryAbioticReduction="abiotic_reduction";
 	public static String strLibraryHumanBioTransformation="human_biotransformation";

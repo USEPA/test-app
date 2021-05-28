@@ -61,6 +61,7 @@ import ToxPredictor.Utilities.HueckelAromaticityDetector;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.Utilities.chemicalcompare;
 
+
 public class TESTApplication extends JFrame{
 
 	//	
@@ -861,7 +862,7 @@ public class TESTApplication extends JFrame{
 		jtfCalcStatus.setVisible(false);
 
 		jbCalculate.setSize(100, heightControls);
-		jbCalculate.setLocation(getWidth()-jbCalculate.getWidth()-inset, loc2);
+		jbCalculate.setLocation(getWidth()-jbCalculate.getWidth()-inset*2, loc2);
 		jbCalculate.setText("Calculate!");
 		jbCalculate.setBackground(Color.green);
 
@@ -1485,10 +1486,9 @@ public class TESTApplication extends JFrame{
 //					+ "CCCCOCC\nqwerty\nCCCOCCCCCCCCCCCOCC\nCCCOCCCCOCCCCCOCCOCOC");
 			
 //			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("xylenes");
-			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("COCOCOCCCCCOCCCCCOCCCOCCCCOCC");
+//			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("COCOCOCCCCCOCCCCCOCCCOCCCCOCC");
 			
-			
-			f.panelBatchStructureDatabaseSearch.jbSearch.doClick();
+//			f.panelBatchStructureDatabaseSearch.jbSearch.doClick();
 			
 			
 //			f.loadBatchForDebug();
