@@ -3,32 +3,146 @@ package AADashboard.Application;
 import java.lang.reflect.Field;
 import java.util.Vector;
 
+import AADashboard.Application.RowHCD.Group;
+import AADashboard.Application.RowHCD.HazardCategoryGeneral;
+import AADashboard.Application.RowHCD.HazardCategorySpecific;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
 
 public class RowHCD {
-	String [] groups={"Identifiers","Human Health Effects","Ecotoxicity","Fate"};
 	
-	public String [] fieldNamesIdentifiers = {"CAS","name"};
+	public static final String [] groups={"Identifiers","Human Health Effects","Ecotoxicity","Fate"};
 	
-	public String[] fieldNamesHumanHealthEffects = { Chemical.strAcute_Mammalian_Toxicity, Chemical.strCarcinogenicity,
+	public static final String [] fieldNamesIdentifiers = {"CAS","name"};
+	
+	public static final String[] fieldNamesHumanHealthEffects = { Chemical.strCarcinogenicity,
 			Chemical.strGenotoxicity_Mutagenicity, Chemical.strEndocrine_Disruption, Chemical.strReproductive,
-			Chemical.strDevelopmental, Chemical.strNeurotoxicity, Chemical.strSystemic_Toxicity,
-			Chemical.strSkin_Sensitization, Chemical.strSkin_Irritation, Chemical.strEye_Irritation };
+			Chemical.strDevelopmental, };
 
-	public String [] fieldNamesEcotoxicity= {Chemical.strAcute_Aquatic_Toxicity,Chemical.strChronic_Aquatic_Toxicity};
-	public String [] fieldNamesFate= {Chemical.strPersistence,Chemical.strBioaccumulation};
+	public static final String [] fieldNamesEcotoxicity= {Chemical.strAcute_Aquatic_Toxicity,Chemical.strChronic_Aquatic_Toxicity};
+	public static final String [] fieldNamesFate= {Chemical.strPersistence,Chemical.strBioaccumulation};
 	
 	
-	public String[] fieldNamesAcuteMammalianToxicity = { Chemical.strAcute_Mammalian_ToxicityOral,
-			Chemical.strAcute_Mammalian_ToxicityInhalation, Chemical.strAcute_Mammalian_ToxicityDermal };
-	public String[] fieldNamesNeurotoxicity = { Chemical.strNeurotoxicity_Repeat_Exposure,
+	public static final String[] fieldNamesAcuteMammalianToxicity = { Chemical.strAcute_Mammalian_ToxicityOral,
+			Chemical.strAcute_Mammalian_ToxicityInhalation, Chemical.strAcute_Mammalian_ToxicityDermal, 
+			Chemical.strSkin_Sensitization, Chemical.strSkin_Irritation, Chemical.strEye_Irritation
+	};
+	public static final String[] fieldNamesNeurotoxicity = { Chemical.strNeurotoxicity_Repeat_Exposure,
 			Chemical.strNeurotoxicity_Single_Exposure };
-	public String[] fieldNamesSystemicToxicity = { Chemical.strSystemic_Toxicity_Repeat_Exposure,
+	public static final String[] fieldNamesSystemicToxicity = { Chemical.strSystemic_Toxicity_Repeat_Exposure,
 			Chemical.strSystemic_Toxicity_Single_Exposure };
 
 	static boolean debug=false;
+	
+	
+	public static int getColumnCount(Group group) {
+		
+		int count=0;
+		
+		for (HazardCategory cat:group.categories) {
+			if (cat instanceof HazardCategorySpecific) count++;
+			else if (cat instanceof HazardCategoryGeneral) {
+				HazardCategoryGeneral hcg=(HazardCategoryGeneral) cat;
+				count+=hcg.categories.size();
+			}
+			
+		}
+		return count;
+		
+	}
+	
+	public static int getColumnCount(HazardCategory cat) {
+		if (cat instanceof HazardCategorySpecific) return 1;
+		else {
+			HazardCategoryGeneral hcg=(HazardCategoryGeneral) cat;
+			return hcg.categories.size();
+		}
+	}
+
+	
+	
+	public static Vector <Group>createGroups() {
+		Vector <Group> groups=new Vector<>();
+		
+		Group group1=new Group("Identifiers");		
+		for (String fields:fieldNamesIdentifiers) 
+			group1.categories.add(new HazardCategorySpecific(fields));
+					
+		Group group2=new Group("Human Health Effects");		
+		HazardCategoryGeneral hcgAMT=new HazardCategoryGeneral("Acute Mammalian Toxicity");
+		group2.categories.add(hcgAMT);
+		for (String fields:fieldNamesAcuteMammalianToxicity) 
+			hcgAMT.categories.add(new HazardCategorySpecific(fields));
+		for (String fields:fieldNamesHumanHealthEffects) {
+			group2.categories.add(new HazardCategorySpecific(fields));
+		}
+
+		HazardCategoryGeneral hcgNT=new HazardCategoryGeneral("Neurotoxicity");
+		group2.categories.add(hcgNT);
+		for (String fields:fieldNamesNeurotoxicity) 
+			hcgNT.categories.add(new HazardCategorySpecific(fields));
+		
+		HazardCategoryGeneral hcgST=new HazardCategoryGeneral("Systemic Toxicity");
+		group2.categories.add(hcgST);
+		for (String fields:fieldNamesSystemicToxicity) 
+			hcgST.categories.add(new HazardCategorySpecific(fields));
+		
+		Group group3=new Group("Ecotoxicity");
+		for (String fields:fieldNamesEcotoxicity) 
+			group3.categories.add(new HazardCategorySpecific(fields));
+
+		Group group4=new Group("Fate");
+		for (String fields:fieldNamesFate) 
+			group4.categories.add(new HazardCategorySpecific(fields));
+				
+		groups.add(group1);
+		groups.add(group2);
+		groups.add(group3);
+		groups.add(group4);
+		
+		return groups;
+	}
+	
+	
+	public static class Group {
+		String name;
+		
+		Vector<HazardCategory>categories=new Vector<>();
+		
+		
+		public Group(String name) {
+			this.name=name;
+		}
+	}
+	
+	public static class HazardCategory {
+		String name;
+		
+		public HazardCategory(String name) {
+			this.name=name;
+		}
+	}
+	
+	public static class HazardCategoryGeneral extends HazardCategory{
+		public HazardCategoryGeneral(String name) {
+			super(name);
+			// TODO Auto-generated constructor stub
+		}
+
+		Vector<HazardCategorySpecific>categories=new Vector<>();
+	}
+	
+	public static class HazardCategorySpecific extends HazardCategory {
+
+		public HazardCategorySpecific(String name) {
+			super(name);
+			// TODO Auto-generated constructor stub
+		}
+	}
+
+	
+	
 
 	/**
 	 * Gets values for a row in the final scores table
@@ -41,7 +155,7 @@ public class RowHCD {
 		Vector<KeyValue>values=new Vector<KeyValue>();
 		RowHCD r=new RowHCD();
 		
-		for (String group:r.groups) {
+		for (String group:groups) {
 			if (debug) System.out.println(group);
 			try {
 				Field myField = r.getClass().getField("fieldNames"+group.replace(" ",""));

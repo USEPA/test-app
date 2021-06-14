@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -14,7 +15,9 @@ import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.ss.util.RegionUtil;
@@ -27,8 +30,14 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 
+import AADashboard.Application.RowHCD.Group;
+import AADashboard.Application.RowHCD.HazardCategory;
+import AADashboard.Application.RowHCD.HazardCategorySpecific;
+import AADashboard.Application.RowHCD.HazardCategoryGeneral;
+import AADashboard.Application.RowHCD.KeyValue;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
+import gov.epa.api.HazardRecord;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 
@@ -282,45 +291,82 @@ public class TableGeneratorExcel {
 
 		sheet.getRow(2).setHeightInPoints(120);	  
 
-		writeHeaderFinalScoreTab(workbook, sheet);
+		Vector <Group>groups=RowHCD.createGroups();
+
+		writeHeaderFinalScoreTab(workbook, sheet,groups);
 
 		Hashtable<String, CellStyle> htStyles = createScoreStylesHashtable(workbook);
 
-		//	        for (int i=0;i<1000;i++) {
-		for (int i=0;i<chemicals.size();i++) {
-			XSSFRow row=sheet.createRow(i+3);	 
+		Vector<HazardCategory>cats=new Vector<>();
+		for (int i=0;i<groups.size();i++) {
+			Group groupi=groups.get(i);
+			for (HazardCategory cat:groupi.categories) cats.add(cat);
+		}
+		
+		
+		for (int chemicalNum=0;chemicalNum<chemicals.size();chemicalNum++) {
+			XSSFRow row=sheet.createRow(chemicalNum+3);	 
 
-			//	        	if (i%100==0) {
-			//	        		System.out.println(i);	        		
-			//	        	}
+			Chemical chemical=chemicals.get(chemicalNum);
+			
+			for (int categoryNum=0;categoryNum<cats.size();categoryNum++) {			
+				HazardCategory cat=cats.get(categoryNum);
 
-			Chemical chemical=chemicals.get(i);
-			ArrayList<Score> scores=chemical.scores;
+				int colCount=RowHCD.getColumnCount(cat);
 
-			XSSFCell cell0=row.createCell(0);
-			cell0.setCellValue(chemical.CAS);
-			//	        	createCell(cell0, chemical.CAS, true);
-
-			for (int j=0;j<scores.size();j++) {	
-				Score score=scores.get(j);
-				String final_score=score.final_score;
-				XSSFCell cell=row.createCell(j+1);
-				//    				createCell(cell,final_score,cs,getColorShort(final_score));
-				
-				if (score.records.size()>0) {
-					if (final_score.contentEquals("N/A")) final_score="I";
-					cell.setCellValue(final_score);
-					cell.setCellStyle(htStyles.get(final_score));
-
-				} else {
-//					fw.write("\t\t<td bgcolor="+getColor(final_score)+" align=center width="+width+"px>"+final_score+"</td>\r\n");
-					cell.setCellValue("");
-					cell.setCellStyle(htStyles.get(final_score));
+				int prevCount=0;
+				for (int j=0;j<categoryNum;j++) {
+					prevCount+=RowHCD.getColumnCount(cats.get(j));
 				}
+				
+				CellStyle csBorder=getStyleBorder(workbook);
+				
+				if (cat instanceof HazardCategorySpecific) {
+					XSSFCell cell=row.createCell(prevCount);					
+					
+					if (cat.name.equals("CAS"))	{
+						cell.setCellValue(chemical.CAS);
+						cell.setCellStyle(csBorder);
+					}
+					else if (cat.name.equals("name")) {
+						cell.setCellValue(chemical.name);
+						cell.setCellStyle(csBorder);
+					}
+					else {
+						Score score=chemical.getScore(cat.name);
+						String final_score=score.final_score;
+						if (score.records.size()>0) {
+							if (final_score.contentEquals("N/A")) final_score="I";
+							cell.setCellValue(final_score);
+							cell.setCellStyle(htStyles.get(final_score));
+		
+						} else {
+							cell.setCellValue("");
+							cell.setCellStyle(htStyles.get(final_score));
+						}
+					}
+					
+				}  else if (cat instanceof HazardCategoryGeneral) {
 
-				
-				
+					HazardCategoryGeneral catGen=(HazardCategoryGeneral)cat;
+					for (int j=0;j<catGen.categories.size();j++) {
+						XSSFCell cell=row.createCell(prevCount+j);					
+						Score score=chemical.getScore(catGen.categories.get(j).name);
+						String final_score=score.final_score;
+						if (score.records.size()>0) {
+							if (final_score.contentEquals("N/A")) final_score="I";
+							cell.setCellValue(final_score);
+							cell.setCellStyle(htStyles.get(final_score));
+		
+						} else {
+							cell.setCellValue("");
+							cell.setCellStyle(htStyles.get(final_score));
+						}
+					}
+					
+				}
 			}
+			
 		}
 
 		sheet.createFreezePane( 0, 3, 0, 3 );
@@ -347,46 +393,134 @@ public class TableGeneratorExcel {
 		return htStyles;
 	}
 
-	private void writeHeaderFinalScoreTab(XSSFWorkbook workbook, XSSFSheet sheet) {
+	
+	
+	
+	private void writeHeaderFinalScoreTab(XSSFWorkbook workbook, XSSFSheet sheet,Vector <Group>groups) {
+		boolean debug=true;
 		
 		XSSFCellStyle styleBorderWithRotate=getStyleBorderWithRotate(workbook);
 		//		XSSFCellStyle styleRotate=getStyleRotate(workbook);
 		XSSFCellStyle styleBorder=getStyleBorder(workbook);
 
+		Chemical chemical=new Chemical();
+		RowHCD rowHCD=new RowHCD();
 		
-		createMergedRegion(sheet, "$A$1:$A$3", "CAS",styleBorder);
-		createMergedRegion(sheet, "$B$1:$P$1", "Human Health Effects",styleBorder);
-		createMergedRegion(sheet, "$Q$1:$R$1", "Ecotoxicity",styleBorder);
-		createMergedRegion(sheet, "$S$1:$T$1", "Fate",styleBorder);
+		Row row1=sheet.getRow(0);
+		
+		int startColumn=0;
+		int stopColumn=0;	
+		
 
-		createMergedRegion(sheet, "$B$2:$D$2", Chemical.strAcute_Mammalian_Toxicity,styleBorder);
-		createMergedRegion(sheet, "$J$2:$K$2", Chemical.strNeurotoxicity,styleBorder);
-		createMergedRegion(sheet, "$L$2:$M$2", Chemical.strSystemic_Toxicity,styleBorder);
+		Vector<HazardCategory>cats=new Vector<>();
 
-		createCell(sheet,"$B$3","Oral",workbook,styleBorderWithRotate);
-		createCell(sheet,"$C$3","Inhalation",workbook,styleBorderWithRotate);
-		createCell(sheet,"$D$3","Dermal",workbook,styleBorderWithRotate);
+		for (int i=0;i<groups.size();i++) {
+			
+			Group groupi=groups.get(i);
+			
+			for (HazardCategory cat:groupi.categories) cats.add(cat);
+			int colCount=RowHCD.getColumnCount(groupi);
+			
+			if (i==0) {
+				stopColumn=colCount-1;
+			} else {
+				int prevCount=0;
+				for (int j=0;j<i;j++) {
+					prevCount+=RowHCD.getColumnCount(groups.get(j));
+				}
+				startColumn=prevCount;
+				stopColumn=startColumn+colCount-1;
+			}
+						
+			CellAddress caStart=new CellAddress(0,startColumn);	
+			CellAddress caStop=new CellAddress(0,stopColumn);
+			
+			String merge=caStart.formatAsString()+":"+caStop.formatAsString();
+			
+//			System.out.println(groupi.name+"\t"+merge);
+			
+			createMergedRegion(sheet,merge , groupi.name,styleBorder);
+			
+		}
+		System.out.println("");
+		
+//		sheet.createRow(1);
+//		sheet.createRow(2);
+//		sheet.createRow(3);
+		
+		for (int i=0;i<cats.size();i++) {			
+			HazardCategory cat=cats.get(i);
 
-		createMergedRegion(sheet, "$E$2:$E$3", Chemical.strCarcinogenicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$F$2:$F$3", Chemical.strGenotoxicity_Mutagenicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$G$2:$G$3", Chemical.strEndocrine_Disruption,styleBorderWithRotate);
-		createMergedRegion(sheet, "$H$2:$H$3", Chemical.strReproductive,styleBorderWithRotate);
-		createMergedRegion(sheet, "$I$2:$I$3", Chemical.strDevelopmental,styleBorderWithRotate);
+			int colCount=RowHCD.getColumnCount(cat);
 
-		createCell(sheet,"$J$3","Repeat Exposure",workbook,styleBorderWithRotate);
-		createCell(sheet,"$K$3","Single Exposure",workbook,styleBorderWithRotate);
+			int prevCount=0;
+			for (int j=0;j<i;j++) {
+				prevCount+=RowHCD.getColumnCount(cats.get(j));
+			}
 
-		createCell(sheet,"$L$3","Repeat Exposure",workbook,styleBorderWithRotate);
-		createCell(sheet,"$M$3","Single Exposure",workbook,styleBorderWithRotate);
+			
+			if (cat instanceof HazardCategorySpecific) {
+				startColumn=prevCount;
+				stopColumn=startColumn;
+				CellAddress caStart=new CellAddress(1,startColumn);	
+				CellAddress caStop=new CellAddress(2,stopColumn);
+				String merge=caStart.formatAsString()+":"+caStop.formatAsString();
+//				System.out.println(cat.name+"\t"+merge);				
+				createMergedRegion(sheet,merge , cat.name,styleBorderWithRotate);
+			}  else if (cat instanceof HazardCategoryGeneral) {
+				HazardCategoryGeneral catGen=(HazardCategoryGeneral)cat;
+				
+				startColumn=prevCount;
+				stopColumn=startColumn+colCount-1;
+				CellAddress caStart=new CellAddress(1,startColumn);	
+				CellAddress caStop=new CellAddress(1,stopColumn);
+				String merge=caStart.formatAsString()+":"+caStop.formatAsString();
 
-		createMergedRegion(sheet, "$N$2:$N$3", Chemical.strSkin_Sensitization,styleBorderWithRotate);
-		createMergedRegion(sheet, "$O$2:$O$3", Chemical.strSkin_Irritation,styleBorderWithRotate);
-		createMergedRegion(sheet, "$P$2:$P$3", Chemical.strEye_Irritation,styleBorderWithRotate);
+				createMergedRegion(sheet,merge , cat.name,styleBorder);
+				
+				for (int j=0;j<catGen.categories.size();j++) {
+					startColumn=prevCount+j;
+					stopColumn=startColumn;
+					String value=catGen.categories.get(j).name.replace("Acute Mammalian Toxicity", "");
+					value=value.replace("Systemic Toxicity", "").replace("Neurotoxicity", "");
+//					System.out.println(value+"\t"+startColumn);					
+					createCell(sheet, 2, startColumn, value, true, workbook, styleBorderWithRotate);
+				}
+				
+			}
+			
 
-		createMergedRegion(sheet, "$Q$2:$Q$3", Chemical.strAcute_Aquatic_Toxicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$R$2:$R$3", Chemical.strChronic_Aquatic_Toxicity,styleBorderWithRotate);
-		createMergedRegion(sheet, "$S$2:$S$3", Chemical.strPersistence,styleBorderWithRotate);
-		createMergedRegion(sheet, "$T$2:$T$3", Chemical.strBioaccumulation,styleBorderWithRotate);
+	
+		}
+		
+//		createMergedRegion(sheet, "$B$2:$D$2", Chemical.strAcute_Mammalian_Toxicity,styleBorder);
+//		createMergedRegion(sheet, "$J$2:$K$2", Chemical.strNeurotoxicity,styleBorder);
+//		createMergedRegion(sheet, "$L$2:$M$2", Chemical.strSystemic_Toxicity,styleBorder);
+//
+//		createCell(sheet,"$B$3","Oral",workbook,styleBorderWithRotate);
+//		createCell(sheet,"$C$3","Inhalation",workbook,styleBorderWithRotate);
+//		createCell(sheet,"$D$3","Dermal",workbook,styleBorderWithRotate);
+//
+//		createMergedRegion(sheet, "$E$2:$E$3", Chemical.strCarcinogenicity,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$F$2:$F$3", Chemical.strGenotoxicity_Mutagenicity,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$G$2:$G$3", Chemical.strEndocrine_Disruption,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$H$2:$H$3", Chemical.strReproductive,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$I$2:$I$3", Chemical.strDevelopmental,styleBorderWithRotate);
+//
+//		createCell(sheet,"$J$3","Repeat Exposure",workbook,styleBorderWithRotate);
+//		createCell(sheet,"$K$3","Single Exposure",workbook,styleBorderWithRotate);
+//
+//		createCell(sheet,"$L$3","Repeat Exposure",workbook,styleBorderWithRotate);
+//		createCell(sheet,"$M$3","Single Exposure",workbook,styleBorderWithRotate);
+//
+//		createMergedRegion(sheet, "$N$2:$N$3", Chemical.strSkin_Sensitization,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$O$2:$O$3", Chemical.strSkin_Irritation,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$P$2:$P$3", Chemical.strEye_Irritation,styleBorderWithRotate);
+//
+//		createMergedRegion(sheet, "$Q$2:$Q$3", Chemical.strAcute_Aquatic_Toxicity,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$R$2:$R$3", Chemical.strChronic_Aquatic_Toxicity,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$S$2:$S$3", Chemical.strPersistence,styleBorderWithRotate);
+//		createMergedRegion(sheet, "$T$2:$T$3", Chemical.strBioaccumulation,styleBorderWithRotate);
 	}
 	
 	public static short getColorShort(String val) {
@@ -423,17 +557,21 @@ public class TableGeneratorExcel {
 
 	void createCell(XSSFSheet sheet,int row,int col,String value,boolean addBorders,XSSFWorkbook wb,XSSFCellStyle style) {
 		XSSFCell cell = sheet.getRow(row).getCell(col);
+		sheet.getRow(row).createCell(col);
 		createCell(cell, value, wb,style);
 	}
 
 	void createCell(XSSFSheet sheet,String range,String value,XSSFWorkbook wb,XSSFCellStyle style) {
 		CellRangeAddress cra=org.apache.poi.ss.util.CellRangeAddress.valueOf(range);
+		sheet.getRow(cra.getFirstRow()).createCell(cra.getFirstColumn());		
 		XSSFCell cell = sheet.getRow(cra.getFirstRow()).getCell(cra.getFirstColumn());
 		createCell(cell,value,wb,style);
 	}
 
 
 	void createCell(XSSFCell cell,String value,XSSFWorkbook wb,XSSFCellStyle style) {
+//		System.out.println("Cell==null"+(cell==null));
+//		System.out.println("value==null"+(value==null));
 		cell.setCellValue(value);
 		cell.setCellStyle(style);
 		CellUtil.setVerticalAlignment(cell,VerticalAlignment.CENTER);
