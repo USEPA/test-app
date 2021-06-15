@@ -3,9 +3,6 @@ package AADashboard.Application;
 import java.lang.reflect.Field;
 import java.util.Vector;
 
-import AADashboard.Application.RowHCD.Group;
-import AADashboard.Application.RowHCD.HazardCategoryGeneral;
-import AADashboard.Application.RowHCD.HazardCategorySpecific;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
