@@ -12,23 +12,29 @@ public class RowHCD {
 	public static final String [] groups={"Identifiers","Human Health Effects","Ecotoxicity","Fate"};
 	
 	public static final String [] fieldNamesIdentifiers = {"CAS","name"};
-	
-	public static final String[] fieldNamesHumanHealthEffects = { Chemical.strCarcinogenicity,
-			Chemical.strGenotoxicity_Mutagenicity, Chemical.strEndocrine_Disruption, Chemical.strReproductive,
-			Chemical.strDevelopmental, };
 
-	public static final String [] fieldNamesEcotoxicity= {Chemical.strAcute_Aquatic_Toxicity,Chemical.strChronic_Aquatic_Toxicity};
-	public static final String [] fieldNamesFate= {Chemical.strPersistence,Chemical.strBioaccumulation};
-	
 	
 	public static final String[] fieldNamesAcuteMammalianToxicity = { Chemical.strAcute_Mammalian_ToxicityOral,
 			Chemical.strAcute_Mammalian_ToxicityInhalation, Chemical.strAcute_Mammalian_ToxicityDermal, 
-			Chemical.strSkin_Sensitization, Chemical.strSkin_Irritation, Chemical.strEye_Irritation
+			
 	};
+	
+	//fieldNamesHumanHealthEffects- fields other than the ones that have HazardCategoryGeneral for them:
+	public static final String[] fieldNamesHumanHealthEffects = { Chemical.strSkin_Sensitization,
+			Chemical.strSkin_Irritation, Chemical.strEye_Irritation, Chemical.strCarcinogenicity,
+			Chemical.strGenotoxicity_Mutagenicity, Chemical.strEndocrine_Disruption, Chemical.strReproductive,
+			Chemical.strDevelopmental, };
+
 	public static final String[] fieldNamesNeurotoxicity = { Chemical.strNeurotoxicity_Repeat_Exposure,
 			Chemical.strNeurotoxicity_Single_Exposure };
 	public static final String[] fieldNamesSystemicToxicity = { Chemical.strSystemic_Toxicity_Repeat_Exposure,
 			Chemical.strSystemic_Toxicity_Single_Exposure };
+
+	
+	public static final String [] fieldNamesEcotoxicity= {Chemical.strAcute_Aquatic_Toxicity,Chemical.strChronic_Aquatic_Toxicity};
+	public static final String [] fieldNamesFate= {Chemical.strPersistence,Chemical.strBioaccumulation};
+	
+	
 
 	static boolean debug=false;
 	
@@ -65,12 +71,15 @@ public class RowHCD {
 		Group group1=new Group("Identifiers");		
 		for (String fields:fieldNamesIdentifiers) 
 			group1.categories.add(new HazardCategorySpecific(fields));
-					
+		
+		//***********************************************************************************
 		Group group2=new Group("Human Health Effects");		
+		
 		HazardCategoryGeneral hcgAMT=new HazardCategoryGeneral("Acute Mammalian Toxicity");
 		group2.categories.add(hcgAMT);
 		for (String fields:fieldNamesAcuteMammalianToxicity) 
 			hcgAMT.categories.add(new HazardCategorySpecific(fields));
+
 		for (String fields:fieldNamesHumanHealthEffects) {
 			group2.categories.add(new HazardCategorySpecific(fields));
 		}
@@ -84,15 +93,16 @@ public class RowHCD {
 		group2.categories.add(hcgST);
 		for (String fields:fieldNamesSystemicToxicity) 
 			hcgST.categories.add(new HazardCategorySpecific(fields));
-		
+		//***********************************************************************************
 		Group group3=new Group("Ecotoxicity");
 		for (String fields:fieldNamesEcotoxicity) 
 			group3.categories.add(new HazardCategorySpecific(fields));
-
+		//***********************************************************************************
 		Group group4=new Group("Fate");
 		for (String fields:fieldNamesFate) 
 			group4.categories.add(new HazardCategorySpecific(fields));
-				
+		//***********************************************************************************
+
 		groups.add(group1);
 		groups.add(group2);
 		groups.add(group3);

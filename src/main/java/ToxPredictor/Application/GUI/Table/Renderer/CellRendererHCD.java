@@ -26,7 +26,7 @@ public class CellRendererHCD extends DefaultTableCellRenderer {
         
         Chemical chemical=tableModel.getChemical(row);
         
-        Score score=chemical.scores.get(col-2);
+        Score score=chemical.getScore(tableModel.getColumnName(col).trim());
         
         Font font=l.getFont();
         
@@ -40,7 +40,6 @@ public class CellRendererHCD extends DefaultTableCellRenderer {
         	}
         }
         
-
         if (score.final_score.contentEquals("VH")) l.setBackground(Color.red);
         else if (score.final_score.contentEquals("H")) l.setBackground(Color.orange);
         else if (score.final_score.contentEquals("M")) l.setBackground(Color.yellow);

@@ -254,6 +254,11 @@ public class TableGeneratorExcel {
 	}
 	
 	public void writeFinalScoresToWorkbook(Chemicals chemicals, XSSFWorkbook workbook) {
+		Vector <Group>groups=RowHCD.createGroups();
+		writeFinalScoresToWorkbook(chemicals, workbook, groups);
+	}
+	
+	public void writeFinalScoresToWorkbook(Chemicals chemicals, XSSFWorkbook workbook, Vector <Group>groups) {
 		//Create a blank sheet
 		XSSFSheet sheet = workbook.createSheet("Hazard Profiles");
 
@@ -266,7 +271,7 @@ public class TableGeneratorExcel {
 
 		sheet.getRow(2).setHeightInPoints(120);	  
 
-		Vector <Group>groups=RowHCD.createGroups();
+		
 
 		writeHeaderFinalScoreTab(workbook, sheet,groups);
 
@@ -300,12 +305,10 @@ public class TableGeneratorExcel {
 					if (cat.name.equals("CAS"))	{
 						cell.setCellValue(chemical.CAS);
 						cell.setCellStyle(csBorder);
-					}
-					else if (cat.name.equals("name")) {
+					} else if (cat.name.equals("name")) {
 						cell.setCellValue(chemical.name);
 						cell.setCellStyle(csBorder);
-					}
-					else {
+					} else {
 						Score score=chemical.getScore(cat.name);
 						String final_score=score.final_score;
 						if (score.records.size()>0) {
@@ -422,7 +425,13 @@ public class TableGeneratorExcel {
 				CellAddress caStop=new CellAddress(2,stopColumn);
 				String merge=caStart.formatAsString()+":"+caStop.formatAsString();
 //				System.out.println(cat.name+"\t"+merge);				
-				createMergedRegion(sheet,merge , cat.name,styleBorderWithRotate);
+				
+				if (cat.name.equals("name") || cat.name.equals("CAS")) {
+					createMergedRegion(sheet,merge , cat.name,styleBorder);
+				} else {
+					createMergedRegion(sheet,merge , cat.name,styleBorderWithRotate);
+				}
+				
 			}  else if (cat instanceof HazardCategoryGeneral) {
 				HazardCategoryGeneral catGen=(HazardCategoryGeneral)cat;
 				

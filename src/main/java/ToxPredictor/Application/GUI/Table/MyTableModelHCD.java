@@ -124,6 +124,9 @@ public class MyTableModelHCD extends AbstractTableModel {
 		colNames.add(Chemical.strAcute_Mammalian_ToxicityOral);
 		colNames.add(Chemical.strAcute_Mammalian_ToxicityInhalation);
 		colNames.add(Chemical.strAcute_Mammalian_ToxicityDermal);
+		colNames.add(Chemical.strSkin_Sensitization);
+		colNames.add(Chemical.strSkin_Irritation);
+		colNames.add(Chemical.strEye_Irritation);
 		colNames.add(Chemical.strCarcinogenicity);
 		colNames.add(Chemical.strGenotoxicity_Mutagenicity);
 		colNames.add(Chemical.strEndocrine_Disruption);		
@@ -133,9 +136,6 @@ public class MyTableModelHCD extends AbstractTableModel {
 		colNames.add(Chemical.strNeurotoxicity_Single_Exposure);
 		colNames.add(Chemical.strSystemic_Toxicity_Repeat_Exposure);
 		colNames.add(Chemical.strSystemic_Toxicity_Single_Exposure);
-		colNames.add(Chemical.strSkin_Sensitization);
-		colNames.add(Chemical.strSkin_Irritation);
-		colNames.add(Chemical.strEye_Irritation);
 		colNames.add(Chemical.strAcute_Aquatic_Toxicity);
 		colNames.add(Chemical.strChronic_Aquatic_Toxicity);
 		colNames.add(Chemical.strPersistence);
@@ -202,15 +202,24 @@ public class MyTableModelHCD extends AbstractTableModel {
 	
 
 	
-	
+	/**
+	 * Get values for a row in table
+	 * 
+	 * @param chemical
+	 * @return
+	 */
 	Vector<String>getValuesNoError(Chemical chemical) {
+		
 		Vector<String>values=new Vector<String>();			
 		values.add(chemical.CAS);
 		values.add(chemical.name);
 		
 		
-		for (int i=0;i<chemical.getScores().size();i++) {	
-			Score score=chemical.getScores().get(i);
+		for (int i=2;i<columnNames.length;i++) {	
+			Score score=chemical.getScore(columnNames[i].trim());
+			
+//			System.out.println(columnNames[i]);
+			
 			String final_score=score.final_score;
 			String hazard_name=score.hazard_name;			
 			
