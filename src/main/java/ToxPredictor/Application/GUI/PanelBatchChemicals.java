@@ -451,7 +451,6 @@ public class PanelBatchChemicals extends JPanel {
 			myfraEditChemical.cleanUpStructure();
 			
 			myfraEditChemical.setVisible(true);
-			this.getParent().setCursor(Utilities.defaultCursor);
 
 //			brute force way to fix things- otherwise sometimes changes to molecule will also mess up another molecule:
 			//TODO: figure out a way to clear out model from jcpep so dont need to waste time
@@ -485,6 +484,9 @@ public class PanelBatchChemicals extends JPanel {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "Error in opening chemical");
 		}
+		this.getParent().setCursor(Utilities.defaultCursor);
+
+		
 	}
 	
 	public static void main(String[] args) {
@@ -734,8 +736,12 @@ public class PanelBatchChemicals extends JPanel {
 				if (ac.getProperty("Index")==null) return -1;
 				else return ac.getProperty("Index");
 			} else if (col==1) {
+
+				if (ac.getProperty("ID")!=null) return ac.getProperty("ID");
+				
 				if (ac.getProperty(DSSToxRecord.strCAS)==null) return "";				
 				else return ac.getProperty(DSSToxRecord.strCAS);
+				
 			} else if (col==2) {
 				if (ac.getProperty(DSSToxRecord.strName)==null) return "";
 				else return ac.getProperty(DSSToxRecord.strName);

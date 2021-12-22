@@ -739,7 +739,7 @@ public class WebTEST3 {
 
 	private static void createConsensusReport(String endpoint, Set<WebReportType> reportTypes, DescriptorData dd,
 			TESTPredictedValue v, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String abbrev, String CAS,
-			String gsid, ArrayList<Double> predictedToxicities, ArrayList<Double> predictedUncertainties, Instances trainingDataSet2d,
+			String dtxcid, ArrayList<Double> predictedToxicities, ArrayList<Double> predictedUncertainties, Instances trainingDataSet2d,
 			Instances testDataSet2d, Instance evalInstance2d, Lookup.ExpRecord er, ReportOptions options,
 			double predToxVal, double predToxUnc) {
 		double[] Mean = trainingDataSet2d.getMeans();
@@ -761,9 +761,9 @@ public class WebTEST3 {
 
 		if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
 			predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc,
-					TESTConstants.ChoiceConsensus, CAS, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
+					TESTConstants.ChoiceConsensus, CAS,dtxcid, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
 					dd.MW, "OK", htTestMatch, htTrainMatch, methods, predictedToxicities,
-					predictedUncertainties, createDetailedConsensusReport, gsid, options);
+					predictedUncertainties, createDetailedConsensusReport, options);
 		}
 
 		if (reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
@@ -1465,7 +1465,7 @@ public class WebTEST3 {
 			}
 
 			// just in case we are running a chemical without gsid (e.g. user drawn structure):
-			if (!reportTypes.isEmpty() && dd.gsid == null) {
+			if (!reportTypes.isEmpty() && dd.dtxcid == null) {
 				ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(ac, "structure", strOutputFolderStructureData);// dont
 			}
 					

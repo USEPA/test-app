@@ -30,7 +30,7 @@ public class PanelOutputOptions extends JPanel {
 	
 //	private JLabel jlReportType=new JLabel("Select report type:");
 	
-	public JCheckBox jcbCreateReports = new JCheckBox();
+//	public JCheckBox jcbCreateReports = new JCheckBox();
 	public JCheckBox jcbCreateDetailedReports = new JCheckBox();
 	JButton jbAboutCreateReports=new JButton();
 	JButton jbViewPanelResults=new JButton();
@@ -119,15 +119,17 @@ public class PanelOutputOptions extends JPanel {
 //		reportOptions.add(TESTConstants.strReportTypeDetailedWeb);
 //		reportOptions.add(TESTConstants.strReportTypeExcel);
 		
-		jcbCreateReports.setText("Create reports");
-		jcbCreateReports.setSize(150, 20);
-		jcbCreateReports.setLocation(insetHorizontal, jtfOutputFolder.getY()+jtfOutputFolder.getHeight()+insetVertical);
-		jcbCreateReports.setSelected(f.as.isCreateReport());		
-		jcbCreateReports.setActionCommand("jcbCreateReports");
-		jcbCreateReports.addActionListener(aa);
+//		jcbCreateReports.setText("Create reports");
+//		jcbCreateReports.setSize(150, 20);
+//		jcbCreateReports.setLocation(insetHorizontal, jtfOutputFolder.getY()+jtfOutputFolder.getHeight()+insetVertical);
+//		jcbCreateReports.setSelected(f.as.isCreateReport());		
+//		jcbCreateReports.setActionCommand("jcbCreateReports");
+//		jcbCreateReports.addActionListener(aa);
 		
 		jcbCreateDetailedReports.setSize(widthComboBox, 20);
-		jcbCreateDetailedReports.setLocation(jcbCreateReports.getX(), jcbCreateReports.getY());
+//		jcbCreateDetailedReports.setLocation(jcbCreateReports.getX(), jcbCreateReports.getY());
+		jcbCreateDetailedReports.setLocation(insetHorizontal, jtfOutputFolder.getY()+jtfOutputFolder.getHeight()+insetVertical);
+		
 		jcbCreateDetailedReports.setText("Create detailed reports");
 		jcbCreateDetailedReports.setSelected(f.as.isCreateDetailedReport());
 		jcbCreateDetailedReports.setActionCommand("jcbCreateDetailedReports");
@@ -138,7 +140,7 @@ public class PanelOutputOptions extends JPanel {
 		jbAboutCreateReports.setMargin(new Insets(0,0,0,0));
 		jbAboutCreateReports.setSize(heightControls, heightControls);
 		jbAboutCreateReports.setText("?");
-		jbAboutCreateReports.setLocation(jcbCreateDetailedReports.getX()+jcbCreateDetailedReports.getWidth()+insetHorizontal,jcbCreateReports.getY());
+		jbAboutCreateReports.setLocation(jcbCreateDetailedReports.getX()+jcbCreateDetailedReports.getWidth()+insetHorizontal,jcbCreateDetailedReports.getY());
 
 		jbViewPanelResults.setActionCommand("jbViewPanelResults");
 		jbViewPanelResults.addActionListener(aa);
@@ -158,7 +160,7 @@ public class PanelOutputOptions extends JPanel {
 //		add(jlReportType);
 		add(jtfOutputFolder);
 		add(jbBrowse);
-		add(jcbCreateReports);
+//		add(jcbCreateReports);
 		add(jcbCreateDetailedReports);
 		add(jbAboutCreateReports);
 		add(jbViewPanelResults);

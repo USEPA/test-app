@@ -708,6 +708,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 			
 			sr.valueMass=tpv.predValMass;
 			sr.valueMassUnits=units;
+			sr.listType=ScoreRecord.typePredicted;
 			
 			long t2=System.currentTimeMillis();
 //			System.out.println(chemical.CAS+"\t"+expValMass+"\t"+(t2-t1));
@@ -734,6 +735,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 			sr.hazardStatement = "";
 			sr.route = "";
 			sr.score = "N/A";
+			sr.listType=ScoreRecord.typePredicted;
 			sr.rationale = tpv.endpoint+" could not be predicted using T.E.S.T.";
 			score.records.add(sr);
 		}
@@ -790,7 +792,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 			}
 			
 //			System.out.println(sr.toJSON());
-			
+			sr.listType=ScoreRecord.typePredicted;
 			score.records.add(sr);
 
 		} else {
@@ -802,6 +804,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 			sr.route = "";
 			sr.score = "N/A";
 			sr.rationale = tpv.endpoint+" could not be predicted using T.E.S.T.";
+			sr.listType=ScoreRecord.typePredicted;
 			score.records.add(sr);
 		}
 	}

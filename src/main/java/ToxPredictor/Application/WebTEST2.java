@@ -41,6 +41,7 @@ import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJS
 import ToxPredictor.Application.Calculations.TaskCalculations;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Database.ChemistryDashboardRecord;
+import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
@@ -297,6 +298,7 @@ public class WebTEST2 {
 		boolean isLogMolarEndpoint = TESTConstants.isLogMolar(endpoint);
 		String abbrev = TESTConstants.getAbbrevEndpoint(endpoint);
 		String CAS = dd.ID;
+		String dtxcid=dd.dtxcid;
 		
 		//*******************************************************************************************************
 		//Look up record in database, if found, reconstruct objects and return that
@@ -550,7 +552,7 @@ public class WebTEST2 {
 
 				if (!reportTypes.isEmpty()) {
 					createConsensusReport(endpoint, reportTypes, dd, v, isBinaryEndpoint, isLogMolarEndpoint, abbrev,
-							CAS, tr.gsid, predictedToxicities, predictedUncertainties, trainingDataSet2d, testDataSet2d,
+							CAS, dtxcid, predictedToxicities, predictedUncertainties, trainingDataSet2d, testDataSet2d,
 							evalInstance2d, er, options, predToxVal, predToxUnc);
 
 				}
@@ -727,8 +729,8 @@ public class WebTEST2 {
 	}
 
 	private static void createConsensusReport(String endpoint, Set<WebReportType> reportTypes, DescriptorData dd,
-			TESTPredictedValue v, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String abbrev, String CAS,
-			String gsid, ArrayList<Double> predictedToxicities, ArrayList<Double> predictedUncertainties, Instances trainingDataSet2d,
+			TESTPredictedValue v, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String abbrev, String CAS,String dtxcid,
+			 ArrayList<Double> predictedToxicities, ArrayList<Double> predictedUncertainties, Instances trainingDataSet2d,
 			Instances testDataSet2d, Instance evalInstance2d, Lookup.ExpRecord er, ReportOptions options,
 			double predToxVal, double predToxUnc) {
 		double[] Mean = trainingDataSet2d.getMeans();
@@ -750,9 +752,9 @@ public class WebTEST2 {
 
 		if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
 			predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc,
-					TESTConstants.ChoiceConsensus, CAS, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
+					TESTConstants.ChoiceConsensus, CAS, dtxcid, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
 					dd.MW, "OK", htTestMatch, htTrainMatch, methods, predictedToxicities,
-					predictedUncertainties, createDetailedConsensusReport, gsid, options);
+					predictedUncertainties, createDetailedConsensusReport, options);
 		}
 
 		if (reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
@@ -1378,7 +1380,7 @@ public class WebTEST2 {
 
 			
 			dd.ID = CAS;
-			dd.gsid = getGSID(ac, CAS);//TODO do we need to store in dd?
+			dd.dtxcid = ac.getProperty(DSSToxRecord.strCID);
 			
 			if (ac.getAtomCount()>0) {
 				dd.InChiKey=InChiKey;
@@ -1398,7 +1400,7 @@ public class WebTEST2 {
 			}
 
 			// just in case we are running a chemical without gsid (e.g. user drawn structure):
-			if (!reportTypes.isEmpty() && dd.gsid == null) {
+			if (!reportTypes.isEmpty() && dd.dtxcid == null) {
 				ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(ac, "structure", strOutputFolderStructureData);// dont
 			}
 					

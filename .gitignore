@@ -12,3 +12,8 @@ mvn-repo/
 dependency-reduced-pom.xml
 ToxRuns/
 *.zip
+test downloadable HCD/
+*.xlsx
+*.bat
+MNDOH/
+*.xls

@@ -4,19 +4,31 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
 
+import org.apache.commons.text.StringEscapeUtils;
+import org.apache.poi.common.usermodel.HyperlinkType;
+import org.apache.poi.hssf.util.HSSFColor;
 import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.VerticalAlignment;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.ss.util.RegionUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
@@ -31,9 +43,11 @@ import org.openscience.cdk.AtomContainerSet;
 import AADashboard.Application.RowHCD.Group;
 import AADashboard.Application.RowHCD.HazardCategory;
 import AADashboard.Application.RowHCD.HazardCategorySpecific;
+import ToxPredictor.Application.GUI.TESTApplication;
 import AADashboard.Application.RowHCD.HazardCategoryGeneral;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
+import gov.epa.api.RecordLink;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 
@@ -57,6 +71,88 @@ public class TableGeneratorExcel {
 			ex.printStackTrace();
 		}
 
+	}
+	
+	public void writeLinksSheet(String[] headers, String sheetName, XSSFWorkbook wb,Vector<RecordLink>links) {
+	
+		CellStyle hlink_style = wb.createCellStyle();
+		Font hlink_font = wb.createFont();
+		hlink_font.setUnderline(Font.U_SINGLE);
+		hlink_font.setColor(HSSFColor.HSSFColorPredefined.BLUE.getIndex());
+		hlink_style.setFont(hlink_font);
+		
+		
+		Sheet recSheet = wb.createSheet(sheetName);
+//		Row recSubtotalRow = recSheet.createRow(0);
+		Row recHeaderRow = recSheet.createRow(0);
+		CellStyle style = wb.createCellStyle();
+		Font font = wb.createFont();
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		style.setFont(font);
+		for (int i = 0; i < headers.length; i++) {
+			Cell recCell = recHeaderRow.createCell(i);
+			recCell.setCellValue(headers[i]);
+			recCell.setCellStyle(style);
+		}
+		int recCurrentRow = 1;
+		
+		for (RecordLink rl:links) {
+			
+			
+			Class rlClass = rl.getClass();
+			Object value = null;
+			try {
+				Row row = recSheet.createRow(recCurrentRow);
+				recCurrentRow++;
+				 
+				for (int i = 0; i < headers.length; i++) {
+					
+					Field field = rlClass.getDeclaredField(headers[i]);
+					value = field.get(rl);
+					
+					if (value==null) continue;
+					
+					if (headers[i].contentEquals("URL")) {
+						String strValue = (String) value;
+						Cell cell = row.createCell(i);     						
+
+						cell.setCellStyle(hlink_style);						
+						if (strValue.length() > 32767) { strValue = strValue.substring(0,32767); }
+						cell.setCellValue(strValue);
+
+						Hyperlink href = wb.getCreationHelper().createHyperlink(HyperlinkType.URL);
+						href.setAddress(strValue);
+						cell.setHyperlink(href);
+						
+					} else if (value instanceof String) { 
+						String strValue = (String) value;
+						if (strValue.length() > 32767) { strValue = strValue.substring(0,32767); }
+						row.createCell(i).setCellValue(strValue);
+					} 
+				}
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				System.out.println(value.toString());
+			}
+		}
+		
+		String lastCol = CellReference.convertNumToColString(headers.length-1);
+		recSheet.setAutoFilter(CellRangeAddress.valueOf("A1:"+lastCol+recCurrentRow));
+		recSheet.createFreezePane(0, 1);
+		
+		for (int i = 0; i < headers.length; i++) {
+			String col = CellReference.convertNumToColString(i);
+
+//			String recSubtotal = "SUBTOTAL(3,"+col+"$3:"+col+"$"+(recCurrentRow+1)+")";
+//			recSubtotalRow.createCell(i).setCellFormula(recSubtotal);
+			
+			recSheet.autoSizeColumn(i);
+			if (recSheet.getColumnWidth(i)>50*256) {
+				recSheet.setColumnWidth(i, 50*256);
+			}
+
+		}
+		
 	}
 	
 	public void writeBatchChemicalsToExcel(AtomContainerSet acs, Vector<String> newProps,XSSFWorkbook workbook) {
@@ -98,6 +194,14 @@ public class TableGeneratorExcel {
 	
 	public void writeScoreRecordsToWorkbook(Chemicals chemicals,XSSFWorkbook workbook) {
 		try {
+			
+			CellStyle hlink_style = workbook.createCellStyle();
+			Font hlink_font = workbook.createFont();
+			hlink_font.setUnderline(Font.U_SINGLE);
+			hlink_font.setColor(HSSFColor.HSSFColorPredefined.BLUE.getIndex());
+			hlink_style.setFont(hlink_font);
+
+			
 			String del="|";
 
 			ArrayList<String>uniqueCAS=new ArrayList<>();
@@ -110,10 +214,13 @@ public class TableGeneratorExcel {
 
 			XSSFCellStyle styleBold=getStyleBold(workbook);
 
+			String [] headers=ScoreRecord.allFieldNames;
+			
+			
 			//Write header
-			for (int i=0;i<ScoreRecord.allFieldNames.length;i++)	{
+			for (int i=0;i<headers.length;i++)	{
 				XSSFCell cell=row.createCell(i);
-				cell.setCellValue(ScoreRecord.allFieldNames[i]);
+				cell.setCellValue(headers[i]);
 				cell.setCellStyle(styleBold);
 			}
 
@@ -134,43 +241,66 @@ public class TableGeneratorExcel {
 
 					LinkedList<String>list=ToxPredictor.Utilities.Utilities.Parse3(line, del);
 
+//					System.out.println(list.size());
+					
 					for (int i=0;i<list.size();i++) {
 						XSSFCell cell=row.createCell(i);
 
 						String value="";
 
 						if (list.get(i).length()>32000) {
-							value=list.get(i).substring(0,32000)+"...";	
-
+							value=list.get(i).substring(0,32000)+"...";
+							cell.setCellValue(value);
 						} else {
 							value=list.get(i);
+							cell.setCellValue(value);
+
+							if (headers[i].equals("url")) {
+								String strValue = (String) value;
+
+								try {
+									URL u = new URL(value); // this would check for the protocol
+									u.toURI();
+									Hyperlink href = workbook.getCreationHelper().createHyperlink(HyperlinkType.URL);
+									href.setAddress(strValue);
+									cell.setHyperlink(href);
+									cell.setCellStyle(hlink_style);						
+
+								} catch (Exception ex) {
+									if (value.length()>1) System.out.println("Invalid URL:"+value);
+								}
+							}
 						}
-						cell.setCellValue(value);
+
 
 					}
 				}
 
 				//				fw.write(chemical.to);
 			}
+						
 
-			for (int i=0;i<17;i++) {
+			sheet.createFreezePane( 1, 1, 1, 1 );
+			
+			int lastRow=rowNum;
+			Row rowHeader=sheet.getRow(0);
+			int lastColumn=rowHeader.getLastCellNum()-1;
+			CellAddress caLast=new CellAddress(lastRow,lastColumn);
+			sheet.setAutoFilter(CellRangeAddress.valueOf("A1:"+caLast.formatAsString()));
+			
+			
+			for (int i=0;i<lastColumn;i++) {
 //				if (i!=1 & i!=7 & i!=9 && i!=10 && i!=11 && i!=12) {
 //					sheet.autoSizeColumn(i);
 //				}
-//				
 //				else
 //					sheet.setColumnWidth(i, 50*256);
-				
 				sheet.autoSizeColumn(i);
-				
 				if (sheet.getColumnWidth(i)>50*256) {
 					sheet.setColumnWidth(i, 50*256);
 				}
-				
-				
 			}
 
-			sheet.createFreezePane( 1, 1, 1, 1 );
 
 			//			for (String CAS:uniqueCAS) {
 			//				System.out.println(CAS);
@@ -254,9 +384,21 @@ public class TableGeneratorExcel {
 	}
 	
 	public void writeFinalScoresToWorkbook(Chemicals chemicals, XSSFWorkbook workbook) {
-		Vector <Group>groups=RowHCD.createGroups();
+		Vector <Group>groups=null;		
+		if (TESTApplication.forMDH) groups=RowHCD.createGroupsMDH();
+		else groups=RowHCD.createGroups();
+		
 		writeFinalScoresToWorkbook(chemicals, workbook, groups);
 	}
+	
+	public void writeFinalScoresToWorkbookSimple(Chemicals chemicals, XSSFWorkbook workbook) {
+		Vector <Group>groups=null;		
+		if (TESTApplication.forMDH) groups=RowHCD.createGroupsMDH_Simple();
+		else groups=RowHCD.createGroupsSimple();
+		
+		writeFinalScoresToWorkbookSimple(chemicals, workbook, groups);
+	}
+
 	
 	public void writeFinalScoresToWorkbook(Chemicals chemicals, XSSFWorkbook workbook, Vector <Group>groups) {
 		//Create a blank sheet
@@ -348,6 +490,63 @@ public class TableGeneratorExcel {
 		sheet.createFreezePane( 0, 3, 0, 3 );
 
 	}
+	
+	public void writeFinalScoresToWorkbookSimple(Chemicals chemicals, XSSFWorkbook workbook, Vector <Group>groups) {
+		//Create a blank sheet
+		XSSFSheet sheet = workbook.createSheet("Hazard Profiles");
+
+		writeHeaderFinalScoreTabSimple(workbook, sheet,groups);
+
+		Hashtable<String, CellStyle> htStyles = createScoreStylesHashtable(workbook);
+
+		Vector<HazardCategory>cats=new Vector<>();//make vector to flatten groups
+		for (int i=0;i<groups.size();i++) {
+			Group groupi=groups.get(i);
+			for (HazardCategory cat:groupi.categories) cats.add(cat);
+		}
+		
+		CellStyle csBorder=getStyleBorder(workbook);
+		
+		for (int chemicalNum=0;chemicalNum<chemicals.size();chemicalNum++) {
+			XSSFRow row=sheet.createRow(chemicalNum+1);	 
+
+			Chemical chemical=chemicals.get(chemicalNum);
+			
+			for (int categoryNum=0;categoryNum<cats.size();categoryNum++) {			
+				HazardCategory cat=cats.get(categoryNum);
+
+				XSSFCell cell=row.createCell(categoryNum);
+				
+				if (cat.name.equals("CAS"))	{
+					cell.setCellValue(chemical.CAS);
+					cell.setCellStyle(csBorder);
+				} else if (cat.name.equals("name")) {
+					cell.setCellValue(chemical.name);
+					cell.setCellStyle(csBorder);
+				} else {
+					Score score=chemical.getScore(cat.name);
+					String final_score=score.final_score;
+					if (score.records.size()>0) {
+						if (final_score.contentEquals("N/A")) final_score="I";
+						cell.setCellValue(final_score);
+						cell.setCellStyle(htStyles.get(final_score));
+	
+					} else {
+						cell.setCellValue("");
+						cell.setCellStyle(htStyles.get(final_score));
+					}
+				}
+			}
+			
+		}
+
+		sheet.createFreezePane( 0, 1, 0, 1 );
+		String lastCol = CellReference.convertNumToColString(cats.size()-1);
+		sheet.setAutoFilter(CellRangeAddress.valueOf("A1:"+lastCol+chemicals.size()));
+
+
+	}
+
 
 	private Hashtable<String, CellStyle> createScoreStylesHashtable(XSSFWorkbook workbook) {
 		Hashtable<String,CellStyle>htStyles=new Hashtable<>();
@@ -454,6 +653,32 @@ public class TableGeneratorExcel {
 			}
 		}
 		
+	}
+	
+	private void writeHeaderFinalScoreTabSimple(XSSFWorkbook workbook, XSSFSheet sheet,Vector <Group>groups) {
+		XSSFCellStyle styleBorderWithRotate=getStyleBorderWithRotate(workbook);
+		//		XSSFCellStyle styleRotate=getStyleRotate(workbook);
+		XSSFCellStyle styleBorder=getStyleBorder(workbook);
+
+		
+		XSSFRow row = sheet.createRow(0);
+		row.setHeightInPoints(180);	  
+		
+		int count=0;
+		
+		for (Group group:groups) {
+			for (HazardCategory cat:group.categories) {
+				XSSFCell cell=row.createCell(count++);
+				
+				if (group.name.contentEquals("Identifiers"))
+					createCell(cell, cat.name, workbook,styleBorder);
+				else 
+					createCell(cell, cat.name, workbook,styleBorderWithRotate);
+			}
+		}
+		
+
+
 	}
 	
 	public static short getColorShort(String val) {

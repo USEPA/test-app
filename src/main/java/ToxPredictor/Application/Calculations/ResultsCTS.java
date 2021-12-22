@@ -32,7 +32,7 @@ public class ResultsCTS {
 	}
 	
 	class Data {
-		Tree tree;
+		Tree data;
 		
 		class Tree {
 			Data2 data;			
@@ -59,7 +59,7 @@ public class ResultsCTS {
 	}
 	
 	public static ArrayList<Child> getAllChildren (ResultsCTS rc) {
-		Data.Tree.Child [] children=rc.data.tree.children;
+		Data.Tree.Child [] children=rc.data.data.children;
 		ArrayList<Child>allChildren=new ArrayList<>();
 		goThroughChildren(children,allChildren);
 		

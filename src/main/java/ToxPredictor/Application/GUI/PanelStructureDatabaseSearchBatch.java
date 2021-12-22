@@ -1,16 +1,13 @@
 package ToxPredictor.Application.GUI;
 
-import java.awt.Color;
 import java.awt.event.*;
-
-import javax.vecmath.Point2d;
-
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Scanner;
 import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
-import javax.swing.table.AbstractTableModel;
 
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
@@ -18,10 +15,8 @@ import ToxPredictor.Application.GUI.PanelBatchChemicals.MyTableModel;
 import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.Utilities.*;
 
-
 //import org.openscience.cdk.interfaces.IMolecule;
 import org.openscience.cdk.*;
-import org.openscience.cdk.interfaces.*;
 
 public class PanelStructureDatabaseSearchBatch extends JPanel {
 
@@ -48,6 +43,9 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 //	JLabel jlBatchNote=new JLabel("Double click to edit batch list chemicals");
 	JScrollPane scrollPane;
 	JButton jbSearch=new JButton();
+	
+	JButton jbLoad_CHC_List=new JButton();
+	JButton jbLoad_CHC_Sample_List=new JButton();
 	
 	actionAdapter aa =new actionAdapter();
 	windowAdapter wa=new windowAdapter();
@@ -105,6 +103,8 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
         jbSearch.addActionListener(aa);
 		jbSearch.setActionCommand("jbSearch");
 		
+		
+		
 //		jbCancel.setSize(textWidth,textHeight);
 //		jbCancel.setLocation(jbOK.getX()-inset-textWidth,jbOK.getY());
 //		jbCancel.setText("Cancel");
@@ -130,6 +130,8 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		jbClear.setText("Clear table");
 		jbClear.setActionCommand("jbClear");
 		jbClear.addActionListener(aa);
+		
+
 
 //		jlBatchNote.setSize(350,20);
 //		jlBatchNote.setLocation(20,this.getHeight()-jlBatchNote.getHeight()-vspacing);
@@ -138,11 +140,33 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		add(this.jcbOptions);
 //		this.add(jlBatchNote);
 		
-		this.add(jbDrawChemical);
-		this.add(jbDelete);
+		add(jbDrawChemical);
+		add(jbDelete);
 		add(jbSearch);
 		add(jbClear);
 
+		if (gui instanceof TESTApplication) {
+			TESTApplication f=(TESTApplication)gui;
+			
+			if (f.forMDH) {
+				jbLoad_CHC_List.setSize(radialwidth,textHeight);
+				jbLoad_CHC_List.setLocation(inset,(int)jbClear.getLocation().getY()+vspacing+textHeight);
+				jbLoad_CHC_List.setText("Load CHC List");
+				
+				jbLoad_CHC_List.addActionListener(aa);
+				jbLoad_CHC_List.setActionCommand("jbLoad_CHC_List");
+				add(jbLoad_CHC_List);
+				
+				jbLoad_CHC_Sample_List.setSize(radialwidth,textHeight);
+				jbLoad_CHC_Sample_List.setLocation(inset,(int)jbLoad_CHC_List.getLocation().getY()+vspacing+textHeight);
+				jbLoad_CHC_Sample_List.setText("Load Sample List");
+				
+				jbLoad_CHC_Sample_List.addActionListener(aa);
+				jbLoad_CHC_Sample_List.setActionCommand("jbLoad_CHC_Sample_List");
+				add(jbLoad_CHC_Sample_List);
+
+			}
+		}
 
 		
 	}
@@ -340,6 +364,51 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 				
 				
 				
+			} else if (e.getActionCommand().equals("jbLoad_CHC_List")) {
+				
+				int type=TaskStructureSearch.TypeSDF_In_Jar;
+				TESTApplication test=(TESTApplication)gui;	
+	    		test.taskStructureFile.init("list_chemicals-2021-07-16-13-19-26.sdf",type,TESTConstants.typeTaskBatch,test);
+	    		test.taskStructureFile.go();
+	    		test.timerBatchStructureFile.start();
+
+//				try {
+//					InputStream ins=this.getClass().getClassLoader().getResourceAsStream("MNDOHTOXFREE.smi");
+//					Scanner scanner=new Scanner(ins);
+//
+//					String data="";
+//					while (scanner.hasNext()) {
+//						data+=scanner.nextLine()+"\r\n";
+//					}
+//					scanner.close();
+//					jtfIdentifiers.setText(data);
+//					jbSearch_actionPerformed(e);
+//					
+//					
+//				} catch (Exception ex) {
+//					ex.printStackTrace();
+//				}
+	    		
+	    		
+			} else if (e.getActionCommand().equals("jbLoad_CHC_Sample_List")) {
+
+				int type=TaskStructureSearch.TypeSDF_In_Jar;
+				TESTApplication test=(TESTApplication)gui;	
+	    		test.taskStructureFile.init("MDH sample chemicals.sdf",type,TESTConstants.typeTaskBatch,test);
+	    		test.taskStructureFile.go();
+	    		test.timerBatchStructureFile.start();
+				
+//				String data="CC(C)(C1=CC=C(O)C=C1)C1=CC=C(O)C=C1\tDTXSID7020182\r\n";//bisphenol A
+//				data+="CC#N\tDTXSID7020009\r\n";//acetonitrile
+//				data+="CC(C)(C)C1=CC(CCC(=O)OCC(COC(=O)CCC2=CC(=C(O)C(=C2)C(C)(C)C)C(C)(C)C)(COC(=O)CCC2=CC(=C(O)C(=C2)C(C)(C)C)C(C)(C)C)COC(=O)CCC2=CC(=C(O)C(=C2)C(C)(C)C)C(C)(C)C)=CC(=C1O)C(C)(C)C\tDTXSID1027633\r\n";//irganox 1010- cant predict descriptors in opera
+//				data+="CC1CC(C)(C)CC(C1)(OOC(C)(C)C)OOC(C)(C)C\tDTXSID4020165\r\n";//AD=0
+//				data+="CCCCOC(=O)C1=C(C=CC=C1)C(=O)OCC1=CC=CC=C1\tDTXSID3020205\r\n";
+//				data+="CCCCOC(=O)C1=CC=CC=C1C(=O)OCCCC\tDTXSID2021781\r\n";
+//				data+="C=CC1=CC=CC=C1\tDTXSID2021284\r\n";
+//				data+="CC(C)(C)C1=CC=C(O)C=C1\tDTXSID1020221\r\n";
+//				jtfIdentifiers.setText(data);
+//				jbSearch_actionPerformed(e);
+
 			}
 
 		}

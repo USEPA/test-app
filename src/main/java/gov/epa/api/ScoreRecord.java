@@ -86,8 +86,8 @@ public class ScoreRecord {
 
 //	All the fields in the class in the desired order:	
 		public static String[] allFieldNames= {"CAS","name","hazardName","source","sourceOriginal", 
-				"score", "listType","route", "category", "hazardCode",
-				"hazardStatement", "rationale", "note","note2","toxvalID",
+				"listType","score", "route", "category", "hazardCode",
+				"hazardStatement",  "rationale","note","note2","toxvalID",
 				"testOrganism","testType","valueMassOperator","valueMass","valueMassUnits","effect",
 				"duration","durationUnits","url","longRef"};
 		
@@ -148,7 +148,7 @@ public class ScoreRecord {
 	public static final String sourceAcute_Toxicity_Data_from_EPA_HPVIS = "Acute Toxicity Data from EPA HPVIS";
 	public static final String sourceReproductive_Toxicity_Data_In_Vitro_from_EPA_HPVIS = "Reproductive Toxicity Data in Vitro from EPA HPVIS";
 
-	public static final String sourceToxVal="ToxVal";
+	public static final String sourceToxVal="ToxVal v8";
 	
 	
 //	public static final float weightECHA_CLP = 20.0f;
@@ -568,6 +568,43 @@ public class ScoreRecord {
 			}
 
 			return vals;
+		}
+		
+		
+		
+		//convert to string by reflection:
+		public String getValue(String fieldName) {
+
+			try {
+				Field myField = this.getClass().getDeclaredField(fieldName);
+				String val=null;
+
+				//System.out.println(myField.getType().getName());
+
+				if (myField.getType().getName().contains("Double")) {
+					if (myField.get(this)==null) {
+						val="";	
+					} else {
+						val=(Double)myField.get(this)+"";
+					}
+
+				} else {
+					if (myField.get(this)==null) {
+						val="";
+					} else {
+						val=(String)myField.get(this);
+					} 
+				}
+
+				val=val.replace("\r\n","<br>");
+				val=val.replace("\n","<br>");
+
+				return val;
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return null;
 		}
 	
 //	void createFlatFileFromAllSources() {

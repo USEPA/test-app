@@ -5,16 +5,23 @@ import java.awt.*;
 import java.awt.event.*;
 import java.util.Vector;
 import java.util.ArrayList;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.awt.image.*;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 
@@ -40,8 +47,13 @@ import ToxPredictor.Application.GUI.Table.MyTableModelAllQSARMethods;
 import ToxPredictor.Application.GUI.Table.MyTableModelDescriptors;
 import ToxPredictor.Application.GUI.Table.MyTableModelHCD;
 import ToxPredictor.Application.GUI.Table.MyTableModelHCD_ScoreRecords;
+import ToxPredictor.Application.GUI.Table.MyTableModelLinks;
+import ToxPredictor.Application.GUI.Table.MyTableModelMAE;
+import ToxPredictor.Application.GUI.Table.MyTableModelSimilarChemical;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
+import ToxPredictor.Application.model.SimilarChemical;
+import ToxPredictor.Application.model.SimilarChemicals;
 import ToxPredictor.MyDescriptors.DescriptorData;
 
 
@@ -49,6 +61,7 @@ import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
+import gov.epa.api.RecordLink;
 import gov.epa.api.Score;
 
 public class PanelResults extends JDialog {
@@ -65,27 +78,48 @@ public //	public boolean Locked=false;
 	JTable tableHCD = new JTable();
 	JTable tableHCDScoreRecords = new JTable();
 	JTable tableHCDScoreRecords2 = new JTable();
-
+	JTable tableLinks = new JTable();
+	
+	JTable tableMAE_Training=new JTable();
+	JTable tableMAE_Prediction=new JTable();
+	
+	
+	JTable tableSimilarChemicalsTraining = new JTable();
+	JTable tableSimilarChemicalsPrediction = new JTable();
+	
 	public JTabbedPane jtabbedPane;
 	
-	JScrollPane scrollPane;
-	JScrollPane scrollPane2;
-	JScrollPane scrollPane3;
-	JScrollPane scrollPane4;
-	JScrollPane scrollPane5;
-	JScrollPane scrollPane6;
+	JScrollPane scrollPaneMethod;
+	JScrollPane scrollPaneAllMethods;
+	JScrollPane scrollPaneDescriptors;
+	
+	JScrollPane scrollPaneFinalScores;
+	JScrollPane scrollPaneScoreRecords;
+	JScrollPane scrollPaneLinks;
+
+	JScrollPane scrollPaneScoreRecords2;
+	JScrollPane scrollPaneSimilarChemicalsTraining;
+	JScrollPane scrollPaneSimilarChemicalsPrediction;
+	JScrollPane scrollPaneMAE_Training;
+	JScrollPane scrollPaneMAE_Prediction;
 	
 //	keyAdapter ka=new keyAdapter();
 	actionAdapter aa=new actionAdapter();
 	
 	public JButton jbSaveToExcel=new JButton();
 	public JButton jbSaveToText=new JButton();
-	public JButton jbSaveToHTML=new JButton();
+//	public JButton jbSaveToHTML=new JButton();
+	public JButton jbViewReport=new JButton();
 
 	int inset=20;
 	
 	TESTApplication f;
 	
+	JPanel panelTraining=new JPanel();
+	JPanel panelPrediction=new JPanel();
+
+	JLabel jlabelTrainingGraph=new JLabel();
+	JLabel jlabelPredictionGraph=new JLabel();
 	
 	public PanelResults(JFrame owner,String title,boolean modal) {		
 		super(owner, title, modal);
@@ -102,7 +136,7 @@ public //	public boolean Locked=false;
 		jbSaveToExcel.setActionCommand("jbSaveToExcel");
 		jbSaveToExcel.addActionListener(aa);
 		jbSaveToExcel.setSize(width,20);
-		jbSaveToExcel.setLocation(inset,scrollPane.getY()+scrollPane.getHeight()+inset);
+		jbSaveToExcel.setLocation(inset,scrollPaneMethod.getY()+scrollPaneMethod.getHeight()+inset);
 		jbSaveToExcel.setText("Save to Excel (.xlsx)");
 		add(jbSaveToExcel);
 
@@ -110,16 +144,23 @@ public //	public boolean Locked=false;
 		jbSaveToText.setActionCommand("jbSaveToText");
 		jbSaveToText.addActionListener(aa);
 		jbSaveToText.setSize(width,20);
-		jbSaveToText.setLocation(jbSaveToExcel.getX()+jbSaveToExcel.getWidth()+inset,scrollPane.getY()+scrollPane.getHeight()+inset);
+		jbSaveToText.setLocation(jbSaveToExcel.getX()+jbSaveToExcel.getWidth()+inset,scrollPaneMethod.getY()+scrollPaneMethod.getHeight()+inset);
 		add(jbSaveToText);
 		
-		jbSaveToHTML.setText("Save to web pages (.html)");
-		jbSaveToHTML.setActionCommand("jbSaveToHTML");
-		jbSaveToHTML.addActionListener(aa);
-		jbSaveToHTML.setSize(width,20);
-		jbSaveToHTML.setLocation(jbSaveToText.getX()+jbSaveToText.getWidth()+inset,scrollPane.getY()+scrollPane.getHeight()+inset);
-		add(jbSaveToHTML);
+//		jbSaveToHTML.setText("Save to web pages (.html)");
+//		jbSaveToHTML.setActionCommand("jbSaveToHTML");
+//		jbSaveToHTML.addActionListener(aa);
+//		jbSaveToHTML.setSize(width,20);
+//		jbSaveToHTML.setLocation(jbSaveToText.getX()+jbSaveToText.getWidth()+inset,scrollPaneMethod.getY()+scrollPaneMethod.getHeight()+inset);
+//		add(jbSaveToHTML);
 
+		jbViewReport.setText("View HTML report");
+		jbViewReport.setActionCommand("jbViewReport");
+		jbViewReport.addActionListener(aa);
+		jbViewReport.setSize(width,20);
+//		jbViewReport.setLocation(jbSaveToHTML.getLocation());
+		jbViewReport.setLocation(jbSaveToText.getX()+jbSaveToText.getWidth()+inset,scrollPaneMethod.getY()+scrollPaneMethod.getHeight()+inset);
+		add(jbViewReport);
 
 	}
 	
@@ -135,8 +176,8 @@ public //	public boolean Locked=false;
 //		System.out.println(width+"\t"+height);
 
 		Dimension scrnsize = Toolkit.getDefaultToolkit().getScreenSize();
-		int height=(int)(scrnsize.height*0.65);
-		int width=(int)(scrnsize.width*0.75);
+		int height=(int)(scrnsize.height*0.85);
+		int width=(int)(scrnsize.width*0.85);
 		
 		this.setResizable(false);
 		this.setSize(width, height); // need space for controls at bottom
@@ -150,61 +191,135 @@ public //	public boolean Locked=false;
 		this.setLayout(null);
 
 		//Create the scroll pane and add the table to it.
-		scrollPane = new JScrollPane(tableMethod);
-		scrollPane.setLocation(inset, inset); //shift it over a bit
-		scrollPane.setSize(width-2*inset, height-6*inset);
+		scrollPaneMethod = new JScrollPane(tableMethod);
+		scrollPaneMethod.setLocation(inset, inset); //shift it over a bit
+		scrollPaneMethod.setSize(width-2*inset, height-6*inset);
 
-		scrollPane2 = new JScrollPane(tableAllMethods);
-		scrollPane2.setLocation(scrollPane.getLocation()); //shift it over a bit
-		scrollPane2.setSize(scrollPane.getSize());
+		scrollPaneAllMethods = new JScrollPane(tableAllMethods);
+		scrollPaneAllMethods.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneAllMethods.setSize(scrollPaneMethod.getSize());
 		
-		scrollPane3 = new JScrollPane(tableDescriptors);
-		scrollPane3.setLocation(scrollPane.getLocation()); //shift it over a bit
-		scrollPane3.setSize(scrollPane.getSize());
+		scrollPaneDescriptors = new JScrollPane(tableDescriptors);
+		scrollPaneDescriptors.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneDescriptors.setSize(scrollPaneMethod.getSize());
 
-		scrollPane4 = new JScrollPane(tableHCD);
-		scrollPane4.setLocation(scrollPane.getLocation()); //shift it over a bit
-		scrollPane4.setSize(scrollPane.getSize());
+		scrollPaneFinalScores = new JScrollPane(tableHCD);
+		scrollPaneFinalScores.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneFinalScores.setSize(scrollPaneMethod.getSize());
+
+		scrollPaneLinks = new JScrollPane(tableLinks);
+		scrollPaneLinks.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneLinks.setSize(scrollPaneMethod.getSize());
 
 		
 		tableHCDScoreRecords.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		tableHCDScoreRecords2.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
-		scrollPane5 = new JScrollPane(tableHCDScoreRecords);
-		scrollPane5.setLocation(scrollPane.getLocation()); //shift it over a bit
-		scrollPane5.setSize(scrollPane.getSize());
+		scrollPaneScoreRecords = new JScrollPane(tableHCDScoreRecords);
+		scrollPaneScoreRecords.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneScoreRecords.setSize(scrollPaneMethod.getSize());
 
-		scrollPane6 = new JScrollPane(tableHCDScoreRecords2);
-		scrollPane6.setLocation(scrollPane.getLocation()); //shift it over a bit
-		scrollPane6.setSize(scrollPane.getSize());
+		scrollPaneScoreRecords2 = new JScrollPane(tableHCDScoreRecords2);
+		scrollPaneScoreRecords2.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneScoreRecords2.setSize(scrollPaneMethod.getSize());
 
 		
+		scrollPaneSimilarChemicalsTraining = new JScrollPane(tableSimilarChemicalsTraining);
+		scrollPaneSimilarChemicalsTraining.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneSimilarChemicalsTraining.setSize((int)(scrollPaneMethod.getWidth()*0.5), scrollPaneMethod.getHeight()-30);
+
+		scrollPaneSimilarChemicalsPrediction = new JScrollPane(tableSimilarChemicalsPrediction);
+		scrollPaneSimilarChemicalsPrediction.setLocation(scrollPaneMethod.getLocation()); //shift it over a bit
+		scrollPaneSimilarChemicalsPrediction.setSize((int)(scrollPaneMethod.getWidth()*0.5), scrollPaneMethod.getHeight()-30);
+		
+		
 		jtabbedPane=new JTabbedPane();
-		jtabbedPane.setSize(scrollPane.getSize());
+		jtabbedPane.setSize(scrollPaneMethod.getSize());
 		add(jtabbedPane);
+
+		int heightMAE_Table=125;
+		int heightPlot=scrollPaneSimilarChemicalsTraining.getHeight()-heightMAE_Table;
+		
+		panelTraining.setLayout(null);
+		panelTraining.add(scrollPaneSimilarChemicalsTraining);
+		scrollPaneSimilarChemicalsTraining.setLocation(0, 0);
+		jlabelTrainingGraph.setSize(heightPlot-50,heightPlot-50);
+		panelTraining.add(jlabelTrainingGraph);
+		jlabelTrainingGraph.setLocation(scrollPaneSimilarChemicalsTraining.getWidth(),0);
+		
+		JPanel panelMAE_Training = new JPanel();
+		panelMAE_Training.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createEtchedBorder(), "Entire set vs. similar chemicals", TitledBorder.LEFT,
+				TitledBorder.TOP));
+		panelMAE_Training.setSize(heightPlot,heightMAE_Table);
+		panelMAE_Training.setLocation(jlabelTrainingGraph.getX(),scrollPaneSimilarChemicalsTraining.getHeight()-panelMAE_Training.getHeight()-30);
+		scrollPaneMAE_Training=new JScrollPane(tableMAE_Training);
+		scrollPaneMAE_Training.setPreferredSize(new Dimension(panelMAE_Training.getWidth()-10,panelMAE_Training.getHeight()-30));
+		panelTraining.add(panelMAE_Training);
+		panelMAE_Training.add(scrollPaneMAE_Training);
+				
+		
+		panelPrediction.setLayout(null);
+		panelPrediction.add(scrollPaneSimilarChemicalsPrediction);
+		scrollPaneSimilarChemicalsPrediction.setLocation(scrollPaneSimilarChemicalsTraining.getLocation());
+		panelPrediction.add(jlabelPredictionGraph);
+		jlabelPredictionGraph.setSize(jlabelTrainingGraph.getSize());
+		jlabelPredictionGraph.setLocation(jlabelTrainingGraph.getLocation());
+
+		JPanel panelMAE_Prediction = new JPanel();
+		panelMAE_Prediction.setBorder(panelMAE_Training.getBorder());
+		panelMAE_Prediction.setSize(panelMAE_Training.getSize());
+		panelMAE_Prediction.setLocation(panelMAE_Training.getLocation());
+		scrollPaneMAE_Prediction=new JScrollPane(tableMAE_Prediction);
+		scrollPaneMAE_Prediction.setPreferredSize(scrollPaneMAE_Training.getPreferredSize());
+		panelPrediction.add(panelMAE_Prediction);
+		panelMAE_Prediction.add(scrollPaneMAE_Prediction);
+
 		
 		tableDescriptors.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
-				
+		tableHCD.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableHCDScoreRecords.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableHCDScoreRecords2.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableLinks.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);		
+		tableMethod.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableAllMethods.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		tableDescriptors.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	}
 
-	public void initTableModel(String endpoint,String method) {
+	public void initTableModel(String endpoint,String method,boolean isBatch) {
 				
 		jtabbedPane.removeAll();
-
-		
-		jtabbedPane.add("Results", scrollPane);
+		jtabbedPane.add("Results", scrollPaneMethod);
 
 		String [] colNames=MyTableModel.getColNames(endpoint, method);
 		MyTableModel tableModel=new MyTableModel(colNames);
 		tableModel.setupTable(tableMethod);
 
 		if(method.contentEquals(TESTConstants.ChoiceConsensus)) {
-			jtabbedPane.add("Individual methods", scrollPane2);		
+			jtabbedPane.add("Individual methods", scrollPaneAllMethods);		
 			String [] colNames2=MyTableModelAllQSARMethods.getColumnNames(endpoint, method);
 			MyTableModelAllQSARMethods tableModelAll=new MyTableModelAllQSARMethods(colNames2);
 			tableModelAll.setupTable(tableAllMethods);			
 		} 
+		
+		if(!isBatch) {
+			jtabbedPane.add("Predictions for similar training chemicals", panelTraining);
+			String [] colNames2=MyTableModelSimilarChemical.getColumnNames();//TODO add units
+			MyTableModelSimilarChemical tableModelSC=new MyTableModelSimilarChemical(colNames2);
+			tableModelSC.setupTable(tableSimilarChemicalsTraining);			
+
+			MyTableModelMAE tableModelMAE_Training=new MyTableModelMAE(MyTableModelMAE.getColumnNames());
+			tableModelMAE_Training.setupTable(tableMAE_Training);
+
+			MyTableModelMAE tableModelMAE_Prediction=new MyTableModelMAE(MyTableModelMAE.getColumnNames());
+			tableModelMAE_Prediction.setupTable(tableMAE_Prediction);
+		
+			jtabbedPane.add("Predictions for similar test chemicals", panelPrediction);
+			colNames2=MyTableModelSimilarChemical.getColumnNames();//TODO add units
+			tableModelSC=new MyTableModelSimilarChemical(colNames2);
+			tableModelSC.setupTable(tableSimilarChemicalsPrediction);
+		}
 
 	}
 	
@@ -212,24 +327,68 @@ public //	public boolean Locked=false;
 		
 		jtabbedPane.removeAll();
 
-		jtabbedPane.add("Descriptors", scrollPane3);		
+		jtabbedPane.add("Descriptors", scrollPaneDescriptors);		
 		String [] colNamesDescriptors=MyTableModelDescriptors.getColumnNames();
-		MyTableModelDescriptors tableModelDescriptors=new MyTableModelDescriptors(colNamesDescriptors);
-		tableModelDescriptors.setupTable(tableDescriptors);
+		
+		//Use invokeLater because so many columns you get error because it takes too long:
+		javax.swing.SwingUtilities.invokeLater(new Runnable() {
+	        public void run() {
+	        	MyTableModelDescriptors tableModelDescriptors=new MyTableModelDescriptors(colNamesDescriptors);
+	    		tableModelDescriptors.setupTable(tableDescriptors);
+	        }
+	    });
 
 	}
 	
 	public void initTableModelHCD() {
 		jtabbedPane.removeAll();
 
-		jtabbedPane.add("Final Scores", scrollPane4);				
+		jtabbedPane.add("Final Scores", scrollPaneFinalScores);				
 		MyTableModelHCD tableModel=new MyTableModelHCD();
 		tableModel.setupTable(tableHCD);
-		tableHCD.getTableHeader().setPreferredSize(new Dimension(scrollPane4.getWidth(), 250));
+		tableHCD.getTableHeader().setPreferredSize(new Dimension(scrollPaneFinalScores.getWidth(), 250));
 		
-		jtabbedPane.add("Score Records", scrollPane5);				
+		jtabbedPane.add("Score Records", scrollPaneScoreRecords);				
 		MyTableModelHCD_ScoreRecords tableModelSR=new MyTableModelHCD_ScoreRecords();
 		tableModelSR.setupTable(tableHCDScoreRecords);
+
+		tableHCDScoreRecords.addMouseListener(new java.awt.event.MouseAdapter() {
+		    @Override
+		    public void mouseClicked(java.awt.event.MouseEvent evt) {
+		        if (evt.getClickCount()==2) {
+		        	int row = tableHCDScoreRecords.rowAtPoint(evt.getPoint());			        
+		        	String link=tableModelSR.getLink(row);
+//		        	System.out.println("link="+link);
+		        	if(link==null || link.trim().isEmpty()) return;
+		        	URI uri=URI.create(link);
+		        	MyBrowserLauncher.launch(uri);
+		        }
+		    }
+		});
+		
+
+		
+		
+		if (TESTApplication.forMDH) {
+			jtabbedPane.add("Links", scrollPaneLinks);				
+			MyTableModelLinks tableModelLinks=new MyTableModelLinks();
+			tableModelLinks.setupTable(tableLinks);
+			
+			tableLinks.addMouseListener(new java.awt.event.MouseAdapter() {
+			    @Override
+			    public void mouseClicked(java.awt.event.MouseEvent evt) {
+			        if (evt.getClickCount()==2) {
+			        	int row = tableLinks.rowAtPoint(evt.getPoint());			        
+			        	RecordLink rl=tableModelLinks.getLink(row);
+//			        	System.out.println(rl.URL);
+			        	URI uri=URI.create(rl.URL);
+			        	MyBrowserLauncher.launch(uri);
+			        }
+			    }
+			});
+			
+		}
+		
 		
 		tableHCD.addMouseListener(new java.awt.event.MouseAdapter() {
 		    @Override
@@ -238,6 +397,7 @@ public //	public boolean Locked=false;
 		        int col = tableHCD.columnAtPoint(evt.getPoint());
 		        		        
 		        if (col>=2) {
+		        	if (tableModel.getChemical(row)==null) return;
 		        	
 			        Chemical chemical=tableModel.getChemical(row);
 			        String scoreName=tableModel.getColumnName(col).trim();
@@ -248,7 +408,24 @@ public //	public boolean Locked=false;
 		        	
 		        	if (score.records.size()==0) return;
 		        	
-		    		jtabbedPane.add("Score Records "+scoreName+" "+chemical.CAS, scrollPane6);				
+		        	if (TESTApplication.forMDH) {
+		        		if(jtabbedPane.getTabCount()==4) {
+		        			jtabbedPane.remove(3);
+		        			for (MouseListener listener:tableHCDScoreRecords2.getMouseListeners()) {
+		        				tableHCDScoreRecords2.removeMouseListener(listener);
+		        			}
+		        		}
+		        	} else {
+		        		if(jtabbedPane.getTabCount()==3) {
+		        			jtabbedPane.remove(2);
+		        			for (MouseListener listener:tableHCDScoreRecords2.getMouseListeners()) {
+		        				tableHCDScoreRecords2.removeMouseListener(listener);
+		        			}
+		        		}		        		
+		        	}
+		        	
+//		        	if(jtabbedPane.getComponentCount()==4)
+		    		jtabbedPane.add("Score Records "+scoreName+" "+chemical.CAS, scrollPaneScoreRecords2);				
 		    		MyTableModelHCD_ScoreRecords tableModelSR=new MyTableModelHCD_ScoreRecords();
 		    		tableModelSR.setupTable(tableHCDScoreRecords2);
 		        	
@@ -257,6 +434,22 @@ public //	public boolean Locked=false;
 		        	}
 		        	jtabbedPane.setSelectedIndex(jtabbedPane.getComponentCount()-1);
 //		    		System.out.println(chemical.CAS+"\t"+scoreName);	
+		        	
+		    		tableHCDScoreRecords2.addMouseListener(new java.awt.event.MouseAdapter() {
+		    		    @Override
+		    		    public void mouseClicked(java.awt.event.MouseEvent evt) {
+		    		        if (evt.getClickCount()==2) {
+		    		        	int row = tableHCDScoreRecords2.rowAtPoint(evt.getPoint());			        
+		    		        	String link=tableModelSR.getLink(row);
+//		    		        	System.out.println("link="+link);
+		    		        	if(link==null || link.trim().isEmpty()) return;
+		    		        	URI uri=URI.create(link);
+		    		        	MyBrowserLauncher.launch(uri);
+		    		        }
+		    		    }
+		    		});
+
+		        	
 		        }
 		    }
 		});
@@ -272,11 +465,11 @@ public //	public boolean Locked=false;
 		String tabName0=jtabbedPane.getTitleAt(0);
 
 		if (tabName0.contentEquals("Descriptors")) {
-			filename = "Batch_Descriptors.xlsx";				
+			filename = "Descriptors.xlsx";				
 		} else if (tabName0.contentEquals("Final Scores")) {
 			filename = "HCD Results.xlsx";
 		} else if (tabName0.contentEquals("Results")) {
-			filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
+			filename = f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
 		} else {
 			JOptionPane.showMessageDialog(f, "Invalid selection");
 			return;
@@ -330,11 +523,14 @@ public //	public boolean Locked=false;
 				Chemicals chemicals=model.getChemicals();				
 
 				TableGeneratorExcel tgExcel = new TableGeneratorExcel();
-				tgExcel.writeFinalScoresToWorkbook(chemicals, workbook);
+				tgExcel.writeFinalScoresToWorkbookSimple(chemicals, workbook);
 		        tgExcel.writeScoreRecordsToWorkbook(chemicals,workbook);
 		        
+		        MyTableModelLinks modelLinks=(MyTableModelLinks)tableLinks.getModel();
+		        tgExcel.writeLinksSheet(RecordLink.fieldNames,"Links", workbook, modelLinks.getRecords());
+		        
 			} else if (tabName0.contentEquals("Results")) {
-				filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
+				filename = f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
 				writeResultsToExcel(workbook,tableMethod.getModel(),f.method);
 				if (f.method.contentEquals(TESTConstants.ChoiceConsensus))
 					writeResultsToExcel(workbook,tableAllMethods.getModel(),"Individual methods");
@@ -679,7 +875,20 @@ public //	public boolean Locked=false;
 	}
 	
 	
-	
+	public void setDefaultCursorAllTables() {		
+		Cursor c=Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR);		
+		tableMethod.getTableHeader().setCursor(c);
+		tableAllMethods.getTableHeader().setCursor(c);
+		tableDescriptors.getTableHeader().setCursor(c);
+		tableHCD.getTableHeader().setCursor(c);
+		tableHCDScoreRecords.getTableHeader().setCursor(c);
+		tableHCDScoreRecords2.getTableHeader().setCursor(c);
+		tableLinks.getTableHeader().setCursor(c);
+		tableMAE_Training.getTableHeader().setCursor(c);
+		tableMAE_Prediction.getTableHeader().setCursor(c);
+		tableSimilarChemicalsTraining.getTableHeader().setCursor(c);
+		tableSimilarChemicalsPrediction.getTableHeader().setCursor(c);
+	}
 	
 	class actionAdapter implements java.awt.event.ActionListener {
 
@@ -693,10 +902,52 @@ public //	public boolean Locked=false;
 				saveToText();
 			} else if (ac.equals("jbSaveToHTML")) {
 				saveToHTML();
+			} else if (ac.equals("jbViewReport")) {
+				viewReport();
 			}
 		}
+
 	}
+
 	
+	private void viewReport() {
+
+		String CAS=f.panelSingleStructureDatabaseSearch.jtfCAS.getText();
+		String endpoint=(String)f.panelCalculationOptions.panelOptionsEndpointMethod.jcbEndpoint.getSelectedItem();
+		String method=(String)f.panelCalculationOptions.panelOptionsEndpointMethod.jcbMethod.getSelectedItem();
+		
+		
+		File f1=new File(f.as.getOutputFolderPath());
+		File f2=new File(f1.getAbsolutePath()+File.separator+"ToxRuns");
+		File f3=new File(f2.getAbsolutePath()+File.separator+"ToxRun_"+CAS);
+		
+		File f5=null;
+		
+		if (!endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
+			File f4=new File(f3.getAbsolutePath()+File.separator+endpoint);
+			String filename=endpoint+"_"+method+"_"+CAS+".html";
+			filename=filename.replace(" ", "_");
+			f5=new File(f4.getAbsolutePath()+File.separator+filename);
+		} else {
+			File f4=new File(f3.getAbsolutePath()+File.separator+"StructureData");
+			String filename="DescriptorData_"+CAS+".html";
+			filename=filename.replace(" ", "_");
+			f5=new File(f4.getAbsolutePath()+File.separator+filename);
+		}
+		
+		if (!f5.exists())  {
+			JOptionPane.showMessageDialog(f, f5.getAbsolutePath()+" does not exist");
+			return;
+		}
+		
+		try {
+			MyBrowserLauncher.launch(f5.toURI());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}	
+	}
+
 	
 	
 	//	public void SetParentFrame(	Object gui) {
@@ -826,7 +1077,7 @@ public //	public boolean Locked=false;
 				
 		
 		if (tabNameSelected.contentEquals("Descriptors")) {
-			filename = "Batch_Descriptors.csv";
+			filename = "Descriptors.csv";
 			model=tableDescriptors.getModel();			
 		} else if (tabNameSelected.contentEquals("Final Scores")) {
 			filename = "HCD Final Scores.csv";
@@ -838,11 +1089,21 @@ public //	public boolean Locked=false;
 			filename = tabNameSelected+".csv";
 			model=tableHCDScoreRecords2.getModel();
 		} else if (tabNameSelected.contentEquals("Results")) {
-			filename = "Batch_" + f.endpoint.replace(" ", "_") + "_" + f.method + ".csv";
+			filename = f.endpoint.replace(" ", "_") + "_" + f.method + ".csv";
 			model=tableMethod.getModel();
 		} else if (tabNameSelected.contentEquals("Individual methods")) {
-			filename = "Batch_" + f.endpoint.replace(" ", "_") + "_AllMethods.csv";
+			filename = f.endpoint.replace(" ", "_") + "_AllMethods.csv";
 			model=tableAllMethods.getModel();
+		} else if (tabNameSelected.contains("Predictions for similar training chemicals")) {
+			filename = tabNameSelected+".csv";
+			model=tableSimilarChemicalsTraining.getModel();
+		} else if (tabNameSelected.contains("Predictions for similar test chemicals")) {
+			filename = tabNameSelected+".csv";
+			model=tableSimilarChemicalsPrediction.getModel();
+		} else if (tabNameSelected.contains("Links")) {
+			filename = tabNameSelected+".csv";
+			model=tableLinks.getModel();
+
 		} else {
 			JOptionPane.showMessageDialog(f, "Invalid selection");
 			return;
@@ -961,8 +1222,13 @@ public //	public boolean Locked=false;
 			}
 		}
 		
+		if (TESTApplication.forMDH) {
+			MyTableModelLinks tableModelLinks=(MyTableModelLinks)tableLinks.getModel();
+			for (int i=0;i<chemical.links.size();i++) {
+				tableModelLinks.addLink(chemical.links.get(i));		
+			}
+		}
 		
-
 	}
 	
 	
@@ -976,6 +1242,74 @@ public //	public boolean Locked=false;
 	public void addPrediction(TESTPredictedValue tpv) {
 		MyTableModel tableModel=(MyTableModel)tableMethod.getModel();
 		tableModel.addPrediction(tpv);
+	}
+	
+	
+	/**
+	 * Convenience method so dont need to access model from other classes
+	 * 
+	 * @param newPredictions
+	 */
+	public void addResultsSimilarChemicals(TESTPredictedValue tpv,String set) {
+		MyTableModelSimilarChemical tableModel=null;
+		MyTableModelMAE tableModelMAE=null;
+		Vector<SimilarChemical> vecSimilarChemicals=null;
+		JLabel labelGraph=null;
+
+		String chart=null;
+		SimilarChemicals similarChemicals=null;
+		
+		if (set.equals("Training")) {
+			tableModel=(MyTableModelSimilarChemical)tableSimilarChemicalsTraining.getModel();
+			tableModelMAE=(MyTableModelMAE)tableMAE_Training.getModel();
+			similarChemicals=tpv.predictionResults.getSimilarChemicals().get(1);
+			labelGraph=jlabelTrainingGraph;
+		} else if (set.equals("Prediction")) { 
+			tableModel=(MyTableModelSimilarChemical)tableSimilarChemicalsPrediction.getModel();
+			tableModelMAE=(MyTableModelMAE)tableMAE_Prediction.getModel();
+			similarChemicals=tpv.predictionResults.getSimilarChemicals().get(0);
+			labelGraph=jlabelPredictionGraph;
+		}
+		
+		vecSimilarChemicals=similarChemicals.getSimilarChemicalsList();
+		
+		for (SimilarChemical similarChemical:vecSimilarChemicals) {
+			tableModel.addPrediction(similarChemical);
+		}
+		tableModel.updateRowHeights();
+		
+		
+		if (similarChemicals.getExternalPredChart()==null) {
+			labelGraph.setIcon(null);
+			tableModelMAE.addResult("No similar chemicals",-9999);
+			return;
+		}
+
+		chart=similarChemicals.getExternalPredChart().getExternalPredChartImageSrc();
+
+		tableModelMAE.addResult("Entire set",similarChemicals.getExternalPredChart().getMAEEntireTestSet());
+		tableModelMAE.addResult("Similarity >= 0.5",similarChemicals.getExternalPredChart().getMAE());
+
+		try {
+//			 System.out.println(chart);
+			 byte[] imageByte = org.apache.commons.codec.binary.Base64.decodeBase64(chart.substring(chart.indexOf(","),chart.length()).trim()); 
+			 ByteArrayInputStream inputStream = new ByteArrayInputStream(imageByte);                         
+			 BufferedImage bufImage = ImageIO.read(inputStream);
+			 			 
+//			 ImageIcon icon = new ImageIcon(bufImage);
+			 
+			 int size=jlabelTrainingGraph.getHeight();
+			 
+			Image newimg = bufImage.getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+			ImageIcon icon = new ImageIcon(newimg);  // transform it back			 
+			labelGraph.setIcon(icon);
+		    
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 	

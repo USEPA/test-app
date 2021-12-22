@@ -322,7 +322,9 @@ public class CTS_Generate_Breakdown_Products {
 			
 //			System.out.println(jo.toString());
 			
-			Unirest.setTimeouts(1000*100,1000*100);
+//			Unirest.setTimeouts(1000*100,1000*100);
+			Unirest.setTimeouts(0,0);
+			
 			
 			HttpResponse<JsonNode> response = Unirest.post(url).header("content-type", "application/json")
 					.header("accept", "application/json").body(jo.toString()).asJson();
@@ -331,6 +333,10 @@ public class CTS_Generate_Breakdown_Products {
 			GsonBuilder builder = new GsonBuilder();
 			builder.setPrettyPrinting();
 			Gson gson = builder.create();
+			
+//			System.out.println("CTS Json input:"+gson.toJson(jo));
+
+			
 			JsonObject joResult = gson.fromJson(response.getBody().getObject().toString(2), JsonObject.class);
 			String strJSON=gson.toJson(joResult);//convert back to JSON string to see if we have implemented all the needed fields
 //			System.out.println(strJSON);
@@ -338,7 +344,8 @@ public class CTS_Generate_Breakdown_Products {
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			String error="Error: "+e.getMessage();
+			e.printStackTrace();
+			String error="runCTS Error: "+e.getMessage();
 			System.out.println(error);
 			return error;
 		}		
@@ -575,6 +582,9 @@ public class CTS_Generate_Breakdown_Products {
 		String smilesC8Cl="C(C(C(C(C(C(C(C(Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)(Cl)Cl";
 		
 		String strJSON=runCTS(urlCTS,smilesTPP,numGens,strLibraryHydrolysis);
+		
+		System.out.println(strJSON);
+		
 
 		GsonBuilder builder = new GsonBuilder();
 		builder.setPrettyPrinting();

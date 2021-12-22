@@ -442,7 +442,7 @@ public class WebTEST4 {
 		long start = System.currentTimeMillis();
 
 		String CAS = dd.ID;
-		String gsid = m.getProperty("gsid");// already looked up in do predictions
+		String dtxcid = m.getProperty(DSSToxRecord.strCID);// already looked up in do predictions
 
 		// ******************************************************************
 
@@ -537,7 +537,7 @@ public class WebTEST4 {
 
 			DataForPredictionRun d = new DataForPredictionRun(descriptorSet, endpoint,
 					TESTConstants.getAbbrevEndpoint(endpoint), TESTConstants.isBinary(endpoint),
-					TESTConstants.isLogMolar(endpoint), useFragmentsConstraint, CAS, gsid, er, dd.MW, dd.MW_Frag,
+					TESTConstants.isLogMolar(endpoint), useFragmentsConstraint, CAS, dtxcid, er, dd.MW, dd.MW_Frag,
 					htTestMatch, htTrainMatch, createDetailedReports, reportOptions, reportTypes);
 
 			if (method.equals(TESTConstants.ChoiceHierarchicalMethod)) {
@@ -687,7 +687,7 @@ public class WebTEST4 {
 
 	public static boolean areDashboardStructuresAvailable() {
 		try {
-			final URL url = new URL("https://comptox.epa.gov/dashboard/dsstoxdb/show_image?source=39242");
+			final URL url = new URL("https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxcid/DTXCID20135");
 			final URLConnection conn = url.openConnection();
 
 			conn.setConnectTimeout(3 * 1000);
@@ -1006,8 +1006,8 @@ public class WebTEST4 {
 		for (TESTPredictedValue r : res) {
 			r.casrn = rec.cas;
 			r.dtxsid = rec.sid;
+			r.dtxcid = rec.cid;
 			r.preferredName = rec.name;
-			r.gsid = rec.gsid;
 			r.inChICode = rec.inchi;
 			r.inChIKey = rec.inchiKey;
 		}
@@ -1025,7 +1025,7 @@ public class WebTEST4 {
 
 		if (Strings.isEmpty(error)) {
 			if ((!createDetailedReports) && !dashboardStructuresAvailable
-					|| ac.getProperty(DSSToxRecord.strGSID) == null) {
+					|| ac.getProperty(DSSToxRecord.strCID) == null) {
 				if (generateWebpages) {
 					ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(ac, "structure",
 							strOutputFolderStructureData);
@@ -1035,7 +1035,7 @@ public class WebTEST4 {
 			DescriptorData dd = new DescriptorData();
 			dd.Error = error;
 			dd.ID = ac.getProperty("CAS");
-			dd.gsid = ac.getProperty("gsid");
+			dd.dtxcid = ac.getProperty("gsid");
 			return dd;
 		}
 
@@ -1046,7 +1046,7 @@ public class WebTEST4 {
 
 			dd.ThreeD = false;
 
-			dd.gsid = ac.getProperty("gsid");
+			dd.dtxcid = ac.getProperty(DSSToxRecord.strCID);
 
 			int descresult = -1;
 

@@ -126,11 +126,11 @@ public class RunFromCommandLine {
 		f.panelResults.setVisible(true);
 		f.panelResults.jbSaveToExcel.setVisible(false);
 		f.panelResults.jbSaveToText.setVisible(false);
-		f.panelResults.jbSaveToHTML.setVisible(false);
+//		f.panelResults.jbSaveToHTML.setVisible(false);
 		
 		if (!endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
 			f.panelResults.setTitle("Prediction results: "+endpoint);
-			f.panelResults.initTableModel(endpoint, method);		
+			f.panelResults.initTableModel(endpoint, method,true);		
 		} else {
 			f.panelResults.setTitle("Descriptor values");
 			f.panelResults.initTableModelDescriptors();

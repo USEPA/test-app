@@ -1,26 +1,30 @@
 package ToxPredictor.Application.model;
 
 
+import java.util.LinkedHashMap;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class SimilarChemical {
 
-    private String gsid;
+    
     private String DSSTOXSID;
-    private String CAS;
+    private String DSSTOXCID;
+    public String getDSSTOXCID() {
+		return DSSTOXCID;
+	}
+
+	public void setDSSTOXCID(String dSSTOXCID) {
+		DSSTOXCID = dSSTOXCID;
+	}
+
+	private String CAS;
     private String backgroundColor;
     private String similarityCoefficient;
     private String expVal;
     private String predVal;
     private String imageUrl;
 
-    public String getGsid() {
-        return gsid;
-    }
-
-    public void setGsid(String gsid) {
-        this.gsid = gsid;
-    }
 
     public String getDSSTOXSID() {
         return DSSTOXSID;
@@ -79,4 +83,16 @@ public class SimilarChemical {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+	public LinkedHashMap<String, String> convertToLinkedHashMap() {
+		// TODO Auto-generated method stub
+		LinkedHashMap<String,String> lhm=new LinkedHashMap();
+		lhm.put("CAS",CAS);
+		lhm.put("Structure",imageUrl);
+		lhm.put("Similarity", similarityCoefficient);
+		lhm.put("Experimental value", expVal);
+		lhm.put("Predicted value", predVal);
+		lhm.put("backgroundColor", backgroundColor);
+		return lhm;
+	}
 }

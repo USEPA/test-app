@@ -43,6 +43,7 @@ import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
 import wekalite.Instance;
 
+import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
@@ -85,9 +86,9 @@ public class PredictToxicityJSONCreator {
 	}
 
 
-	public PredictionResults writeConsensusResultsJSON(double predToxVal, double predToxUnc, String method, String CAS, String endpoint, String abbrev, boolean isBinaryEndpoint,
+	public PredictionResults writeConsensusResultsJSON(double predToxVal, double predToxUnc, String method, String CAS,String dtxcid, String endpoint, String abbrev, boolean isBinaryEndpoint,
 			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ArrayList methods,
-			ArrayList predictions, ArrayList uncertainties, boolean createDetailedConsensusReport, String gsid, 
+			ArrayList predictions, ArrayList uncertainties, boolean createDetailedConsensusReport, 
 			ReportOptions options) {
 		try {
 
@@ -131,13 +132,13 @@ public class PredictToxicityJSONCreator {
 
 			this.writeIndividualPredictionsForConsensus(pr,methods, predictions, uncertainties, createDetailedConsensusReport);
 
-			predictionResultsPrimaryTable.setGsid(gsid);
+			predictionResultsPrimaryTable.setDtxcid(dtxcid);
 			pr.setImgSize(PredictToxicityWebPageCreator.imgSize);
 			pr.setWebPath(PredictToxicityWebPageCreator.webPath);
 			pr.setWebPath2(PredictToxicityWebPageCreator.webPath2);
 
 
-			if (gsid == null) {
+			if (dtxcid == null) {
 				//Following code doesnt seem to work:		
 				//				individualPredictionsForConsensus.setImageUrl(ReportUtils.convertImageToBase64(ReportUtils.getImageSrc(options, "../StructureData/structure.png")));
 				//				logger.debug("valeryURL="+ReportUtils.getImageSrc(options, "../StructureData/structure.png"));
@@ -150,7 +151,7 @@ public class PredictToxicityJSONCreator {
 
 			} else {
 				//use dashboard image if available:
-				pr.setImageURL(PredictToxicityWebPageCreator.webPath + gsid);
+				pr.setImageURL(PredictToxicityWebPageCreator.webPath + dtxcid);
 				//				individualPredictionsForConsensus.setImageUrl(ReportUtils.convertImageToBase64(PredictToxicityWebPageCreator.webPath + gsid));
 			}
 
@@ -158,9 +159,9 @@ public class PredictToxicityJSONCreator {
 			//				fw.write("<p><a href=\"../StructureData/descriptordata.html\">Descriptor values for " + "test chemical</a></p>\n");
 			//			}
 
-			this.writeSimilarChemicals(pr,"test", htTestMatch, abbrev, er.expToxValue, predToxVal,  gsid, options);
+			this.writeSimilarChemicals(pr,"test", htTestMatch, abbrev, er.expToxValue, predToxVal,  CAS, dtxcid, options);
 
-			this.writeSimilarChemicals(pr,"training", htTrainMatch, abbrev, er.expToxValue, predToxVal, gsid, options);
+			this.writeSimilarChemicals(pr,"training", htTrainMatch, abbrev, er.expToxValue, predToxVal, CAS, dtxcid, options);
 
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			gson.toJson(pr, fw);
@@ -194,7 +195,7 @@ public class PredictToxicityJSONCreator {
 		pr.setWebPath2(PredictToxicityWebPageCreator.webPath2);
 
 		if (createReports) {
-			if (d.gsid == null || !WebTEST4.dashboardStructuresAvailable) {
+			if (d.dtxcid == null || !WebTEST4.dashboardStructuresAvailable) {
 				//Using brute force to make sure path is right:
 				File outputFolder=new File(d.reportOptions.reportBase);
 				File imageFile=new File(outputFolder.getParentFile().getAbsolutePath()+File.separator+"StructureData/structure.png");
@@ -208,7 +209,7 @@ public class PredictToxicityJSONCreator {
 				}
 			} else {
 				//use dashboard image if available:
-				pr.setImageURL(PredictToxicityWebPageCreator.webPath + d.gsid);
+				pr.setImageURL(PredictToxicityWebPageCreator.webPath + d.dtxcid);
 				//individualPredictionsForConsensus.setImageUrl(ReportUtils.convertImageToBase64(PredictToxicityWebPageCreator.webPath + gsid));
 			}
 		}
@@ -217,8 +218,8 @@ public class PredictToxicityJSONCreator {
 
 		long t1=System.currentTimeMillis();
 		
-		if (createReports) writeSimilarChemicals(pr,"test", d.htTestMatch, d.abbrev, d.er.expToxValue, predToxVal,  d.gsid, d.reportOptions);
-		if (createReports) writeSimilarChemicals(pr,"training", d.htTrainMatch, d.abbrev, d.er.expToxValue, predToxVal, d.gsid, d.reportOptions);
+		if (createReports) writeSimilarChemicals(pr,"test", d.htTestMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid, d.reportOptions);
+		if (createReports) writeSimilarChemicals(pr,"training", d.htTrainMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid, d.reportOptions);
 
 		long t2=System.currentTimeMillis();
 		
@@ -226,9 +227,9 @@ public class PredictToxicityJSONCreator {
 //			System.out.println((t2-t1)+" millsecs to find similar chemicals for "+pr.getCAS()+" for "+pr.getMethod());
 		
 		if (d.isBinaryEndpoint) {
-			this.WriteBinaryPredictionTable(pr, d.gsid,d.er, predToxVal, tpv.message);
+			this.WriteBinaryPredictionTable(pr, d.dtxcid,d.er, predToxVal, tpv.message);
 		} else {
-			this.writeMainTable(pr, d.gsid, tpv, predToxVal,predToxUnc, d.MW, d.er, tpv.message);
+			this.writeMainTable(pr, d.dtxcid, tpv, predToxVal,predToxUnc, d.MW, d.er, tpv.message);
 		}
 	}
 
@@ -456,7 +457,7 @@ public class PredictToxicityJSONCreator {
 		return endpointSources;
 	}
 
-	public static void writeMainTable(PredictionResults pr,String gsid,TESTPredictedValue tpv,double predToxVal,double predToxUnc, double MW, Lookup.ExpRecord er, String message) throws Exception {
+	public static void writeMainTable(PredictionResults pr,String dtxcid,TESTPredictedValue tpv,double predToxVal,double predToxUnc, double MW, Lookup.ExpRecord er, String message) throws Exception {
 
 		String method=pr.getMethod();
 		String endpoint=pr.getEndpoint();
@@ -467,7 +468,7 @@ public class PredictToxicityJSONCreator {
 		boolean writePredictionInterval = true;
 
 		PredictionResultsPrimaryTable predictionResultsPrimaryTable = pr.getPredictionResultsPrimaryTable();
-		predictionResultsPrimaryTable.setGsid(gsid);
+		predictionResultsPrimaryTable.setDtxcid(dtxcid);
 
 
 		if (method.equals(TESTConstants.ChoiceConsensus) || method.equals(TESTConstants.ChoiceNearestNeighborMethod)) {
@@ -665,7 +666,7 @@ public class PredictToxicityJSONCreator {
 
 	private void writeSimilarChemicals(PredictionResults pr, String set, 
 			Hashtable<Double, Instance> ht, String abbrev,
-			double expVal, double predVal, String gsid, 
+			double expVal, double predVal, String CAS, String dtxcid, 
 			ReportOptions options) throws Exception
 	{
 
@@ -800,7 +801,7 @@ public class PredictToxicityJSONCreator {
 
 		//			logger.debug(expVal+"\t"+predVal);
 
-		writeSimilarChemicalsTable(pr, expVal, predVal, gsid, d2, strImageFolder, vecCAS2, vecExp2, vecPred2, vecSC2, options, similarChemicals);
+		writeSimilarChemicalsTable(pr, expVal, predVal, CAS, dtxcid, d2, strImageFolder, vecCAS2, vecExp2, vecPred2, vecSC2, options, similarChemicals);
 
 
 
@@ -898,7 +899,7 @@ public class PredictToxicityJSONCreator {
 	}
 
 	private void writeSimilarChemicalsTable(PredictionResults pr, double expVal, double predVal, 
-			String gsid, java.text.DecimalFormat df, String strImageFolder, Vector<String> vecCAS2,
+			String CAS, String dtxcid, java.text.DecimalFormat df, String strImageFolder, Vector<String> vecCAS2,
 			Vector<String> vecExp2, Vector<String> vecPred2, Vector<Double> vecSC2, ReportOptions options,
 			SimilarChemicals similarChemicals) throws Exception   {
 
@@ -950,7 +951,7 @@ public class PredictToxicityJSONCreator {
 			String CASi = vecCAS2.get(i);
 			String predVali = vecPred2.get(i);
 
-			String gsid_i = null;
+			String cid_i = null;
 			String DSSTOXSIDi = null;
 
 			//			if (htChemistryDashboardInfo != null) {
@@ -962,7 +963,7 @@ public class PredictToxicityJSONCreator {
 
 			if(records.size()>0) {
 				DSSToxRecord record=records.get(0);
-				gsid_i = record.gsid;
+				cid_i = record.cid;
 				DSSTOXSIDi = record.sid;
 			}
 
@@ -973,11 +974,11 @@ public class PredictToxicityJSONCreator {
 			//			}
 //msg=
 
-			similarChemical.setGsid(gsid_i);
+			similarChemical.setDSSTOXCID(cid_i);
 			similarChemical.setDSSTOXSID(DSSTOXSIDi);
 			similarChemical.setCAS(CASi);
 
-			if (gsid_i == null || !WebTEST4.dashboardStructuresAvailable){
+			if (cid_i == null || !WebTEST4.dashboardStructuresAvailable){
 				// slow???
 				
 				CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
@@ -997,7 +998,7 @@ public class PredictToxicityJSONCreator {
 
 			} else {
 				//use Chemistry Dashboard image if available:
-				similarChemical.setImageUrl(PredictToxicityWebPageCreator.webPath + gsid_i);
+				similarChemical.setImageUrl(PredictToxicityWebPageCreator.webPath + cid_i);
 				//				similarChemical.setImageUrl(ReportUtils.convertImageToBase64(PredictToxicityWebPageCreator.webPath + gsid_i));
 			}
 
@@ -1010,6 +1011,31 @@ public class PredictToxicityJSONCreator {
 			similarChemicals.getSimilarChemicalsList().add(similarChemical);
 
 		} // end loop over elements
+		
+		SimilarChemical testChemical=new SimilarChemical();
+		similarChemicals.getSimilarChemicalsList().add(0,testChemical);
+		Color color = Color.LIGHT_GRAY;
+		
+		String strColor = String.format("#%02x%02x%02x", color.getRed(), color.getGreen(), color.getBlue());
+		testChemical.setBackgroundColor(strColor);
+
+		if (expVal > -9999)
+			testChemical.setExpVal(d2.format(expVal));
+		else 
+			testChemical.setExpVal("N/A");
+				
+		if (predVal > -9999)
+			testChemical.setPredVal(d2.format(predVal));
+		else 
+			testChemical.setPredVal("N/A");
+		
+		
+		testChemical.setImageUrl(PredictToxicityWebPageCreator.webPath + dtxcid);
+		testChemical.setSimilarityCoefficient(df.format(1.00));
+		testChemical.setCAS(CAS+" (test chemical)");
+		
+//		System.out.println(testChemical.getImageUrl());
+				
 
 		//		predictionResults.setSimilarChemicals(similarChemicals);
 	}
@@ -1069,7 +1095,8 @@ public class PredictToxicityJSONCreator {
 		String ytitle = "Pred. " + title;
 
 		// String charttitle = "Prediction results (redder = more similar)";
-		String charttitle = "Prediction results (colors defined in table below)";
+//		String charttitle = "Prediction results (colors defined in table below)";
+		String charttitle = "Prediction results";
 
 		JLabelChart fc = new fraChart.JLabelChart(x, y, SC, charttitle, xtitle, ytitle);
 		fc.doDrawLegend = false;
@@ -1120,10 +1147,10 @@ public class PredictToxicityJSONCreator {
 
 	}
 
-	public static void WriteBinaryPredictionTable(PredictionResults pr, String gsid,Lookup.ExpRecord er, double predToxVal, String message) throws Exception {
+	public static void WriteBinaryPredictionTable(PredictionResults pr, String dtxcid,Lookup.ExpRecord er, double predToxVal, String message) throws Exception {
 
 		PredictionResultsPrimaryTable predictionResultsPrimaryTable = pr.getPredictionResultsPrimaryTable();
-		predictionResultsPrimaryTable.setGsid(gsid);
+		predictionResultsPrimaryTable.setDtxcid(dtxcid);
 
 
 		String endpoint=pr.getEndpoint();

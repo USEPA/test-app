@@ -18,33 +18,31 @@ import javax.swing.table.TableColumnModel;
 
 import ToxPredictor.Application.GUI.Table.Renderer.CellRendererHCD;
 import ToxPredictor.Application.GUI.Table.Renderer.CellRendererHCD_ScoreRecords;
+import gov.epa.api.RecordLink;
 import gov.epa.api.ScoreRecord;
 
 
 
-public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
+public class MyTableModelLinks extends AbstractTableModel {
 
 	protected int m_result = 0;
 
 	protected int columnsCount = 1;
 	
-	private static final String [] fieldNames=ScoreRecord.allFieldNames;
+	static String [] fieldNames=RecordLink.fieldNames;
 	
 	JTable table;
 
 	//TODO- maybe there's a way to use AtomContainerSet - messes up the Collections.sort- need to cast it somehow
-	Vector<ScoreRecord> records;
+	Vector<RecordLink> records;
 	
 	int sortCol;
 	boolean isSortAsc=true;
 
 	
-	public void addScoreRecord(ScoreRecord scoreRecord) {
+	public void addLink(RecordLink rl) {
 		// TODO Auto-generated method stub
-		records.add(scoreRecord);		
-		
-//		System.out.println(scoreRecord.CAS+"\t"+scoreRecord.score);
-		
+		records.add(rl);		
 	
 		fireTableDataChanged();
 		table.scrollRectToVisible(table.getCellRect(getRowCount() - 1, 0, true));
@@ -52,8 +50,9 @@ public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
 
 	}
 
-	public MyTableModelHCD_ScoreRecords() {
-		records=new Vector<ScoreRecord>();	
+	public MyTableModelLinks() {
+		records=new Vector<RecordLink>();
+		columnNames=getColumnNames();		
 	}
 			
 	
@@ -61,14 +60,16 @@ public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
 	 * Convert vector to ACS for use by other classes
 	 * @return
 	 */
-	public  Vector<ScoreRecord> getRecords() {
+	public  Vector<RecordLink> getRecords() {
 		return records;
 	}
 	
 
+	private String[] columnNames;
+
 	public int getColumnCount() {
 //		System.out.println(columnNames.length);
-		return fieldNames.length;
+		return columnNames.length;
 	}
 
 	public int getRowCount() {
@@ -102,9 +103,9 @@ public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
 		
 //		System.out.println(table.getColumnModel().getColumnCount());
 		
-		CellRendererHCD_ScoreRecords c=new CellRendererHCD_ScoreRecords();
-		c.setHorizontalAlignment(JLabel.CENTER);
-		table.getColumn("score").setCellRenderer(c);
+//		CellRendererHCD_ScoreRecords c=new CellRendererHCD_ScoreRecords();
+//		c.setHorizontalAlignment(JLabel.CENTER);
+//		table.getColumn("score").setCellRenderer(c);
 		
 //		table.setRowSelectionAllowed(false);
 		
@@ -118,35 +119,30 @@ public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
 	}
 
 	
-	public void updateRow(ScoreRecord scoreRecord,int row) {
-		
-		records.set(row, scoreRecord);
+	public void updateRow(RecordLink recordLink,int row) {
+		records.set(row, recordLink);
 		fireTableDataChanged();
+	}
 
-	}
-	public String getLink(int row) {
-//		System.out.println("records.size="+records.size());
-		return records.get(row).url;
-	}
+	
 	
 	public String getColumnName(int col) {
 //		System.out.println(col+"\t"+columnNames[col]);
-		return fieldNames[col];
+		return columnNames[col];
 	}
 
 	public Object getValueAt(int row, int col) {
-		ScoreRecord scoreRecord=getScoreRecord(row);
-		return getValue(scoreRecord, col);
+		RecordLink recordLink=records.get(row);
+		return getValue(recordLink,col);
 	}
 	
 	
-	Object getValue(ScoreRecord scoreRecord,int col) {
-		return scoreRecord.getValue(fieldNames[col]);		
+	Object getValue(RecordLink recordLink,int col) {
+		return recordLink.toStringArray().get(col);
 	}
 
-	public ScoreRecord getScoreRecord(int row) {
-		return records.get(row);
-	}
+	
+	
 
 	
 	public void sortByCol() {						
@@ -164,33 +160,23 @@ public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
 		fireTableDataChanged();
 	}
 	
-	class CustomComparator implements Comparator<ScoreRecord>{
+	class CustomComparator implements Comparator<RecordLink>{
 	    int col;
 		
 		CustomComparator(int sortCol) {
 			this.col=sortCol;
 		}
 		
-		public int compare(ScoreRecord ac1, ScoreRecord ac2) {	        
+		public int compare(RecordLink ac1, RecordLink ac2) {	        
 	    	String val1=(String)getValue(ac1,col);
 	    	String val2=(String)getValue(ac2,col);
-	    		    			    
-	    	if (fieldNames[col].equals("CAS")) {//CAS
+	    	
+	    	if (columnNames[col].equals("CAS")) {//CAS
 	    		return MyTableModel.compareCAS_String(val1, val2);
 	    	} else {
 	    		return MyTableModel.compareString(val1, val2);
 	    	}
-
-//	    	if (col==0) {//Index
-//	    		return MyTableModel.compareInt(val1,val2);
-//	    	} else if (col==1) {//CAS
-//	    		return MyTableModel.compareCAS_String(val1, val2);
-//	    	} else if (col>=5) {//CAS
-//	    		return MyTableModel.compareContinuous(val1, val2);
-//	    	} else {
-//	    		return MyTableModel.compareString(val1, val2);
-//	    	}
-	    }
+		}
 	}
 
 	
@@ -224,30 +210,6 @@ public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
 		return false;
 	}
 
-//	/*
-//	 * Don't need to implement this method unless your table's
-//	 * data can change.
-//	 */
-//	public void setValueAt(Object value, int row, int col) {
-//
-//		TESTPredictedValue ac=vecchemical.get(row);
-//
-////		if (col==0) {
-////			ac.setProperty("Index", value);
-////		} else if (col==1) {
-////			ac.setProperty("CAS", value);
-////		} else if (col==2) {
-////			ac.setProperty("Name", value);
-////		} else if (col==3) {
-////			ac.setProperty("Formula", value);
-////		} else if (col==4) {
-////			ac.setProperty("Error", value);
-////		} else {
-////			
-////		}
-//		fireTableCellUpdated(row, col);
-//
-//	}
 
 	class ColumnListener extends MouseAdapter {
 		protected JTable table;
@@ -289,5 +251,11 @@ public class MyTableModelHCD_ScoreRecords extends AbstractTableModel {
 		records.clear();
 		fireTableDataChanged();
 	}
+
+	public RecordLink getLink(int row) {
+		return records.get(row);
+	}
+
+	
 
 }

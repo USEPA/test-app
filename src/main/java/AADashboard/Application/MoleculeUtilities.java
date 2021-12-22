@@ -496,7 +496,7 @@ void createFlameRetardantsSDF(String sdfFilePath) {
 		DSSToxRecord d=new DSSToxRecord();
 		d.cas=datarow.get("casrn").getAsString();
 		if (!datarow.get("dtxcid").isJsonNull()) d.cid=datarow.get("dtxcid").getAsString();
-		if (!datarow.get("synGsid").isJsonNull()) d.gsid=datarow.get("synGsid").getAsString();
+//		if (!datarow.get("synGsid").isJsonNull()) d.gsid=datarow.get("synGsid").getAsString();
 		
 		if (!datarow.get("jChemInChIKey").isJsonNull()) {//are they null if it's not in there? or blank or error?
 			d.inchiKey=datarow.get("jChemInChIKey").getAsString();	

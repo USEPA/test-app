@@ -1,7 +1,11 @@
 package ToxPredictor.Application.GUI.Table;
 
+import java.awt.Component;
+import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -9,22 +13,28 @@ import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import org.apache.logging.log4j.util.Strings;
 
 import ToxPredictor.Application.TESTConstants;
+import ToxPredictor.Application.GUI.Table.Renderer.CellRendererHCD;
+import ToxPredictor.Application.GUI.Table.Renderer.CellRendererSimilarChemical;
 import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableHeaderRenderer;
+import ToxPredictor.Application.GUI.Table.Renderer.VerticalTableHeaderCellRenderer;
+import ToxPredictor.Application.model.SimilarChemical;
 import ToxPredictor.MyDescriptors.DescriptorData;
 
 
-public class MyTableModelDescriptors extends AbstractTableModel {
+public class MyTableModelSimilarChemical extends AbstractTableModel {
 
 //	protected int m_result = 0;
 //	protected int columnsCount = 1;
@@ -34,23 +44,24 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	//Store as vector of linkedhashmap so that values stay sorted and don't need to keep using complicated reflection to retrieve the values
 	Vector<LinkedHashMap<String,String>> vecDD;
 	
-	Vector<String>descriptorNames=DescriptorData.getDescriptorNames();
 	
 	int sortCol;
 	boolean isSortAsc=true;
-
-	public void addPrediction(DescriptorData dd) {
+	public String [] columnNames;
+	
+	public void addPrediction(SimilarChemical sc) {
 		// TODO Auto-generated method stub
-		vecDD.add(dd.convertToLinkedHashMap());
-
+		
+//		System.out.println(sc.getImageUrl());
+		vecDD.add(sc.convertToLinkedHashMap());
 		fireTableDataChanged();
 		table.scrollRectToVisible(table.getCellRect(getRowCount() - 1, 0, true));
 		table.repaint();
 	}
 
-	public MyTableModelDescriptors(String [] colNames) {
+	public MyTableModelSimilarChemical(String [] columnNames) {
 		vecDD=new Vector<>();
-		columnNames=colNames;		
+		this.columnNames=columnNames;		
 	}
 			
 	
@@ -63,20 +74,15 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	}
 	
 
-	private String[] columnNames = { "#", "ID", "Query","SmilesRan", "Error" };
-
-	
 	public static String [] getColumnNames () {
+		Vector<String>names=new Vector<>();
 		
-		
-		Vector<String>colNames=new Vector<>();
-		
-		//TODO add descriptors
-		Vector<String>descNames=DescriptorData.getDescriptorNames();
-		
-		for (String descName:descNames) colNames.add(descName);
-		
-		String[] array = colNames.toArray(new String[colNames.size()]);
+		names.add("CAS");
+		names.add("Structure");
+		names.add("Similarity");
+		names.add("Experimental value");
+		names.add("Predicted value");
+		String[] array = names.toArray(new String[names.size()]);
 		return array;
 
 	}
@@ -121,6 +127,10 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 		table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
 //		table.setRowSelectionAllowed(false);
 		
+		
+		CellRendererSimilarChemical crsc=new CellRendererSimilarChemical();
+		table.getColumnModel().getColumn(2).setCellRenderer(crsc);
+		
 //		table.addMouseListener(new mouseAdapter());
 //		table.addKeyListener(ka);
 	}
@@ -130,38 +140,33 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	}
 
 	public Object getValueAt(int row, int col) {
-		
-		if (row>vecDD.size()) return null;
-		
 		LinkedHashMap<String,String> dd=vecDD.get(row);
-		String key=this.descriptorNames.get(col);
+		String key=columnNames[col];
 		if (dd.get(key)==null) return "";
-		else return dd.get(key);
+		else {
+			
+			if (key.equals("Structure")) {
+				try {
+					ImageIcon imageIcon=new ImageIcon(new URL(dd.get(key)));
+					Image image = imageIcon.getImage(); // transform it 
+					Image newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+					imageIcon = new ImageIcon(newimg);  // transform it back
+					return imageIcon;
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					return "Image not available";
+				}
+			} else {
+//				System.out.println(dd.get(key));
+				return dd.get(key);	
+			}
+			
+			
+		}
 	}
 	
 	
-	
-//	Vector<String>getValuesError(LinkedHashMap<String,String> dd) {
-//		Vector<String>values=new Vector<String>();			
-//		values.add(dd.get("index"));
-//		values.add(dd.get("CAS"));
-//		values.add(dd.get("query"));
-//		values.add(dd.get("SMILES"));		
-//		values.add(dd.get("error"));
-//		
-//		for (int i=5;i<getColumnCount();i++) {
-//			values.add("");
-//		}
-////		System.out.println(values.size());
-//		
-//		return values;
-//	}
-	
-	
-	
-	
 	public LinkedHashMap<String,String> getPrediction(int row) {
-		if (row>=vecDD.size()) return null;
 		return vecDD.get(row);
 	}
 
@@ -174,19 +179,17 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 		
 		public int compare(LinkedHashMap<String,String> ac1,LinkedHashMap<String,String> ac2) {	        
 	    	
-			String key=descriptorNames.get(col);
+			String key=columnNames[col];
 			String val1=(String)ac1.get(key);
 	    	String val2=(String)ac2.get(key);
 	    	
 	    	
 	    	if (col==0) {//Index
-	    		return MyTableModel.compareInt(val1,val2);
-	    	} else if (col==1) {//CAS
-	    		return MyTableModel.compareCAS_String(val1, val2);
-	    	} else if (col>=5) {
-	    		return MyTableModel.compareContinuous(val1, val2);
-	    	} else {
 	    		return MyTableModel.compareString(val1, val2);
+	    	} else if (col>=2) {//CAS
+	    		return MyTableModel.compareContinuous(val1, val2);	    	
+	    	} else {
+	    		return 0;
 	    	}
 	    			    	
 	    	
@@ -216,7 +219,21 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	}
 	
 	
+	public void updateRowHeights()
+	{
+	    for (int row = 0; row < table.getRowCount(); row++)
+	    {
+	        int rowHeight = table.getRowHeight();
 
+	        for (int column = 0; column < table.getColumnCount(); column++)
+	        {
+	            Component comp = table.prepareRenderer(table.getCellRenderer(row, column), row, column);
+	            rowHeight = Math.max(rowHeight, comp.getPreferredSize().height);
+	        }
+
+	        table.setRowHeight(row, rowHeight);
+	    }
+	}
 	
 	/*
 	 * JTable uses this method to determine the default renderer/
@@ -226,7 +243,12 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	 */
 	public Class getColumnClass(int c) {
 		try {
-			return String.class;
+			if (columnNames[c].equals("Structure")) {
+				return ImageIcon.class; 
+			} else {
+				return String.class;
+			}
+
 		} catch (Exception e) {
 			return null;
 		}
@@ -276,6 +298,7 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 				System.out.println("mismatch!");
 			}
 			sortByCol();
+			updateRowHeights();
 
 		}
 	}

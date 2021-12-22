@@ -34,7 +34,8 @@ public class DataForPredictionRun {
 //	ArrayList <String>methods;
 	
 	public String CAS;
-	public String gsid;
+//	public String gsid;
+	public String dtxcid;
 
 	public Lookup.ExpRecord er;
 	public double MW;
@@ -51,7 +52,7 @@ public class DataForPredictionRun {
 //			Instances evalInstances2d, Instances trainingDataSet2d,	AllResults allResults, 
 //			Instances evalInstancesFrag, Instances trainingDataSetFrag,	AllResults allResultsFrag, 
 			String endpoint, String abbrev, boolean isBinaryEndpoint,
-			boolean isLogMolarEndpoint, boolean useFragmentsConstraint, String CAS, String gsid, ExpRecord er,
+			boolean isLogMolarEndpoint, boolean useFragmentsConstraint, String CAS, String dtxcid, ExpRecord er,
 			double MW, double MW_Frag, Hashtable<Double, Instance> htTestMatch,
 			Hashtable<Double, Instance> htTrainMatch, boolean createDetailedReport, ReportOptions reportOptions,
 			Set<WebReportType> reportTypes) {
@@ -69,7 +70,7 @@ public class DataForPredictionRun {
 		this.isLogMolarEndpoint = isLogMolarEndpoint;
 		this.useFragmentsConstraint = useFragmentsConstraint;
 		this.CAS = CAS;
-		this.gsid = gsid;
+		this.dtxcid = dtxcid;
 		this.er = er;
 		this.MW = MW;
 		this.MW_Frag = MW_Frag;

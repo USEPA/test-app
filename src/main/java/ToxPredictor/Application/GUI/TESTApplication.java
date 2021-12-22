@@ -35,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.ws.rs.ForbiddenException;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -67,10 +68,13 @@ public class TESTApplication extends JFrame{
 	//	
 	public static boolean defaultToSingleChemicalMode=true;
 	public boolean includeLDA=true;
-	public boolean includeAA_Dashboard=false;
+	public boolean includeAA_Dashboard=true;
 	public boolean includeRecentMolFileMenu=false;
 	public boolean includeER=false;
 	public boolean includeCTS=true;
+	
+	public static boolean forMDH=true;
+	public static boolean includeExposure=true;
 
 	String endpoint;
 	String method;
@@ -135,7 +139,7 @@ public class TESTApplication extends JFrame{
 	//	JButton jbSaveSDF=new JButton();
 	private JTextField jtfCalcStatus = new JTextField();
 	//	JButton jbCloseBatch=new JButton();
-	JButton jbSwitchToSingle = new JButton();
+	public JButton jbSwitchToSingle = new JButton();
 	JButton jbSwitchToBatch = new JButton();
 
 
@@ -404,6 +408,10 @@ public class TESTApplication extends JFrame{
 		this.panelBatch.init((int)(widthRight), heightRight);
 		this.panelBatch.setLocation(xlocationRight, ylocationRight);
 
+		this.panelBatchStructureDatabaseSearch.SetParentFrame(this);
+		this.panelSingleStructureDatabaseSearch.SetParentFrame(this);
+
+		
 		this.panelBatchStructureDatabaseSearch.setLocation(inset,inset);
 		this.panelBatchStructureDatabaseSearch.init(widthLeft,heightUpperLeft);
 
@@ -415,8 +423,6 @@ public class TESTApplication extends JFrame{
 
 		//		this.myfraSelectOutputFolder.SetParentFrame(this);
 		//		this.myfraOptions.SetParentFrame(this);
-		this.panelBatchStructureDatabaseSearch.SetParentFrame(this);
-		this.panelSingleStructureDatabaseSearch.SetParentFrame(this);
 
 		this.add(panelDraw);
 		this.add(panelBatch);
@@ -1211,9 +1217,13 @@ public class TESTApplication extends JFrame{
 					jbCalculate.setVisible(true);
 					jbStop.setVisible(false);
 					jtfCalcStatus.setVisible(false);
+					
 					setCursor(Utilities.defaultCursor);
 					panelResults.setCursor(Utilities.defaultCursor);
+					panelResults.setDefaultCursorAllTables();
 					
+//					panelResults.tableHCD.setCursor(Utilities.defaultCursor);//Java bug makes this extra line necessary
+//					System.out.println(panelResults.tableHCD.getCursor().toString());
 
 				}
 
@@ -1224,6 +1234,8 @@ public class TESTApplication extends JFrame{
 		timerBatchStructureFile = new javax.swing.Timer(1, new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 
+				setCursor(Utilities.waitCursor);
+				
 				// TODO: add code to disable buttons here
 				jbCalculate.setVisible(false);
 				jbStop.setVisible(true);
@@ -1248,6 +1260,7 @@ public class TESTApplication extends JFrame{
 					jbCalculate.setVisible(true);
 					jbStop.setVisible(false);
 					jtfCalcStatus.setVisible(false);
+
 					setCursor(Utilities.defaultCursor);
 
 				}
@@ -1448,6 +1461,10 @@ public class TESTApplication extends JFrame{
 
 	public static void main(String[] args) {
 
+		if (forMDH) {
+			TESTConstants.SoftwareVersion+=" MDH";
+		}
+		
 		DialogSplash fs = new DialogSplash();
 		fs.setVisible(true);
 		//
@@ -1465,39 +1482,51 @@ public class TESTApplication extends JFrame{
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		System.out.println("forMDH="+forMDH);
 		
-		if (defaultToSingleChemicalMode) {
-			f.aa.switchToSingleChemicalMode();
-//			f.loadChemicalForDebug("71-43-2");
-//			f.loadChemicalForDebug("115-86-6");
-//			f.loadChemicalForDebug("perchloroethane");
-//			f.loadChemicalForDebug("61-94-9");
-//			f.loadChemicalForDebug("N,N'-Dimethyl-N,N'-bis(3-(3',4',5'-trimethoxybenzoxy)propyl)ethylenediamine dihydrochloride");
-//			f.loadChemicalForDebug("triphenyl phosphate");
-//			f.panelCalculationOptions.panelCTSOptions.jcbRunCTS.setSelected(true);
-			
-		}
-		else {
+		
+		if (forMDH) {
 			f.aa.switchToBatchMode();
+//			System.out.println("here");
+		} else {
+			if (defaultToSingleChemicalMode) {
+				f.aa.switchToSingleChemicalMode();
+//				f.loadChemicalForDebug("71-43-2");
+//				f.loadChemicalForDebug("115-86-6");
+//				f.loadChemicalForDebug("perchloroethane");
+//				f.loadChemicalForDebug("61-94-9");
+//				f.loadChemicalForDebug("N,N'-Dimethyl-N,N'-bis(3-(3',4',5'-trimethoxybenzoxy)propyl)ethylenediamine dihydrochloride");
+//				f.loadChemicalForDebug("triphenyl phosphate");
+//				f.panelCalculationOptions.panelCTSOptions.jcbRunCTS.setSelected(true);
+				
+			} else {
+				f.aa.switchToBatchMode();
 
-			f.panelBatchStructureDatabaseSearch.jcbOptions.setSelectedItem(PanelStructureDatabaseSearchBatch.strOptionSmiles);
-//			f.panelBatchStructureDatabaseSearch.jrbName.doClick();
-//			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("c1ccccc1\n"
-//					+ "CCCCOCC\nqwerty\nCCCOCCCCCCCCCCCOCC\nCCCOCCCCOCCCCCOCCOCOC");
-			
-//			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("xylenes");
-//			f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("COCOCOCCCCCOCCCCCOCCCOCCCCOCC");
-			
-//			f.panelBatchStructureDatabaseSearch.jbSearch.doClick();
-			
-			
-//			f.loadBatchForDebug();
-			//f.loadBatchForDebugFromString();
+				f.panelBatchStructureDatabaseSearch.jcbOptions.setSelectedItem(PanelStructureDatabaseSearchBatch.strOptionSmiles);
+//				f.panelBatchStructureDatabaseSearch.jrbName.doClick();
+//				f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("c1ccccc1\n"
+//						+ "CCCCOCC\nqwerty\nCCCOCCCCCCCCCCCOCC\nCCCOCCCCOCCCCCOCCOCOC");
+				
+//				f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("xylenes");
+//				f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("COCOCOCCCCCOCCCCCOCCCOCCCCOCC");
+				
+//				f.panelBatchStructureDatabaseSearch.jbSearch.doClick();
+				
+				
+//				f.loadBatchForDebug();
+				//f.loadBatchForDebugFromString();
+			}
+
 		}
+		
+	
+		
 		HueckelAromaticityDetector.debug=false;
 				
 		f.repaint();
 	}
+	
+	
 
 	
 	private void loadChemicalForDebug(String search) {

@@ -1095,7 +1095,7 @@ public class WebTEST5 {
 			r.casrn = rec.cas;
 			r.dtxsid = rec.sid;
 			r.preferredName = rec.name;
-			r.gsid = rec.gsid;
+			r.dtxcid = rec.cid;
 			r.inChICode = rec.inchi;
 			r.inChIKey = rec.inchiKey;
 		}

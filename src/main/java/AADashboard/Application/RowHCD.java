@@ -3,6 +3,7 @@ package AADashboard.Application;
 import java.lang.reflect.Field;
 import java.util.Vector;
 
+import ToxPredictor.Application.GUI.TESTApplication;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
@@ -23,7 +24,12 @@ public class RowHCD {
 	public static final String[] fieldNamesHumanHealthEffects = { Chemical.strSkin_Sensitization,
 			Chemical.strSkin_Irritation, Chemical.strEye_Irritation, Chemical.strCarcinogenicity,
 			Chemical.strGenotoxicity_Mutagenicity, Chemical.strEndocrine_Disruption, Chemical.strReproductive,
-			Chemical.strDevelopmental, };
+			Chemical.strDevelopmental };
+	
+	public static final String[] fieldNamesHumanHealthEffectsMDH = { Chemical.strCarcinogenicity,
+			Chemical.strGenotoxicity_Mutagenicity, Chemical.strEndocrine_Disruption, Chemical.strReproductive,
+			Chemical.strDevelopmental};
+
 
 	public static final String[] fieldNamesNeurotoxicity = { Chemical.strNeurotoxicity_Repeat_Exposure,
 			Chemical.strNeurotoxicity_Single_Exposure };
@@ -107,10 +113,105 @@ public class RowHCD {
 		groups.add(group2);
 		groups.add(group3);
 		groups.add(group4);
+
+		if (TESTApplication.includeExposure) {
+			group4.categories.add(new HazardCategorySpecific(Chemical.strExposure));
+		}
+
 		
 		return groups;
 	}
 	
+	public static Vector <Group>createGroupsMDH() {
+		Vector <Group> groups=new Vector<>();
+		
+		Group group1=new Group("Identifiers");		
+		for (String fields:fieldNamesIdentifiers) 
+			group1.categories.add(new HazardCategorySpecific(fields));
+		
+		//***********************************************************************************
+		Group group2=new Group("Human Health Effects");		
+		
+		HazardCategoryGeneral hcgAMT=new HazardCategoryGeneral("Acute Mammalian Toxicity");
+		group2.categories.add(hcgAMT);
+		for (String fields:fieldNamesAcuteMammalianToxicity) 
+			hcgAMT.categories.add(new HazardCategorySpecific(fields));
+
+		for (String fields:fieldNamesHumanHealthEffectsMDH) {
+			group2.categories.add(new HazardCategorySpecific(fields));
+		}
+
+		HazardCategoryGeneral hcgNT=new HazardCategoryGeneral("Neurotoxicity");
+		group2.categories.add(hcgNT);
+		for (String fields:fieldNamesNeurotoxicity) 
+			hcgNT.categories.add(new HazardCategorySpecific(fields));
+		
+		HazardCategoryGeneral hcgST=new HazardCategoryGeneral("Systemic Toxicity");
+		group2.categories.add(hcgST);
+		for (String fields:fieldNamesSystemicToxicity) 
+			hcgST.categories.add(new HazardCategorySpecific(fields));
+		//***********************************************************************************
+		Group group4=new Group("Fate");
+		for (String fields:fieldNamesFate) 
+			group4.categories.add(new HazardCategorySpecific(fields));
+		//***********************************************************************************
+
+		groups.add(group1);
+		groups.add(group2);
+		groups.add(group4);
+				
+		group4.categories.add(new HazardCategorySpecific(Chemical.strExposureIndividual));
+		group4.categories.add(new HazardCategorySpecific(Chemical.strExposurePopulation));
+		group4.categories.add(new HazardCategorySpecific(Chemical.strExposureChildOrConsumerProducts));
+
+		
+		return groups;
+	}
+
+	/**
+	 * Create groups for minnesota department of health but reduce number of levels
+	 * 
+	 * @return
+	 */
+	public static Vector <Group>createGroupsMDH_Simple() {
+		Vector <Group> groups=new Vector<>();
+		
+		Group group1=new Group("Identifiers");		
+		for (String fields:fieldNamesIdentifiers) 
+			group1.categories.add(new HazardCategorySpecific(fields));
+		
+		//***********************************************************************************
+		Group group2=new Group("Hazards");		
+		
+		for (String fields:fieldNamesAcuteMammalianToxicity) 
+			group2.categories.add(new HazardCategorySpecific(fields));
+
+		for (String fields:fieldNamesHumanHealthEffectsMDH) {
+			group2.categories.add(new HazardCategorySpecific(fields));
+		}
+
+		for (String fields:fieldNamesNeurotoxicity) 
+			group2.categories.add(new HazardCategorySpecific(fields));
+		
+		for (String fields:fieldNamesSystemicToxicity) 
+			group2.categories.add(new HazardCategorySpecific(fields));
+
+		
+//		if (TESTApplication.includeExposure) {
+//			group2.categories.add(new HazardCategorySpecific(Chemical.strExposure));
+//		}
+		
+		group2.categories.add(new HazardCategorySpecific(Chemical.strExposureIndividual));
+		group2.categories.add(new HazardCategorySpecific(Chemical.strExposurePopulation));
+		group2.categories.add(new HazardCategorySpecific(Chemical.strExposureChildOrConsumerProducts));
+		
+
+		//***********************************************************************************
+		groups.add(group1);
+		groups.add(group2);
+		
+		return groups;
+	}
 	
 	public static class Group {
 		String name;
@@ -232,6 +333,49 @@ public class RowHCD {
 					
 		}
 		
+	}
+
+	public static Vector<Group> createGroupsSimple() {
+
+		Vector <Group> groups=new Vector<>();
+
+		Group group1=new Group("Identifiers");		
+		for (String fields:fieldNamesIdentifiers) 
+			group1.categories.add(new HazardCategorySpecific(fields));
+
+		//***********************************************************************************
+		Group group2=new Group("Hazards");		
+
+		for (String fields:fieldNamesAcuteMammalianToxicity) 			
+			group2.categories.add(new HazardCategorySpecific(fields));
+
+		for (String fields:fieldNamesHumanHealthEffects) {
+			group2.categories.add(new HazardCategorySpecific(fields));
+		}
+
+		for (String fields:fieldNamesNeurotoxicity) 
+			group2.categories.add(new HazardCategorySpecific(fields));
+
+		for (String fields:fieldNamesSystemicToxicity) 
+			group2.categories.add(new HazardCategorySpecific(fields));
+		//***********************************************************************************
+		for (String fields:fieldNamesEcotoxicity) 
+			group2.categories.add(new HazardCategorySpecific(fields));
+		//***********************************************************************************
+		for (String fields:fieldNamesFate) 
+			group2.categories.add(new HazardCategorySpecific(fields));
+		//***********************************************************************************
+
+		groups.add(group1);
+		groups.add(group2);
+
+		if (TESTApplication.includeExposure) {
+			group2.categories.add(new HazardCategorySpecific(Chemical.strExposure));
+		}
+
+
+		return groups;
+	
 	}
 }
 

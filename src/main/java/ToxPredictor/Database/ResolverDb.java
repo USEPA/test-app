@@ -297,7 +297,7 @@ public class ResolverDb {
 				DSSToxRecord cdr = new DSSToxRecord();
 				cdr.cid = rs.getString("cid");
 				cdr.sid = rs.getString("sid");
-				cdr.gsid = rs.getString("gsid");
+//				cdr.gsid = rs.getString("gsid");
 				cdr.name = rs.getString("name");
 				cdr.cas = rs.getString("cas");
 				cdr.smiles = rs.getString("smiles");

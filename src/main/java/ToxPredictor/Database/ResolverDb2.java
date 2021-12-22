@@ -90,7 +90,7 @@ public class ResolverDb2 {
 				DSSToxRecord cdr = new DSSToxRecord();
 				cdr.cid = rs.getString("cid");
 				cdr.sid = rs.getString("sid");
-				cdr.gsid = rs.getString("id");
+//				cdr.gsid = rs.getString("id");
 				cdr.name = rs.getString("name");
 				cdr.cas = rs.getString("casrn");
 				cdr.mol = rs.getString("mol");
@@ -424,15 +424,12 @@ public class ResolverDb2 {
 	public static void assignRecordByStructureNotInDB(AtomContainer m) {
 		Inchi inchi = Inchi.generateInChiKeyIndigo(m);
 		
-		String inchiKey=inchi.inchiKey;
-		
 		DSSToxRecord rec=new DSSToxRecord();
-		
-		
+				
 		if (inchi==null) {
 			rec.cas="C_"+System.currentTimeMillis();
 		} else {
-			rec.cas="C_"+inchiKey;
+			rec.cas="C_"+inchi.inchiKey;
 			rec.inchi=inchi.inchi;
 			rec.inchiKey=inchi.inchiKey;
 		}
@@ -649,6 +646,11 @@ public class ResolverDb2 {
 	private static ArrayList<DSSToxRecord> lookupByDTXSID(String DTXSID) {
 		return executeQuery("select * from " + TABLE_NAME + " where sid = '" + DTXSID + "';");
 	}
+	
+	public static ArrayList<DSSToxRecord> lookupByDTXCID(String DTXCID) {
+		return executeQuery("select * from " + TABLE_NAME + " where cid = '" + DTXCID + "';");
+	}
+
 
 	private static ArrayList<DSSToxRecord> lookupByInchi(String Inchi) {
 		return executeQuery("select * from " + TABLE_NAME + " where inchi = '" + Inchi + "';");

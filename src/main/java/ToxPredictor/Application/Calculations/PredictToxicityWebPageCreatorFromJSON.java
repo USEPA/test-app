@@ -968,17 +968,17 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		fw.write("</tr>\n\n");
 
 		
-		fw.write("<tr>\n");
-		// String CAS = chemical.stringValue(chemicalNameIndex);
-		fw.write("<td><font color=\"blue\">" + pr.getCAS() + "<br>(test chemical)</font></td>\n");
-		fw.write("<td><a href=\""+pr.getImageURL()+"\">"+
-				"<img src=\"" +pr.getImageURL() 
-				+ "\" width=" + pr.getImgSize()+ " border=0></a></td>\n");
-
-		fw.write("<td align=\"center\"><br></td>\n");
-		this.writeCenteredTD(fw, simChems.getExpVal());
-		this.writeCenteredTD(fw, simChems.getPredVal());
-		fw.write("</tr>\n\n");
+//		fw.write("<tr>\n");
+//		// String CAS = chemical.stringValue(chemicalNameIndex);
+//		fw.write("<td><font color=\"blue\">" + pr.getCAS() + "<br>(test chemical)</font></td>\n");
+//		fw.write("<td><a href=\""+pr.getImageURL()+"\">"+
+//				"<img src=\"" +pr.getImageURL() 
+//				+ "\" width=" + pr.getImgSize()+ " border=0></a></td>\n");
+//
+//		fw.write("<td align=\"center\"><br></td>\n");
+//		this.writeCenteredTD(fw, simChems.getExpVal());
+//		this.writeCenteredTD(fw, simChems.getPredVal());
+//		fw.write("</tr>\n\n");
 
 		for (int i = 0; i < simChems.getSimilarChemicalsList().size(); i++) {
 

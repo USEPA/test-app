@@ -103,7 +103,7 @@ public class PredictToxicityWebPageCreator {
 
 	Lookup lookup = new Lookup();
 
-	public static String webPath = "https://comptox.epa.gov/dashboard/dsstoxdb/show_image?source=";
+	public static String webPath = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxcid/";
 	public static String webPath2 = "https://comptox.epa.gov/dashboard/dsstoxdb/results?search=";
 
 	static void WriteHeaderInfo(FileWriter fw, String CAS, String endpoint, String method) throws IOException {
@@ -237,7 +237,7 @@ public class PredictToxicityWebPageCreator {
 
 	public String WriteConsensusResultsWebPages(double predToxVal, double predToxUnc, String method, String OutputFolder, String CAS, String endpoint, String abbrev, boolean isBinaryEndpoint,
 			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ArrayList <String>methods,
-			ArrayList<Double> predictions, ArrayList<Double> uncertainties, boolean createDetailedConsensusReport, String gsid, Hashtable<String, ChemistryDashboardRecord> htChemistryDashboardInfo,
+			ArrayList<Double> predictions, ArrayList<Double> uncertainties, boolean createDetailedConsensusReport, String dtxcid, Hashtable<String, ChemistryDashboardRecord> htChemistryDashboardInfo,
 			ReportOptions options) {
 		try {
 
@@ -303,11 +303,11 @@ public class PredictToxicityWebPageCreator {
 			this.WriteIndividualPredictionsForConsensus(fw, endpoint, methods, predictions, uncertainties, createDetailedConsensusReport);
 			fw.write("</td>\r\n");
 
-			if (gsid == null) {
+			if (dtxcid == null) {
 				fw.write("<td><a href=\"../StructureData/structure.png\"><img src=\"" + ReportUtils.getImageSrc(options, "../StructureData/structure.png") + "\" width=" + imgSize
 						+ " border=0></a></td>\n");
 			} else {// TODO- check if image exists online??? slow???
-				fw.write("<td><a href=\"" + webPath + gsid + "\"><img src=\"" + webPath + gsid + "\" width=" + imgSize + " border=0></a></td>\n");
+				fw.write("<td><a href=\"" + webPath + dtxcid + "\"><img src=\"" + webPath + dtxcid + "\" width=" + imgSize + " border=0></a></td>\n");
 			}
 
 			// fw.write("<td align=middle>Test chemical<br><img
@@ -322,9 +322,9 @@ public class PredictToxicityWebPageCreator {
 			}
 			fw.write("<br><hr>\n");
 
-			this.WriteSimilarChemicals("test", htTestMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, htChemistryDashboardInfo, gsid, options);
+			this.WriteSimilarChemicals("test", htTestMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, htChemistryDashboardInfo, dtxcid, options);
 			fw.write("<br><hr>\n");
-			this.WriteSimilarChemicals("training", htTrainMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, htChemistryDashboardInfo, gsid, options);
+			this.WriteSimilarChemicals("training", htTrainMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, htChemistryDashboardInfo, dtxcid, options);
 
 			fw.close();
 

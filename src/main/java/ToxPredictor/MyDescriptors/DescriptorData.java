@@ -35,7 +35,7 @@ public class DescriptorData {
 	
 	public int Index;
 	public String ID=""; // chemical abstract number
-	public String gsid;
+	public String dtxcid;
 	public String Query;
 	public String SmilesRan;
 	public String Error;

@@ -9,7 +9,7 @@ public class PredictionResultsPrimaryTable {
     private String endpointSubscripted;
     private Vector<EndpointSource> endpointSources;
 
-    private String gsid;//gsid for chemical to be predicted
+    private String dtxcid;//CID for chemical to be predicted
     
     private String expCAS;//cas number corresponding to experimental value
     private String expSet;//set where the experimental value came from (training or prediction)
@@ -155,15 +155,16 @@ public class PredictionResultsPrimaryTable {
         this.predMinMaxVal = predMinMaxVal;
     }
 
-    public String getGsid() {
-        return gsid;
-    }
 
-    public void setGsid(String gsid) {
-        this.gsid = gsid;
-    }
+    public String getDtxcid() {
+		return dtxcid;
+	}
 
-    public String getMassUnits() {
+	public void setDtxcid(String dtxcid) {
+		this.dtxcid = dtxcid;
+	}
+
+	public String getMassUnits() {
         return massUnits;
     }
 

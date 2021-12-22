@@ -5,7 +5,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 
@@ -67,6 +67,7 @@ public class TaskStructureSearch {
 	public static final int TypeSDF_In_Jar=3;
 	public static final int TypeName = 4;
 	
+	
 	SwingWorker worker;
 
 	// task variables:
@@ -82,7 +83,7 @@ public class TaskStructureSearch {
 	Object gui = null;
 	String filepath;
 
-	int structureType;//smiles,CAS,or name
+	public int structureType;//smiles,CAS,or name
 	int runType;//single chemical or batch
 	
 //	ChemicalFinder cf;
@@ -402,7 +403,8 @@ public class TaskStructureSearch {
 					break;
 				}
 				
-				if (m==null || m.getAtomCount()==0) break;
+//				if (m==null || m.getAtomCount()==0) break;
+				if (m==null) break;
 				
     			String message="Loading "+m.getProperty("CAS")+", " +counter;
 //    			System.out.println(message);
@@ -451,6 +453,7 @@ public class TaskStructureSearch {
 		}
 	}
 	
+	
 	public static void setCAS(AtomContainer ac) {
 		String CASfield=MolFileUtilities.getCASField(ac);
 		
@@ -472,7 +475,7 @@ public class TaskStructureSearch {
 		}
 		
 		
-//		System.out.println(CAS);
+//		System.out.println("*" +CAS+"*");
 //		System.out.println(CAS+"\t"+recordsCAS.size());
 		
 		if (CAS!=null) {
@@ -1082,7 +1085,9 @@ public class TaskStructureSearch {
 			
 			rec.assignFromDSSToxRecord(molecule, rec);
 													
-		} 
+		} else {
+//			System.out.println("Molecule not in dsstox");
+		}
 		return molecule;
 	}
 
@@ -1333,7 +1338,12 @@ public class TaskStructureSearch {
 
 		if ( !StringUtils.isEmpty(ID) ) {
 			ID = cleanString(ID);
-			m.setProperty("CAS", ID);
+			m.setProperty("ID", ID);
+			
+			if(ResolverDb2.isCASValid(ID)) {
+				m.setProperty("CAS", ID);
+			}
+			
 		} 
 
 		m.setProperty("Query", identifier);//store smiles as the string used in the query for export later so users can match up results
@@ -1728,19 +1738,22 @@ private static String trimQuotes(String identifier) {
 	 * The actual long running task. This runs in a SwingWorker thread.
 	 */
 	public class ActualTask {
+		
+
+
 		ActualTask() {
 
 			current = 0;
 			done=false;
 			
-			((TESTApplication) gui).setCursor(Utilities.waitCursor);
+//			((TESTApplication) gui).setCursor(Utilities.waitCursor);
 			
 			if (runType==TESTConstants.typeTaskBatch) {
 				runBatch();
 			} else {
 				runSingle();
 			}
-			((TESTApplication) gui).setCursor(Utilities.defaultCursor);
+//			((TESTApplication) gui).setCursor(Utilities.defaultCursor);
 			
 			
 		} // end ActualTaskConstructor
@@ -1925,7 +1938,7 @@ private static String trimQuotes(String identifier) {
 		private void runBatch() {
 			AtomContainerSet moleculeSet=null;
 
-			if (structureType==TypeSDF) moleculeSet=LoadFromSDF(filepath);
+			if (structureType==TypeSDF) moleculeSet=LoadFromSDF(filepath);			
 			else if (structureType==TypeSDF_In_Jar) moleculeSet=LoadFromSDFInJar();
 			else moleculeSet=LoadFromList(filepath,structureType);
 			

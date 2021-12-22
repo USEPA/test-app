@@ -1233,9 +1233,9 @@ public class WebTEST {
 				if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
 						|| reportTypes.contains(WebReportType.PDF)) {
 					predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,
-							endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
+							dd.dtxcid,endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
 							htTrainMatch, methods, predictedToxicities, predictedUncertainties,
-							createDetailedConsensusReport, dd.gsid, options);
+							createDetailedConsensusReport,  options);
 				}
 
 				if (reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
@@ -1311,12 +1311,12 @@ public class WebTEST {
 		String abbrev = TESTConstants.getAbbrevEndpoint(endpoint);
 
 		String CAS = dd.ID;
-		String gsid = m.getProperty("gsid");
+//		String gsid = m.getProperty("gsid");
 		String DSSTOXSID = m.getProperty("dsstox_compound_id");
 		String DSSTOXCID = m.getProperty("dsstox_substance_id");
 
 //		if ((gsid == null || DSSTOXSID == null || DSSTOXCID == null) && htChemistryDashboardInfo != null) {
-		if ((gsid == null || DSSTOXSID == null || DSSTOXCID == null)) {
+		if ((DSSTOXSID == null || DSSTOXCID == null)) {
 			// try to look up based on CAS
 //			ChemistryDashboardRecord rec = GetChemistryDashboardIDs.get(CAS);
 
@@ -1330,8 +1330,6 @@ public class WebTEST {
 
 						DSSToxRecord rec=recs.get(0);
 						
-						if (gsid == null)
-							gsid = rec.gsid;
 						if (DSSTOXSID == null)
 							DSSTOXSID = rec.sid;
 						if (DSSTOXCID == null)
@@ -1358,7 +1356,7 @@ public class WebTEST {
 
 		if (csv != null) {
 			csv.printField(CAS);
-			csv.printField(gsid);
+//			csv.printField(gsid);
 			csv.printField(DSSTOXSID);
 			csv.printField(DSSTOXCID);
 		}
@@ -1697,10 +1695,10 @@ public class WebTEST {
 					PredictionResults predictionResults = null;
 					if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
 							|| reportTypes.contains(WebReportType.PDF)) {
-						predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,
+						predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,DSSTOXCID, 
 								endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
 								htTrainMatch, methods, predictedToxicities, predictedUncertainties,
-								createDetailedConsensusReport, gsid, options);
+								createDetailedConsensusReport, options);
 					}
 
 					if (reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
@@ -2336,8 +2334,9 @@ public class WebTEST {
 		for (TESTPredictedValue r : res) {
 			r.casrn = rec.cas;
 			r.dtxsid = rec.sid;
+			r.dtxcid = rec.cid;
 			r.preferredName = rec.name;
-			r.gsid = rec.gsid;
+//			r.gsid = rec.gsid;
 			r.inChICode = rec.inchi;
 			r.inChIKey = rec.inchiKey;
 		}
@@ -2752,7 +2751,7 @@ public class WebTEST {
 				DescriptorData dd = new DescriptorData();
 				dd.ID = (String) ac.getProperty("CAS");
 				String CAS = dd.ID;
-				dd.gsid = getGSID(ac, CAS);
+//				dd.gsid = getGSID(ac, CAS);
 
 				int descresult = -1;
 
@@ -2806,7 +2805,7 @@ public class WebTEST {
 
 				// just in case we are running a chemical without gsid (e.g. user drawn
 				// structure):
-				if (!reportTypes.isEmpty() && dd.gsid == null) {
+				if (!reportTypes.isEmpty() && dd.dtxcid == null) {
 					ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(ac, "structure",
 							strOutputFolderStructureData);// dont
 				}
@@ -2859,37 +2858,37 @@ public class WebTEST {
 		return strOutputFolderStructureData;
 	}
 
-	static String getGSID(IAtomContainer ac, String CAS) {
-		String gsid = ac.getProperty("gsid");
-
-		if (gsid == null) {
-						
-			if (ResolverDb.isAvailable()) {			
-				if (!Strings.isEmpty(CAS) && !CAS.matches("C\\d*_\\d{8,}")) {				
-					ArrayList<DSSToxRecord> recs = ResolverDb.lookupByCAS(CAS);
-					if (recs.size()==0) {
-						logger.debug("Cannot resolve {}", CAS);
-					} else {
-						DSSToxRecord rec=recs.get(0);
-						if (gsid == null)
-							gsid = rec.gsid;
-					}					
-				}
-			}
-			
-			
-			
-//			// try to look up based on CAS
-//			ChemistryDashboardRecord rec = ChemistryDashboardRecord.lookupDashboardRecord("casrn", CAS,
-//					statNCCT_ID_Records);
-//			if (rec == null)
-//				logger.debug("Cannot resolve {}", CAS);
-//			else
-//				gsid = rec.gsid;
-		}
-		
-		return gsid;
-	}
+//	static String getGSID(IAtomContainer ac, String CAS) {
+//		String gsid = ac.getProperty("gsid");
+//
+//		if (gsid == null) {
+//						
+//			if (ResolverDb.isAvailable()) {			
+//				if (!Strings.isEmpty(CAS) && !CAS.matches("C\\d*_\\d{8,}")) {				
+//					ArrayList<DSSToxRecord> recs = ResolverDb.lookupByCAS(CAS);
+//					if (recs.size()==0) {
+//						logger.debug("Cannot resolve {}", CAS);
+//					} else {
+//						DSSToxRecord rec=recs.get(0);
+//						if (gsid == null)
+//							gsid = rec.gsid;
+//					}					
+//				}
+//			}
+//			
+//			
+//			
+////			// try to look up based on CAS
+////			ChemistryDashboardRecord rec = ChemistryDashboardRecord.lookupDashboardRecord("casrn", CAS,
+////					statNCCT_ID_Records);
+////			if (rec == null)
+////				logger.debug("Cannot resolve {}", CAS);
+////			else
+////				gsid = rec.gsid;
+//		}
+//		
+//		return gsid;
+//	}
 
 	public static List<TESTPredictedValue> go(DescriptorData dd, CalculationParameters params) {
 		///////////////////////////////////////////////////////////////

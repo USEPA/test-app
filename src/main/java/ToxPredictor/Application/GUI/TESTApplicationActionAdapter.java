@@ -391,7 +391,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 		f.as.setEndpoint(f.panelCalculationOptions.panelOptionsEndpointMethod.jcbEndpoint.getSelectedItem()+"");
 		f.as.setMethod(f.panelCalculationOptions.panelOptionsEndpointMethod.jcbMethod.getSelectedItem()+"");
 		
-		f.as.setCreateReport(f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.isSelected());
+//		f.as.setCreateReport(f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.isSelected());
 		f.as.setCreateDetailedReport(f.panelCalculationOptions.panelOutputOptions.jcbCreateDetailedReports.isSelected());
 		f.as.setRelaxFragmentConstraint(f.panelCalculationOptions.panelOptionsEndpointMethod.jcbRelaxFragmentConstraint.isSelected());
 		
@@ -419,7 +419,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 		if (f.panelBatch.isVisible()) {
 			batchCalculate(TESTConstants.typeRunEndpoint);			
 		} else {
-			calculate(TESTConstants.typeRunEndpoint);
+			calculate(TESTConstants.typeRunEndpoint);			
 		}
 
 	}
@@ -435,6 +435,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 
 		saveApplicationSettings();
 
+		f.panelResults.jbViewReport.setVisible(false);
 		
 		if (f.panelBatch.isVisible()) {
 			batchCalculate(TESTConstants.typeRunAA);
@@ -450,18 +451,21 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 	 * This method switches to single chemical mode
 	 */
 	void switchToSingleChemicalMode() {
+		
+		
 		f.panelDraw.setVisible(true);
 		f.panelSingleStructureDatabaseSearch.setVisible(true);
 		f.jmFileSingle.setVisible(true);
 		f.jbSwitchToBatch.setVisible(true);
 		
-		f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setVisible(false);
-		f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.setVisible(false);
+//		f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setVisible(false);
+//		f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.setVisible(false);
 		f.panelCalculationOptions.panelOutputOptions.jcbCreateDetailedReports.setVisible(true);
-//		f.panelCalculationOptions.panelOutputOptions.jbAboutCreateReports.setVisible(false);
+		f.panelCalculationOptions.panelOutputOptions.jbAboutCreateReports.setVisible(true);
 		
 //		f.panelCalculationOptions.panelOutputOptions.jcbCreateDetailedReports.setLocation(f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.getLocation());
-		
+//		f.panelResults.jbSaveToHTML.setVisible(false);
+		f.panelResults.jbViewReport.setVisible(true);
 
 		f.panelBatch.setVisible(false);
 		f.panelBatchStructureDatabaseSearch.setVisible(false);
@@ -475,17 +479,18 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 	}
 
 	void switchToBatchMode() {
+//		System.out.println("Enter switch to batch");
 		f.panelDraw.setVisible(false);
 		f.panelSingleStructureDatabaseSearch.setVisible(false);
 		f.jmFileSingle.setVisible(false);
 		f.jbSwitchToBatch.setVisible(false);
 		
 		
-		f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setVisible(true);
+//		f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setVisible(true);
 		
-		f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.setVisible(true);	
+//		f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.setVisible(true);	
 		f.panelCalculationOptions.panelOutputOptions.jcbCreateDetailedReports.setVisible(false);
-//		f.panelCalculationOptions.panelOutputOptions.jbAboutCreateReports.setVisible(true);
+		f.panelCalculationOptions.panelOutputOptions.jbAboutCreateReports.setVisible(false);
 		
 		f.panelBatch.setVisible(true);
 		f.panelBatchStructureDatabaseSearch.setVisible(true);
@@ -496,7 +501,9 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			f.panelCalculationOptions.panelCTSOptions.setVisible(false);
 		}
 		f.panelBatchStructureDatabaseSearch.jtfIdentifiers.requestFocus();
-
+//		f.panelResults.jbSaveToHTML.setVisible(true);
+		f.panelResults.jbViewReport.setVisible(false);
+		
 	}
 
 
@@ -1329,8 +1336,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			
 			if (runCTS) {				
 				
-				String route=(String)f.panelCalculationOptions.panelCTSOptions.jcbRoute.getSelectedItem();
-				
+				String route=(String)f.panelCalculationOptions.panelCTSOptions.jcbRoute.getSelectedItem();				
 				if (route.contentEquals("Hydrolysis")) libraryCTS=CTS_Generate_Breakdown_Products.strLibraryHydrolysis;
 				else if (route.contentEquals("Abiotic Reduction")) libraryCTS=CTS_Generate_Breakdown_Products.strLibraryAbioticReduction;
 				else if (route.contentEquals("Human Metabolism")) libraryCTS=CTS_Generate_Breakdown_Products.strLibraryHumanBioTransformation;				
@@ -1347,8 +1353,28 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			boolean createReports=true;//always create reports in single mode
 			boolean generateWebpages=true;//always write webpages to hard drive in single mode
 			boolean createDetailedReports=f.panelCalculationOptions.panelOutputOptions.jcbCreateDetailedReports.isSelected();
-			
+						
 			if (f.endpoint.contentEquals(TESTConstants.abbrevChoiceDescriptors)) createDetailedReports=true;
+			
+			if (!f.endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
+				f.panelResults.setTitle("Prediction results: "+f.endpoint);
+				f.panelResults.initTableModel(f.endpoint, f.method,false);		
+			} else {
+				f.panelResults.setTitle("Descriptor values");
+//				System.out.println("Init table model descriptors");
+				f.panelResults.initTableModelDescriptors();
+			}
+			
+//			if (!createReports) {
+//				f.panelResults.jbSaveToHTML.setVisible(false);
+//			} else {
+//				f.panelResults.jbSaveToHTML.setVisible(true);
+//			}
+			
+			f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);
+			
+			f.panelResults.setVisible(true);
+			
 			
 			f.task.init(ms, useFragmentsConstraint,createReports,createDetailedReports,generateWebpages, OutputFolder, f, f.endpoint, f.method, 
 					TESTConstants.typeTaskSingle,TESTConstants.typeRunEndpoint, runCTS, libraryCTS);
@@ -1360,11 +1386,11 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			
 			f.panelResults.setTitle("Hazard comparison");
 			f.panelResults.initTableModelHCD();
-			f.panelResults.jbSaveToHTML.setVisible(false);
+//			f.panelResults.jbSaveToHTML.setVisible(false);
 			f.panelResults.setVisible(true);				
 			AtomContainerSet acs=new AtomContainerSet();
 			acs.addAtomContainer(myMolecule);
-			f.task.initForAA(acs, useFragmentsConstraint, OutputFolder, f, TESTConstants.typeTaskBatch, TESTConstants.typeRunAA,runCTS);
+			f.task.initForAA(acs, useFragmentsConstraint, OutputFolder, f, TESTConstants.typeTaskBatch, TESTConstants.typeRunAA,runCTS,libraryCTS);
 			f.task.go();
 			f.timerCalculations.start();
 			
@@ -1495,21 +1521,21 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 
 			if (type==TESTConstants.typeRunEndpoint) {
 				
-				boolean createReports=f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.isSelected();
+				boolean createReports=false;
 
 				if (!f.endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
 					f.panelResults.setTitle("Prediction results: "+f.endpoint);
-					f.panelResults.initTableModel(f.endpoint, f.method);		
+					f.panelResults.initTableModel(f.endpoint, f.method,true);		
 				} else {
 					f.panelResults.setTitle("Descriptor values");
 					f.panelResults.initTableModelDescriptors();
 				}
 				
-				if (!createReports) {
-					f.panelResults.jbSaveToHTML.setVisible(false);
-				} else {
-					f.panelResults.jbSaveToHTML.setVisible(true);
-				}
+//				if (!createReports) {
+//					f.panelResults.jbSaveToHTML.setVisible(false);
+//				} else {
+//					f.panelResults.jbSaveToHTML.setVisible(true);
+//				}
 				
 				f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);
 				
@@ -1528,13 +1554,17 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 				
 				f.panelResults.setTitle("Hazard comparison");
 				f.panelResults.initTableModelHCD();
-				f.panelResults.jbSaveToHTML.setVisible(false);
-				f.panelResults.setVisible(true);				
+//				f.panelResults.jbSaveToHTML.setVisible(false);
+				f.panelResults.setVisible(true);	
+				f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);
+
 				
-				f.task.initForAA(acs, useFragmentsConstraint, OutputFolder, f, TESTConstants.typeTaskBatch, TESTConstants.typeRunAA,runCTS);
+				f.task.initForAA(acs, useFragmentsConstraint, OutputFolder, f, TESTConstants.typeTaskBatch, TESTConstants.typeRunAA,runCTS,null);
 				f.task.go();
 				f.timerCalculations.start();
 			}
+			
+//			f.panelResults.jbSaveToHTML.setEnabled(f.panelCalculationOptions.panelOutputOptions.jcbCreateReports.isSelected());
 			
 
 		} catch (Exception ex) {

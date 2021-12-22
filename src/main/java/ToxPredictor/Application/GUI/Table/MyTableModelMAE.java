@@ -2,6 +2,7 @@ package ToxPredictor.Application.GUI.Table;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -24,7 +25,7 @@ import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableHeaderRenderer;
 import ToxPredictor.MyDescriptors.DescriptorData;
 
 
-public class MyTableModelDescriptors extends AbstractTableModel {
+public class MyTableModelMAE extends AbstractTableModel {
 
 //	protected int m_result = 0;
 //	protected int columnsCount = 1;
@@ -39,16 +40,22 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	int sortCol;
 	boolean isSortAsc=true;
 
-	public void addPrediction(DescriptorData dd) {
+	public void addResult(String set,double MAE) {
 		// TODO Auto-generated method stub
-		vecDD.add(dd.convertToLinkedHashMap());
+		
+		LinkedHashMap<String, String>map=new LinkedHashMap<>();
+		
+		map.put("Chemicals", set);
+		DecimalFormat df=new DecimalFormat("0.000");
+		map.put("Mean absolute error", df.format(MAE));
+		vecDD.add(map);
 
 		fireTableDataChanged();
 		table.scrollRectToVisible(table.getCellRect(getRowCount() - 1, 0, true));
 		table.repaint();
 	}
 
-	public MyTableModelDescriptors(String [] colNames) {
+	public MyTableModelMAE(String [] colNames) {
 		vecDD=new Vector<>();
 		columnNames=colNames;		
 	}
@@ -63,18 +70,14 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	}
 	
 
-	private String[] columnNames = { "#", "ID", "Query","SmilesRan", "Error" };
+	private String[] columnNames;
 
 	
 	public static String [] getColumnNames () {
-		
-		
 		Vector<String>colNames=new Vector<>();
 		
-		//TODO add descriptors
-		Vector<String>descNames=DescriptorData.getDescriptorNames();
-		
-		for (String descName:descNames) colNames.add(descName);
+		colNames.add("Chemicals");
+		colNames.add("Mean absolute error");
 		
 		String[] array = colNames.toArray(new String[colNames.size()]);
 		return array;
@@ -103,7 +106,7 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 
 		header.setUpdateTableInRealTime(true);
 		
-		header.addMouseListener(this.new ColumnListener(table));
+//		header.addMouseListener(this.new ColumnListener(table));
 
 		table.setModel(this);
 		
@@ -116,10 +119,11 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 		
 //		table.getColumnModel().getColumn(0).setPreferredWidth(15);
 		
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-		table.getColumnModel().getColumn(0).setCellRenderer(centerRenderer);
+		DefaultTableCellRenderer enderer = new DefaultTableCellRenderer();
+		enderer.setHorizontalAlignment(JLabel.LEFT);
+		table.getColumnModel().getColumn(0).setCellRenderer(enderer);
 //		table.setRowSelectionAllowed(false);
+		table.setRowHeight(25);
 		
 //		table.addMouseListener(new mouseAdapter());
 //		table.addKeyListener(ka);
@@ -130,85 +134,63 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	}
 
 	public Object getValueAt(int row, int col) {
-		
-		if (row>vecDD.size()) return null;
-		
 		LinkedHashMap<String,String> dd=vecDD.get(row);
-		String key=this.descriptorNames.get(col);
+		String key=this.columnNames[col];
 		if (dd.get(key)==null) return "";
 		else return dd.get(key);
 	}
 	
 	
 	
-//	Vector<String>getValuesError(LinkedHashMap<String,String> dd) {
-//		Vector<String>values=new Vector<String>();			
-//		values.add(dd.get("index"));
-//		values.add(dd.get("CAS"));
-//		values.add(dd.get("query"));
-//		values.add(dd.get("SMILES"));		
-//		values.add(dd.get("error"));
-//		
-//		for (int i=5;i<getColumnCount();i++) {
-//			values.add("");
-//		}
-////		System.out.println(values.size());
-//		
-//		return values;
-//	}
-	
-	
-	
 	
 	public LinkedHashMap<String,String> getPrediction(int row) {
-		if (row>=vecDD.size()) return null;
 		return vecDD.get(row);
 	}
 
-	class CustomComparator implements Comparator<LinkedHashMap<String,String>>{
-	    int col;
-		
-		CustomComparator(int sortCol) {
-			this.col=sortCol;
-		}
-		
-		public int compare(LinkedHashMap<String,String> ac1,LinkedHashMap<String,String> ac2) {	        
-	    	
-			String key=descriptorNames.get(col);
-			String val1=(String)ac1.get(key);
-	    	String val2=(String)ac2.get(key);
-	    	
-	    	
-	    	if (col==0) {//Index
-	    		return MyTableModel.compareInt(val1,val2);
-	    	} else if (col==1) {//CAS
-	    		return MyTableModel.compareCAS_String(val1, val2);
-	    	} else if (col>=5) {
-	    		return MyTableModel.compareContinuous(val1, val2);
-	    	} else {
-	    		return MyTableModel.compareString(val1, val2);
-	    	}
-	    			    	
-	    	
-//	    	System.out.println(val1+"\t"+val2);
-	    		
-	    }
-		
-		String addZeros(String val,int length) {
-			while (val.length()<length) val="0"+val;
-			return val;
-		}
-	}
+//	class CustomComparator implements Comparator<LinkedHashMap<String,String>>{
+//	    int col;
+//		
+//		CustomComparator(int sortCol) {
+//			this.col=sortCol;
+//		}
+//		
+//		public int compare(LinkedHashMap<String,String> ac1,LinkedHashMap<String,String> ac2) {	        
+//	    	
+//			String key=descriptorNames.get(col);
+//			String val1=(String)ac1.get(key);
+//	    	String val2=(String)ac2.get(key);
+//	    	
+//	    	
+//	    	if (col==0) {//Index
+//	    		return MyTableModel.compareInt(val1,val2);
+//	    	} else if (col==1) {//CAS
+//	    		return MyTableModel.compareCAS_String(val1, val2);
+//	    	} else if (col>=5) {
+//	    		return MyTableModel.compareContinuous(val1, val2);
+//	    	} else {
+//	    		return MyTableModel.compareString(val1, val2);
+//	    	}
+//	    			    	
+//	    	
+////	    	System.out.println(val1+"\t"+val2);
+//	    		
+//	    }
+//		
+//		String addZeros(String val,int length) {
+//			while (val.length()<length) val="0"+val;
+//			return val;
+//		}
+//	}
 	
-	public void sortByCol() {						
-		Collections.sort(vecDD,new CustomComparator(sortCol));
-		
-//		System.out.println(sortCol);
-		
-		if (!isSortAsc) Collections.reverse(vecDD);
-		
-		fireTableDataChanged();
-	}
+//	public void sortByCol() {						
+//		Collections.sort(vecDD,new CustomComparator(sortCol));
+//		
+////		System.out.println(sortCol);
+//		
+//		if (!isSortAsc) Collections.reverse(vecDD);
+//		
+//		fireTableDataChanged();
+//	}
 	
 	public void  removeRow(int row) {	
 		vecDD.remove(row);
@@ -249,36 +231,36 @@ public class MyTableModelDescriptors extends AbstractTableModel {
 	}
 
 
-	class ColumnListener extends MouseAdapter {
-		protected JTable table;
-
-
-		public ColumnListener(JTable t) {
-			table = t;
-		}
-
-		public void mouseClicked(MouseEvent e) {
-
-			TableColumnModel colModel = table.getColumnModel();
-			int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
-
-			int modelIndex = colModel.getColumn(columnModelIndex)
-					.getModelIndex();
-
-			if (modelIndex < 0)
-				return;
-
-			sortCol=modelIndex;
-			isSortAsc = !isSortAsc;
-			//System.out.println(isSortAsc);
-			
-			if (columnModelIndex!=modelIndex) {
-				System.out.println("mismatch!");
-			}
-			sortByCol();
-
-		}
-	}
+//	class ColumnListener extends MouseAdapter {
+//		protected JTable table;
+//
+//
+//		public ColumnListener(JTable t) {
+//			table = t;
+//		}
+//
+//		public void mouseClicked(MouseEvent e) {
+//
+//			TableColumnModel colModel = table.getColumnModel();
+//			int columnModelIndex = colModel.getColumnIndexAtX(e.getX());
+//
+//			int modelIndex = colModel.getColumn(columnModelIndex)
+//					.getModelIndex();
+//
+//			if (modelIndex < 0)
+//				return;
+//
+//			sortCol=modelIndex;
+//			isSortAsc = !isSortAsc;
+//			//System.out.println(isSortAsc);
+//			
+//			if (columnModelIndex!=modelIndex) {
+//				System.out.println("mismatch!");
+//			}
+//			sortByCol();
+//
+//		}
+//	}
 
 
 	/**

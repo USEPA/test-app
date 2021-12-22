@@ -43,11 +43,14 @@ import com.hp.hpl.jena.util.FileUtils;
 import AADashboard.Application.TableGeneratorExcel;
 import AADashboard.Application.TableGeneratorHTML;
 import AADashboard.Application.AADashboard;
+import AADashboard.Application.MySQL_DB;
 import QSAR.validation2.InstanceUtilities;
 import edu.stanford.ejalbert.BrowserLauncher;//new one
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
+import gov.epa.api.RecordLink;
 import gov.epa.api.Score;
+import gov.epa.api.ScoreRecord;
 //import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import ToxPredictor.Utilities.SaveStructureToFile;
 import ToxPredictor.Utilities.TESTPredictedValue;
@@ -357,7 +360,7 @@ public class TaskCalculations2 {
 	public void initForAA(IAtomContainerSet moleculeSet, 
 			boolean useFragmentsConstraint, 
 			File fileOutputFolder, Object gui,  
-			int taskType,int runType,boolean runCTS) {
+			int taskType,int runType,boolean runCTS, String libraryCTS) {
 
 		this.moleculeSet = moleculeSet;
 		this.fileOutputFolder = fileOutputFolder;
@@ -366,12 +369,13 @@ public class TaskCalculations2 {
 		this.taskType = taskType;
 		this.runType = runType;
 		this.runCTS=runCTS;
+		this.libraryCTS=libraryCTS;
 
 		WebTEST4.reportFolderName=fileOutputFolder.getAbsolutePath();		
 		WebTEST4.createDetailedReports=false;//TODO set in init method
 		WebTEST4.createReports=false;
 		WebTEST4.useFragmentsConstraint=useFragmentsConstraint;
-		WebTEST4.generateWebpages=true;
+		WebTEST4.generateWebpages=false;
 		
 		this.taskType = taskType;
 		this.runType = runType;
@@ -457,7 +461,7 @@ public class TaskCalculations2 {
 		statMessage = message;
 	}
 
-	private AtomContainer calculate(String CAS, AtomContainer ac,boolean areDashboardStructuresAvailable) {
+	private AtomContainer calculate(String CAS, AtomContainer ac,boolean areDashboardStructuresAvailable,boolean isBatch) {
 				
 		TESTApplication ta=(TESTApplication)gui;
 		
@@ -475,7 +479,7 @@ public class TaskCalculations2 {
 		if (taskType == TESTConstants.typeTaskBatch) {
 			index = (Integer) ac.getProperty("Index");
 		} else {
-			index = 0;
+			index = 1;
 		}
 
 		
@@ -496,15 +500,13 @@ public class TaskCalculations2 {
 			error=(String) ac.getProperty("Error");
 			listTPV=WebTEST4.go2(areDashboardStructuresAvailable,ac,dd, params);
 
-
-
 			
 		} catch (Exception ex) {
 			logger.error("Error running chemical{}",ex.getMessage());
 			return ac;
 		}
 				
-		if (taskType != TESTConstants.typeTaskBatch) return ac;
+//		if (taskType != TESTConstants.typeTaskBatch) return ac;
 		
 		
 		String smiles="";
@@ -534,6 +536,14 @@ public class TaskCalculations2 {
 			if (method.contentEquals(TESTConstants.ChoiceConsensus)) {
 				ta.panelResults.addPredictionAllMethods(tpv);
 			} 
+			
+			if (!isBatch) {
+				ta.panelResults.addResultsSimilarChemicals(tpv, "Training");
+				ta.panelResults.addResultsSimilarChemicals(tpv, "Prediction");
+			}
+			
+			
+			
 //			long t2=System.currentTimeMillis();
 //			System.out.println("Time to update table:"+(t2-t1)+ " milliseconds");
 			
@@ -555,10 +565,10 @@ public class TaskCalculations2 {
 			dd.Query=query;
 			dd.SmilesRan=smiles;
 											
-			if (index==1) {
-				ta.panelResults.initTableModelDescriptors();
-				ta.panelResults.setVisible(true);
-			}
+//			if (index==1) {
+//				ta.panelResults.initTableModelDescriptors();
+//				ta.panelResults.setVisible(true);
+//			}
 			
 			ta.panelResults.addPrediction(dd);
 						
@@ -608,8 +618,11 @@ public class TaskCalculations2 {
 			
 			WebTEST4.dashboardStructuresAvailable=WebTEST4.areDashboardStructuresAvailable();
 			
+			
+			
 			if (gui instanceof TESTApplication) {
-				((TESTApplication) gui).setCursor(Utilities.waitCursor);
+//				((TESTApplication) gui).setCursor(Utilities.waitCursor);
+//				((TESTApplication)gui).panelResults.setCursor(Utilities.waitCursor);
 				
 				if(((TESTApplication) gui).includeAA_Dashboard) {
 					aad=new AADashboard();
@@ -628,10 +641,12 @@ public class TaskCalculations2 {
 				
 			}
 			
+//			((TESTApplication)gui).panelResults.setCursor(Utilities.defaultCursor);
+//			((TESTApplication) gui).setCursor(Utilities.defaultCursor);
 
-			if (gui instanceof TESTApplication) {
-				((TESTApplication) gui).setCursor(Utilities.defaultCursor);
-			} 
+//			if (gui instanceof TESTApplication) {
+//				((TESTApplication) gui).setCursor(Utilities.defaultCursor);
+//			} 
 //			else if (gui instanceof ToxApplet7) {
 //				((ToxApplet7) gui).setCursor(Utilities.defaultCursor);
 //			}
@@ -640,6 +655,12 @@ public class TaskCalculations2 {
 		
 		private void runAA() {
 
+			if (TESTApplication.forMDH) {
+				AADashboard.statAA_Dashboard_Records=MySQL_DB.getStatement("databases\\AA dashboard MDH.db");
+			}
+			
+//			System.out.println("runCTS="+runCTS);
+			
 			if (runCTS) {
 				runCTS();
 				if (moleculeSet.getAtomContainerCount()>1) {
@@ -693,12 +714,18 @@ public class TaskCalculations2 {
 
 				Chemicals chemicals=new Chemicals();
 				
+//				String [] endpoints= {TESTConstants.ChoiceRat_LD50,
+//						TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50,
+//						TESTConstants.ChoiceMutagenicity,TESTConstants.ChoiceReproTox,
+//						TESTConstants.ChoiceBCF,
+//						TESTConstants.ChoiceEstrogenReceptor,
+//						TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity,
+//						TESTConstants.ChoiceWaterSolubility};
+				
 				String [] endpoints= {TESTConstants.ChoiceRat_LD50,
 						TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50,
 						TESTConstants.ChoiceMutagenicity,TESTConstants.ChoiceReproTox,
 						TESTConstants.ChoiceBCF,
-						TESTConstants.ChoiceEstrogenReceptor,
-						TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity,
 						TESTConstants.ChoiceWaterSolubility};
 
 				String [] methods= {TESTConstants.ChoiceConsensus};
@@ -710,12 +737,14 @@ public class TaskCalculations2 {
 				loadTrainingData(cp);
 								
 
+//				System.out.println("ac count="+moleculeSet.getAtomContainerCount());
+				
 				//			for (int i=0;i<1;i++) {
 				for (int i=0;i<moleculeSet.getAtomContainerCount();i++) {
 					AtomContainer ac=(AtomContainer)moleculeSet.getAtomContainer(i);
 					String CAS=ac.getProperty(DSSToxRecord.strCAS);
 					String name=ac.getProperty(DSSToxRecord.strName);
-					
+									
 					String error=ac.getProperty("Error");
 					error=error.replace("\n", "");
 					error=error.replace("\r", "");
@@ -725,6 +754,11 @@ public class TaskCalculations2 {
 
 					statMessage = "Molecule ID = " + CAS + " (" + (i + 1) + " of " + moleculeSet.getAtomContainerCount() + ")";
 					Chemical chemical=aad.runChemicalForGUI(CAS, name, ac,cp);
+					
+					if (TESTApplication.forMDH) {
+						removeExtraScoresForMDH(chemical);
+						RecordLink.getLinks(chemical,AADashboard.statAA_Dashboard_Records);
+					}
 
 					//Get records from toxval database:
 					
@@ -808,6 +842,20 @@ public class TaskCalculations2 {
 				ex.printStackTrace();
 			}
 		}
+
+		private void removeExtraScoresForMDH(Chemical chemical) {
+			for (int j=0;j<chemical.scores.size();j++) {
+				Score score=chemical.scores.get(j);
+				
+				if (score.hazard_name.equals(Chemical.strSkin_Irritation)
+						|| score.hazard_name.equals(Chemical.strSkin_Sensitization)
+						|| score.hazard_name.equals(Chemical.strEye_Irritation)
+						|| score.hazard_name.equals(Chemical.strAcute_Aquatic_Toxicity)
+						|| score.hazard_name.equals(Chemical.strChronic_Aquatic_Toxicity)
+						|| score.hazard_name.equals(Chemical.strExposure))
+					chemical.scores.remove(j--);
+			}
+		}
 		
 		
 		private String runCTS() {
@@ -835,7 +883,9 @@ public class TaskCalculations2 {
 					
 //					System.out.println(strJSON);
 					
-					if (strJSON==null || strJSON.contains("Error")) {
+//					if (strJSON==null || strJSON.contains("Error")) {
+					if (strJSON==null) {
+						System.out.println("problem with CTS");
 						return strJSON;
 					}
 					
@@ -856,6 +906,8 @@ public class TaskCalculations2 {
 
 							//TODO should we add options to keep possible or unlikely products???							
 							if (!cc.data.likelihood.contentEquals("LIKELY")) continue;
+
+//							System.out.println(cc.data.smiles+"\t"+cc.data.likelihood);
 							
 							AtomContainer m = WebTEST4.loadSMILES(cc.data.smiles);
 							m = TaskStructureSearch.CleanUpMolecule(m);
@@ -875,7 +927,6 @@ public class TaskCalculations2 {
 							ex.printStackTrace();
 						}
 						
-//						System.out.println(cc.smiles+"\t"+cc.likelihood);
 					}				
 
 				} catch (Exception ex) {
@@ -883,9 +934,12 @@ public class TaskCalculations2 {
 				}
 			}
 			moleculeSet=ms2;
-			return "OK";
 			
 //			System.out.println(ms2.getAtomContainerCount());
+
+			
+			return "OK";
+			
 			
 		}
 		
@@ -894,7 +948,7 @@ public class TaskCalculations2 {
 									
 //			File folder=new File(fileOutputFolder.getAbsolutePath()+File.separator+"ToxRuns");
 //			folder.mkdirs();
-
+			TESTApplication f=(TESTApplication) gui;	
 			
 			String endpoint=params.endpoints[0];
 			String method=params.methods[0];
@@ -912,17 +966,16 @@ public class TaskCalculations2 {
 					if (moleculeSet.getAtomContainerCount()>1) {
 						taskType=TESTConstants.typeTaskBatch;
 						
-						TESTApplication f=(TESTApplication) gui;						
-						
+											
 						if (!endpoint.contentEquals(TESTConstants.ChoiceDescriptors)) {
 							f.panelResults.setTitle("Prediction results including environmental transformation products: "+endpoint);
-							f.panelResults.initTableModel(endpoint, method);		
+							f.panelResults.initTableModel(endpoint, method,true);		
 						} else {
 							f.panelResults.setTitle("Descriptor values including environmental transformation products");
 							f.panelResults.initTableModelDescriptors();
 						}
 						f.panelResults.setVisible(true);
-						f.panelResults.jbSaveToHTML.setVisible(true);
+//						f.panelResults.jbSaveToHTML.setVisible(true);
 					} else {
 						JOptionPane.showMessageDialog((TESTApplication) gui, "No transformation products were generated by CTS");
 					}
@@ -946,6 +999,19 @@ public class TaskCalculations2 {
 			loadTrainingData(params);
 
 			boolean areDashboardStructuresAvailable=WebTEST4.areDashboardStructuresAvailable();
+				
+			boolean isBatch=false;
+			TESTApplication ta=(TESTApplication)gui;
+			if (ta.jbSwitchToSingle.isVisible()) {
+				isBatch=true;
+			}
+			
+			if (moleculeSet.getAtomContainerCount()>1) {
+				f.panelResults.jbViewReport.setVisible(false);
+			} else {
+				f.panelResults.jbViewReport.setVisible(true);	
+			}
+			
 			
 			for (int i = 0; i < moleculeSet.getAtomContainerCount(); i++) {
 
@@ -964,7 +1030,7 @@ public class TaskCalculations2 {
 				m.setProperty("Error", error);
 				
 				
-				m=calculate(CAS, m,areDashboardStructuresAvailable);
+				m=calculate(CAS, m,areDashboardStructuresAvailable,isBatch);
 				
 				// System.out.println("Total
 				// Memory"+Runtime.getRuntime().totalMemory());
@@ -993,36 +1059,37 @@ public class TaskCalculations2 {
 					ex.printStackTrace();
 				}
 			} else {
-				IAtomContainer m = moleculeSet.getAtomContainer(0);
-				
-				String error=m.getProperty("Error");
-				
-//				System.out.println("error="+error);
-				
-				if (!Strings.isEmpty(error)) {
-					TESTApplication f = (TESTApplication) gui;
-					JOptionPane.showMessageDialog(f, "Calculation error: "+error);
-					done = true;
-					return;
-				}
-				
-				String CAS = (String) m.getProperty("CAS");
-				File fileToDisplay=getFilePathSingle(CAS,endpoint,method);
-				
-				URL myURL;
-				try {
-					myURL = fileToDisplay.toURI().toURL();
-					String strURL = myURL.toString();
-					MyBrowserLauncher.launch(fileToDisplay.toURI());
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}	
+//				IAtomContainer m = moleculeSet.getAtomContainer(0);
+//				
+//				String error=m.getProperty("Error");
+//				
+////				System.out.println("error="+error);
+//				
+//				if (!Strings.isEmpty(error)) {
+//					TESTApplication f = (TESTApplication) gui;
+//					JOptionPane.showMessageDialog(f, "Calculation error: "+error);
+//					done = true;
+//					return;
+//				}
+//				
+//				String CAS = (String) m.getProperty("CAS");
+//				File fileToDisplay=getFilePathSingle(CAS,endpoint,method);
+//				
+//				URL myURL;
+//				try {
+//					myURL = fileToDisplay.toURI().toURL();
+//					String strURL = myURL.toString();
+////					MyBrowserLauncher.launch(fileToDisplay.toURI());
+//					
+//					TESTApplication f = (TESTApplication) gui;
+//					
+//				} catch (MalformedURLException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}	
 
 			}
 
-			TESTApplication f=(TESTApplication)gui;
-			
 			
 			if (commandLineOutputFile==null) {
 				done =true;				
@@ -1131,53 +1198,53 @@ public class TaskCalculations2 {
 //			}
 		}
 
-		private File getFilePathSingle(String CAS,String endpoint,String method) {
-			// TODO Auto-generated method stub
-
-			File htmlFileSingle=null;
-
-			// TODO
-			String strOutputFolder1 = fileOutputFolder.getAbsolutePath() + File.separator + "ToxRuns";
-			String strOutputFolder2 = strOutputFolder1 + File.separator + "ToxRun_" + CAS;
-			String strOutputFolder3 = strOutputFolder2 + File.separator + "StructureData";
-			String strOutputFolder4 = strOutputFolder2 + File.separator + endpoint;
-
-			
-			
-			String filename = "";
-			if (endpoint.equals(TESTConstants.ChoiceDescriptors)) {
-				filename = "DescriptorData_"+CAS+".html";
-				htmlFileSingle= new File(strOutputFolder3 + File.separator + filename);
-
-			} else {
-
-				//				filename = "PredictionResults";
-				//				filename += method.replaceAll(" ", "");
-				//				filename += ".html";
-				String fileNameNoExtension=WebTEST4.getResultFileNameNoExtension(endpoint, method, CAS);
-				filename=fileNameNoExtension+".html";
-
-				htmlFileSingle= new File(strOutputFolder4 + File.separator + filename);
-			}
-
-			// here add file to recent file list:
-			if (gui instanceof TESTApplication) {
-
-				TESTApplication f = (TESTApplication) gui;
-
-				if(WebTEST4.createDetailedReports) {
-					String molFilePath = strOutputFolder3 + File.separator + CAS + ".mol";
-					f.as.addFilePath(molFilePath);
-					f.as.saveSettingsToFile();
-				}
-
-				//gui8.setupRecentFiles();
-				// we are done:
-				f.setCursor(Utilities.defaultCursor);
-			} 
-
-			return htmlFileSingle;
-		}
+//		private File getFilePathSingle(String CAS,String endpoint,String method) {
+//			// TODO Auto-generated method stub
+//
+//			File htmlFileSingle=null;
+//
+//			// TODO
+//			String strOutputFolder1 = fileOutputFolder.getAbsolutePath() + File.separator + "ToxRuns";
+//			String strOutputFolder2 = strOutputFolder1 + File.separator + "ToxRun_" + CAS;
+//			String strOutputFolder3 = strOutputFolder2 + File.separator + "StructureData";
+//			String strOutputFolder4 = strOutputFolder2 + File.separator + endpoint;
+//
+//			
+//			
+//			String filename = "";
+//			if (endpoint.equals(TESTConstants.ChoiceDescriptors)) {
+//				filename = "DescriptorData_"+CAS+".html";
+//				htmlFileSingle= new File(strOutputFolder3 + File.separator + filename);
+//
+//			} else {
+//
+//				//				filename = "PredictionResults";
+//				//				filename += method.replaceAll(" ", "");
+//				//				filename += ".html";
+//				String fileNameNoExtension=WebTEST4.getResultFileNameNoExtension(endpoint, method, CAS);
+//				filename=fileNameNoExtension+".html";
+//
+//				htmlFileSingle= new File(strOutputFolder4 + File.separator + filename);
+//			}
+//
+//			// here add file to recent file list:
+//			if (gui instanceof TESTApplication) {
+//
+//				TESTApplication f = (TESTApplication) gui;
+//
+//				if(WebTEST4.createDetailedReports) {
+//					String molFilePath = strOutputFolder3 + File.separator + CAS + ".mol";
+//					f.as.addFilePath(molFilePath);
+//					f.as.saveSettingsToFile();
+//				}
+//
+//				//gui8.setupRecentFiles();
+//				// we are done:
+//				f.setCursor(Utilities.defaultCursor);
+//			} 
+//
+//			return htmlFileSingle;
+//		}
 		
 	}// end ActualTaskConstructor
 

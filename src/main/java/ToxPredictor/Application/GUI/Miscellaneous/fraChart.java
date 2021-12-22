@@ -1097,7 +1097,7 @@ public class fraChart extends JFrame {
 			if (jlResults != null)
 			    jlResults.setText(results);
 
-			String s1 = "MAE = "+myDF.format(MAE);;
+			String s1 = "MAE = "+myDF.format(MAE);
 
 			int s1width = (int) g2.getFont().getStringBounds(s1, frc)
 					.getWidth();

@@ -11,7 +11,7 @@ public class DSSToxRecord {
 	public String name;
 	public String cid;
 	public String sid;
-	public String gsid;
+//	public String gsid;
 	public String smiles;
 	public String inchi;
 	public String inchiKey;
@@ -37,7 +37,7 @@ public class DSSToxRecord {
 		rec=new DSSToxRecord();
 		rec.cid=m.getProperty(strCID);
 		rec.sid=m.getProperty(strSID);
-		rec.gsid=m.getProperty(strGSID);
+//		rec.gsid=m.getProperty(strGSID);
 		rec.name=m.getProperty(strName);
 		rec.cas=m.getProperty(strCAS);
 		rec.smiles=m.getProperty(strSmiles);
@@ -61,7 +61,7 @@ public class DSSToxRecord {
 		m.setProperty(strName, rec.name);
 		m.setProperty(strCID,rec.cid);//store gsid so dont need to look up later
 		m.setProperty(strSID,rec.sid);//store gsid so dont need to look up later
-		m.setProperty(strGSID,rec.gsid);//store gsid so dont need to look up later
+//		m.setProperty(strGSID,rec.gsid);//store gsid so dont need to look up later
 		m.setProperty(strInchi, rec.inchi);
 		m.setProperty(strInchiKey, rec.inchiKey);
 		m.setProperty(strInchiKey1, rec.inchiKey1);
@@ -74,7 +74,7 @@ public class DSSToxRecord {
 	}
 	
 	public String toString() {
-		return cas + "\t" + gsid + "\t" + name;
+		return cas + "\t" + cid + "\t" + name;
 	}
 
 }

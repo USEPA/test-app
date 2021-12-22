@@ -24,6 +24,7 @@ public class TESTPredictedValue {
 	public Boolean predActive;
 	
 	public String dtxsid;
+	public String dtxcid;
 	public String casrn;
 	public String gsid;
 	public String preferredName;

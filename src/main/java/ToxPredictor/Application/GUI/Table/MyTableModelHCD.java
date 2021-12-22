@@ -17,6 +17,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.Application.GUI.Table.Renderer.CellRendererHCD;
 import ToxPredictor.Application.GUI.Table.Renderer.VerticalTableHeaderCellRenderer;
 import gov.epa.api.Chemical;
@@ -124,9 +125,12 @@ public class MyTableModelHCD extends AbstractTableModel {
 		colNames.add(Chemical.strAcute_Mammalian_ToxicityOral);
 		colNames.add(Chemical.strAcute_Mammalian_ToxicityInhalation);
 		colNames.add(Chemical.strAcute_Mammalian_ToxicityDermal);
-		colNames.add(Chemical.strSkin_Sensitization);
-		colNames.add(Chemical.strSkin_Irritation);
-		colNames.add(Chemical.strEye_Irritation);
+		
+		if (!TESTApplication.forMDH) {
+			colNames.add(Chemical.strSkin_Sensitization);
+			colNames.add(Chemical.strSkin_Irritation);
+			colNames.add(Chemical.strEye_Irritation);			
+		}
 		colNames.add(Chemical.strCarcinogenicity);
 		colNames.add(Chemical.strGenotoxicity_Mutagenicity);
 		colNames.add(Chemical.strEndocrine_Disruption);		
@@ -136,10 +140,24 @@ public class MyTableModelHCD extends AbstractTableModel {
 		colNames.add(Chemical.strNeurotoxicity_Single_Exposure);
 		colNames.add(Chemical.strSystemic_Toxicity_Repeat_Exposure);
 		colNames.add(Chemical.strSystemic_Toxicity_Single_Exposure);
-		colNames.add(Chemical.strAcute_Aquatic_Toxicity);
-		colNames.add(Chemical.strChronic_Aquatic_Toxicity);
-		colNames.add(Chemical.strPersistence);
-		colNames.add(Chemical.strBioaccumulation);
+		
+		if (!TESTApplication.forMDH) {
+			colNames.add(Chemical.strAcute_Aquatic_Toxicity);
+			colNames.add(Chemical.strChronic_Aquatic_Toxicity);
+			colNames.add(Chemical.strPersistence);
+			colNames.add(Chemical.strBioaccumulation);
+		}
+		
+		if (TESTApplication.forMDH) {
+			colNames.add(Chemical.strExposureIndividual);
+			colNames.add(Chemical.strExposurePopulation);
+			colNames.add(Chemical.strExposureChildOrConsumerProducts);
+		} else {
+			if (TESTApplication.includeExposure) {
+				colNames.add(Chemical.strExposure);
+			}
+		}
+		
 		
 		for(int i=2;i<colNames.size();i++) {
 			colNames.set(i, "  "+colNames.get(i));
@@ -220,6 +238,8 @@ public class MyTableModelHCD extends AbstractTableModel {
 			
 //			System.out.println(columnNames[i]);
 			
+//			if (score.final_score==null) System.out.println(score.hazard_name);
+			
 			String final_score=score.final_score;
 			String hazard_name=score.hazard_name;			
 			
@@ -240,6 +260,7 @@ public class MyTableModelHCD extends AbstractTableModel {
 	
 	
 	public Chemical getChemical(int row) {
+		if (row>=chemicals.size()) return null;
 		return chemicals.get(row);
 	}
 
@@ -270,7 +291,12 @@ public class MyTableModelHCD extends AbstractTableModel {
 	    	String val1=(String)getValue(ac1,col);
 	    	String val2=(String)getValue(ac2,col);
 	    		    			    
-	    	return MyTableModel.compareString(val1, val2);
+	    	if (columnNames[col].equals("CAS")) {//CAS
+	    		return MyTableModel.compareCAS_String(val1, val2);
+	    	} else {
+	    		return MyTableModel.compareString(val1, val2);
+	    	}
+
 	    	
 //	    	if (col==0) {//Index
 //	    		return MyTableModel.compareInt(val1,val2);

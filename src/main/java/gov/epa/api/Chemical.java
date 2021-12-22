@@ -14,6 +14,7 @@ import com.google.gson.FieldNamingStrategy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import ToxPredictor.Application.GUI.TESTApplication;
 import gov.epa.api.Score;
 
 /**
@@ -42,6 +43,9 @@ public class Chemical {
 
 	public ArrayList<Score> scores=new ArrayList<Score>();//array to store all the score data and their associated records	
 
+	
+	public ArrayList<RecordLink>links=new ArrayList<>(); 
+	
 	//Note: transient makes it not get serialized- scores object saves it to json instead
 //	public transient Score scoreAcute_Mammalian_Toxicity = new Score();
 	
@@ -70,6 +74,12 @@ public class Chemical {
 	public transient Score scoreBioaccumulation = new Score();
 
 	public transient Score scoreWaterSolubility=new Score();
+	public transient Score scoreExposure=new Score();
+	
+	public transient Score scoreExposureIndividual=new Score();
+	public transient Score scoreExposurePopulation=new Score();
+	public transient Score scoreExposureChildOrConsumerProducts=new Score();
+	
 	
 	//Transformation products from CTS:
 	ArrayList<Chemical> transformationProducts = new ArrayList<Chemical>();
@@ -109,7 +119,16 @@ public class Chemical {
 
 	public static final String strPersistence = "Persistence";
 	public static final String strBioaccumulation = "Bioaccumulation";
+	
+	public static final String strExposure = "Exposure";
+	
+	public static final String strExposureIndividual = "Potential For Individual Exposure";
+	public static final String strExposurePopulation = "Potential For Population Exposure";
+	public static final String strExposureChildOrConsumerProducts = "Presence In Child Or Consumer Products";
+	
+	
 
+	
 	//Array of hazard_names for convenience:
 //	public static String[] hazard_names = { strAcute_Mammalian_Toxicity, strCarcinogenicity,
 //			strGenotoxicity_Mutagenicity, strEndocrine_Disruption, strReproductive, strDevelopmental, strNeurological,
@@ -160,6 +179,12 @@ public class Chemical {
 		scoreChronic_Aquatic_Toxicity.hazard_name = strChronic_Aquatic_Toxicity;
 		scorePersistence.hazard_name = strPersistence;
 		scoreBioaccumulation.hazard_name = strBioaccumulation;
+		scoreExposure.hazard_name=strExposure;
+		
+		scoreExposureIndividual.hazard_name=strExposureIndividual;
+		scoreExposurePopulation.hazard_name=strExposurePopulation;
+		scoreExposureChildOrConsumerProducts.hazard_name=strExposureChildOrConsumerProducts;
+		
 		
 //		scores.add(scoreAcute_Mammalian_Toxicity);
 		
@@ -186,6 +211,15 @@ public class Chemical {
 		scores.add(scoreChronic_Aquatic_Toxicity);
 		scores.add(scorePersistence);
 		scores.add(scoreBioaccumulation);
+		
+		if (!TESTApplication.forMDH) {
+			if (TESTApplication.includeExposure) scores.add(scoreExposure);
+		} else {
+			scores.add(scoreExposureIndividual);
+			scores.add(scoreExposurePopulation);
+			scores.add(scoreExposureChildOrConsumerProducts);
+		}
+		
 		
 	}
 	
@@ -277,27 +311,27 @@ public class Chemical {
 	}
 	
 	
-	/**
-	 * Store records from second chemical into first chemical
-	 * 
-	 * @param c1
-	 * @param c2
-	 */
-	public void addRecords(Chemical c2) {
-		
-		
-
-		for (int i=0;i<scores.size();i++) {
-			
-			Score score1i=scores.get(i);
-			Score score2i=c2.scores.get(i);
-			
-			for (int j=0;j<score2i.records.size();j++) {
-				score1i.records.add(score2i.records.get(j));
-//				System.out.println(CAS+"\t"+score1i.hazard_name+"\t"+score1i.records.size());
-			}
-		}
-	}
+//	/**
+//	 * Store records from second chemical into first chemical
+//	 * 
+//	 * @param c1
+//	 * @param c2
+//	 */
+//	public void addRecords(Chemical c2) {
+//		
+//		
+//
+//		for (int i=0;i<scores.size();i++) {
+//			
+//			Score score1i=scores.get(i);
+//			Score score2i=c2.scores.get(i);
+//			
+//			for (int j=0;j<score2i.records.size();j++) {
+//				score1i.records.add(score2i.records.get(j));
+////				System.out.println(CAS+"\t"+score1i.hazard_name+"\t"+score1i.records.size());
+//			}
+//		}
+//	}
 	
 
 	/**
@@ -1514,5 +1548,12 @@ public class Chemical {
 
 	public void setSMILES(String sMILES) {
 		SMILES = sMILES;
+	}
+
+	public void addRecords(Chemical chemical2) {
+		for (Score score:scores) {
+			Score score2=chemical2.getScore(score.hazard_name);
+			score.records.addAll(score2.records);
+		}
 	}
 }
