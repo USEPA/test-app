@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -42,7 +43,7 @@ public class MyTableModelSimilarChemical extends AbstractTableModel {
 	JTable table;
 
 	//Store as vector of linkedhashmap so that values stay sorted and don't need to keep using complicated reflection to retrieve the values
-	Vector<LinkedHashMap<String,String>> vecDD;
+	Vector<LinkedHashMap<String,Object>> vecDD;
 	
 	
 	int sortCol;
@@ -69,7 +70,7 @@ public class MyTableModelSimilarChemical extends AbstractTableModel {
 	 * Convert vector to ACS for use by other classes
 	 * @return
 	 */
-	public Vector<LinkedHashMap<String,String>> getPredictions() {
+	public Vector<LinkedHashMap<String,Object>> getPredictions() {
 		return vecDD;
 	}
 	
@@ -95,7 +96,7 @@ public class MyTableModelSimilarChemical extends AbstractTableModel {
 		return vecDD.size();
 	}
 	
-	public void updateRow(LinkedHashMap<String,String>dd,int row) {
+	public void updateRow(LinkedHashMap<String,Object>dd,int row) {
 		
 		vecDD.set(row, dd);
 		fireTableDataChanged();
@@ -140,44 +141,25 @@ public class MyTableModelSimilarChemical extends AbstractTableModel {
 	}
 
 	public Object getValueAt(int row, int col) {
-		LinkedHashMap<String,String> dd=vecDD.get(row);
+		LinkedHashMap<String,Object> dd=vecDD.get(row);
 		String key=columnNames[col];
 		if (dd.get(key)==null) return "";
-		else {
-			
-			if (key.equals("Structure")) {
-				try {
-					ImageIcon imageIcon=new ImageIcon(new URL(dd.get(key)));
-					Image image = imageIcon.getImage(); // transform it 
-					Image newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
-					imageIcon = new ImageIcon(newimg);  // transform it back
-					return imageIcon;
-				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					return "Image not available";
-				}
-			} else {
-//				System.out.println(dd.get(key));
-				return dd.get(key);	
-			}
-			
-			
-		}
+		else return dd.get(key);	
 	}
 	
 	
-	public LinkedHashMap<String,String> getPrediction(int row) {
+	public LinkedHashMap<String,Object> getPrediction(int row) {
 		return vecDD.get(row);
 	}
 
-	class CustomComparator implements Comparator<LinkedHashMap<String,String>>{
+	class CustomComparator implements Comparator<LinkedHashMap<String,Object>>{
 	    int col;
 		
 		CustomComparator(int sortCol) {
 			this.col=sortCol;
 		}
 		
-		public int compare(LinkedHashMap<String,String> ac1,LinkedHashMap<String,String> ac2) {	        
+		public int compare(LinkedHashMap<String,Object> ac1,LinkedHashMap<String,Object> ac2) {	        
 	    	
 			String key=columnNames[col];
 			String val1=(String)ac1.get(key);
@@ -308,7 +290,7 @@ public class MyTableModelSimilarChemical extends AbstractTableModel {
 	 * Remove all rows from table
 	 */
 	public void clear() {
-		vecDD.removeAllElements();
+		vecDD.clear();
 		fireTableDataChanged();
 	}
 

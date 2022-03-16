@@ -26,14 +26,14 @@ public class CellRendererSimilarChemical extends DefaultTableCellRenderer {
         //Get the status for the current row.
         MyTableModelSimilarChemical tableModel = (MyTableModelSimilarChemical) table.getModel();
         
-        LinkedHashMap<String, String> map=tableModel.getPrediction(row);
+        LinkedHashMap<String, Object> map=tableModel.getPrediction(row);
 
-        String color=map.get("backgroundColor");
+        String color=(String)map.get("backgroundColor");
         
 //        System.out.println(color);
         
         l.setBackground(new Color( Integer.parseInt( color.replace("#", ""), 16 )));
-        l.setToolTipText(getColor(Double.parseDouble(map.get("Similarity"))));
+        l.setToolTipText(getColor(Double.parseDouble((String)map.get("Similarity"))));
         
         return l;
     }

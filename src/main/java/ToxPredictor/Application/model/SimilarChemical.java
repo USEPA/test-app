@@ -1,7 +1,16 @@
 package ToxPredictor.Application.model;
 
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Base64;
 import java.util.LinkedHashMap;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -84,11 +93,56 @@ public class SimilarChemical {
         this.imageUrl = imageUrl;
     }
 
-	public LinkedHashMap<String, String> convertToLinkedHashMap() {
+    
+    public static ImageIcon decodeBase64ToImageIcon(String imageString) {
+    	 
+        BufferedImage image = null;
+        byte[] imageByte;
+        try {
+//        	System.out.println(imageString);
+            imageByte = Base64.getDecoder().decode(imageString.replace("data:image/png;base64, ", ""));
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+            image = ImageIO.read(bis);
+            bis.close();
+            return new ImageIcon(image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }        
+    }
+    
+    
+    public static ImageIcon urlToImageIcon(String url) {
+    	
+    	try {
+			ImageIcon imageIcon = new ImageIcon(new URL(url));
+			Image image = imageIcon.getImage(); // transform it 
+			Image newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+			imageIcon = new ImageIcon(newimg);  // transform it back
+			return imageIcon;
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+			System.out.println(url);
+			return null;
+		}
+    }
+    
+	public LinkedHashMap<String, Object> convertToLinkedHashMap() {
 		// TODO Auto-generated method stub
-		LinkedHashMap<String,String> lhm=new LinkedHashMap();
+		LinkedHashMap<String,Object> lhm=new LinkedHashMap<>();
 		lhm.put("CAS",CAS);
-		lhm.put("Structure",imageUrl);
+				
+		if (imageUrl.contains("base64")) {			
+			lhm.put("Structure",decodeBase64ToImageIcon(imageUrl));			
+		} else {
+			lhm.put("Structure",urlToImageIcon(imageUrl));	
+		}
+						
+//		lhm.put("Structure",imageUrl);//previously we stored just url instead of imageIcon- which made scrolling the table slow
+		
+		
 		lhm.put("Similarity", similarityCoefficient);
 		lhm.put("Experimental value", expVal);
 		lhm.put("Predicted value", predVal);
