@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 import QSAR.qsarOptimal.OptimalResults;
+import QSAR.validation2.NearestNeighborMethod;
 import QSAR.validation2.TestChemical;
 import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.TESTConstants;
@@ -863,23 +864,26 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		fw.write("<th>Similarity<br>Coefficient</th>\n");
 		fw.write("</tr>\n\n");
 		
-		fw.write("<tr>\n");
-		// String CAS = chemical.stringValue(chemicalNameIndex);
-		fw.write("<td><font color=\"blue\">" + pr.getCAS() + "<br>(test chemical)</font></td>\n");
-		fw.write("<td><a href=\""+pr.getImageURL()+"\">"+
-				"<img src=\"" +pr.getImageURL() 
-				+ "\" width=" + pr.getImgSize()+ " border=0></a></td>\n");
-
-		this.writeCenteredTD(fw, simChems.getExpVal());
-		fw.write("<td align=\"center\"><br></td>\n");
+//		fw.write("<tr>\n");
+//		// String CAS = chemical.stringValue(chemicalNameIndex);
+//		fw.write("<td><font color=\"blue\">" + pr.getCAS() + "<br>(test chemical)</font></td>\n");
+//		fw.write("<td><a href=\""+pr.getImageURL()+"\">"+
+//				"<img src=\"" +pr.getImageURL() 
+//				+ "\" width=" + pr.getImgSize()+ " border=0></a></td>\n");
+//
+//		this.writeCenteredTD(fw, simChems.getExpVal());
+//		fw.write("<td align=\"center\"><br></td>\n");
+//		fw.write("</tr>\n\n");
+//
+//		int neighborCount=Math.min(3, simChems.getSimilarChemicalsList().size());
 		
 		
-		fw.write("</tr>\n\n");
-
-		int neighborCount=Math.min(3, simChems.getSimilarChemicalsList().size());
-		 
+		int neighborCount=Math.min(4, simChems.getSimilarChemicalsList().size()); 
+		
+		
 		for (int i = 0; i < neighborCount; i++) {
 
+			
 			SimilarChemical simChem = simChems.getSimilarChemicalsList().get(i);
 
 			fw.write("<tr>\n");

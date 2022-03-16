@@ -3412,6 +3412,7 @@ public class DescriptorData {
 
 
 	public Hashtable htVarDef;
+	public String dtxsid;
 
 
 	public void Initialize() {

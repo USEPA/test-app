@@ -1371,8 +1371,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 //				f.panelResults.jbSaveToHTML.setVisible(true);
 //			}
 			
-			f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);
-			
+			f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);			
 			f.panelResults.setVisible(true);
 			
 			
@@ -1387,6 +1386,8 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			f.panelResults.setTitle("Hazard comparison");
 			f.panelResults.initTableModelHCD();
 //			f.panelResults.jbSaveToHTML.setVisible(false);
+
+			f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);			
 			f.panelResults.setVisible(true);				
 			AtomContainerSet acs=new AtomContainerSet();
 			acs.addAtomContainer(myMolecule);
@@ -1537,10 +1538,8 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 //					f.panelResults.jbSaveToHTML.setVisible(true);
 //				}
 				
-				f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);
-				
+				f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);				
 				f.panelResults.setVisible(true);
-				
 							
 				boolean createDetailedReports=false;
 				boolean generateWebpages=false;
@@ -1555,9 +1554,9 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 				f.panelResults.setTitle("Hazard comparison");
 				f.panelResults.initTableModelHCD();
 //				f.panelResults.jbSaveToHTML.setVisible(false);
-				f.panelResults.setVisible(true);	
-				f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);
 
+				f.panelCalculationOptions.panelOutputOptions.jbViewPanelResults.setEnabled(true);
+				f.panelResults.setVisible(true);	
 				
 				f.task.initForAA(acs, useFragmentsConstraint, OutputFolder, f, TESTConstants.typeTaskBatch, TESTConstants.typeRunAA,runCTS,null);
 				f.task.go();

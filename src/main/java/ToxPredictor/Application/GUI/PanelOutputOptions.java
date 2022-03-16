@@ -145,7 +145,7 @@ public class PanelOutputOptions extends JPanel {
 		jbViewPanelResults.setActionCommand("jbViewPanelResults");
 		jbViewPanelResults.addActionListener(aa);
 		jbViewPanelResults.setMargin(new Insets(0,0,0,0));
-		jbViewPanelResults.setSize(100,2*heightControls);
+		jbViewPanelResults.setSize(100,30);
 		jbViewPanelResults.setText("View results");
 		jbViewPanelResults.setLocation(getWidth()-jbViewPanelResults.getWidth()-insetHorizontal,jbAboutCreateReports.getY());
 		jbViewPanelResults.setEnabled(false);

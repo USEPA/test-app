@@ -37,7 +37,6 @@ public class MyTableModelHCD extends AbstractTableModel {
 	int sortCol;
 	boolean isSortAsc=true;
 
-	
 	public void addChemical(Chemical chemical) {
 		// TODO Auto-generated method stub
 		chemicals.add(chemical);		
@@ -110,7 +109,7 @@ public class MyTableModelHCD extends AbstractTableModel {
 			table.getColumn(getColumnName(i)).setHeaderRenderer(headerRenderer);
 		}
 		
-		
+		table.getTableHeader().setResizingAllowed(true);
 //		table.setRowSelectionAllowed(false);
 		
 //		table.addMouseListener(new mouseAdapter());

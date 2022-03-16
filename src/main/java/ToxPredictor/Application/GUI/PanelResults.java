@@ -23,6 +23,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
 import org.apache.logging.log4j.util.Strings;
@@ -184,6 +185,8 @@ public //	public boolean Locked=false;
 						
 		Utilities.CenterFrame(this);
 		
+//		this.setLocation(this.getX(), f.getY());//align with top of main program
+		
 		//		Utilities.SetFonts(this.getContentPane());
 		Utilities.SetFonts(this);
 
@@ -342,118 +345,121 @@ public //	public boolean Locked=false;
 	
 	public void initTableModelHCD() {
 		jtabbedPane.removeAll();
-
 		jtabbedPane.add("Final Scores", scrollPaneFinalScores);				
-		MyTableModelHCD tableModel=new MyTableModelHCD();
-		tableModel.setupTable(tableHCD);
-		tableHCD.getTableHeader().setPreferredSize(new Dimension(scrollPaneFinalScores.getWidth(), 250));
+		jtabbedPane.add("Score Records", scrollPaneScoreRecords);	
 		
-		jtabbedPane.add("Score Records", scrollPaneScoreRecords);				
-		MyTableModelHCD_ScoreRecords tableModelSR=new MyTableModelHCD_ScoreRecords();
-		tableModelSR.setupTable(tableHCDScoreRecords);
+		if (tableHCDScoreRecords.getModel() instanceof DefaultTableModel) {
+			MyTableModelHCD_ScoreRecords tableModelSR=new MyTableModelHCD_ScoreRecords();
+			tableModelSR.setupTable(tableHCDScoreRecords);
 
-		tableHCDScoreRecords.addMouseListener(new java.awt.event.MouseAdapter() {
-		    @Override
-		    public void mouseClicked(java.awt.event.MouseEvent evt) {
-		        if (evt.getClickCount()==2) {
-		        	int row = tableHCDScoreRecords.rowAtPoint(evt.getPoint());			        
-		        	String link=tableModelSR.getLink(row);
-//		        	System.out.println("link="+link);
-		        	if(link==null || link.trim().isEmpty()) return;
-		        	URI uri=URI.create(link);
-		        	MyBrowserLauncher.launch(uri);
-		        }
-		    }
-		});
-		
-
-		
-		
-		if (TESTApplication.forMDH) {
-			jtabbedPane.add("Links", scrollPaneLinks);				
-			MyTableModelLinks tableModelLinks=new MyTableModelLinks();
-			tableModelLinks.setupTable(tableLinks);
-			
-			tableLinks.addMouseListener(new java.awt.event.MouseAdapter() {
+			tableHCDScoreRecords.addMouseListener(new java.awt.event.MouseAdapter() {
 			    @Override
 			    public void mouseClicked(java.awt.event.MouseEvent evt) {
 			        if (evt.getClickCount()==2) {
-			        	int row = tableLinks.rowAtPoint(evt.getPoint());			        
-			        	RecordLink rl=tableModelLinks.getLink(row);
-//			        	System.out.println(rl.URL);
-			        	URI uri=URI.create(rl.URL);
+			        	int row = tableHCDScoreRecords.rowAtPoint(evt.getPoint());			        
+			        	String link=tableModelSR.getLink(row);
+//			        	System.out.println("link="+link);
+			        	if(link==null || link.trim().isEmpty()) return;
+			        	URI uri=URI.create(link);
 			        	MyBrowserLauncher.launch(uri);
 			        }
 			    }
 			});
-			
+		} else {
+			MyTableModelHCD_ScoreRecords model=(MyTableModelHCD_ScoreRecords) tableHCDScoreRecords.getModel();
+			model.clear();
 		}
 		
 		
-		tableHCD.addMouseListener(new java.awt.event.MouseAdapter() {
-		    @Override
-		    public void mouseClicked(java.awt.event.MouseEvent evt) {
-		        int row = tableHCD.rowAtPoint(evt.getPoint());
-		        int col = tableHCD.columnAtPoint(evt.getPoint());
-		        		        
-		        if (col>=2) {
-		        	if (tableModel.getChemical(row)==null) return;
-		        	
-			        Chemical chemical=tableModel.getChemical(row);
-			        String scoreName=tableModel.getColumnName(col).trim();
-
-//		        	System.out.println(jtabbedPane.getComponentCount());
-		        	
-		        	Score score=chemical.getScore(scoreName);
-		        	
-		        	if (score.records.size()==0) return;
-		        	
-		        	if (TESTApplication.forMDH) {
-		        		if(jtabbedPane.getTabCount()==4) {
-		        			jtabbedPane.remove(3);
-		        			for (MouseListener listener:tableHCDScoreRecords2.getMouseListeners()) {
-		        				tableHCDScoreRecords2.removeMouseListener(listener);
-		        			}
-		        		}
-		        	} else {
-		        		if(jtabbedPane.getTabCount()==3) {
-		        			jtabbedPane.remove(2);
-		        			for (MouseListener listener:tableHCDScoreRecords2.getMouseListeners()) {
-		        				tableHCDScoreRecords2.removeMouseListener(listener);
-		        			}
-		        		}		        		
-		        	}
-		        	
-//		        	if(jtabbedPane.getComponentCount()==4)
-		    		jtabbedPane.add("Score Records "+scoreName+" "+chemical.CAS, scrollPaneScoreRecords2);				
-		    		MyTableModelHCD_ScoreRecords tableModelSR=new MyTableModelHCD_ScoreRecords();
-		    		tableModelSR.setupTable(tableHCDScoreRecords2);
-		        	
-		        	for (int i=0;i<score.records.size();i++) {
-		        		tableModelSR.addScoreRecord(score.records.get(i));
-		        	}
-		        	jtabbedPane.setSelectedIndex(jtabbedPane.getComponentCount()-1);
-//		    		System.out.println(chemical.CAS+"\t"+scoreName);	
-		        	
-		    		tableHCDScoreRecords2.addMouseListener(new java.awt.event.MouseAdapter() {
-		    		    @Override
-		    		    public void mouseClicked(java.awt.event.MouseEvent evt) {
-		    		        if (evt.getClickCount()==2) {
-		    		        	int row = tableHCDScoreRecords2.rowAtPoint(evt.getPoint());			        
-		    		        	String link=tableModelSR.getLink(row);
-//		    		        	System.out.println("link="+link);
-		    		        	if(link==null || link.trim().isEmpty()) return;
-		    		        	URI uri=URI.create(link);
-		    		        	MyBrowserLauncher.launch(uri);
-		    		        }
-		    		    }
-		    		});
-
-		        	
-		        }
-		    }
-		});
+		if (TESTApplication.forMDH) {
+			jtabbedPane.add("Links", scrollPaneLinks);
+			
+			if (tableLinks.getModel() instanceof DefaultTableModel) {
+				MyTableModelLinks modelLinks=new MyTableModelLinks();
+				modelLinks.setupTable(tableLinks);
+				
+				tableLinks.addMouseListener(new java.awt.event.MouseAdapter() {
+				    @Override
+				    public void mouseClicked(java.awt.event.MouseEvent evt) {
+				        if (evt.getClickCount()==2) {
+				        	
+				        	int row = tableLinks.rowAtPoint(evt.getPoint());			        
+//				        	System.out.println(modelLinks.getRowCount()+"\t"+row);
+				        	
+				        	RecordLink rl=modelLinks.getLink(row);
+//				        	System.out.println(rl.URL);
+				        	URI uri=URI.create(rl.URL);
+				        	MyBrowserLauncher.launch(uri);
+				        }
+				    }
+				});
+			} else {
+				MyTableModelLinks modelLinks=(MyTableModelLinks) tableLinks.getModel();
+				modelLinks.clear();
+			}
+		}
 		
+		if (tableHCD.getModel() instanceof DefaultTableModel) {
+			MyTableModelHCD modelHCD=new MyTableModelHCD();
+			modelHCD.setupTable(tableHCD);
+			tableHCD.getTableHeader().setPreferredSize(new Dimension(scrollPaneFinalScores.getWidth(), 250));
+			
+			tableHCD.addMouseListener(new java.awt.event.MouseAdapter() {
+			    @Override
+			    public void mouseClicked(java.awt.event.MouseEvent evt) {
+			        int row = tableHCD.rowAtPoint(evt.getPoint());
+			        int col = tableHCD.columnAtPoint(evt.getPoint());
+			        		        
+			        if (col>=2) {
+			        	if (modelHCD.getChemical(row)==null) return;
+			        	
+				        Chemical chemical=modelHCD.getChemical(row);
+				        String scoreName=modelHCD.getColumnName(col).trim();
+//			        	System.out.println(jtabbedPane.getComponentCount());			        	
+			        	Score score=chemical.getScore(scoreName);			        	
+			        	if (score.records.size()==0) return;
+			        	
+			        	if (tableHCDScoreRecords2.getModel() instanceof DefaultTableModel) {
+//				        	if(jtabbedPane.getComponentCount()==4)
+				    		jtabbedPane.add("Score Records "+scoreName+" "+chemical.CAS, scrollPaneScoreRecords2);				
+				    		MyTableModelHCD_ScoreRecords tableModelSR2=new MyTableModelHCD_ScoreRecords();
+				    		tableModelSR2.setupTable(tableHCDScoreRecords2);
+				        	
+				        	for (int i=0;i<score.records.size();i++) {
+				        		tableModelSR2.addScoreRecord(score.records.get(i));
+				        	}
+				        	jtabbedPane.setSelectedIndex(jtabbedPane.getComponentCount()-1);
+				        	
+				    		tableHCDScoreRecords2.addMouseListener(new java.awt.event.MouseAdapter() {
+				    		    @Override
+				    		    public void mouseClicked(java.awt.event.MouseEvent evt) {
+				    		        if (evt.getClickCount()==2) {
+				    		        	int row = tableHCDScoreRecords2.rowAtPoint(evt.getPoint());			        
+				    		        	String link=tableModelSR2.getLink(row);
+//				    		        	System.out.println("link="+link);
+				    		        	if(link==null || link.trim().isEmpty()) return;
+				    		        	URI uri=URI.create(link);
+				    		        	MyBrowserLauncher.launch(uri);
+				    		        }
+				    		    }
+				    		});			        		
+			        	} else {
+			        		MyTableModelHCD_ScoreRecords tableModelSR2=(MyTableModelHCD_ScoreRecords) tableHCDScoreRecords2.getModel();
+							tableModelSR2.clear();
+							jtabbedPane.add("Score Records "+scoreName+" "+chemical.CAS, scrollPaneScoreRecords2);				
+				        	for (int i=0;i<score.records.size();i++) {
+				        		tableModelSR2.addScoreRecord(score.records.get(i));
+				        	}
+				        	jtabbedPane.setSelectedIndex(jtabbedPane.getComponentCount()-1);
+			        	}
+			        	
+			        }
+			    }
+			});
+		} else {
+			MyTableModelHCD modelHCD=(MyTableModelHCD) tableHCD.getModel();
+			modelHCD.clear();
+		}
 		
 		
 	}

@@ -68,12 +68,12 @@ public class TESTApplication extends JFrame{
 	//	
 	public static boolean defaultToSingleChemicalMode=true;
 	public boolean includeLDA=true;
-	public boolean includeAA_Dashboard=true;
+	public boolean includeAA_Dashboard=false;
 	public boolean includeRecentMolFileMenu=false;
 	public boolean includeER=false;
 	public boolean includeCTS=true;
 	
-	public static boolean forMDH=true;
+	public static boolean forMDH=false;
 	public static boolean includeExposure=true;
 
 	String endpoint;
@@ -1482,7 +1482,7 @@ public class TESTApplication extends JFrame{
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		System.out.println("forMDH="+forMDH);
+//		System.out.println("forMDH="+forMDH);
 		
 		
 		if (forMDH) {

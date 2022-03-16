@@ -33,11 +33,12 @@ public class VerticalTableHeaderCellRenderer
    * appropriate to a vertical table header cell.
    */
   public VerticalTableHeaderCellRenderer() {
-    setHorizontalAlignment(LEFT);
-    setHorizontalTextPosition(CENTER);
-    setVerticalAlignment(CENTER);
-    setVerticalTextPosition(TOP);
-    setUI(new VerticalLabelUI());
+	  
+	  setHorizontalAlignment(LEFT);
+	  setHorizontalTextPosition(CENTER);
+	  setVerticalAlignment(CENTER);
+	  setVerticalTextPosition(TOP);
+	  setUI(new VerticalLabelUI());
   }
 
   /**

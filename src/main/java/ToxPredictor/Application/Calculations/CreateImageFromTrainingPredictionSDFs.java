@@ -3,8 +3,11 @@ package ToxPredictor.Application.Calculations;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
+import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
 
 import ToxPredictor.Utilities.SaveStructureToFile;
+import ToxPredictor.Utilities.StructureImageUtil;
 
 
 /**
@@ -33,6 +36,30 @@ public class CreateImageFromTrainingPredictionSDFs {
 		}
 		
 	}
+	
+	
+	public String CreateStructureImage2(String CAS, String DestFolder,String endpointAbbrev) {
+
+		try {
+			
+			AtomContainer ac=getAtomContainer(endpointAbbrev, CAS, "training");
+			
+			if (ac==null) ac=getAtomContainer(endpointAbbrev, CAS, "prediction");
+			
+			if (ac==null) return null;
+			
+			SmilesGenerator smigen = new SmilesGenerator(SmiFlavor.Isomeric);
+			String smiles=smigen.create(ac);
+			
+			return StructureImageUtil.generateImgSrc(smiles);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return null;
+		}
+		
+	}
+	
 	private AtomContainer getAtomContainer(String endpointAbbrev,String CAS, String set) {
 		
 		try {
