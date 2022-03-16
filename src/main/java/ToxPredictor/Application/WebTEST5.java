@@ -530,8 +530,11 @@ public class WebTEST5 {
 
 
 		String CAS = dd.ID;
-		String gsid = m.getProperty(DSSToxRecord.strGSID);//already looked up in do predictions 
+//		String gsid = m.getProperty(DSSToxRecord.strGSID);//already looked up in do predictions 
+		String dtxcid = m.getProperty(DSSToxRecord.strCID);//already looked up in do predictions 
+		String dtxsid = m.getProperty(DSSToxRecord.strSID);//already looked up in do predictions 
 
+		
 		// ******************************************************************
 		String searchString="";
 		if (searchKey.equals(DSSToxRecord.strInchi)) searchString=dd.InChi;
@@ -643,7 +646,7 @@ public class WebTEST5 {
 					endpoint, TESTConstants.getAbbrevEndpoint(endpoint), 
 					TESTConstants.isBinary(endpoint), TESTConstants.isLogMolar(endpoint), 
 					useFragmentsConstraint, 
-					CAS, gsid, er, dd.MW, dd.MW_Frag, 
+					CAS, dtxcid,dtxsid, er, dd.MW, dd.MW_Frag, 
 					htTestMatch, htTrainMatch, createDetailedReport, reportOptions, reportTypes);
 
 

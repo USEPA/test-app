@@ -561,7 +561,7 @@ public class WebTEST3 {
 
 				if (!reportTypes.isEmpty()) {
 					createConsensusReport(endpoint, reportTypes, dd, v, isBinaryEndpoint, isLogMolarEndpoint, abbrev,
-							CAS, tr.gsid, predictedToxicities, predictedUncertainties, trainingDataSet2d, testDataSet2d,
+							CAS,tr.DSSTOXCID,tr.DSSTOXSID, predictedToxicities, predictedUncertainties, trainingDataSet2d, testDataSet2d,
 							evalInstance2d, er, options, predToxVal, predToxUnc);
 
 				}
@@ -739,7 +739,7 @@ public class WebTEST3 {
 
 	private static void createConsensusReport(String endpoint, Set<WebReportType> reportTypes, DescriptorData dd,
 			TESTPredictedValue v, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String abbrev, String CAS,
-			String dtxcid, ArrayList<Double> predictedToxicities, ArrayList<Double> predictedUncertainties, Instances trainingDataSet2d,
+			String dtxcid,String dtxsid, ArrayList<Double> predictedToxicities, ArrayList<Double> predictedUncertainties, Instances trainingDataSet2d,
 			Instances testDataSet2d, Instance evalInstance2d, Lookup.ExpRecord er, ReportOptions options,
 			double predToxVal, double predToxUnc) {
 		double[] Mean = trainingDataSet2d.getMeans();
@@ -761,7 +761,7 @@ public class WebTEST3 {
 
 		if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
 			predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc,
-					TESTConstants.ChoiceConsensus, CAS,dtxcid, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
+					TESTConstants.ChoiceConsensus, CAS,dtxcid,dtxsid, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
 					dd.MW, "OK", htTestMatch, htTrainMatch, methods, predictedToxicities,
 					predictedUncertainties, createDetailedConsensusReport, options);
 		}

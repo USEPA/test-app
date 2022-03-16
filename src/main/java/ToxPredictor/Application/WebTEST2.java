@@ -299,6 +299,7 @@ public class WebTEST2 {
 		String abbrev = TESTConstants.getAbbrevEndpoint(endpoint);
 		String CAS = dd.ID;
 		String dtxcid=dd.dtxcid;
+		String dtxsid=dd.dtxsid;
 		
 		//*******************************************************************************************************
 		//Look up record in database, if found, reconstruct objects and return that
@@ -552,7 +553,7 @@ public class WebTEST2 {
 
 				if (!reportTypes.isEmpty()) {
 					createConsensusReport(endpoint, reportTypes, dd, v, isBinaryEndpoint, isLogMolarEndpoint, abbrev,
-							CAS, dtxcid, predictedToxicities, predictedUncertainties, trainingDataSet2d, testDataSet2d,
+							CAS, dtxcid, dtxsid,predictedToxicities, predictedUncertainties, trainingDataSet2d, testDataSet2d,
 							evalInstance2d, er, options, predToxVal, predToxUnc);
 
 				}
@@ -729,7 +730,7 @@ public class WebTEST2 {
 	}
 
 	private static void createConsensusReport(String endpoint, Set<WebReportType> reportTypes, DescriptorData dd,
-			TESTPredictedValue v, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String abbrev, String CAS,String dtxcid,
+			TESTPredictedValue v, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String abbrev, String CAS,String dtxcid,String dtxsid,
 			 ArrayList<Double> predictedToxicities, ArrayList<Double> predictedUncertainties, Instances trainingDataSet2d,
 			Instances testDataSet2d, Instance evalInstance2d, Lookup.ExpRecord er, ReportOptions options,
 			double predToxVal, double predToxUnc) {
@@ -752,7 +753,7 @@ public class WebTEST2 {
 
 		if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
 			predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc,
-					TESTConstants.ChoiceConsensus, CAS, dtxcid, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
+					TESTConstants.ChoiceConsensus, CAS, dtxcid, dtxsid,endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
 					dd.MW, "OK", htTestMatch, htTrainMatch, methods, predictedToxicities,
 					predictedUncertainties, createDetailedConsensusReport, options);
 		}

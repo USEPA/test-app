@@ -1233,7 +1233,7 @@ public class WebTEST {
 				if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
 						|| reportTypes.contains(WebReportType.PDF)) {
 					predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,
-							dd.dtxcid,endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
+							dd.dtxcid,dd.dtxsid,endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
 							htTrainMatch, methods, predictedToxicities, predictedUncertainties,
 							createDetailedConsensusReport,  options);
 				}
@@ -1695,7 +1695,7 @@ public class WebTEST {
 					PredictionResults predictionResults = null;
 					if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
 							|| reportTypes.contains(WebReportType.PDF)) {
-						predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,DSSTOXCID, 
+						predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,DSSTOXCID, DSSTOXSID,
 								endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
 								htTrainMatch, methods, predictedToxicities, predictedUncertainties,
 								createDetailedConsensusReport, options);

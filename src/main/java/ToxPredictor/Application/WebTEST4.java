@@ -443,6 +443,7 @@ public class WebTEST4 {
 
 		String CAS = dd.ID;
 		String dtxcid = m.getProperty(DSSToxRecord.strCID);// already looked up in do predictions
+		String dtxsid = m.getProperty(DSSToxRecord.strSID);// already looked up in do predictions
 
 		// ******************************************************************
 
@@ -537,7 +538,7 @@ public class WebTEST4 {
 
 			DataForPredictionRun d = new DataForPredictionRun(descriptorSet, endpoint,
 					TESTConstants.getAbbrevEndpoint(endpoint), TESTConstants.isBinary(endpoint),
-					TESTConstants.isLogMolar(endpoint), useFragmentsConstraint, CAS, dtxcid, er, dd.MW, dd.MW_Frag,
+					TESTConstants.isLogMolar(endpoint), useFragmentsConstraint, CAS, dtxcid, dtxsid,er, dd.MW, dd.MW_Frag,
 					htTestMatch, htTrainMatch, createDetailedReports, reportOptions, reportTypes);
 
 			if (method.equals(TESTConstants.ChoiceHierarchicalMethod)) {
