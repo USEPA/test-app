@@ -54,7 +54,7 @@ public class MyTableModelSimilarChemical extends AbstractTableModel {
 		// TODO Auto-generated method stub
 		
 //		System.out.println(sc.getImageUrl());
-		vecDD.add(sc.convertToLinkedHashMap());
+		vecDD.add(sc.convertToLinkedHashMap(table));
 		fireTableDataChanged();
 		table.scrollRectToVisible(table.getCellRect(getRowCount() - 1, 0, true));
 		table.repaint();

@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JTable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -94,7 +95,7 @@ public class SimilarChemical {
     }
 
     
-    public static ImageIcon decodeBase64ToImageIcon(String imageString) {
+    public static ImageIcon decodeBase64ToImageIcon(String imageString, int size) {
     	 
         BufferedImage image = null;
         byte[] imageByte;
@@ -103,8 +104,13 @@ public class SimilarChemical {
             imageByte = Base64.getDecoder().decode(imageString.replace("data:image/png;base64, ", ""));
             ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
             image = ImageIO.read(bis);
+            
+            int heightOriginal=image.getHeight();
+            int heightFinal=(int)((double)size/(double)image.getWidth()*heightOriginal);
+            
+            Image newimg = image.getScaledInstance(size, heightFinal,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
             bis.close();
-            return new ImageIcon(image);
+            return new ImageIcon(newimg);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -112,12 +118,12 @@ public class SimilarChemical {
     }
     
     
-    public static ImageIcon urlToImageIcon(String url) {
+    public static ImageIcon urlToImageIcon(String url, int size) {
     	
     	try {
 			ImageIcon imageIcon = new ImageIcon(new URL(url));
 			Image image = imageIcon.getImage(); // transform it 
-			Image newimg = image.getScaledInstance(100, 100,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+			Image newimg = image.getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
 			imageIcon = new ImageIcon(newimg);  // transform it back
 			return imageIcon;
 
@@ -129,15 +135,20 @@ public class SimilarChemical {
 		}
     }
     
-	public LinkedHashMap<String, Object> convertToLinkedHashMap() {
+	public LinkedHashMap<String, Object> convertToLinkedHashMap(JTable table) {
 		// TODO Auto-generated method stub
 		LinkedHashMap<String,Object> lhm=new LinkedHashMap<>();
 		lhm.put("CAS",CAS);
 				
+		
+		int size=table.getColumnModel().getColumn(1).getWidth();
+//		System.out.println(size);
+		
+		
 		if (imageUrl.contains("base64")) {			
-			lhm.put("Structure",decodeBase64ToImageIcon(imageUrl));			
+			lhm.put("Structure",decodeBase64ToImageIcon(imageUrl,size));			
 		} else {
-			lhm.put("Structure",urlToImageIcon(imageUrl));	
+			lhm.put("Structure",urlToImageIcon(imageUrl,size));	
 		}
 						
 //		lhm.put("Structure",imageUrl);//previously we stored just url instead of imageIcon- which made scrolling the table slow

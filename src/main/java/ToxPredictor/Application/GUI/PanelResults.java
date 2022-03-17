@@ -307,21 +307,23 @@ public //	public boolean Locked=false;
 		} 
 		
 		if(!isBatch) {
-			jtabbedPane.add("Predictions for similar training chemicals", panelTraining);
 			String [] colNames2=MyTableModelSimilarChemical.getColumnNames();//TODO add units
-			MyTableModelSimilarChemical tableModelSC=new MyTableModelSimilarChemical(colNames2);
-			tableModelSC.setupTable(tableSimilarChemicalsTraining);			
+
+			jtabbedPane.add("Predictions for similar test chemicals", panelPrediction);
+			MyTableModelSimilarChemical tableModelSC_test=new MyTableModelSimilarChemical(colNames2);
+			tableModelSC_test.setupTable(tableSimilarChemicalsPrediction);
+
+			MyTableModelMAE tableModelMAE_Prediction=new MyTableModelMAE(MyTableModelMAE.getColumnNames());
+			tableModelMAE_Prediction.setupTable(tableMAE_Prediction);
+			
+			jtabbedPane.add("Predictions for similar training chemicals", panelTraining);
+			MyTableModelSimilarChemical tableModelSC_training=new MyTableModelSimilarChemical(colNames2);
+			tableModelSC_training.setupTable(tableSimilarChemicalsTraining);			
 
 			MyTableModelMAE tableModelMAE_Training=new MyTableModelMAE(MyTableModelMAE.getColumnNames());
 			tableModelMAE_Training.setupTable(tableMAE_Training);
 
-			MyTableModelMAE tableModelMAE_Prediction=new MyTableModelMAE(MyTableModelMAE.getColumnNames());
-			tableModelMAE_Prediction.setupTable(tableMAE_Prediction);
 		
-			jtabbedPane.add("Predictions for similar test chemicals", panelPrediction);
-			colNames2=MyTableModelSimilarChemical.getColumnNames();//TODO add units
-			tableModelSC=new MyTableModelSimilarChemical(colNames2);
-			tableModelSC.setupTable(tableSimilarChemicalsPrediction);
 		}
 
 	}

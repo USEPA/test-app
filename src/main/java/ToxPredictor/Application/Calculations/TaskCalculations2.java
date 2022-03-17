@@ -538,8 +538,8 @@ public class TaskCalculations2 {
 			} 
 			
 			if (!isBatch) {
-				ta.panelResults.addResultsSimilarChemicals(tpv, "Training");
 				ta.panelResults.addResultsSimilarChemicals(tpv, "Prediction");
+				ta.panelResults.addResultsSimilarChemicals(tpv, "Training");
 			}
 			
 			
