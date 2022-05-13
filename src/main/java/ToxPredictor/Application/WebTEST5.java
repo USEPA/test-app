@@ -646,7 +646,7 @@ public class WebTEST5 {
 					endpoint, TESTConstants.getAbbrevEndpoint(endpoint), 
 					TESTConstants.isBinary(endpoint), TESTConstants.isLogMolar(endpoint), 
 					useFragmentsConstraint, 
-					CAS, dtxcid,dtxsid, er, dd.MW, dd.MW_Frag, 
+					CAS, dtxcid,dtxsid,dd.SmilesRan, er, dd.MW, dd.MW_Frag, 
 					htTestMatch, htTrainMatch, createDetailedReport, reportOptions, reportTypes);
 
 

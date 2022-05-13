@@ -761,7 +761,7 @@ public class WebTEST3 {
 
 		if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML) || reportTypes.contains(WebReportType.PDF)) {
 			predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc,
-					TESTConstants.ChoiceConsensus, CAS,dtxcid,dtxsid, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
+					TESTConstants.ChoiceConsensus, CAS,dtxcid,dtxsid,dd.SmilesRan, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er,
 					dd.MW, "OK", htTestMatch, htTrainMatch, methods, predictedToxicities,
 					predictedUncertainties, createDetailedConsensusReport, options);
 		}

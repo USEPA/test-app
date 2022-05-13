@@ -37,6 +37,7 @@ public class DataForPredictionRun {
 //	public String gsid;
 	public String dtxcid;
 	public String dtxsid;
+	public String smiles;
 
 	public Lookup.ExpRecord er;
 	public double MW;
@@ -54,7 +55,7 @@ public class DataForPredictionRun {
 //			Instances evalInstancesFrag, Instances trainingDataSetFrag,	AllResults allResultsFrag, 
 			String endpoint, String abbrev, boolean isBinaryEndpoint,
 			boolean isLogMolarEndpoint, boolean useFragmentsConstraint, 
-			String CAS, String dtxcid,String dtxsid, ExpRecord er,
+			String CAS, String dtxcid,String dtxsid, String smiles,ExpRecord er,
 			double MW, double MW_Frag, Hashtable<Double, Instance> htTestMatch,
 			Hashtable<Double, Instance> htTrainMatch, boolean createDetailedReport, ReportOptions reportOptions,
 			Set<WebReportType> reportTypes) {
@@ -74,6 +75,7 @@ public class DataForPredictionRun {
 		this.CAS = CAS;
 		this.dtxcid = dtxcid;
 		this.dtxsid = dtxsid;
+		this.smiles=smiles;
 		this.er = er;
 		this.MW = MW;
 		this.MW_Frag = MW_Frag;

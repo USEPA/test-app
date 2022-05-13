@@ -509,24 +509,11 @@ public class TaskCalculations2 {
 //		if (taskType != TESTConstants.typeTaskBatch) return ac;
 		
 		
-		String smiles="";
-		
-		try {
-			SmilesGenerator sg =SmilesGenerator.unique();
-			smiles = sg.create(ac);
-			ac.setProperty("SmilesRan", smiles);
-			
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-
-		
 		if (!endpoint.equals(TESTConstants.ChoiceDescriptors)) {
 
 			TESTPredictedValue tpv=listTPV.get(0);
 			
-			tpv.smiles=smiles;
+			tpv.smiles=dd.SmilesRan;
 			tpv.index=new Integer(index);
 			tpv.query=query;			
 			
@@ -563,7 +550,7 @@ public class TaskCalculations2 {
 
 			dd.Index=index;
 			dd.Query=query;
-			dd.SmilesRan=smiles;
+			
 											
 //			if (index==1) {
 //				ta.panelResults.initTableModelDescriptors();
@@ -1006,7 +993,7 @@ public class TaskCalculations2 {
 				isBatch=true;
 			}
 			
-			if (moleculeSet.getAtomContainerCount()>1) {
+			if (moleculeSet.getAtomContainerCount()>1 || f.panelBatch.isVisible()) {
 				f.panelResults.jbViewReport.setVisible(false);
 			} else {
 				f.panelResults.jbViewReport.setVisible(true);	

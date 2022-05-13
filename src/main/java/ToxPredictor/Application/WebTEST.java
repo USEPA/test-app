@@ -53,6 +53,8 @@ import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import AADashboard.Application.MySQL_DB;
@@ -1232,8 +1234,10 @@ public class WebTEST {
 				PredictionResults predictionResults = null;
 				if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
 						|| reportTypes.contains(WebReportType.PDF)) {
+					
+
 					predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,
-							dd.dtxcid,dd.dtxsid,endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
+							dd.dtxcid,dd.dtxsid,dd.SmilesRan,endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
 							htTrainMatch, methods, predictedToxicities, predictedUncertainties,
 							createDetailedConsensusReport,  options);
 				}
@@ -1695,7 +1699,7 @@ public class WebTEST {
 					PredictionResults predictionResults = null;
 					if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
 							|| reportTypes.contains(WebReportType.PDF)) {
-						predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,DSSTOXCID, DSSTOXSID,
+						predictionResults = jsonCreator.writeConsensusResultsJSON(predToxVal, predToxUnc, method, CAS,DSSTOXCID, DSSTOXSID,dd.SmilesRan,
 								endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, dd.MW, "OK", htTestMatch,
 								htTrainMatch, methods, predictedToxicities, predictedUncertainties,
 								createDetailedConsensusReport, options);

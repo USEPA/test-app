@@ -103,8 +103,8 @@ public class PredictToxicityWebPageCreator {
 
 	Lookup lookup = new Lookup();
 
-	public static String webPath = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxcid/";
-	public static String webPath2 = "https://comptox.epa.gov/dashboard/dsstoxdb/results?search=";
+	public static String webPath = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxcid/";//image link
+	public static String webPath2 = "https://comptox.epa.gov/dashboard/dsstoxdb/results?search=";//dashboard page
 
 	static void WriteHeaderInfo(FileWriter fw, String CAS, String endpoint, String method) throws IOException {
 

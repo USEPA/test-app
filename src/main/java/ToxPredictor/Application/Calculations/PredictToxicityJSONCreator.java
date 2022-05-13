@@ -23,6 +23,7 @@ import ToxPredictor.Database.DSSToxRecord;
 //import ToxPredictor.Database.ChemistryDashboardRecord;
 import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.Utilities.ReportUtils;
+import ToxPredictor.Utilities.StructureImageUtil;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
@@ -86,7 +87,7 @@ public class PredictToxicityJSONCreator {
 	}
 
 
-	public PredictionResults writeConsensusResultsJSON(double predToxVal, double predToxUnc, String method, String CAS,String dtxcid, String dtxsid,String endpoint, String abbrev, boolean isBinaryEndpoint,
+	public PredictionResults writeConsensusResultsJSON(double predToxVal, double predToxUnc, String method, String CAS,String dtxcid, String dtxsid,String smiles, String endpoint, String abbrev, boolean isBinaryEndpoint,
 			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ArrayList methods,
 			ArrayList predictions, ArrayList uncertainties, boolean createDetailedConsensusReport, 
 			ReportOptions options) {
@@ -147,7 +148,7 @@ public class PredictToxicityJSONCreator {
 				File outputFolder=new File(options.reportBase);
 				File imageFile=new File(outputFolder.getParentFile().getAbsolutePath()+File.separator+"StructureData/structure.png");
 				String strURL = imageFile.toURI().toURL().toString();
-				pr.setImageURL(ReportUtils.convertImageToBase64(strURL));
+				pr.setImageURL(StructureImageUtil.convertImageToBase64(strURL));
 
 			} else {
 				//use dashboard image if available:
@@ -159,9 +160,9 @@ public class PredictToxicityJSONCreator {
 			//				fw.write("<p><a href=\"../StructureData/descriptordata.html\">Descriptor values for " + "test chemical</a></p>\n");
 			//			}
 
-			this.writeSimilarChemicals(pr,"test", htTestMatch, abbrev, er.expToxValue, predToxVal,  CAS, dtxcid, dtxsid,options);
+			this.writeSimilarChemicals(pr,"test", htTestMatch, abbrev, er.expToxValue, predToxVal,  CAS, dtxcid, dtxsid,smiles, options);
 
-			this.writeSimilarChemicals(pr,"training", htTrainMatch, abbrev, er.expToxValue, predToxVal, CAS, dtxcid, dtxsid, options);
+			this.writeSimilarChemicals(pr,"training", htTrainMatch, abbrev, er.expToxValue, predToxVal, CAS, dtxcid, dtxsid, smiles, options);
 
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			gson.toJson(pr, fw);
@@ -204,7 +205,7 @@ public class PredictToxicityJSONCreator {
 					pr.setImageURL("../StructureData/structure.png");
 				} else {
 					String strURL = imageFile.toURI().toURL().toString();
-					pr.setImageURL(ReportUtils.convertImageToBase64(strURL));
+					pr.setImageURL(StructureImageUtil.convertImageToBase64(strURL));
 
 				}
 			} else {
@@ -218,8 +219,8 @@ public class PredictToxicityJSONCreator {
 
 		long t1=System.currentTimeMillis();
 		
-		if (createReports) writeSimilarChemicals(pr,"test", d.htTestMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid, d.dtxsid,d.reportOptions);
-		if (createReports) writeSimilarChemicals(pr,"training", d.htTrainMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid,d.dtxsid, d.reportOptions);
+		if (createReports) writeSimilarChemicals(pr,"test", d.htTestMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid, d.dtxsid,d.smiles,d.reportOptions);
+		if (createReports) writeSimilarChemicals(pr,"training", d.htTrainMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid,d.dtxsid, d.smiles,d.reportOptions);
 
 		long t2=System.currentTimeMillis();
 		
@@ -666,7 +667,7 @@ public class PredictToxicityJSONCreator {
 
 	private void writeSimilarChemicals(PredictionResults pr, String set, 
 			Hashtable<Double, Instance> ht, String abbrev,
-			double expVal, double predVal, String CAS, String dtxcid, String dtxsid,
+			double expVal, double predVal, String CAS, String dtxcid, String dtxsid,String smiles,
 			ReportOptions options) throws Exception
 	{
 
@@ -801,7 +802,7 @@ public class PredictToxicityJSONCreator {
 
 		//			logger.debug(expVal+"\t"+predVal);
 
-		writeSimilarChemicalsTable(pr, expVal, predVal, CAS, dtxcid, dtxsid, d2, strImageFolder, vecCAS2, vecExp2, vecPred2, vecSC2, options, similarChemicals);
+		writeSimilarChemicalsTable(pr, expVal, predVal, CAS, dtxcid, dtxsid, smiles, d2, strImageFolder, vecCAS2, vecExp2, vecPred2, vecSC2, options, similarChemicals);
 
 
 
@@ -899,7 +900,7 @@ public class PredictToxicityJSONCreator {
 	}
 
 	private void writeSimilarChemicalsTable(PredictionResults pr, double expVal, double predVal, 
-			String CAS, String dtxcid,String dtxsid, java.text.DecimalFormat df, String strImageFolder, Vector<String> vecCAS2,
+			String CAS, String dtxcid,String dtxsid, String smiles, java.text.DecimalFormat df, String strImageFolder, Vector<String> vecCAS2,
 			Vector<String> vecExp2, Vector<String> vecPred2, Vector<Double> vecSC2, ReportOptions options,
 			SimilarChemicals similarChemicals) throws Exception   {
 
@@ -978,6 +979,9 @@ public class PredictToxicityJSONCreator {
 			similarChemical.setDSSTOXSID(DSSTOXSIDi);
 			similarChemical.setCAS(CASi);
 
+			
+//			System.out.println("2022-05-09:"+cid_i+"\t"+WebTEST4.dashboardStructuresAvailable);
+			
 			if (cid_i == null || !WebTEST4.dashboardStructuresAvailable){
 				// slow???
 				
@@ -990,7 +994,7 @@ public class PredictToxicityJSONCreator {
 				} else {
 					File imageFile=new File(strImageFolder+File.separator+CASi + ".png");
 					String strURL = imageFile.toURI().toURL().toString();
-					similarChemical.setImageUrl(ReportUtils.convertImageToBase64(strURL));
+					similarChemical.setImageUrl(StructureImageUtil.convertImageToBase64(strURL));
 				}
 
 				//				similarChemical.setImageUrl(ReportUtils.convertImageToBase64(ReportUtils.getImageSrc(options, strImageFolder, CASi + ".png")));
@@ -1030,17 +1034,17 @@ public class PredictToxicityJSONCreator {
 		else 
 			testChemical.setPredVal("N/A");
 		
+		if (dtxcid == null) {
+			testChemical.setImageUrl(StructureImageUtil.generateImageSrcBase64FromSmiles(smiles));			
+		} else {
+			testChemical.setImageUrl(PredictToxicityWebPageCreator.webPath + dtxcid);	
+		}
 		
-		testChemical.setImageUrl(PredictToxicityWebPageCreator.webPath + dtxcid);
 		testChemical.setSimilarityCoefficient(df.format(1.00));
 		testChemical.setCAS(CAS+" (test chemical)");
 		testChemical.setDSSTOXCID(dtxcid);
 		testChemical.setDSSTOXSID(dtxsid);
 		
-//		System.out.println(testChemical.getImageUrl());
-				
-
-		//		predictionResults.setSimilarChemicals(similarChemicals);
 	}
 
 	

@@ -538,7 +538,7 @@ public class WebTEST4 {
 
 			DataForPredictionRun d = new DataForPredictionRun(descriptorSet, endpoint,
 					TESTConstants.getAbbrevEndpoint(endpoint), TESTConstants.isBinary(endpoint),
-					TESTConstants.isLogMolar(endpoint), useFragmentsConstraint, CAS, dtxcid, dtxsid,er, dd.MW, dd.MW_Frag,
+					TESTConstants.isLogMolar(endpoint), useFragmentsConstraint, CAS, dtxcid, dtxsid,dd.SmilesRan,er, dd.MW, dd.MW_Frag,
 					htTestMatch, htTrainMatch, createDetailedReports, reportOptions, reportTypes);
 
 			if (method.equals(TESTConstants.ChoiceHierarchicalMethod)) {
@@ -888,6 +888,7 @@ public class WebTEST4 {
 					String smiles = null;
 					try {
 						smiles = CDKUtilities.generateSmiles(m);
+						dd.SmilesRan=smiles;
 					} catch (Exception e) {
 						logger.catching(e);
 					}
