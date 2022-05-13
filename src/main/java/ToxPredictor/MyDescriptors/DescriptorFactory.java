@@ -29,6 +29,7 @@ import org.openscience.cdk.qsar.result.DoubleResult;
 //import org.openscience.cdk.renderer.Renderer2D;
 //import org.openscience.cdk.renderer.Renderer2DModel;
 
+import org.w3c.dom.Document;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -62,7 +63,6 @@ import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
 import org.openscience.cdk.tools.manipulator.MolecularFormulaManipulator;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 import org.openscience.cdk.Ring;
-import org.w3c.dom.Document;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
