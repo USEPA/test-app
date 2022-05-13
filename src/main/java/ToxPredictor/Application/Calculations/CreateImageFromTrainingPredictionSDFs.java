@@ -51,7 +51,7 @@ public class CreateImageFromTrainingPredictionSDFs {
 			SmilesGenerator smigen = new SmilesGenerator(SmiFlavor.Isomeric);
 			String smiles=smigen.create(ac);
 			
-			return StructureImageUtil.generateImgSrc(smiles);
+			return StructureImageUtil.generateImageSrcBase64FromSmiles(smiles);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

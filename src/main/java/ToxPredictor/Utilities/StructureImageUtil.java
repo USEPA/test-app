@@ -1,9 +1,22 @@
 package ToxPredictor.Utilities;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+
+import org.apache.commons.io.IOUtils;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.depict.Depiction;
@@ -24,6 +37,78 @@ public class StructureImageUtil {
 	
 	private static final SmilesParser parser = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 
+	
+	
+	public static ImageIcon decodeBase64ToImageIcon(String imageString, int size) {
+   	 
+        BufferedImage image = null;
+        byte[] imageByte;
+        try {
+//        	System.out.println(imageString);
+            imageByte = Base64.getDecoder().decode(imageString.replace("data:image/png;base64, ", ""));
+            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
+            image = ImageIO.read(bis);
+            
+            int heightOriginal=image.getHeight();
+            int heightFinal=(int)((double)size/(double)image.getWidth()*heightOriginal);
+            
+            Image newimg = image.getScaledInstance(size, heightFinal,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
+            bis.close();
+            return new ImageIcon(newimg);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }        
+    }
+    
+    
+    public static ImageIcon urlToImageIcon(String url, int size) {
+    	
+    	try {
+			ImageIcon imageIcon = new ImageIcon(new URL(url));
+			Image image = imageIcon.getImage(); // transform it 
+			Image newimg = image.getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
+			imageIcon = new ImageIcon(newimg);  // transform it back
+			return imageIcon;
+
+		} catch (MalformedURLException e) {
+			// TODO Auto-generated catch block
+			System.out.println(e.getMessage());
+			System.out.println(url);
+			return null;
+		}
+    }
+    
+    public static String dataUriFromImageFile(String imagePath) throws IOException
+	{
+		Path path = Paths.get(imagePath);
+		byte[] data = Files.readAllBytes(path);
+		String base64bytes = org.apache.commons.codec.binary.Base64.encodeBase64String(data);
+		String src = "data:image/png;base64," + base64bytes;
+		return src;
+	}
+	
+    
+    public static String convertImageToBase64(String url) {
+		String imgURL=null;
+		try {
+			String base64 = null;
+			
+			BufferedInputStream bis = new BufferedInputStream(new URL(url).openConnection().getInputStream());
+			byte[] imageBytes = IOUtils.toByteArray(bis);
+			base64 = Base64.getEncoder().encodeToString(imageBytes);
+			
+			//need to add this or img url won't work (TMM):
+			imgURL="data:image/png;base64, "+base64;
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return imgURL;
+	}
+    
+    
 	/**
 	 * Write image to file
 	 * 
@@ -59,7 +144,7 @@ public class StructureImageUtil {
 	 * @throws CDKException
 	 * @throws IndigoException
 	 */
-	public static String generateImgSrc(String smiles) throws IOException, CDKException, IndigoException {
+	public static String generateImageSrcBase64FromSmiles(String smiles) throws IOException, CDKException, IndigoException {
 //		String inchikey = StructureUtil.indigoInchikeyFromSmiles(smiles);
 		
 		AtomContainer ac = (AtomContainer) parser.parseSmiles(smiles);

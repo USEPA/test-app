@@ -17,7 +17,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>iso-8859-1</project.build.sourceEncoding>
-		<jdk.version>1.8</jdk.version>
+		<maven.compiler.release>17</maven.compiler.release>
+	
 		<mainClass>gov.epa.WebTESTApplication</mainClass>
 		<openhtml.version>0.0.1-RC11</openhtml.version>
 		<poi.version>3.16</poi.version>
@@ -172,11 +173,23 @@
 			<version>r938</version>
 		</dependency>
 
+
+		
 		<dependency>
 			<groupId>cdk</groupId>
 			<artifactId>cdk</artifactId>
 			<version>2.1</version>
 		</dependency>
+		
+		
+		<!--
+		<dependency>
+            <groupId>org.openscience.cdk</groupId>
+            <artifactId>cdk-bundle</artifactId>
+            <version>2.7.1</version>
+        </dependency>
+		-->
+		
 		<dependency>
 			<groupId>cdk</groupId>
 			<artifactId>JChemPaint</artifactId>

@@ -18,23 +18,4 @@ public class ReportUtils {
 		else
 			return Paths.get(options.reportBase, parts).toString();
 	}
-	
-	public static String convertImageToBase64(String url) {
-		String imgURL=null;
-		try {
-			String base64 = null;
-			
-			BufferedInputStream bis = new BufferedInputStream(new URL(url).openConnection().getInputStream());
-			byte[] imageBytes = IOUtils.toByteArray(bis);
-			base64 = Base64.getEncoder().encodeToString(imageBytes);
-			
-			//need to add this or img url won't work (TMM):
-			imgURL="data:image/png;base64, "+base64;
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		return imgURL;
-	}
 }

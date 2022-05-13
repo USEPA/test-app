@@ -15,6 +15,8 @@ import javax.swing.JTable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import ToxPredictor.Utilities.StructureImageUtil;
+
 public class SimilarChemical {
 
     
@@ -95,45 +97,7 @@ public class SimilarChemical {
     }
 
     
-    public static ImageIcon decodeBase64ToImageIcon(String imageString, int size) {
-    	 
-        BufferedImage image = null;
-        byte[] imageByte;
-        try {
-//        	System.out.println(imageString);
-            imageByte = Base64.getDecoder().decode(imageString.replace("data:image/png;base64, ", ""));
-            ByteArrayInputStream bis = new ByteArrayInputStream(imageByte);
-            image = ImageIO.read(bis);
-            
-            int heightOriginal=image.getHeight();
-            int heightFinal=(int)((double)size/(double)image.getWidth()*heightOriginal);
-            
-            Image newimg = image.getScaledInstance(size, heightFinal,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way
-            bis.close();
-            return new ImageIcon(newimg);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }        
-    }
     
-    
-    public static ImageIcon urlToImageIcon(String url, int size) {
-    	
-    	try {
-			ImageIcon imageIcon = new ImageIcon(new URL(url));
-			Image image = imageIcon.getImage(); // transform it 
-			Image newimg = image.getScaledInstance(size, size,  java.awt.Image.SCALE_SMOOTH); // scale it the smooth way  
-			imageIcon = new ImageIcon(newimg);  // transform it back
-			return imageIcon;
-
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			System.out.println(e.getMessage());
-			System.out.println(url);
-			return null;
-		}
-    }
     
 	public LinkedHashMap<String, Object> convertToLinkedHashMap(JTable table) {
 		// TODO Auto-generated method stub
@@ -144,11 +108,12 @@ public class SimilarChemical {
 		int size=table.getColumnModel().getColumn(1).getWidth();
 //		System.out.println(size);
 		
+//		System.out.println("2022-05-09: "+CAS+"\t"+imageUrl);
 		
 		if (imageUrl.contains("base64")) {			
-			lhm.put("Structure",decodeBase64ToImageIcon(imageUrl,size));			
+			lhm.put("Structure",StructureImageUtil.decodeBase64ToImageIcon(imageUrl,size));			
 		} else {
-			lhm.put("Structure",urlToImageIcon(imageUrl,size));	
+			lhm.put("Structure",StructureImageUtil.urlToImageIcon(imageUrl,size));	
 		}
 						
 //		lhm.put("Structure",imageUrl);//previously we stored just url instead of imageIcon- which made scrolling the table slow
