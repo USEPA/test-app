@@ -1371,7 +1371,8 @@ public class DescriptorFactory {
 
 		try {
 			DF.debug = false;
-
+			HueckelAromaticityDetector.debug=false;
+			
 			if (mode == 1) { // read from smiles string
 				// SmilesParser sp = new SmilesParser();
 

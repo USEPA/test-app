@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,7 +36,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	private static final Logger logger = LogManager.getLogger(PredictToxicityWebPageCreatorFromJSON.class);
 	
 	
-	private void writeHeaderInfo(FileWriter fw, String CAS, String endpoint, String method) throws IOException {
+	private void writeHeaderInfo(Writer fw, String CAS, String endpoint, String method) throws IOException {
 
 		fw.write("<html>\n");
 		fw.write("<head>\n");
@@ -48,7 +49,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	}
 	
 	
-	private void writeBinaryPredictionTable(PredictionResults pr,FileWriter fw) throws Exception {
+	private void writeBinaryPredictionTable(PredictionResults pr,Writer fw) throws Exception {
 		PredictionResultsPrimaryTable prpt=pr.getPredictionResultsPrimaryTable();
 		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
 
@@ -107,29 +108,35 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	}
 	
 	public void writeResultsWebPages(PredictionResults pr,String htmlOutputFilePath) {
+		//		System.out.println("enter writeResultsWebPages");
+
 		try {
 			Path pathToFile = Paths.get(htmlOutputFilePath);
 			Files.createDirectories(pathToFile.getParent());
+
+
+			if (pr==null) {
+				System.out.println("Can't generate report, prediction results is null for "+htmlOutputFilePath);
+				return;
+			}
+			
+			if(pr.getMethod().contentEquals(TESTConstants.ChoiceConsensus)) {
+				writeConsensusResultsWebPages(pr, htmlOutputFilePath);
+			} else if(pr.getMethod().contentEquals(TESTConstants.ChoiceNearestNeighborMethod)) {
+				writeNearestNeighborResultsWebPages(pr, htmlOutputFilePath);
+			} else if(pr.getMethod().contentEquals(TESTConstants.ChoiceHierarchicalMethod) || pr.getMethod().contentEquals(TESTConstants.ChoiceSingleModelMethod) || pr.getMethod().contentEquals(TESTConstants.ChoiceGroupContributionMethod)) {
+				writeHierarchicalClusteringResultsWebpages(pr, htmlOutputFilePath);
+			} else if (pr.getMethod().contentEquals(TESTConstants.ChoiceLDA)) {
+				writeLDAResultsWebpages(pr, htmlOutputFilePath);
+			}
+
+
+
 		} catch (Exception ex) {
 			logger.catching(ex);
 			return;
 		}
-				
-//		GsonBuilder builder = new GsonBuilder();
-//		builder.setPrettyPrinting().serializeNulls();// makes it multiline and readable
-//		Gson gson = builder.create();
-//		System.out.println(gson.toJson(pr));
 
-		
-		if(pr.getMethod().contentEquals(TESTConstants.ChoiceConsensus)) {
-			writeConsensusResultsWebPages(pr, htmlOutputFilePath);
-		} else if(pr.getMethod().contentEquals(TESTConstants.ChoiceNearestNeighborMethod)) {
-			writeNearestNeighborResultsWebPages(pr, htmlOutputFilePath);
-		} else if(pr.getMethod().contentEquals(TESTConstants.ChoiceHierarchicalMethod) || pr.getMethod().contentEquals(TESTConstants.ChoiceSingleModelMethod) || pr.getMethod().contentEquals(TESTConstants.ChoiceGroupContributionMethod)) {
-			writeHierarchicalClusteringResultsWebpages(pr, htmlOutputFilePath);
-		} else if (pr.getMethod().contentEquals(TESTConstants.ChoiceLDA)) {
-			writeLDAResultsWebpages(pr, htmlOutputFilePath);
-		}
 	}
 	
 	
@@ -712,94 +719,106 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		return str;
 	}
 	
-	private void writeCenteredTD(FileWriter fw,String value) throws Exception {
+	private void writeCenteredTD(Writer fw,String value) throws Exception {
 		writeTD(fw,"center",value);
 	}
 	
-	private void writeTD(FileWriter fw,String align,String text) throws Exception {
+	private void writeTD(Writer fw,String align,String text) throws Exception {
 		String str=createTD(align, text);
 		fw.write(str);
 	}
 	
-	private void writeTD(FileWriter fw,String text) throws Exception {
+	private void writeTD(Writer fw,String text) throws Exception {
 		fw.write("<td>"+text+"</td>\n");		
 	}
 
 
 
 	public void writeConsensusResultsWebPages(PredictionResults pr,String htmlOutputFilePath) {
+		try {
+			FileWriter fw=new FileWriter(htmlOutputFilePath);
+			writeConsensusResultsWebPages(pr, fw);
+		} catch (Exception ex) {
+			logger.catching(ex);
+		}
+	}
+	
+	public void writeConsensusResultsWebPages(PredictionResults pr,Writer fw) {
 
 		try {
-		//filewriter for web page:
-		FileWriter fw=new FileWriter(htmlOutputFilePath);
+			//filewriter for web page:			
 
-		//*******************************************************************
-		String units="";
-		if (!pr.isBinaryEndpoint()) {
-			if (pr.isLogMolarEndpoint()) units=pr.getPredictionResultsPrimaryTable().getMolarLogUnits();
-			else units=pr.getPredictionResultsPrimaryTable().getMassUnits();
+			//*******************************************************************
+			String units="";
+			if (!pr.isBinaryEndpoint()) {
+				if (pr.isLogMolarEndpoint()) units=pr.getPredictionResultsPrimaryTable().getMolarLogUnits();
+				else units=pr.getPredictionResultsPrimaryTable().getMassUnits();
+			}
+			//*******************************************************************
+
+
+			this.writeHeaderInfo(fw, pr.getCAS(), pr.getEndpoint(), pr.getMethod());
+
+			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + pr.getCAS() + "</font> from " + pr.getMethod() + " method</h2>\n");
+
+			if (pr.getIndividualPredictionsForConsensus()==null) {
+				fw.write("No prediction made: "+pr.getError());
+				fw.flush();
+				fw.write("</html>");
+				fw.close();
+				return;
+			}
+
+			if (pr.isBinaryEndpoint()) {
+				this.writeBinaryPredictionTable(pr,fw);
+			} else {
+				this.writeMainTable(pr,fw);
+			}
+
+			fw.write("<BR><BR>\r\n");
+
+			fw.write("\r\n<table border=1 cellpadding=10 cellspacing=0>\r\n");
+			fw.write("<tr>\r\n");
+
+			fw.write("<td>\r\n");
+			this.writeIndividualPredictionsForConsensus(pr, fw,units);
+			fw.write("</td>\r\n");
+
+			fw.write("<td><a href=\""+pr.getImageURL()+"\">"+
+					"<img src=\"" +pr.getImageURL() 
+					+ "\" width=" + pr.getImgSize()+ " border=0></a></td>\n");
+
+			fw.write("</tr>\r\n");
+			fw.write("</table>\r\n\r\n");
+
+			if (pr.isCreateDetailedReport()) {
+
+				fw.write("<p><a href=\"../StructureData/DescriptorData_"+pr.getCAS()+".html\">Descriptor values for " + "test chemical</a></p>\n");
+				//			fw.write("<p><a href=\"../StructureData/descriptordata.html\">Descriptor values for " + "test chemical</a></p>\n");
+			}
+			fw.write("<br><hr>\n");
+
+
+			for (int i=0;i<pr.getSimilarChemicals().size();i++) {
+				this.writeSimilarChemicals(pr, pr.getSimilarChemicals().get(i), fw, units);
+				if (i<pr.getSimilarChemicals().size()-1) fw.write("<br><hr>\n");
+			}
+
+			fw.flush();
+			fw.write("</html>");
+			fw.close();
+
+
+		} catch (Exception ex) {
+			logger.catching(ex);
 		}
-		//*******************************************************************
-
-		
-		this.writeHeaderInfo(fw, pr.getCAS(), pr.getEndpoint(), pr.getMethod());
-
-		fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + pr.getCAS() + "</font> from " + pr.getMethod() + " method</h2>\n");
-
-		
-		
-		if (pr.isBinaryEndpoint()) {
-			this.writeBinaryPredictionTable(pr,fw);
-		} else {
-			this.writeMainTable(pr,fw);
-		}
-		
-		fw.write("<BR><BR>\r\n");
-
-		fw.write("\r\n<table border=1 cellpadding=10 cellspacing=0>\r\n");
-		fw.write("<tr>\r\n");
-
-		fw.write("<td>\r\n");
-		this.writeIndividualPredictionsForConsensus(pr, fw,units);
-		fw.write("</td>\r\n");
-
-		fw.write("<td><a href=\""+pr.getImageURL()+"\">"+
-				"<img src=\"" +pr.getImageURL() 
-				+ "\" width=" + pr.getImgSize()+ " border=0></a></td>\n");
-		
-		fw.write("</tr>\r\n");
-		fw.write("</table>\r\n\r\n");
-
-		if (pr.isCreateDetailedReport()) {
-			
-			fw.write("<p><a href=\"../StructureData/DescriptorData_"+pr.getCAS()+".html\">Descriptor values for " + "test chemical</a></p>\n");
-//			fw.write("<p><a href=\"../StructureData/descriptordata.html\">Descriptor values for " + "test chemical</a></p>\n");
-		}
-		fw.write("<br><hr>\n");
-		
-		
-		for (int i=0;i<pr.getSimilarChemicals().size();i++) {
-			this.writeSimilarChemicals(pr, pr.getSimilarChemicals().get(i), fw, units);
-			if (i<pr.getSimilarChemicals().size()-1) fw.write("<br><hr>\n");
-		}
-		
-		fw.flush();
-		fw.write("</html>");
-		fw.close();
-		
-		
-	} catch (Exception ex) {
-		logger.catching(ex);
-	}
 	}
 
 	
 	private void writeNearestNeighborResultsWebPages(PredictionResults pr,String htmlOutputFilePath) {
 		
 		try {
-			
-			
-			//filewriter for web page:
+
 			FileWriter fw=new FileWriter(htmlOutputFilePath);
 
 			//*******************************************************************
@@ -849,7 +868,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		}
 	}
 
-	private void writeNeighborsTable(String units,FileWriter fw,PredictionResults pr) throws Exception {
+	private void writeNeighborsTable(String units,Writer fw,PredictionResults pr) throws Exception {
 		
 		SimilarChemicals simChems=pr.getSimilarChemicals().get(1);
 		fw.write("<table border=1 cellpadding=3 cellspacing=0>\n");
@@ -891,7 +910,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			if (simChem.getDSSTOXSID() == null) {
 				fw.write("<td>" + simChem.getCAS() + "</td>\n");
 			} else {
-				fw.write("<td><a href=\"" + pr.getWebPath2() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
+				fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
 			}
 
 			
@@ -925,7 +944,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		}
 	}
 	
-	private void writeSimilarChemicals(PredictionResults pr, SimilarChemicals simChems, FileWriter fw,String units) throws Exception {
+	private void writeSimilarChemicals(PredictionResults pr, SimilarChemicals simChems, Writer fw,String units) throws Exception {
 
 		String set = simChems.getSimilarChemicalsSet();
 
@@ -984,6 +1003,9 @@ public class PredictToxicityWebPageCreatorFromJSON {
 //		this.writeCenteredTD(fw, simChems.getPredVal());
 //		fw.write("</tr>\n\n");
 
+		
+//		System.out.println(simChems.getSimilarChemicalsList().size());
+		
 		for (int i = 0; i < simChems.getSimilarChemicalsList().size(); i++) {
 
 			SimilarChemical simChem = simChems.getSimilarChemicalsList().get(i);
@@ -993,7 +1015,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			if (simChem.getDSSTOXSID() == null) {
 				fw.write("<td>" + simChem.getCAS() + "</td>\n");
 			} else {
-				fw.write("<td><a href=\"" + pr.getWebPath2() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
+				fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
 			}
 
 			
@@ -1015,7 +1037,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	}
 	
 	
-	private void writeCancerStats(CancerStats cs,FileWriter fw) throws Exception {
+	private void writeCancerStats(CancerStats cs,Writer fw) throws Exception {
 
 		java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
 
@@ -1060,8 +1082,9 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	 * 
 	 * @param fw
 	 */
-	private void writeIndividualPredictionsForConsensus(PredictionResults pr, FileWriter fw,String units) throws Exception {
+	private void writeIndividualPredictionsForConsensus(PredictionResults pr, Writer fw,String units) throws Exception {
 
+		
 		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
 		fw.write("<caption>Individual Predictions</caption>\r\n");
 
@@ -1098,7 +1121,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		}
 		fw.write("</table>\n");
 	}
-	private void writeMainTable(PredictionResults pr, FileWriter fw) throws Exception {
+	private void writeMainTable(PredictionResults pr, Writer fw) throws Exception {
 		PredictionResultsPrimaryTable prpt=pr.getPredictionResultsPrimaryTable();
 		
 		boolean isLogMolarEndpoint=pr.isLogMolarEndpoint();
@@ -1197,7 +1220,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		
 	}
 	
-	private void writeExternalPredChart(PredictionResults pr,ExternalPredChart epc,String units,FileWriter fw) throws Exception {
+	private void writeExternalPredChart(PredictionResults pr,ExternalPredChart epc,String units,Writer fw) throws Exception {
 //		System.out.println("writeExternalPredChart");
 		
 		if (epc==null) {
@@ -1254,7 +1277,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 
 	}
 
-	void writeSimilarityLegend(FileWriter fw) throws Exception {
+	void writeSimilarityLegend(Writer fw) throws Exception {
 //		System.out.println("writeSimilarityLegend");
 		
 //		fw.write("<td>\n");
@@ -1321,8 +1344,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		String folder="web-reports/ToxRuns/"+"/ToxRun_"+CAS+"/"+endpoint;
 
 		
-		String jsonFilePath=folder+"/PredictionResultsConsensus.json";
-		
+		String jsonFilePath=folder+"/PredictionResultsConsensus.json";		
 		String htmlFilePath=folder+"/PredictionResultsConsensus2.html";
 
 		PredictToxicityWebPageCreatorFromJSON p=new PredictToxicityWebPageCreatorFromJSON();

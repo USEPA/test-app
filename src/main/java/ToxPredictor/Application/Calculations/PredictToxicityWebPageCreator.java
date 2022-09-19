@@ -103,8 +103,10 @@ public class PredictToxicityWebPageCreator {
 
 	Lookup lookup = new Lookup();
 
-	public static String webPath = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxcid/";//image link
-	public static String webPath2 = "https://comptox.epa.gov/dashboard/dsstoxdb/results?search=";//dashboard page
+	public static String webImagePathByCID = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxcid/";//image link
+	public static String webImagePathBySID = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxsid/";//image link
+
+	public static String webPathDashboardPage = "https://comptox.epa.gov/dashboard/dsstoxdb/results?search=";//dashboard page for the chemical
 
 	static void WriteHeaderInfo(FileWriter fw, String CAS, String endpoint, String method) throws IOException {
 
@@ -307,7 +309,7 @@ public class PredictToxicityWebPageCreator {
 				fw.write("<td><a href=\"../StructureData/structure.png\"><img src=\"" + ReportUtils.getImageSrc(options, "../StructureData/structure.png") + "\" width=" + imgSize
 						+ " border=0></a></td>\n");
 			} else {// TODO- check if image exists online??? slow???
-				fw.write("<td><a href=\"" + webPath + dtxcid + "\"><img src=\"" + webPath + dtxcid + "\" width=" + imgSize + " border=0></a></td>\n");
+				fw.write("<td><a href=\"" + webImagePathByCID + dtxcid + "\"><img src=\"" + webImagePathByCID + dtxcid + "\" width=" + imgSize + " border=0></a></td>\n");
 			}
 
 			// fw.write("<td align=middle>Test chemical<br><img
@@ -851,7 +853,7 @@ public class PredictToxicityWebPageCreator {
 			fw.write("<td><a href=\"../StructureData/structure.png\"><img src=\"" + ReportUtils.getImageSrc(options, "../StructureData/structure.png") + "\" width=" + imgSize
 					+ " border=0></a></td>\n");
 		} else {// TODO- check if image exists online??? slow???
-			fw.write("<td><a href=\"" + webPath + gsid + "\"><img src=\"" + webPath + gsid + "\" width=" + imgSize + " border=0></a></td>\n");
+			fw.write("<td><a href=\"" + webImagePathByCID + gsid + "\"><img src=\"" + webImagePathByCID + gsid + "\" width=" + imgSize + " border=0></a></td>\n");//TODO fix to use CID
 		}
 
 		fw.write("<td align=\"center\"><br></td>\n");
@@ -886,7 +888,7 @@ public class PredictToxicityWebPageCreator {
 			if (DSSTOXSID == null) {
 				fw.write("<td>" + CASi + "</td>\n");
 			} else {
-				fw.write("<td><a href=\"" + webPath2 + DSSTOXSID + "\" target=\"_blank\">" + CASi + "</td>\n");// TODD
+				fw.write("<td><a href=\"" + webPathDashboardPage + DSSTOXSID + "\" target=\"_blank\">" + CASi + "</td>\n");// TODD
 			}
 
 			if (gsid_i == null) {// TODO- check if image exists online???
@@ -900,7 +902,7 @@ public class PredictToxicityWebPageCreator {
 				fw.write("<td><a href=\"../../images/" + CASi + ".png\"><img src=\"" + ReportUtils.getImageSrc(options, "../../images", CASi + ".png") + "\" width=" + imgSize
 						+ " border=0></a></td>\n");
 			} else {
-				fw.write("<td><a href=\"" + webPath + gsid_i + "\"><img src=\"" + webPath + gsid_i + "\" width=" + imgSize + " border=0></a></td>\n");
+				fw.write("<td><a href=\"" + webImagePathByCID + gsid_i + "\"><img src=\"" + webImagePathByCID + gsid_i + "\" width=" + imgSize + " border=0></a></td>\n");//TODO fix to use CID
 			}
 
 			String strColor = getColorString(vecSC2.get(i));

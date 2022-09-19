@@ -77,9 +77,9 @@ public class WebTEST4 {
 
 //	private ChemicalFinder cf = new ChemicalFinder();
 
-	private static Hashtable<String, Instances> ht_ccTraining = new Hashtable<String, Instances>();
+	public static Hashtable<String, Instances> ht_ccTraining = new Hashtable<String, Instances>();
 	private static Hashtable<String, Instances> ht_ccTrainingFrag = new Hashtable<String, Instances>();
-	private static Hashtable<String, Instances> ht_ccPrediction = new Hashtable<String, Instances>();
+	public static Hashtable<String, Instances> ht_ccPrediction = new Hashtable<String, Instances>();
 	private static Hashtable<String, AllResults> ht_allResults = new Hashtable<String, AllResults>();
 	private static Hashtable<String, AllResults> ht_allResultsFrag = new Hashtable<String, AllResults>();
 
@@ -789,6 +789,8 @@ public class WebTEST4 {
 		double predToxVal = ptNN.predToxVal;
 //		double predToxUnc=ptNN.predToxUnc;//TODO		
 
+//		System.out.println("name of test instance="+instancesEval.instance(0).getName());
+		
 		String method = TESTConstants.ChoiceNearestNeighborMethod;
 
 		TESTPredictedValue v = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, d.er.expToxValue, predToxVal,
@@ -851,8 +853,7 @@ public class WebTEST4 {
 //			System.out.println("used value from molecule");
 
 		} catch (Exception ex) {
-
-//			System.out.println("try to look up");
+//			System.out.println("try to look up in db");
 
 			if (ResolverDb2.isAvailable()) {
 				if (!Strings.isEmpty(CAS) && !CAS.matches("C\\d*_\\d{8,}")) {
@@ -898,12 +899,14 @@ public class WebTEST4 {
 					if (StringUtils.isEmpty(error)) {
 						res = calculate(m, dd, df, endpoint, method, params.reportTypes, options);
 					} else { // something wrong with chemical dont do calculations
-								// but write to file:
-
+								// but write to file:						
 						res = new ArrayList<>();
 
 						String errorCode = (String) m.getProperty("ErrorCode");
 
+//						logger.debug("errorCode="+errorCode);
+
+						
 						if (!endpoint.equals(TESTConstants.abbrevChoiceDescriptors)) {
 							Instances trainingDataSet2d = ht_ccTraining.get(endpoint);
 							Instances testDataSet2d = ht_ccPrediction.get(endpoint);

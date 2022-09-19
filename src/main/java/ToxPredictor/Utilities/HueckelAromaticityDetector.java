@@ -63,7 +63,7 @@ public class HueckelAromaticityDetector
 //	static IRingSet ringSet=null;
 	static long timeout=5000;
 
-	public static boolean debug=true;
+	public static boolean debug=false;
 
 //	public static IRingSet getRingSet() {
 //		return ringSet;

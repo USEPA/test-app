@@ -586,7 +586,7 @@ public class WriteBatchResults {
 				if (ac.getProperty("gsid") == null || !WebTEST4.dashboardStructuresAvailable) {
 					imagePath=f3 + "/structure.png";
 				} else {
-					imagePath=PredictToxicityWebPageCreator.webPath + ac.getProperty("gsid");
+					imagePath=PredictToxicityWebPageCreator.webImagePathByCID + ac.getProperty("gsid");//TODO fix to use CID
 				}
 				
 				
@@ -686,7 +686,7 @@ public class WriteBatchResults {
 				if (ac.getProperty("gsid") == null || !WebTEST4.dashboardStructuresAvailable) {
 					imagePath=f3 + "/structure.png";
 				} else {
-					imagePath=PredictToxicityWebPageCreator.webPath + ac.getProperty("gsid");
+					imagePath=PredictToxicityWebPageCreator.webImagePathByCID + ac.getProperty("gsid");//TODO fix to use CID
 				}
 	//			String filename = "PredictionResults";
 	//			filename += method.replaceAll(" ", "");

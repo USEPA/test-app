@@ -135,8 +135,9 @@ public class PredictToxicityJSONCreator {
 
 			predictionResultsPrimaryTable.setDtxcid(dtxcid);
 			pr.setImgSize(PredictToxicityWebPageCreator.imgSize);
-			pr.setWebPath(PredictToxicityWebPageCreator.webPath);
-			pr.setWebPath2(PredictToxicityWebPageCreator.webPath2);
+			pr.setWebImagePathByCID(PredictToxicityWebPageCreator.webImagePathByCID);
+			pr.setWebImagePathBySID(PredictToxicityWebPageCreator.webImagePathBySID);
+			pr.setWebPathDashboardPage(PredictToxicityWebPageCreator.webPathDashboardPage);
 
 
 			if (dtxcid == null) {
@@ -152,7 +153,7 @@ public class PredictToxicityJSONCreator {
 
 			} else {
 				//use dashboard image if available:
-				pr.setImageURL(PredictToxicityWebPageCreator.webPath + dtxcid);
+				pr.setImageURL(PredictToxicityWebPageCreator.webImagePathByCID + dtxcid);
 				//				individualPredictionsForConsensus.setImageUrl(ReportUtils.convertImageToBase64(PredictToxicityWebPageCreator.webPath + gsid));
 			}
 
@@ -192,11 +193,12 @@ public class PredictToxicityJSONCreator {
 		pr.setSCmin(PredictToxicityWebPageCreator.SCmin);
 
 		pr.setImgSize(PredictToxicityWebPageCreator.imgSize);
-		pr.setWebPath(PredictToxicityWebPageCreator.webPath);
-		pr.setWebPath2(PredictToxicityWebPageCreator.webPath2);
+		pr.setWebImagePathByCID(PredictToxicityWebPageCreator.webImagePathByCID);
+		pr.setWebImagePathBySID(PredictToxicityWebPageCreator.webImagePathBySID);
+		pr.setWebPathDashboardPage(PredictToxicityWebPageCreator.webPathDashboardPage);
 
 		if (createReports) {
-			if (d.dtxcid == null || !WebTEST4.dashboardStructuresAvailable) {
+			if ((d.dtxcid == null && d.dtxsid==null)  || !WebTEST4.dashboardStructuresAvailable) {
 				//Using brute force to make sure path is right:
 				File outputFolder=new File(d.reportOptions.reportBase);
 				File imageFile=new File(outputFolder.getParentFile().getAbsolutePath()+File.separator+"StructureData/structure.png");
@@ -210,7 +212,13 @@ public class PredictToxicityJSONCreator {
 				}
 			} else {
 				//use dashboard image if available:
-				pr.setImageURL(PredictToxicityWebPageCreator.webPath + d.dtxcid);
+				
+				if (d.dtxsid!=null) {
+					pr.setImageURL(PredictToxicityWebPageCreator.webImagePathBySID + d.dtxsid);
+				} else if (d.dtxcid!=null) {
+					pr.setImageURL(PredictToxicityWebPageCreator.webImagePathByCID + d.dtxcid);	
+				}
+				
 				//individualPredictionsForConsensus.setImageUrl(ReportUtils.convertImageToBase64(PredictToxicityWebPageCreator.webPath + gsid));
 			}
 		}
@@ -708,9 +716,16 @@ public class PredictToxicityJSONCreator {
 		}
 
 		// System.out.println(outputfolder);
-		File of1 = new File(options.reportBase);
-		String folder = of1.getParentFile().getParent();
-		String strImageFolder = folder + File.separator + "Images";
+		
+		String strImageFolder=null;
+		
+		if (options.reportBase!=null) {
+			File of1 = new File(options.reportBase);
+			String folder = of1.getParentFile().getParent();
+			strImageFolder = folder + File.separator + "Images";
+		}
+		
+		
 
 		// Vectors to store results for calculations:
 		Vector<Double> vecExp = new Vector<Double>();
@@ -904,13 +919,9 @@ public class PredictToxicityJSONCreator {
 			Vector<String> vecExp2, Vector<String> vecPred2, Vector<Double> vecSC2, ReportOptions options,
 			SimilarChemicals similarChemicals) throws Exception   {
 
-
-
 		// ***********************************************************
 		// Write out table of exp and pred values for nearest chemicals:
-
 		//		SimilarChemicals similarChemicals = predictionResults.getSimilarChemicals();
-
 		String units;
 		if (pr.isLogMolarEndpoint()) {
 			units = TESTConstants.getMolarLogUnits(pr.getEndpoint());
@@ -949,10 +960,15 @@ public class PredictToxicityJSONCreator {
 
 		for (int i = 0; i < vecExp2.size(); i++) {
 			SimilarChemical similarChemical = new SimilarChemical();
+			
+//			System.out.println(i+"\t"+similarChemical.getDSSTOXSID());
+			
+			
 			String CASi = vecCAS2.get(i);
 			String predVali = vecPred2.get(i);
 
 			String cid_i = null;
+			String sid_i = null;
 			String DSSTOXSIDi = null;
 
 			//			if (htChemistryDashboardInfo != null) {
@@ -965,6 +981,7 @@ public class PredictToxicityJSONCreator {
 			if(records.size()>0) {
 				DSSToxRecord record=records.get(0);
 				cid_i = record.cid;
+				sid_i= record.sid;
 				DSSTOXSIDi = record.sid;
 			}
 
@@ -982,7 +999,7 @@ public class PredictToxicityJSONCreator {
 			
 //			System.out.println("2022-05-09:"+cid_i+"\t"+WebTEST4.dashboardStructuresAvailable);
 			
-			if (cid_i == null || !WebTEST4.dashboardStructuresAvailable){
+			if (sid_i == null || !WebTEST4.dashboardStructuresAvailable){
 				// slow???
 				
 				CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
@@ -1003,8 +1020,9 @@ public class PredictToxicityJSONCreator {
 
 			} else {
 				//use Chemistry Dashboard image if available:
-				similarChemical.setImageUrl(PredictToxicityWebPageCreator.webPath + cid_i);
-				//				similarChemical.setImageUrl(ReportUtils.convertImageToBase64(PredictToxicityWebPageCreator.webPath + gsid_i));
+				similarChemical.setImageUrl(PredictToxicityWebPageCreator.webImagePathBySID + sid_i);
+//				similarChemical.setImageUrl(PredictToxicityWebPageCreator.webImagePathByCID + cid_i);
+				//similarChemical.setImageUrl(ReportUtils.convertImageToBase64(PredictToxicityWebPageCreator.webPath + gsid_i));
 			}
 
 			String strColor = PredictToxicityWebPageCreator.getColorString(vecSC2.get(i));
@@ -1034,11 +1052,13 @@ public class PredictToxicityJSONCreator {
 		else 
 			testChemical.setPredVal("N/A");
 		
-		if (dtxcid == null) {
-			testChemical.setImageUrl(StructureImageUtil.generateImageSrcBase64FromSmiles(smiles));			
-		} else {
-			testChemical.setImageUrl(PredictToxicityWebPageCreator.webPath + dtxcid);	
-		}
+		if (dtxsid!=null) 
+			testChemical.setImageUrl(PredictToxicityWebPageCreator.webImagePathBySID + dtxsid);
+		else if (dtxcid!=null) 
+			testChemical.setImageUrl(PredictToxicityWebPageCreator.webImagePathByCID + dtxcid);	
+		else 
+			testChemical.setImageUrl(StructureImageUtil.generateImageSrcBase64FromSmiles(smiles));
+		
 		
 		testChemical.setSimilarityCoefficient(df.format(1.00));
 		testChemical.setCAS(CAS+" (test chemical)");

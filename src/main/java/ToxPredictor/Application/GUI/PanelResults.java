@@ -750,7 +750,7 @@ public //	public boolean Locked=false;
 								}
 							}
 						} else {
-							imagePath=PredictToxicityWebPageCreator.webPath + tpv.gsid;
+							imagePath=PredictToxicityWebPageCreator.webImagePathByCID + tpv.gsid;//TODO fix to use CID
 						}
 						fw.write("<td><a href=\"" + imagePath + "\"><img src=\"" + imagePath + "\" "+WriteBatchResults.getStructureImageHtmlDetails(imagePath)+"></a></td>\n");
 					} else {

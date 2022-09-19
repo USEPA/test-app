@@ -643,7 +643,7 @@ public class ResolverDb2 {
 		}
 	}
 	
-	private static ArrayList<DSSToxRecord> lookupByDTXSID(String DTXSID) {
+	public static ArrayList<DSSToxRecord> lookupByDTXSID(String DTXSID) {
 		return executeQuery("select * from " + TABLE_NAME + " where sid = '" + DTXSID + "';");
 	}
 	
