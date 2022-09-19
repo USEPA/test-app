@@ -29,7 +29,7 @@ public class RunFromSmiles {
 //	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().serializeSpecialFloatingPointValues().create();
 	private static Gson gson = new GsonBuilder().setPrettyPrinting().serializeSpecialFloatingPointValues().create();
 	
-	private static AtomContainer createMolecule(String smiles,String DTXSID,String CAS) {
+	public static AtomContainer createMolecule(String smiles,String DTXSID,String CAS) {
 		AtomContainer m = WebTEST4.prepareSmilesMolecule(smiles);
 		m.setProperty(DSSToxRecord.strSID,DTXSID);//store sid so dont need to look up later
 		m.setProperty(DSSToxRecord.strSmiles, smiles);//need original smiles NOT QSAR ready smiles
@@ -51,7 +51,7 @@ public class RunFromSmiles {
 	 * @return hashtable of results with key as DTXSID and prediction results + report as TESTPredictedValue
 	 * 
 	 */
-	private static Hashtable<String,PredictionResults> runEndpoint(AtomContainerSet moleculeSet, String endpoint,String method,boolean createReports,boolean createDetailedReports) {				
+	public static Hashtable<String,PredictionResults> runEndpoint(AtomContainerSet moleculeSet, String endpoint,String method,boolean createReports,boolean createDetailedReports,String key) {				
 
 		DescriptorFactory.debug=false;
 		WebTEST4.createDetailedReports=createDetailedReports;
@@ -75,6 +75,10 @@ public class RunFromSmiles {
 			String DTXSID=ac.getProperty(DSSToxRecord.strSID);
 			String Smiles=ac.getProperty(DSSToxRecord.strSmiles);
 			String error=(String) ac.getProperty("Error");
+			String CAS=null;
+			
+//			System.out.println(DTXSID);
+			
 			
 			if (pr==null) {
 				pr=new PredictionResults();
@@ -82,14 +86,24 @@ public class RunFromSmiles {
 				pr.setMethod(method);
 			}
 
-			if (ac.getProperty(DSSToxRecord.strCAS)!=null) {
-				pr.setCAS(ac.getProperty(DSSToxRecord.strCAS));	
+			if (ac.getProperty(DSSToxRecord.strCAS)!=null) {				
+				CAS=ac.getProperty(DSSToxRecord.strCAS);
+				pr.setCAS(CAS);	
 			}
 
 			pr.setDTXSID(DTXSID);
 			pr.setSmiles(Smiles);
 			pr.setError(error);
-			htResults.put(DTXSID, pr);					
+			
+			if (key.equals(DSSToxRecord.strCAS)) {
+				htResults.put(CAS, pr);	
+			} else if (key.equals(DSSToxRecord.strSID)) {
+				htResults.put(DTXSID, pr);
+			} else if (key.equals(DSSToxRecord.strSmiles)) {
+				htResults.put(Smiles, pr);
+			}
+			
+								
 		} // end loop over molecules
 		return htResults;
 	}
@@ -224,7 +238,7 @@ public class RunFromSmiles {
 		acs.addAtomContainer(createMolecule("XXXX", "DTXSID2","123-45-6"));//bad smiles (cant convert to structure)
 		acs.addAtomContainer(createMolecule("[S]", "DTXSID9034941","7704-34-9"));//has no carbon
 				
-		Hashtable<String,PredictionResults>htResults=runEndpoint(acs, endpoint, method,createReports,createDetailedReports);		
+		Hashtable<String,PredictionResults>htResults=runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
 		
 		//Get single report as Json string:
 		PredictionResults predictionResults=htResults.get("DTXSID3039242");		
