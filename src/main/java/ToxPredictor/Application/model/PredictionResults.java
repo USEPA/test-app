@@ -8,15 +8,39 @@ public class PredictionResults {
 
 	private String reportBase;
 	
+	
+    private String Smiles;//test chemical CAS (chemical being predicted)
+    
+
+	private String DTXSID;//test chemical CAS (chemical being predicted)
     private String CAS;//test chemical CAS (chemical being predicted)
 
     private String endpoint; //endpoint being calculated
     private String method;//method used to calculate endpoint
-
-    private int imgSize;//size of image to display
+    private String error;
     
-    private String webPath;//path to get images on Chemistry Dashboard
-    private String webPath2;//path to get property prediction page on Chemistry Dashboard 
+    public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
+	}
+
+	private int imgSize;//size of image to display
+    
+    private String webImagePathByCID;//path to get images on Chemistry Dashboard
+    private String webImagePathBySID;//path to get images on Chemistry Dashboard
+    
+    public String getWebImagePathBySID() {
+		return webImagePathBySID;
+	}
+
+	public void setWebImagePathBySID(String webImagePathBySID) {
+		this.webImagePathBySID = webImagePathBySID;
+	}
+
+	private String webPathDashboardPage;//path to get property prediction page on Chemistry Dashboard 
     
     private double SCmin;//minimum similar coefficient for chemicals to display in similar chemicals table
     private boolean isBinaryEndpoint;//whether endpoint is binary (i.e. mutagenicity)
@@ -178,19 +202,36 @@ public class PredictionResults {
         this.imgSize = imgSize;
     }
 
-    public String getWebPath() {
-        return webPath;
+    public String getWebImagePathByCID() {
+        return webImagePathByCID;
     }
 
-    public void setWebPath(String webPath) {
-        this.webPath = webPath;
+    public void setWebImagePathByCID(String webPath) {
+        this.webImagePathByCID = webPath;
     }
 
-    public String getWebPath2() {
-        return webPath2;
+    public String getWebPathDashboardPage() {
+        return webPathDashboardPage;
     }
 
-    public void setWebPath2(String webPath2) {
-        this.webPath2 = webPath2;
+    public void setWebPathDashboardPage(String webPathDashboardPage) {
+        this.webPathDashboardPage = webPathDashboardPage;
     }
+    
+    public String getSmiles() {
+		return Smiles;
+	}
+
+	public void setSmiles(String smiles) {
+		Smiles = smiles;
+	}
+
+	public String getDTXSID() {
+		return DTXSID;
+	}
+
+	public void setDTXSID(String dTXSID) {
+		DTXSID = dTXSID;
+	}
+
 }
