@@ -12,12 +12,15 @@ import java.sql.Statement;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-
+import ToxPredictor.Application.WebTEST4;
+import ToxPredictor.Application.GUI.TESTApplication;
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 //import gov.epa.api.FlatFileRecord;
@@ -48,6 +51,9 @@ public class ParseToxValDB {
 //  The "databases/toxval_v8.db" folder didn't work even when I moved the database there, so I switched it back to the "AA Dashboard/databases/toxval_v8.db" folder.
 	public static Statement statToxVal = MySQL_DB.getStatement(DB_Path_AA_Dashboard_Records);
 
+	
+	private static final Logger logger = LogManager.getLogger(ParseToxValDB.class);
+	
 
 	@Deprecated	
 	private String createSQLQuery_toxval(String CAS) {
@@ -154,7 +160,7 @@ public class ParseToxValDB {
 	 * @param CAS
 	 * @return
 	 */
-	private String createSQLQuery_toxval3(String CAS) {
+	private static String createSQLQuery_toxval3(String CAS) {
 		
 		String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
 				"b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
@@ -211,6 +217,45 @@ public class ParseToxValDB {
 				"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
 				"AND b.toxval_numeric>0\r\n" + 									
 				"AND a.casrn=\""+CAS+"\";";		
+
+//		System.out.println("\n"+SQL);
+
+		return SQL;
+
+
+	}
+	
+	
+	/**
+	 * Getting the reference info
+	 * 
+	 * @param CAS
+	 * @return
+	 */
+	private String createReferenceQueryByToxval_id(String toxval_id) {
+		
+		
+		String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
+				"b.toxval_id, b.toxval_units, b.toxval_numeric, e.toxval_type_supercategory,"+
+				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
+				"\r\n" + 				
+				"FROM toxval b\r\n" + 
+				"INNER JOIN chemical a on a.dtxsid=b.dtxsid\r\n" + 
+				"LEFT JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +	
+				"INNER JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
+				"WHERE\r\n"+
+				"b.toxval_id="+toxval_id+";"; 		
+		
+
+		//TODO simplify this query to speed it up:
+//		SELECT 
+//		b.toxval_id, b.toxval_units, b.toxval_numeric, 
+//		c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash
+//		FROM toxval b				
+//		JOIN record_source c ON b.toxval_id=c.toxval_id
+//		WHERE
+//		b.toxval_id=123
+		
 
 //		System.out.println("\n"+SQL);
 
@@ -280,11 +325,73 @@ public class ParseToxValDB {
 	}
 
 
-
+/**
+ * Refactored so that it only pulled the reference info for the toxval records that were actually used one at a time
+ * 
+ * @param chemical
+ */
 	void getDataFromTable_toxval(Chemical chemical) {
 
 		try {
 
+			
+//			String sql=createSQLQuery_toxval(chemical.CAS);				
+			String sql=createSQLQuery_toxval3(chemical.CAS);
+						
+			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
+
+			Vector<RecordToxVal>records=new Vector();
+									
+			while (rs.next()) {						 
+				RecordToxVal r=new RecordToxVal();							
+				createRecord(rs,r);
+				records.add(r);						
+			}
+								
+			//***************************************************************************************************************************************
+						
+			for (int i=0;i<records.size();i++) {
+				RecordToxVal ri=records.get(i);
+				
+				Vector<RecordToxVal>recordsRef=new Vector<>();
+
+				//create second query to get reference info: (there is potentially more than 1 reference record for each toxval_id)
+				String sqlRef=createReferenceQueryByToxval_id(ri.toxval_id);
+				ResultSet rsRef=MySQL_DB.getRecords(statToxVal, sqlRef);
+
+				while (rsRef.next()) {
+					RecordToxVal recordRef=new RecordToxVal();
+					createRecord(rsRef,recordRef,chemical.CAS);		
+					recordsRef.add(recordRef);
+				}
+				addReferenceInfo(recordsRef, ri);	
+				
+//				if (recordsRef.size()>1)
+//					System.out.println(ri.toxval_id+"\t"+recordsRef.size());
+				
+				//Create score records:
+				ParseToxVal.createScoreRecord(chemical, ri);
+					
+			}
+			
+//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+records.size());
+//			System.out.println("# refs="+numRefs);
+			
+//			System.out.println("CAS="+chemical.CAS);
+//			System.out.println("records.size()="+records.size());
+//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+count);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+	
+	void getDataFromTable_toxval_old(Chemical chemical) {
+
+		try {
+
+			
 //			String sql=createSQLQuery_toxval(chemical.CAS);				
 			String sql=createSQLQuery_toxval3(chemical.CAS);
 						
@@ -303,16 +410,25 @@ public class ParseToxValDB {
 			String sqlRef=createReferenceQuery(chemical.CAS);
 			ResultSet rsRef=MySQL_DB.getRecords(statToxVal, sqlRef);
 			
+//			logger.warn("here3:");
+			
 			Hashtable<String,Vector<RecordToxVal>>recordsRef=new Hashtable<>();
 			
 			int numRefs=0;
 			
+			
+//			if (chemical.CAS.equals("10108-64-2")) {
+//				logger.warn(sqlRef+"\n");
+//			}
+						
 			while (rsRef.next()) {
 				numRefs++;
-			
+				
+//				if (numRefs==2000 && TESTApplication.forMDH) break;//temporary bug fix to stop it from hanging for 10108-64-2 in MDL list
+				
 				RecordToxVal r=new RecordToxVal();							
-				createRecord(rsRef,r);		
-
+				createRecord(rsRef,r,chemical.CAS);		
+				
 				//store reference info by toxval_id for easy retrieval when looping through tox data
 				if (recordsRef.get(r.toxval_id)==null) {										
 					Vector<RecordToxVal>recs=new Vector<>();
@@ -322,9 +438,10 @@ public class ParseToxValDB {
 					Vector<RecordToxVal>recs=recordsRef.get(r.toxval_id);
 					recs.add(r);
 				}
+				
 			}
 
-		
+//			logger.warn("here4:");
 	
 			//**************************************************************************************************************
 			//Add the reference info to the records:
@@ -336,7 +453,7 @@ public class ParseToxValDB {
 			
 			for (int i=0;i<records.size();i++) {
 				RecordToxVal ri=records.get(i);
-				addReferenceInfo(recordsRef, ri);				
+				addReferenceInfo(recordsRef.get(ri.toxval_id), ri);				
 				
 				//Create score records:
 				ParseToxVal.createScoreRecord(chemical, ri);
@@ -352,7 +469,7 @@ public class ParseToxValDB {
 			
 					
 			}
-
+			
 //			System.out.println("Records in toxval table for "+chemical.CAS+" = "+records.size());
 //			System.out.println("# refs="+numRefs);
 
@@ -375,8 +492,8 @@ public class ParseToxValDB {
 	 * @param recordsRef
 	 * @param ri
 	 */
-	private void addReferenceInfo(Hashtable<String, Vector<RecordToxVal>> recordsRef, RecordToxVal ri) {
-		Vector<RecordToxVal>recs=recordsRef.get(ri.toxval_id);			
+	private void addReferenceInfo(Vector<RecordToxVal>recsRef, RecordToxVal ri) {
+					
 		
 													
 //				System.out.println("0"+"\t"+r0.toxval_id);
@@ -387,8 +504,8 @@ public class ParseToxValDB {
 		ri.url="";
 		
 		
-		for (int j=0;j<recs.size();j++) {								
-			RecordToxVal recRef=recs.get(j);
+		for (int j=0;j<recsRef.size();j++) {								
+			RecordToxVal recRef=recsRef.get(j);
 																
 			if (ri.long_ref.isEmpty()) ri.long_ref=recRef.long_ref; 
 			else ri.long_ref+="<br>"+recRef.long_ref;
@@ -549,6 +666,9 @@ public class ParseToxValDB {
 
 		String [] fieldValuesBCF= {model,"Biodegradation Score"};			
 		String query=createSQLQuery(chemical.CAS, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
+		
+		System.out.println(query);
+		
 		ResultSet rs=MySQL_DB.getRecords(statToxVal, query);			
 
 
@@ -646,7 +766,7 @@ public class ParseToxValDB {
 				//				System.out.println(name);								
 				String val=rs.getString(i);
 
-				//				System.out.println(name+"\t"+val);
+//				logger.warn(name+"\t"+val);
 
 				if (val!=null) {
 					Field myField = r.getClass().getDeclaredField(name);			
@@ -655,10 +775,51 @@ public class ParseToxValDB {
 
 			}
 
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			logger.warn("here3a"+e.getMessage());
+			logger.warn("here3a"+e.getStackTrace().toString());
+		}
+	}
+	
+	
+	public static void createRecord(ResultSet rs, Object r,String CAS) {
+		ResultSetMetaData rsmd;
+		try {
+			rsmd = rs.getMetaData();
+
+			int columnCount = rsmd.getColumnCount();
+
+			// The column count starts from 1
+			for (int i = 1; i <= columnCount; i++ ) {
+				String name = rsmd.getColumnName(i);
+				//				System.out.println(name);								
+				String val=rs.getString(i);
+
+//				if (CAS.equals("10108-64-2")) {
+//					logger.warn(i+" of "+columnCount+"\t"+r.getClass().getName()+"\t"+name+"\t"+val);
+////					logger.warn("*\t"+r.getClass().getName()+"\t"+name+"\t"+val.length());
+//				}
+
+
+				if (val!=null) {
+					Field myField = r.getClass().getDeclaredField(name);			
+					myField.set(r, val);
+				}
+				
+//				if (CAS.equals("10108-64-2")) {
+//					logger.warn(i+" set");
+//				}
+
+
+			}
 
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			logger.warn("error creating tox val record:"+e.getMessage());
+//			logger.warn("here3a"+e.getStackTrace().toString());
 		}
 	}
 
@@ -740,6 +901,13 @@ public class ParseToxValDB {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
+		
+		String sql=createSQLQuery_toxval3("71-43-2");
+		System.out.println(sql);
+		
+		
+		if (true) return;
+		
 		ParseToxValDB p = new ParseToxValDB();
 		String folder="AA dashboard/toxval/test spreadsheets";//use relative path so dont have to keep changing this- i.e. it is relative to java installation:  "D:\Users\TMARTI02\OneDrive - Environmental Protection Agency (EPA)\0 java\ghs-data-gathering\AA Dashboard\toxval"
 
@@ -1034,12 +1202,13 @@ public class ParseToxValDB {
 	}
 
 	public void getDataFromToxValDB(Chemical chemical) {
-		getDataFromTable_toxval(chemical);		
+		
+		
+		getDataFromTable_toxval(chemical);
 		getDataFromTable_cancer_summary(chemical);
 		getDataFromTable_genetox_summary(chemical);
 		getDataFromTable_models(chemical);
 		getDataFromTable_bcfbaf(chemical);//TODO
-		
 	}
 
 }
