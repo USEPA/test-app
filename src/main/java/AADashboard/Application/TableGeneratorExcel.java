@@ -87,7 +87,7 @@ public class TableGeneratorExcel {
 		Row recHeaderRow = recSheet.createRow(0);
 		CellStyle style = wb.createCellStyle();
 		Font font = wb.createFont();
-		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
+		font.setBold(true);
 		style.setFont(font);
 		for (int i = 0; i < headers.length; i++) {
 			Cell recCell = recHeaderRow.createCell(i);
@@ -131,8 +131,8 @@ public class TableGeneratorExcel {
 					} 
 				}
 			} catch (Exception ex) {
-				ex.printStackTrace();
-				System.out.println(value.toString());
+//				ex.printStackTrace();
+				System.out.println("error store value in excel: "+value.toString());
 			}
 		}
 		

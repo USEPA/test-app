@@ -11,6 +11,7 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellReference;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.io.MDLV2000Writer;
@@ -19,7 +20,7 @@ import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import ToxPredictor.Application.TESTConstants;
 
 import org.apache.poi.hssf.usermodel.*;
-import org.apache.poi.hssf.util.CellReference;
+//import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.hssf.util.HSSFColor;
 
 
@@ -703,102 +704,103 @@ public class CreatePredictionsTextFile {
 		
 		CellStyle cs=wb.createCellStyle();
 		cs.setDataFormat(formatD3);
-		cs.setAlignment(CellStyle.ALIGN_CENTER);
+		cs.setAlignment(HorizontalAlignment.CENTER);
 		cs.setFont(f);
 		
-		short red=HSSFColor.ROSE.index;
-		short green=HSSFColor.LIGHT_GREEN.index;
+		short red=IndexedColors.ROSE.index;
+		short green=IndexedColors.LIGHT_GREEN.index;
 		
-		
+
 		CellStyle csRed=wb.createCellStyle();
 		csRed.setDataFormat(formatD3);
-		csRed.setAlignment(CellStyle.ALIGN_CENTER);
+		csRed.setAlignment(HorizontalAlignment.CENTER);
 		csRed.setFont(f);
 		csRed.setFillForegroundColor(red);
-		csRed.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		csRed.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+		
 		
 		CellStyle csGreen=wb.createCellStyle();
 		csGreen.setDataFormat(formatD3);
-		csGreen.setAlignment(CellStyle.ALIGN_CENTER);
+		csGreen.setAlignment(HorizontalAlignment.CENTER);
 		csGreen.setFont(f);
 		csGreen.setFillForegroundColor(green);
-		csGreen.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		csGreen.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 		CellStyle cs2=wb.createCellStyle();
 		cs2.setFont(f);
 
 		CellStyle csHeader=wb.createCellStyle();
-		csHeader.setBorderTop(CellStyle.BORDER_MEDIUM);
-		csHeader.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csHeader.setAlignment(CellStyle.ALIGN_CENTER);
+		csHeader.setBorderTop(BorderStyle.MEDIUM);
+		csHeader.setBorderBottom(BorderStyle.MEDIUM);
+		csHeader.setAlignment(HorizontalAlignment.CENTER);
 		csHeader.setFont(f);
 		
 		CellStyle csBottom=wb.createCellStyle();
-		csBottom.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csBottom.setAlignment(CellStyle.ALIGN_CENTER);
+		csBottom.setBorderBottom(BorderStyle.MEDIUM);
+		csBottom.setAlignment(HorizontalAlignment.CENTER);
 		csBottom.setDataFormat(formatD3);
 		csBottom.setFont(f);
 		
 		CellStyle csBottom2=wb.createCellStyle();
-		csBottom2.setBorderBottom(CellStyle.BORDER_MEDIUM);
+		csBottom2.setBorderBottom(BorderStyle.MEDIUM);
 		csBottom2.setFont(f);
-//		csBottom2.setAlignment(CellStyle.ALIGN_CENTER);
+//		csBottom2.setAlignment(HorizontalAlignment.CENTER);
 
 
 		CellStyle csBottomRed=wb.createCellStyle();
-		csBottomRed.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csBottomRed.setAlignment(CellStyle.ALIGN_CENTER);
+		csBottomRed.setBorderBottom(BorderStyle.MEDIUM);
+		csBottomRed.setAlignment(HorizontalAlignment.CENTER);
 		csBottomRed.setDataFormat(formatD3);
 		csBottomRed.setFont(f);
 		csBottomRed.setFillForegroundColor(red);
-		csBottomRed.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		csBottomRed.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 
 		CellStyle csBottomGreen=wb.createCellStyle();
-		csBottomGreen.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csBottomGreen.setAlignment(CellStyle.ALIGN_CENTER);
+		csBottomGreen.setBorderBottom(BorderStyle.MEDIUM);
+		csBottomGreen.setAlignment(HorizontalAlignment.CENTER);
 		csBottomGreen.setDataFormat(formatD3);
 		csBottomGreen.setFont(f);
 		csBottomGreen.setFillForegroundColor(green);
-		csBottomGreen.setFillPattern(CellStyle.SOLID_FOREGROUND);
+		csBottomGreen.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 		
 		//Creating header row:
 		HSSFRow row = sheet.createRow(0);
 		
 		HSSFCell cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Method");
 		cell.setCellStyle(csHeader);
 		
 		
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("R2");
 		cell.setCellStyle(csHeader);
 
 		cell=row.createCell(2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("(R2-R2abs)/R2");
 		cell.setCellStyle(csHeader);
 
 		cell=row.createCell(3);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("k");
 		cell.setCellStyle(csHeader);
 					
 		cell=row.createCell(4);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("RMSE");
 		cell.setCellStyle(csHeader);
 		
 		cell=row.createCell(5);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("MAE");
 		cell.setCellStyle(csHeader);
 
 		cell=row.createCell(6);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Coverage");
 		cell.setCellStyle(csHeader);
 		
@@ -815,7 +817,7 @@ public class CreatePredictionsTextFile {
 
 			row = sheet.createRow(i+1);
 			cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(methods.get(i));
 			cell.setCellStyle(cs2);
 
@@ -824,7 +826,7 @@ public class CreatePredictionsTextFile {
 			for (int j=1;j<=6;j++) {
 				double val=rowMethod.getCell(j+3).getNumericCellValue();
 				cell=row.createCell(j);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(val);
 
 //				System.out.println(methods.get(i)+"\t"+val);
@@ -861,14 +863,14 @@ public class CreatePredictionsTextFile {
 		row = sheet.createRow(methods.size()+1);
 
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Consensus");
 		cell.setCellStyle(csBottom2);
 		
 		for (int j=1;j<=6;j++) {
 			double val=rowConsensus.getCell(j+methods.size()+7).getNumericCellValue();
 			cell=row.createCell(j);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(val);
 //			cell.setCellStyle(csBottom);
 			
@@ -901,26 +903,26 @@ public class CreatePredictionsTextFile {
 		
 		
 		CellStyle csCenter=wb.createCellStyle();
-		csCenter.setAlignment(CellStyle.ALIGN_CENTER);
+		csCenter.setAlignment(HorizontalAlignment.CENTER);
 
 		row = sheet.createRow(methods.size()+2);
 		row = sheet.createRow(methods.size()+3);
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("RunFolder");
 
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue(endpoint+desc);
 		cell.setCellStyle(csCenter);
 
 		row = sheet.createRow(methods.size()+4);
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("RndRun#");
 		
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(rndRun);
 		cell.setCellStyle(csCenter);
 
@@ -948,21 +950,21 @@ public class CreatePredictionsTextFile {
 		
 		CellStyle cs=wb.createCellStyle();
 		cs.setDataFormat(formatD3);
-		cs.setAlignment(CellStyle.ALIGN_CENTER);
+		cs.setAlignment(HorizontalAlignment.CENTER);
 		
 		CellStyle csHeader=wb.createCellStyle();
-		csHeader.setBorderTop(CellStyle.BORDER_MEDIUM);
-		csHeader.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csHeader.setAlignment(CellStyle.ALIGN_CENTER);
+		csHeader.setBorderTop(BorderStyle.MEDIUM);
+		csHeader.setBorderBottom(BorderStyle.MEDIUM);
+		csHeader.setAlignment(HorizontalAlignment.CENTER);
 		
 		CellStyle csBottom=wb.createCellStyle();
-		csBottom.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csBottom.setAlignment(CellStyle.ALIGN_CENTER);
+		csBottom.setBorderBottom(BorderStyle.MEDIUM);
+		csBottom.setAlignment(HorizontalAlignment.CENTER);
 		csBottom.setDataFormat(formatD3);
 		
 		CellStyle csBottom2=wb.createCellStyle();
-		csBottom2.setBorderBottom(CellStyle.BORDER_MEDIUM);
-//		csBottom2.setAlignment(CellStyle.ALIGN_CENTER);
+		csBottom2.setBorderBottom(BorderStyle.MEDIUM);
+//		csBottom2.setAlignment(HorizontalAlignment.CENTER);
 
 		
 		
@@ -970,29 +972,29 @@ public class CreatePredictionsTextFile {
 		HSSFRow row = sheet.createRow(0);
 		
 		HSSFCell cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Method");
 		cell.setCellStyle(csHeader);
 		
 		//
 
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Concordance");
 		cell.setCellStyle(csHeader);
 
 		cell=row.createCell(2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Sensitivity");
 		cell.setCellStyle(csHeader);
 
 		cell=row.createCell(3);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Specificity");
 		cell.setCellStyle(csHeader);
 					
 		cell=row.createCell(4);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Coverage");
 		cell.setCellStyle(csHeader);
 		
@@ -1003,7 +1005,7 @@ public class CreatePredictionsTextFile {
 
 			row = sheet.createRow(i+1);
 			cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(methods.get(i));
 
 			HSSFRow rowMethod = sheetMethod.getRow(1);
@@ -1011,7 +1013,7 @@ public class CreatePredictionsTextFile {
 			for (int j=1;j<=4;j++) {
 				double val=rowMethod.getCell(j+3).getNumericCellValue();
 				cell=row.createCell(j);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(val);
 				cell.setCellStyle(cs);
 			} // end stat j loop
@@ -1024,14 +1026,14 @@ public class CreatePredictionsTextFile {
 		row = sheet.createRow(methods.size()+1);
 
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Consensus");
 		cell.setCellStyle(csBottom2);
 		
 		for (int j=1;j<=4;j++) {
 			double val=rowConsensus.getCell(j+methods.size()+7).getNumericCellValue();
 			cell=row.createCell(j);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(val);
 			cell.setCellStyle(csBottom);
 		} // end stat j loop
@@ -1040,26 +1042,26 @@ public class CreatePredictionsTextFile {
 		
 		
 		CellStyle csCenter=wb.createCellStyle();
-		csCenter.setAlignment(CellStyle.ALIGN_CENTER);
+		csCenter.setAlignment(HorizontalAlignment.CENTER);
 
 		row = sheet.createRow(methods.size()+2);
 		row = sheet.createRow(methods.size()+3);
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("RunFolder");
 
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue(endpoint+desc);
 		cell.setCellStyle(csCenter);
 
 		row = sheet.createRow(methods.size()+4);
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("RndRun#");
 		
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(rndRun);
 		cell.setCellStyle(csCenter);
 
@@ -1083,31 +1085,31 @@ public class CreatePredictionsTextFile {
 		//Creating header row:
 		HSSFRow row = sheet.createRow(0);
 		HSSFCell cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("");
 
 		cell = row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("MAE");
 		
 		row = sheet.createRow(1);
 		
 		cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Run");
 		
 		for (int i=1;i<=methods.size();i++) {
 			cell = row.createCell(i);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(methods.get(i-1));
 		}
 
 		cell = row.createCell(methods.size()+1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Avg");
 		
 		cell = row.createCell(methods.size()+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Diff from global Avg");
 
 		
@@ -1119,7 +1121,7 @@ public class CreatePredictionsTextFile {
 			row = sheet.createRow(i+1);
 
 			cell = row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(i);
 			
 			for (int j=0;j<methods.size();j++) {
@@ -1132,32 +1134,32 @@ public class CreatePredictionsTextFile {
 			}
 
 			cell = row.createCell(methods.size()+1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellFormula("AVERAGE(B"+(i+2)+":F"+(i+2)+")");
 			
 			cell = row.createCell(methods.size()+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellFormula("ABS(G"+(i+2)+"-$G$"+(numRndSets+3)+")");//TODO add code to select column based on # of methods!
 		}
 		
 		row = sheet.createRow(numRndSets+2);
 		cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Avg");
 		
 		for (int j=0;j<methods.size();j++) {
 			cell = row.createCell(j+1);
 			
 			if (wb.getSheet(methods.get(j))!=null) {
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellFormula(methods.get(j)+"!E"+(numRndSets+2));
 			} else {
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 			}
 		}
 		
 		cell = row.createCell(methods.size()+1);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellFormula("AVERAGE(B"+(numRndSets+3)+":F"+(numRndSets+3)+")");//TODO add code if F isnt last column
 
 		row = sheet.createRow(numRndSets+3);
@@ -1167,16 +1169,16 @@ public class CreatePredictionsTextFile {
 									
 			row = sheet.createRow(numRndSets+5+i);
 			cell = row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//			
 			cell.setCellValue(methods.get(i));
 			
 			cell = row.createCell(1);
 			
 			if (wb.getSheet(methods.get(i))==null) {
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//				
 				cell.setCellValue("N/A");
 			} else {
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+//				
 				cell.setCellFormula(methods.get(i)+"!B"+(numRndSets+4));	
 			}
 			
@@ -1185,11 +1187,11 @@ public class CreatePredictionsTextFile {
 		
 		row = sheet.createRow(numRndSets+methods.size()+5);
 		cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//		
 		cell.setCellValue("Overall avg");
 
 		cell = row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//		
 		cell.setCellFormula("MATCH(MIN(H3:H7),$H$3:H7,0)");//TODO: make based on number of sets and methods
 		
 		
@@ -1202,31 +1204,31 @@ public class CreatePredictionsTextFile {
 		//Creating header row:
 		HSSFRow row = sheet.createRow(0);
 		HSSFCell cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//		
 		cell.setCellValue("");
 
 		cell = row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//		
 		cell.setCellValue("Concordance");
 		
 		row = sheet.createRow(1);
 		
 		cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//		
 		cell.setCellValue("Run");
 		
 		for (int i=1;i<=methods.size();i++) {
 			cell = row.createCell(i);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			//
 			cell.setCellValue(methods.get(i-1));
 		}
 
 		cell = row.createCell(methods.size()+1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		//
 		cell.setCellValue("Avg");
 		
 		cell = row.createCell(methods.size()+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		//
 		cell.setCellValue("Diff from global Avg");
 
 		
@@ -1238,7 +1240,7 @@ public class CreatePredictionsTextFile {
 			row = sheet.createRow(i+1);
 
 			cell = row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(i);
 			
 			for (int j=0;j<methods.size();j++) {
@@ -1251,32 +1253,32 @@ public class CreatePredictionsTextFile {
 			}
 
 			cell = row.createCell(methods.size()+1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellFormula("AVERAGE(B"+(i+2)+":F"+(i+2)+")");
 			
 			cell = row.createCell(methods.size()+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellFormula("ABS(G"+(i+2)+"-$G$"+(numRndSets+3)+")");//TODO add code to select column based on # of methods!
 		}
 		
 		row = sheet.createRow(numRndSets+2);
 		cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		//
 		cell.setCellValue("Avg");
 		
 		for (int j=0;j<methods.size();j++) {
 			cell = row.createCell(j+1);
 			
 			if (wb.getSheet(methods.get(j))!=null) {
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellFormula(methods.get(j)+"!B"+(numRndSets+2));
 			} else {
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 			}
 		}
 		
 		cell = row.createCell(methods.size()+1);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellFormula("AVERAGE(B"+(numRndSets+3)+":F"+(numRndSets+3)+")");//TODO add code if F isnt last column
 
 		row = sheet.createRow(numRndSets+3);
@@ -1286,16 +1288,16 @@ public class CreatePredictionsTextFile {
 									
 			row = sheet.createRow(numRndSets+5+i);
 			cell = row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(methods.get(i));
 			
 			cell = row.createCell(1);
 			
 			if (wb.getSheet(methods.get(i))==null) {
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue("N/A");
 			} else {
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellFormula(methods.get(i)+"!B"+(numRndSets+4));	
 			}
 			
@@ -1304,11 +1306,11 @@ public class CreatePredictionsTextFile {
 		
 		row = sheet.createRow(numRndSets+methods.size()+5);
 		cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Overall avg");
 
 		cell = row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellFormula("MATCH(MIN(H3:H7),$H$3:H7,0)");//TODO: make based on number of sets and methods
 		
 		
@@ -1316,15 +1318,15 @@ public class CreatePredictionsTextFile {
 	void CreateConsensusTabHeader(HSSFSheet sheetConsensus,Vector<String> methods) {
 		HSSFRow row = sheetConsensus.createRow(0);
 		HSSFCell cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("CAS");
 	
 		cell = row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("exp");
 		
 		cell = row.createCell(methods.size()+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Consensus");				
 	}
 
@@ -1335,19 +1337,19 @@ public class CreatePredictionsTextFile {
 		HSSFCell cell = row.getCell(0);
 		if (cell==null) {
 			cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(currentCAS);
 		}
 		
 		cell = row.getCell(1);
 		if (cell==null) {
 			cell=row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(dExp);
 		}
 		
 		cell = row.createCell(methodNumber+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(dPred);
 
 	}
@@ -1363,15 +1365,15 @@ public class CreatePredictionsTextFile {
 		HSSFRow row =this.rowMaker(sheet, 0);
 
 		HSSFCell cell = row.createCell(startCol);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("CAS");
 		
 		cell = row.createCell(startCol+1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("exp");
 
 		cell = row.createCell(startCol+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("pred");
 
 //		System.out.println(sheet.getSheetName()+"\t"+CAS.size()+"\t"+predArray.length);
@@ -1384,15 +1386,15 @@ public class CreatePredictionsTextFile {
 			
 			
 			cell = row.createCell(startCol);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(CAS.get(i));
 			
 			cell = row.createCell(startCol+1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(expArray[i]);
 
 			cell = row.createCell(startCol+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(predArray[i]);
 			
 			
@@ -1403,36 +1405,36 @@ public class CreatePredictionsTextFile {
 		row =this.rowMaker(sheet, CAS.size()+3);
 
 		cell = row.createCell(startCol);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Chemicals that are outside AD:");
 
 		row =this.rowMaker(sheet, CAS.size()+4);
 
 		cell = row.createCell(startCol);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("CAS");
 		
 		cell = row.createCell(startCol+1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("exp");
 
 		cell = row.createCell(startCol+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("pred");
 
 		for (int i=0;i<CAS2.size();i++) {	
 			row =this.rowMaker(sheet, CAS.size()+5+i);
 
 			cell = row.createCell(startCol);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(CAS2.get(i));
 			
 			cell = row.createCell(startCol+1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(expArray2[i]);
 
 			cell = row.createCell(startCol+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(-9999);
 		}
 
@@ -1477,7 +1479,7 @@ public class CreatePredictionsTextFile {
 			if (row==null) row=sheetConsensus.createRow(0);
 			
 			HSSFCell cell = row.createCell(methodNumber+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(method);
 			
 			int counter=1;
@@ -1521,7 +1523,7 @@ public class CreatePredictionsTextFile {
 
 
 					cell=row.createCell(methods.size()+2);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 					cell.setCellValue(predVal);
 					
 //					System.out.println(currentCAS+"\t"+predVal);
@@ -1622,20 +1624,20 @@ public class CreatePredictionsTextFile {
 			
 			Row row=sheet.getRow(0);
 			Cell cell=row.createCell(10);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Run #");
 			
 			cell=row.createCell(11);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Desc");
 
 			row=sheet.getRow(1);
 			cell=row.createCell(10);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(run);
 			
 			cell=row.createCell(11);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(desc);
 
 						
@@ -1686,7 +1688,7 @@ public class CreatePredictionsTextFile {
 			if (row==null) row=sheetConsensus.createRow(0);
 			
 			HSSFCell cell = row.createCell(methodNumber+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(method);
 			
 			int counter=1;
@@ -1725,7 +1727,7 @@ public class CreatePredictionsTextFile {
 					double predVal=this.CalculateConsensus(row,methods);
 
 					cell=row.createCell(methods.size()+2);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 					cell.setCellValue(predVal);
 					
 					if (predVal!=-9999) {
@@ -1794,27 +1796,27 @@ public class CreatePredictionsTextFile {
 					
 		int col=startCol;
 		HSSFCell cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("R2");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("(R2-R2abs)/R2");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("k");
 					
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("RMSE");
 		
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("MAE");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Coverage");
 
 		// *************************************************
@@ -1823,27 +1825,27 @@ public class CreatePredictionsTextFile {
 		col=startCol;
 		
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(R2);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(bob);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(k);
 					
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(RMSE);
 		
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(MAE);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(coverage);
 
 	}
@@ -1874,19 +1876,19 @@ public class CreatePredictionsTextFile {
 					
 		int col=startCol;
 		HSSFCell cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Concordance");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Sensitivity");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Specificity");
 					
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Coverage");
 
 		// *************************************************
@@ -1895,19 +1897,19 @@ public class CreatePredictionsTextFile {
 		col=startCol;
 		
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(concordance);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(sensitivity);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(specificity);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(coverage);
 
 	}
@@ -2146,13 +2148,13 @@ public class CreatePredictionsTextFile {
 			
 			for (int i=0;i<hl.size();i++) {					
 				HSSFCell cell = row.createCell(i);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue(hl.get(i));
 			}
 			
 			for (int i=1;i<hl.size()-1;i++) {					
 				HSSFCell cell = row.createCell(i+hl.size()-1);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue(hl.get(i));
 			}
 
@@ -2175,12 +2177,12 @@ public class CreatePredictionsTextFile {
 //						System.out.println(bob+"\t"+counter);
 						row = sheet.createRow((short) counter);
 						HSSFCell cell = row.createCell(0);
-						cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+						
 						cell.setCellValue(counter);
 						
 						for (int j=0;j<hl.size();j++) {
 							cell = row.createCell(j+1);
-							cell.setCellType(HSSFCell.CELL_TYPE_STRING);							
+														
 						}
 						
 						
@@ -2203,10 +2205,10 @@ public class CreatePredictionsTextFile {
 					
 					if (val.equals("Avg")) {
 						avgrow=counter;
-						cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+						
 						cell.setCellValue(val);
 					} else {
-						cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+						
 						cell.setCellValue(Double.parseDouble(val));
 					}
 				}
@@ -2223,7 +2225,7 @@ public class CreatePredictionsTextFile {
 					
 					
 					HSSFCell cell = row.createCell(i+hl.size()-1);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 				
 					double dval=(data[j][i]-data[numRndSets+1][i])/data[numRndSets+1][i]*100;
 					
@@ -2242,11 +2244,11 @@ public class CreatePredictionsTextFile {
 			row = sheet.createRow(++counter);
 			
 			HSSFCell cell = row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Run with MAE closest to avg");
 			
 			cell = row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(minMAERun);
 			
 //			weka.core.matrix.Matrix m=new weka.core.matrix.Matrix(data);
@@ -2277,13 +2279,13 @@ public class CreatePredictionsTextFile {
 			
 			for (int i=0;i<hl.size();i++) {					
 				HSSFCell cell = row.createCell(i);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue(hl.get(i));
 			}
 			
 			for (int i=1;i<hl.size()-1;i++) {					
 				HSSFCell cell = row.createCell(i+hl.size()-1);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue(hl.get(i));
 			}
 
@@ -2309,12 +2311,12 @@ public class CreatePredictionsTextFile {
 //					System.out.println(bob+"\t"+counter);
 					row = sheet.createRow((short) counter);
 					HSSFCell cell = row.createCell(0);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 					cell.setCellValue(counter);
 					
 					for (int j=0;j<hl.size();j++) {
 						cell = row.createCell(j+1);
-						cell.setCellType(HSSFCell.CELL_TYPE_STRING);							
+													
 					}
 					counter++;
 				}
@@ -2322,7 +2324,7 @@ public class CreatePredictionsTextFile {
 				
 				row = sheet.createRow((short) counter);
 				HSSFCell cell=row.createCell(0);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue("Avg");
 				
 				for (int i=0;i<l.size();i++) {					
@@ -2332,7 +2334,7 @@ public class CreatePredictionsTextFile {
 					
 					String val=l.get(i);
 
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 					cell.setCellValue(Double.parseDouble(val));
 					
 				}
@@ -2341,7 +2343,7 @@ public class CreatePredictionsTextFile {
 			int nstats=3;
 			row = sheet.createRow(counter);
 			HSSFCell cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Avg");
 
 			
@@ -2359,7 +2361,7 @@ public class CreatePredictionsTextFile {
 				Avg/=(double)n;
 				
 				cell=row.createCell(i);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(Avg);
 
 //				System.out.println(i+"\t"+Avg);
@@ -2377,7 +2379,7 @@ public class CreatePredictionsTextFile {
 				row=sheet.getRow(j);
 				for (int i=1;i<hl.size()-1;i++) {					
 					cell = row.createCell(i+hl.size()-1);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 				
 					double val1=row.getCell(i).getNumericCellValue();
 					double valavg=rowAvg.getCell(i).getNumericCellValue();
@@ -2401,11 +2403,8 @@ public class CreatePredictionsTextFile {
 //			row = sheet.createRow(counter+3);
 			
 			cell = row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
 			cell.setCellValue("Run with concordance closest to avg");
-			
 			cell = row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
 			cell.setCellValue(minMAERun);
 			
 //			weka.core.matrix.Matrix m=new weka.core.matrix.Matrix(data);

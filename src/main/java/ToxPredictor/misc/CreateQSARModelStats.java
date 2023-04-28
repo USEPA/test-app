@@ -8,8 +8,12 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -176,7 +180,7 @@ public class CreateQSARModelStats {
 			if (row==null) row=sheetConsensus.createRow(0);
 			
 			HSSFCell cell = row.createCell(methodNumber+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(method);
 			
 			int counter=1;
@@ -215,7 +219,7 @@ public class CreateQSARModelStats {
 					double predVal=this.CalculateConsensus(row,methods);
 
 					cell=row.createCell(methods.size()+2);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 					cell.setCellValue(predVal);
 					
 					if (predVal!=-9999) {
@@ -278,21 +282,21 @@ public class CreateQSARModelStats {
 		
 		CellStyle cs=wb.createCellStyle();
 		cs.setDataFormat(formatD3);
-		cs.setAlignment(CellStyle.ALIGN_CENTER);
+		cs.setAlignment(HorizontalAlignment.CENTER);
 		
 		CellStyle csHeader=wb.createCellStyle();
-		csHeader.setBorderTop(CellStyle.BORDER_MEDIUM);
-		csHeader.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csHeader.setAlignment(CellStyle.ALIGN_CENTER);
+		csHeader.setBorderTop(BorderStyle.MEDIUM);
+		csHeader.setBorderBottom(BorderStyle.MEDIUM);
+		csHeader.setAlignment(HorizontalAlignment.CENTER);
 		
 		CellStyle csBottom=wb.createCellStyle();
-		csBottom.setBorderBottom(CellStyle.BORDER_MEDIUM);
-		csBottom.setAlignment(CellStyle.ALIGN_CENTER);
+		csBottom.setBorderBottom(BorderStyle.MEDIUM);
+		csBottom.setAlignment(HorizontalAlignment.CENTER);
 		csBottom.setDataFormat(formatD3);
 		
 		CellStyle csBottom2=wb.createCellStyle();
-		csBottom2.setBorderBottom(CellStyle.BORDER_MEDIUM);
-//		csBottom2.setAlignment(CellStyle.ALIGN_CENTER);
+		csBottom2.setBorderBottom(BorderStyle.MEDIUM);
+//		csBottom2.setAlignment(HorizontalAlignment.CENTER);
 
 		
 		
@@ -300,29 +304,29 @@ public class CreateQSARModelStats {
 		HSSFRow row = sheet.createRow(0);
 		
 		HSSFCell cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Method");
 		cell.setCellStyle(csHeader);
 		
 		//
 
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Concordance");
 		cell.setCellStyle(csHeader);
 
 		cell=row.createCell(2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Sensitivity");
 		cell.setCellStyle(csHeader);
 
 		cell=row.createCell(3);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Specificity");
 		cell.setCellStyle(csHeader);
 					
 		cell=row.createCell(4);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Coverage");
 		cell.setCellStyle(csHeader);
 		
@@ -333,7 +337,7 @@ public class CreateQSARModelStats {
 
 			row = sheet.createRow(i+1);
 			cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(methods.get(i));
 
 			HSSFRow rowMethod = sheetMethod.getRow(1);
@@ -341,7 +345,7 @@ public class CreateQSARModelStats {
 			for (int j=1;j<=4;j++) {
 				double val=rowMethod.getCell(j+3).getNumericCellValue();
 				cell=row.createCell(j);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(val);
 				cell.setCellStyle(cs);
 			} // end stat j loop
@@ -354,14 +358,14 @@ public class CreateQSARModelStats {
 		row = sheet.createRow(methods.size()+1);
 
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Consensus");
 		cell.setCellStyle(csBottom2);
 		
 		for (int j=1;j<=4;j++) {
 			double val=rowConsensus.getCell(j+methods.size()+7).getNumericCellValue();
 			cell=row.createCell(j);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(val);
 			cell.setCellStyle(csBottom);
 		} // end stat j loop
@@ -370,26 +374,26 @@ public class CreateQSARModelStats {
 		
 		
 		CellStyle csCenter=wb.createCellStyle();
-		csCenter.setAlignment(CellStyle.ALIGN_CENTER);
+		csCenter.setAlignment(HorizontalAlignment.CENTER);
 
 		row = sheet.createRow(methods.size()+2);
 		row = sheet.createRow(methods.size()+3);
 		cell=row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Endpoint");
 
 		cell=row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue(endpoint);
 		cell.setCellStyle(csCenter);
 
 //		row = sheet.createRow(methods.size()+4);
 //		cell=row.createCell(0);
-//		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//		
 //		cell.setCellValue("RndRun#");
 //		
 //		cell=row.createCell(1);
-//		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+//		
 //		cell.setCellValue(rndRun);
 //		cell.setCellStyle(csCenter);
 
@@ -410,15 +414,15 @@ public class CreateQSARModelStats {
 	void CreateConsensusTabHeader(HSSFSheet sheetConsensus,Vector<String> methods) {
 		HSSFRow row = sheetConsensus.createRow(0);
 		HSSFCell cell = row.createCell(0);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("CAS");
 	
 		cell = row.createCell(1);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("exp");
 		
 		cell = row.createCell(methods.size()+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Consensus");				
 	}
 	
@@ -469,7 +473,7 @@ public class CreateQSARModelStats {
 			if (row==null) row=sheetConsensus.createRow(0);
 			
 			HSSFCell cell = row.createCell(methodNumber+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(method);
 			
 			int counter=1;
@@ -514,7 +518,7 @@ public class CreateQSARModelStats {
 					//TODO- do we need this since we have consensus output file? 
 
 					cell=row.createCell(methods.size()+2);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 					cell.setCellValue(predVal);
 					
 //					System.out.println(currentCAS+"\t"+predVal);
@@ -596,27 +600,27 @@ public class CreateQSARModelStats {
 					
 		int col=startCol;
 		HSSFCell cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("R2");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("(R2-R2abs)/R2");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("k");
 					
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("RMSE");
 		
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("MAE");
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+		
 		cell.setCellValue("Coverage");
 
 		// *************************************************
@@ -625,27 +629,27 @@ public class CreateQSARModelStats {
 		col=startCol;
 		
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(R2);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(bob);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(k);
 					
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(RMSE);
 		
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(MAE);
 
 		cell=row.createCell(col++);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(coverage);
 
 	}
@@ -719,19 +723,19 @@ public class CreateQSARModelStats {
 		HSSFCell cell = row.getCell(0);
 		if (cell==null) {
 			cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(currentCAS);
 		}
 		
 		cell = row.getCell(1);
 		if (cell==null) {
 			cell=row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(dExp);
 		}
 		
 		cell = row.createCell(methodNumber+2);
-		cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+		
 		cell.setCellValue(dPred);
 
 	}
@@ -875,15 +879,15 @@ public class CreateQSARModelStats {
 			HSSFRow row =this.rowMaker(sheet, 0);
 	
 			HSSFCell cell = row.createCell(startCol);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("CAS");
 			
 			cell = row.createCell(startCol+1);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("exp");
 	
 			cell = row.createCell(startCol+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("pred");
 	
 	//		System.out.println(sheet.getSheetName()+"\t"+CAS.size()+"\t"+predArray.length);
@@ -896,15 +900,15 @@ public class CreateQSARModelStats {
 				
 				
 				cell = row.createCell(startCol);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue(CAS.get(i));
 				
 				cell = row.createCell(startCol+1);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(expArray[i]);
 	
 				cell = row.createCell(startCol+2);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(predArray[i]);
 				
 				
@@ -915,36 +919,36 @@ public class CreateQSARModelStats {
 			row =this.rowMaker(sheet, CAS.size()+3);
 	
 			cell = row.createCell(startCol);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Chemicals that are outside AD:");
 	
 			row =this.rowMaker(sheet, CAS.size()+4);
 	
 			cell = row.createCell(startCol);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("CAS");
 			
 			cell = row.createCell(startCol+1);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("exp");
 	
 			cell = row.createCell(startCol+2);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("pred");
 	
 			for (int i=0;i<CAS2.size();i++) {	
 				row =this.rowMaker(sheet, CAS.size()+5+i);
 	
 				cell = row.createCell(startCol);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue(CAS2.get(i));
 				
 				cell = row.createCell(startCol+1);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(expArray2[i]);
 	
 				cell = row.createCell(startCol+2);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(-9999);
 			}
 	
@@ -1010,35 +1014,35 @@ public class CreateQSARModelStats {
 			
 			CellStyle cs=wb.createCellStyle();
 			cs.setDataFormat(formatD3);
-			cs.setAlignment(CellStyle.ALIGN_CENTER);
+			cs.setAlignment(HorizontalAlignment.CENTER);
 			cs.setFont(f);
 			
-			short red=HSSFColor.ROSE.index;
-			short green=HSSFColor.LIGHT_GREEN.index;
-			short orange=HSSFColor.YELLOW.index;
+			short red=IndexedColors.ROSE.index;
+			short green=IndexedColors.LIGHT_GREEN.index;
+			short orange=IndexedColors.YELLOW.index;
 			
 			
 //			CellStyle csRed=wb.createCellStyle();
 //			csRed.setDataFormat(formatD3);
-//			csRed.setAlignment(CellStyle.ALIGN_CENTER);
+//			csRed.setAlignment(HorizontalAlignment.CENTER);
 //			csRed.setFont(f);
 //			csRed.setFillForegroundColor(red);
-//			csRed.setFillPattern(CellStyle.SOLID_FOREGROUND);
+//			csRed.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			
 //			CellStyle csGreen=wb.createCellStyle();
 //			csGreen.setDataFormat(formatD3);
-//			csGreen.setAlignment(CellStyle.ALIGN_CENTER);
+//			csGreen.setAlignment(HorizontalAlignment.CENTER);
 //			csGreen.setFont(f);
 //			csGreen.setFillForegroundColor(green);
-//			csGreen.setFillPattern(CellStyle.SOLID_FOREGROUND);
+//			csGreen.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 			
 			CellStyle csOrange=wb.createCellStyle();
 			csOrange.setDataFormat(formatD3);
-			csOrange.setAlignment(CellStyle.ALIGN_CENTER);
+			csOrange.setAlignment(HorizontalAlignment.CENTER);
 			csOrange.setFont(f);
 			csOrange.setFillForegroundColor(orange);
-			csOrange.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			csOrange.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 
 
 	
@@ -1046,83 +1050,83 @@ public class CreateQSARModelStats {
 			cs2.setFont(f);
 	
 			CellStyle csHeader=wb.createCellStyle();
-			csHeader.setBorderTop(CellStyle.BORDER_MEDIUM);
-			csHeader.setBorderBottom(CellStyle.BORDER_MEDIUM);
-			csHeader.setAlignment(CellStyle.ALIGN_CENTER);
+			csHeader.setBorderTop(BorderStyle.MEDIUM);
+			csHeader.setBorderBottom(BorderStyle.MEDIUM);
+			csHeader.setAlignment(HorizontalAlignment.CENTER);
 			csHeader.setFont(f);
 			
 			CellStyle csBottom=wb.createCellStyle();
-			csBottom.setBorderBottom(CellStyle.BORDER_MEDIUM);
-			csBottom.setAlignment(CellStyle.ALIGN_CENTER);
+			csBottom.setBorderBottom(BorderStyle.MEDIUM);
+			csBottom.setAlignment(HorizontalAlignment.CENTER);
 			csBottom.setDataFormat(formatD3);
 			csBottom.setFont(f);
 			
 			CellStyle csBottom2=wb.createCellStyle();
-			csBottom2.setBorderBottom(CellStyle.BORDER_MEDIUM);
+			csBottom2.setBorderBottom(BorderStyle.MEDIUM);
 			csBottom2.setFont(f);
-	//		csBottom2.setAlignment(CellStyle.ALIGN_CENTER);
+	//		csBottom2.setAlignment(HorizontalAlignment.CENTER);
 	
 	
 //			CellStyle csBottomRed=wb.createCellStyle();
-//			csBottomRed.setBorderBottom(CellStyle.BORDER_MEDIUM);
-//			csBottomRed.setAlignment(CellStyle.ALIGN_CENTER);
+//			csBottomRed.setBorderBottom(BorderStyle.MEDIUM);
+//			csBottomRed.setAlignment(HorizontalAlignment.CENTER);
 //			csBottomRed.setDataFormat(formatD3);
 //			csBottomRed.setFont(f);
 //			csBottomRed.setFillForegroundColor(red);
-//			csBottomRed.setFillPattern(CellStyle.SOLID_FOREGROUND);
+//			csBottomRed.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			
 //			CellStyle csBottomGreen=wb.createCellStyle();
-//			csBottomGreen.setBorderBottom(CellStyle.BORDER_MEDIUM);
-//			csBottomGreen.setAlignment(CellStyle.ALIGN_CENTER);
+//			csBottomGreen.setBorderBottom(BorderStyle.MEDIUM);
+//			csBottomGreen.setAlignment(HorizontalAlignment.CENTER);
 //			csBottomGreen.setDataFormat(formatD3);
 //			csBottomGreen.setFont(f);
 //			csBottomGreen.setFillForegroundColor(green);
-//			csBottomGreen.setFillPattern(CellStyle.SOLID_FOREGROUND);
+//			csBottomGreen.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 	
 			CellStyle csBottomOrange=wb.createCellStyle();
-			csBottomOrange.setBorderBottom(CellStyle.BORDER_MEDIUM);
-			csBottomOrange.setAlignment(CellStyle.ALIGN_CENTER);
+			csBottomOrange.setBorderBottom(BorderStyle.MEDIUM);
+			csBottomOrange.setAlignment(HorizontalAlignment.CENTER);
 			csBottomOrange.setDataFormat(formatD3);
 			csBottomOrange.setFont(f);
 			csBottomOrange.setFillForegroundColor(orange);
-			csBottomOrange.setFillPattern(CellStyle.SOLID_FOREGROUND);
+			csBottomOrange.setFillPattern(FillPatternType.SOLID_FOREGROUND);
 			
 			//Creating header row:
 			HSSFRow row = sheet.createRow(0);
 			
 			HSSFCell cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Method");
 			cell.setCellStyle(csHeader);
 			
 			
 			cell=row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("R2");
 			cell.setCellStyle(csHeader);
 	
 			cell=row.createCell(2);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("(R2-R2abs)/R2");
 			cell.setCellStyle(csHeader);
 	
 			cell=row.createCell(3);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("k");
 			cell.setCellStyle(csHeader);
 						
 			cell=row.createCell(4);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("RMSE");
 			cell.setCellStyle(csHeader);
 			
 			cell=row.createCell(5);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("MAE");
 			cell.setCellStyle(csHeader);
 	
 			cell=row.createCell(6);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Coverage");
 			cell.setCellStyle(csHeader);
 			
@@ -1139,7 +1143,7 @@ public class CreateQSARModelStats {
 	
 				row = sheet.createRow(i+1);
 				cell=row.createCell(0);
-				cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+				
 				cell.setCellValue(methods.get(i));
 				cell.setCellStyle(cs2);
 	
@@ -1148,7 +1152,7 @@ public class CreateQSARModelStats {
 				for (int j=1;j<=6;j++) {
 					double val=rowMethod.getCell(j+3).getNumericCellValue();
 					cell=row.createCell(j);
-					cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+					
 					cell.setCellValue(val);
 	
 	//				System.out.println(methods.get(i)+"\t"+val);
@@ -1185,14 +1189,14 @@ public class CreateQSARModelStats {
 			row = sheet.createRow(methods.size()+1);
 	
 			cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Consensus");
 			cell.setCellStyle(csBottom2);
 			
 			for (int j=1;j<=6;j++) {
 				double val=rowConsensus.getCell(j+methods.size()+7).getNumericCellValue();
 				cell=row.createCell(j);
-				cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+				
 				cell.setCellValue(val);
 	//			cell.setCellStyle(csBottom);
 				
@@ -1225,26 +1229,26 @@ public class CreateQSARModelStats {
 			
 			
 			CellStyle csCenter=wb.createCellStyle();
-			csCenter.setAlignment(CellStyle.ALIGN_CENTER);
+			csCenter.setAlignment(HorizontalAlignment.CENTER);
 	
 			row = sheet.createRow(methods.size()+2);
 			row = sheet.createRow(methods.size()+3);
 			cell=row.createCell(0);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Endpoint");
 	
 			cell=row.createCell(1);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue(endpoint);
 			cell.setCellStyle(csCenter);
 //	
 //			row = sheet.createRow(methods.size()+4);
 //			cell=row.createCell(0);
-//			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+//			
 //			cell.setCellValue("RndRun#");
 			
 //			cell=row.createCell(1);
-//			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+//			
 //			cell.setCellValue(rndRun);
 //			cell.setCellStyle(csCenter);
 	
@@ -1433,19 +1437,19 @@ public class CreateQSARModelStats {
 						
 			int col=startCol;
 			HSSFCell cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Concordance");
 	
 			cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Sensitivity");
 	
 			cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Specificity");
 						
 			cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_STRING);
+			
 			cell.setCellValue("Coverage");
 	
 			// *************************************************
@@ -1454,19 +1458,19 @@ public class CreateQSARModelStats {
 			col=startCol;
 			
 			cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(concordance);
 	
 			cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(sensitivity);
 	
 			cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(specificity);
 	
 			cell=row.createCell(col++);
-			cell.setCellType(HSSFCell.CELL_TYPE_NUMERIC);
+			
 			cell.setCellValue(coverage);
 	
 		}
