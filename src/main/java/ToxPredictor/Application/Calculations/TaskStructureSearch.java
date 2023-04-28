@@ -396,7 +396,6 @@ public class TaskStructureSearch {
 				try {
 					m = (AtomContainer)mr.next();
 
-//					System.out.println(m.getAtomCount());
 				
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -404,12 +403,20 @@ public class TaskStructureSearch {
 				}
 				
 //				if (m==null || m.getAtomCount()==0) break;
-				if (m==null) break;
+				if (m==null) {
+					System.out.println("null chemical, breaking");
+					break;
+				}
 				
     			String message="Loading "+m.getProperty("CAS")+", " +counter;
 //    			System.out.println(message);
     			setMessage(message);
 
+//    			String CAS=m.getProperty("CAS");
+//    			if (CAS.contains("NOCAS"))
+//    				System.out.println(counter+"\t"+m.getProperty("CAS"));
+
+    			
 				
 //				Hashtable props=m.getProperties();//TODO make sure properties are preserved
 				
@@ -493,7 +500,7 @@ public class TaskStructureSearch {
 				if (recordsCAS.size()>0) rec.name=recordsCAS.get(0).name;
 			}
 			
-			if (rec.name.isEmpty()) {
+			if (rec.name==null || rec.name.isEmpty()) {
 
 				if (recordsAC==null) {
 					recordsAC=ResolverDb2.lookupByAtomContainer(ac);

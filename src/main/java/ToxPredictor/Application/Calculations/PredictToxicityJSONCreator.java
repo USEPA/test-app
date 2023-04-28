@@ -125,7 +125,7 @@ public class PredictToxicityJSONCreator {
 			}
 
 			if (predCount == 0) {
-				message = "No prediction could be made";
+				message = "No prediction could be made due to applicability domain violations";
 			} else if (predCount < TaskCalculations.minPredCount) {
 				message = "The consensus prediction for this chemical is considered unreliable since only one prediction can only be made";
 			}

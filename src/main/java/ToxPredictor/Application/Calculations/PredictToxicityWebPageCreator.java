@@ -106,8 +106,11 @@ public class PredictToxicityWebPageCreator {
 	public static String webImagePathByCID = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxcid/";//image link
 	public static String webImagePathBySID = "https://comptox.epa.gov/dashboard-api/ccdapp1/chemical-files/image/by-dtxsid/";//image link
 
-	public static String webPathDashboardPage = "https://comptox.epa.gov/dashboard/dsstoxdb/results?search=";//dashboard page for the chemical
-
+//	public static String webPathDashboardPage = "https://comptox.epa.gov/dashboard/dsstoxdb/results?search=";//dashboard page for the chemical
+	public static String webPathDashboardPage = "https://comptox.epa.gov/dashboard/chemical/details/";//dashboard page for the chemical
+	
+	
+	
 	static void WriteHeaderInfo(FileWriter fw, String CAS, String endpoint, String method) throws IOException {
 
 		fw.write("<html>\n");

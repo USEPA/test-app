@@ -17,29 +17,19 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import org.apache.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.Strings;
 
 import com.hp.hpl.jena.util.FileUtils;
 
-import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.AtomContainer;
 
-import ToxPredictor.Application.CalculationParameters;
 import ToxPredictor.Application.TESTConstants;
-import ToxPredictor.Application.WebReportType;
 
-import ToxPredictor.Application.WebTEST4;
-import ToxPredictor.Application.GUI.ApplicationSettings;
 import ToxPredictor.Application.GUI.TESTApplication;
-import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
-import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.HueckelAromaticityDetector;
-import ToxPredictor.Utilities.TESTPredictedValue;
 
 public class RunFromCommandLine {
 
@@ -53,8 +43,12 @@ public class RunFromCommandLine {
 		String outputFilePath=commandLine.getOptionValue("o");
 		String endpointAbbrev=commandLine.getOptionValue("e");
 		String methodAbbrev=commandLine.getOptionValue("m");
+		
+		boolean hasShow=commandLine.hasOption("s");		
+		
 //		String reportType=commandLine.getOptionValue("r");
 
+		System.out.println("hasShow="+hasShow);
 		System.out.println("inputFilePath="+inputFilePath);
 		System.out.println("outputFilePath="+outputFilePath);
 		System.out.println("endpointAbbrev="+endpointAbbrev);
@@ -123,7 +117,7 @@ public class RunFromCommandLine {
 		tc2.init(acs, useFragmentsConstraint, createReports,createDetailedReports,generateWebpages,fileOutputFolder, 
 				f, endpoint, method, taskType, runType, runCTS, libraryCTS);
 		
-		f.panelResults.setVisible(true);
+		if (hasShow) f.panelResults.setVisible(true);
 		f.panelResults.jbSaveToExcel.setVisible(false);
 		f.panelResults.jbSaveToText.setVisible(false);
 //		f.panelResults.jbSaveToHTML.setVisible(false);
@@ -165,6 +159,13 @@ public class RunFromCommandLine {
 				"abbreviated endpoint (LC50, LC50DM, IGC50, LD50, EC50GA, BCF, DevTox, Mutagenicity, ER_Binary, ER_LogRBA, BP, VP, MP, Density, FP, ST, TC, Viscosity, WS)");
 		// o.setArgs(19);
 		options.addOption(o);
+		
+		
+		o = new Option("s", "show", false,
+				"show calculation table");
+		o.setRequired(false);
+		options.addOption(o);
+
 
 		return options;
 	}

@@ -39,6 +39,7 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FilenameUtils;
@@ -190,10 +191,16 @@ public class WebTEST {
 
 				String ID = null;
 				String Smiles = null;
-
+				
+				
+				
+				
 				if (!delimiter.equals("")) {
-					List<String> l = ToxPredictor.Utilities.Utilities.Parse2(Line, delimiter);
+					List<String> l = ToxPredictor.Utilities.Utilities.Parse3(Line, delimiter);
 
+//					System.out.println(l.size());
+					
+					
 					if (l.size() >= 2) {
 						Smiles = (String) l.get(0);
 						ID = (String) l.get(1);
@@ -203,8 +210,14 @@ public class WebTEST {
 				} else {
 					Smiles = Line;
 				}
-
+				
+				Smiles=Smiles.trim();
+				
+//				System.out.println("delimiter=*"+delimiter+"*");
+//				System.out.println("smiles=*"+Smiles+"*");
+				
 				AtomContainer m = loadSMILES(Smiles);
+				
 				
 				if ( !StringUtils.isEmpty(ID) ) {
 					ID = ID.replace("\"", "_");
@@ -275,6 +288,25 @@ public class WebTEST {
 	}
 
 	public static AtomContainer loadSMILES(String smiles) {
+		
+		if (smiles.isEmpty()) {
+			AtomContainer m = new AtomContainer();
+			String error = "smiles blank";
+			m.setProperty("Error", error);
+			m.setProperty("ErrorCode", ERROR_CODE_STRUCTURE_ERROR);
+			return m;
+		}
+		
+		if (smiles.contains(":") || smiles.contains("*")) {
+			AtomContainer m = new AtomContainer();
+			String error = "not completely defined substance";
+			m.setProperty("Error", error);
+			m.setProperty("ErrorCode", ERROR_CODE_STRUCTURE_ERROR);
+			return m;
+		}
+
+
+		
 		String ID;
 		ArrayList<DSSToxRecord> recs = ResolverDb.lookupBySMILES(smiles);
 		if ( recs.size() == 0 ) {
@@ -1883,7 +1915,7 @@ public class WebTEST {
 		return v;
 	}
 
-	static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, double ExpToxVal,
+	public static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, double ExpToxVal,
 			double PredToxVal, double MW, String error, boolean isBinary) {
 		if (!isBinary) {
 			return getTESTPredictedValue(endpoint, method, CAS, ExpToxVal, PredToxVal, MW, error);
@@ -2563,12 +2595,28 @@ public class WebTEST {
 		params.inputFilePath = cmd.getOptionValue("input");
 		params.smilesColumn = cmd.getOptionValue("smiles-column");
 		params.outputFilePath = cmd.getOptionValue("output");
-		params.endpoints = cmd.getOptionValues("endpoint");
+		
+		
+		String endpoints=cmd.getOptionValue("endpoint");
+		if (endpoints.contains(",")) {
+			params.endpoints=endpoints.split(",");	
+		} else {
+			params.endpoints = cmd.getOptionValues("endpoint");
+		}
+		
+		for (String endpoint:params.endpoints ) {
+			System.out.println(endpoint);
+		}
+		
+				
 		params.methods = cmd.getOptionValues("method");
 		params.reportTypes = new HashSet<>();
-		for (String option : cmd.getOptionValues("report")) {
-			params.reportTypes.add(WebReportType.valueOf(option));
-		}
+		
+		if (cmd.getOptionValues("report")!=null) {
+			for (String option : cmd.getOptionValues("report")) {
+				params.reportTypes.add(WebReportType.valueOf(option));
+			}
+		} 
 		return WebTEST.go(params);
 	}
 
@@ -3113,6 +3161,12 @@ public class WebTEST {
 
 		o = new Option("e", "endpoint", true,
 				"abbreviated endpoint (LC50, LC50DM, IGC50, LD50, EC50GA, BCF, DevTox, Mutagenicity, ER_Binary, ER_LogRBA, BP, VP, MP, Density, FP, ST, TC, Viscosity, WS)");
+		
+		options.addOption(o);
+		
+		o = new Option("r", "report", true,	"report options(json, html,pdf)");
+		
+		
 		// o.setArgs(19);
 		options.addOption(o);
 

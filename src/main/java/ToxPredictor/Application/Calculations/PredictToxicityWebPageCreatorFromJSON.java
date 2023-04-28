@@ -36,13 +36,13 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	private static final Logger logger = LogManager.getLogger(PredictToxicityWebPageCreatorFromJSON.class);
 	
 	
-	private void writeHeaderInfo(Writer fw, String CAS, String endpoint, String method) throws IOException {
+	private void writeHeaderInfo(Writer fw, String identifier, String endpoint, String method) throws IOException {
 
 		fw.write("<html>\n");
 		fw.write("<head>\n");
 
 		// fw.write("<title>Prediction results from the "+method+" method\n");
-		fw.write("<title>Predicted " + endpoint + " for " + CAS + " from " + method + " method");
+		fw.write("<title>Predicted " + endpoint + " for " + identifier + " from " + method + " method");
 		fw.write("</title>\n");
 		fw.write("</head>\n");
 
@@ -159,10 +159,11 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			}
 			//*******************************************************************
 
+			String identifier = getPageIdentifier(pr);
 			
-			writeHeaderInfo(fw, pr.getCAS(), pr.getEndpoint(), pr.getMethod());
+			writeHeaderInfo(fw, identifier, pr.getEndpoint(), pr.getMethod());
 
-			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + pr.getCAS() + "</font> from " + pr.getMethod() + " method</h2>\n");
+			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + identifier + "</font> from " + pr.getMethod() + " method</h2>\n");
 
 			if (pr.isBinaryEndpoint()) {
 				this.writeBinaryPredictionTable(pr,fw);
@@ -335,10 +336,11 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			}
 			//*******************************************************************
 
+			String identifier = getPageIdentifier(pr);
 			
-			writeHeaderInfo(fw, pr.getCAS(), pr.getEndpoint(), pr.getMethod());
+			writeHeaderInfo(fw, identifier, pr.getEndpoint(), pr.getMethod());
 
-			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + pr.getCAS() + "</font> from " + pr.getMethod() + " method</h2>\n");
+			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + identifier + "</font> from " + pr.getMethod() + " method</h2>\n");
 
 			if (pr.isBinaryEndpoint()) {
 				this.writeBinaryPredictionTable(pr,fw);
@@ -757,9 +759,12 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			//*******************************************************************
 
 
-			this.writeHeaderInfo(fw, pr.getCAS(), pr.getEndpoint(), pr.getMethod());
+			String identifier = getPageIdentifier(pr);
+			
+			this.writeHeaderInfo(fw, identifier, pr.getEndpoint(), pr.getMethod());
+			
 
-			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + pr.getCAS() + "</font> from " + pr.getMethod() + " method</h2>\n");
+			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + identifier + "</font> from " + pr.getMethod() + " method</h2>\n");
 
 			if (pr.getIndividualPredictionsForConsensus()==null) {
 				fw.write("No prediction made: "+pr.getError());
@@ -814,6 +819,26 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		}
 	}
 
+
+	private String getPageIdentifier(PredictionResults pr) {
+		String identifier="";
+
+		if (pr.getDTXSID()!=null) {
+			identifier=pr.getDTXSID();
+			if (pr.getCAS()!=null) {
+				identifier+=" ("+pr.getCAS()+")";
+			}
+		} else if (pr.getDTXCID()!=null) {
+			identifier=pr.getDTXCID();
+			if (pr.getCAS()!=null) {
+				identifier+=" ("+pr.getCAS()+")";
+			}
+		} else if (pr.getCAS()!=null) {
+			identifier=pr.getCAS();
+		}
+		return identifier;
+	}
+
 	
 	private void writeNearestNeighborResultsWebPages(PredictionResults pr,String htmlOutputFilePath) {
 		
@@ -829,10 +854,11 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			}
 			//*******************************************************************
 
+			String identifier = getPageIdentifier(pr);
 			
-			this.writeHeaderInfo(fw, pr.getCAS(), pr.getEndpoint(), pr.getMethod());
+			this.writeHeaderInfo(fw, identifier, pr.getEndpoint(), pr.getMethod());
 
-			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + pr.getCAS() + "</font> from " + pr.getMethod() + " method</h2>\n");
+			fw.write("<h2>Predicted " + pr.getEndpoint() + " for <font color=\"blue\">" + identifier + "</font> from " + pr.getMethod() + " method</h2>\n");
 
 			
 			if (pr.isBinaryEndpoint()) {
@@ -1012,10 +1038,12 @@ public class PredictToxicityWebPageCreatorFromJSON {
 
 			fw.write("<tr>\n");
 
-			if (simChem.getDSSTOXSID() == null) {
-				fw.write("<td>" + simChem.getCAS() + "</td>\n");
-			} else {
+			if (simChem.getDSSTOXSID() != null) {
 				fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
+			} else if (simChem.getDSSTOXCID() != null) {
+				fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXCID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
+			} else {
+				fw.write("<td>" + simChem.getCAS() + "</td>\n");
 			}
 
 			
