@@ -1502,7 +1502,7 @@ public class TESTApplication extends JFrame{
 			} else {
 				f.aa.switchToBatchMode();
 
-				f.panelBatchStructureDatabaseSearch.jcbOptions.setSelectedItem(PanelStructureDatabaseSearchBatch.strOptionSmiles);
+//				f.panelBatchStructureDatabaseSearch.jcbOptions.setSelectedItem(PanelStructureDatabaseSearchBatch.strOptionSmiles);
 //				f.panelBatchStructureDatabaseSearch.jrbName.doClick();
 //				f.panelBatchStructureDatabaseSearch.jtfIdentifiers.setText("c1ccccc1\n"
 //						+ "CCCCOCC\nqwerty\nCCCOCCCCCCCCCCCOCC\nCCCOCCCCOCCCCCOCCOCOC");

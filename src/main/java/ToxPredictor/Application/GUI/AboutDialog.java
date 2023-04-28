@@ -95,7 +95,7 @@ public class AboutDialog extends JFrame {
      * 		o QSAR models now have stricter statistical standards (leave one out concordance = 0.8, sensitivity = 0.5, and specificity = 0.5)
      *		o Model statistics such as concordance, sensitivity, and specificity are now displayed in the results web pages
           
-     * 4.0 (3/?/11):
+     * 4.0 (6/7/11):
      * -Added the following physical properties:
      * 	    o Boiling point
      *      o Flash point
@@ -123,7 +123,7 @@ public class AboutDialog extends JFrame {
      *  4.0.1 (5/2/11):
      *    	o Fixed bug in loading output folder from xml file
      *    	
-     *  4.1 (1/?/12):
+     *  4.1 (7/27/12):
      *  	o Fixed bug for saving results files on network drives such as EPA M drive
      *  	o Updated/added endpoints as follows:
      *  		- Updated aquatic toxicity endpoints (LC50, LC50DM) using latest version of Aquire database
@@ -161,8 +161,31 @@ public class AboutDialog extends JFrame {
      *  	  previously there was a bug where changes to one chemical 
      *        in the batch list could affect another molecule in the list. This is
      *        slower but at least no errors are introduced during editing the molecules
-     *  		 
-     *  	          	 
+     *  4.2 (4/2016)
+     *  	o Added MOA based method for calculating acute fathead minnow toxicity
+	 *		o Fixed bug involving selecting the output folder
+     *      o Fix inconsistencies in the calculation of the ALOGP descriptor 		 
+     *  4.2.1 (7/2016)     *  
+     *  	o Corrected bug where FDA method was omitted from the list of method options.
+     *  5.1.1 (2021)
+     *  	o The interface for T.E.S.T. has been completely redesigned.
+	 *		o The structure search feature in T.E.S.T. has been greatly improved
+	 *		o The FDA method was removed to speed up calculations (with no loss in prediction accuracy using the Consensus method).
+	 *		o Model load times have been significantly reduced.
+	 *		o T.E.S.T. can now calculate molecular descriptors for chemicals with a large number of interconnected aromatic rings.
+	 *		o T.E.S.T. calculations are no longer terminated if molecular descriptors cannot be generated for a chemical in the batch list.
+	 *		o T.E.S.T. can now estimate the toxicity of chemical transformation products via CTS.
+	 *		o Batch mode now displays a results screen to track prediction results inside T.E.S.T..
+	 *		o T.E.S.T. now has report options to minimize the amount of files created.
+     *  5.1.4 (TBA)
+     *  	o Updated whim weights.txt using new Todeschini book (table A3), see whim weights v1.3.xlsx. 
+     *  		- This affects MATSv and GATSv (and others)
+     * 	        <dependency>
+             		<groupId>gov.epa.webtest</groupId>
+			        <artifactId>SystemData</artifactId>
+            		<version>1.3</version>
+           		</dependency>
+     *  			          	 
 	 */
 	
 

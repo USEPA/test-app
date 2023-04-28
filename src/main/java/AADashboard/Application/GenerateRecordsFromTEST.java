@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -26,11 +28,8 @@ import ToxPredictor.Application.CalculationParameters;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebReportType;
 import ToxPredictor.Application.WebTEST;
-import ToxPredictor.Application.WebTEST2;
 import ToxPredictor.Application.WebTEST4;
-import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreator;
 import ToxPredictor.Database.ChemistryDashboardRecord2;
-import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.FormatUtils;
@@ -40,6 +39,7 @@ import gov.epa.api.Chemical;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 import gov.epa.api.TESTRecord;
+
 
 /**
  * Class to create score records using T.E.S.T. predictions
@@ -54,6 +54,8 @@ public class GenerateRecordsFromTEST {
 	
 
 	MolFileUtilities mfu=new MolFileUtilities();
+	
+	private static final Logger logger = LogManager.getLogger(GenerateRecordsFromTEST.class);
 	
 /**
  * This version uses WebTEST4 so that it runs single chemical and doesnt create any extra files
@@ -75,9 +77,12 @@ public class GenerateRecordsFromTEST {
 			List<TESTPredictedValue>vecTPV=WebTEST4.go2(true,ac, dd,cp);
 		
 			
+//			logger.warn("here1:vecTPV.size="+vecTPV.size());
+			
 			long t1=System.currentTimeMillis();
 			createRecords_From_TEST(chemical, vecTPV);
 					
+//			logger.warn("here2");
 			
 			long t2=System.currentTimeMillis();			
 //			System.out.println("Time to get records from TEST models for "+chemical.CAS+"\t"+(t2-t1));

@@ -534,9 +534,10 @@ public //	public boolean Locked=false;
 				tgExcel.writeFinalScoresToWorkbookSimple(chemicals, workbook);
 		        tgExcel.writeScoreRecordsToWorkbook(chemicals,workbook);
 		        
-		        MyTableModelLinks modelLinks=(MyTableModelLinks)tableLinks.getModel();
-		        tgExcel.writeLinksSheet(RecordLink.fieldNames,"Links", workbook, modelLinks.getRecords());
-		        
+		        if (f.forMDH) {
+		        	MyTableModelLinks modelLinks=(MyTableModelLinks)tableLinks.getModel();
+		        	tgExcel.writeLinksSheet(RecordLink.fieldNames,"Links", workbook, modelLinks.getRecords());
+		        }
 			} else if (tabName0.contentEquals("Results")) {
 				filename = f.endpoint.replace(" ", "_") + "_" + f.method + ".xlsx";
 				writeResultsToExcel(workbook,tableMethod.getModel(),f.method);

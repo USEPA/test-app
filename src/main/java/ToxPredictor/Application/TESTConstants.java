@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
 
 public class TESTConstants {
-	public static String SoftwareVersion = "5.1.2";
+	public static String SoftwareVersion = "5.1.3";
 	public static String SoftwareTitle = "T.E.S.T (Toxicity Estimation Software Tool)";
 	
 	//*add endpoint* 01

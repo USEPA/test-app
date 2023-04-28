@@ -46,6 +46,7 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 	
 	JButton jbLoad_CHC_List=new JButton();
 	JButton jbLoad_CHC_Sample_List=new JButton();
+	JButton jbLoad_CHC_HPV_List=new JButton();
 	
 	actionAdapter aa =new actionAdapter();
 	windowAdapter wa=new windowAdapter();
@@ -69,13 +70,22 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 
 	private void SetupSimpleControls() {
 		
+		boolean forMDH=false;
+		
+		if (gui instanceof TESTApplication) {
+			TESTApplication f=(TESTApplication)gui;
+			forMDH=f.forMDH;
+		}
+		
 		int radialwidth=150;
 		int textHeight=20;
 		
 //		int vspacing=15;
 		int vspacing=(this.getHeight()-5*textHeight)/10;
 		
-		
+		if (forMDH) {
+			vspacing=(this.getHeight()-7*textHeight)/10;
+		}
 		Vector<String>options=new Vector<>();
 		options.add(strOptionAutomatic);
 		options.add(strOptionCAS);
@@ -145,28 +155,39 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 		add(jbSearch);
 		add(jbClear);
 
-		if (gui instanceof TESTApplication) {
-			TESTApplication f=(TESTApplication)gui;
 			
-			if (f.forMDH) {
-				jbLoad_CHC_List.setSize(radialwidth,textHeight);
-				jbLoad_CHC_List.setLocation(inset,(int)jbClear.getLocation().getY()+vspacing+textHeight);
-				jbLoad_CHC_List.setText("Load CHC List");
-				
-				jbLoad_CHC_List.addActionListener(aa);
-				jbLoad_CHC_List.setActionCommand("jbLoad_CHC_List");
-				add(jbLoad_CHC_List);
-				
-				jbLoad_CHC_Sample_List.setSize(radialwidth,textHeight);
-				jbLoad_CHC_Sample_List.setLocation(inset,(int)jbLoad_CHC_List.getLocation().getY()+vspacing+textHeight);
-				jbLoad_CHC_Sample_List.setText("Load Sample List");
-				
-				jbLoad_CHC_Sample_List.addActionListener(aa);
-				jbLoad_CHC_Sample_List.setActionCommand("jbLoad_CHC_Sample_List");
-				add(jbLoad_CHC_Sample_List);
+		if (forMDH) {
+			jbLoad_CHC_List.setSize(radialwidth,textHeight);
+			jbLoad_CHC_List.setLocation(inset,(int)jbClear.getLocation().getY()+vspacing+textHeight);
+			jbLoad_CHC_List.setText("Load CHC List");
 
-			}
+			jbLoad_CHC_List.addActionListener(aa);
+			jbLoad_CHC_List.setActionCommand("jbLoad_CHC_List");
+			add(jbLoad_CHC_List);
+
+			// **************************************************
+
+			jbLoad_CHC_HPV_List.addActionListener(aa);
+			jbLoad_CHC_HPV_List.setActionCommand("jbLoad_CHC_HPV_List");
+			add(jbLoad_CHC_HPV_List);
+
+
+			jbLoad_CHC_HPV_List.setSize(radialwidth,textHeight);
+			jbLoad_CHC_HPV_List.setLocation(inset,(int)jbLoad_CHC_List.getLocation().getY()+vspacing+textHeight);
+			jbLoad_CHC_HPV_List.setText("Load CHC HPV List");
+
+			// **************************************************
+
+			jbLoad_CHC_Sample_List.setSize(radialwidth,textHeight);
+			jbLoad_CHC_Sample_List.setLocation(inset,(int)jbLoad_CHC_HPV_List.getLocation().getY()+vspacing+textHeight);
+			jbLoad_CHC_Sample_List.setText("Load Sample List");
+
+			jbLoad_CHC_Sample_List.addActionListener(aa);
+			jbLoad_CHC_Sample_List.setActionCommand("jbLoad_CHC_Sample_List");
+			add(jbLoad_CHC_Sample_List);
+
 		}
+
 
 		
 	}
@@ -362,13 +383,21 @@ public class PanelStructureDatabaseSearchBatch extends JPanel {
 				MyTableModel model=(MyTableModel)f.panelBatch.table.getModel();
 				model.clear();
 				
+			} else if (e.getActionCommand().equals("jbLoad_CHC_HPV_List")) {
+				
+				int type=TaskStructureSearch.TypeSDF_In_Jar;
+				TESTApplication test=(TESTApplication)gui;	
+							
+	    		test.taskStructureFile.init("2022 CHC HPV.sdf",type,TESTConstants.typeTaskBatch,test);
+	    		test.taskStructureFile.go();
+	    		test.timerBatchStructureFile.start();
 				
 				
 			} else if (e.getActionCommand().equals("jbLoad_CHC_List")) {
 				
 				int type=TaskStructureSearch.TypeSDF_In_Jar;
 				TESTApplication test=(TESTApplication)gui;	
-	    		test.taskStructureFile.init("list_chemicals-2021-07-16-13-19-26.sdf",type,TESTConstants.typeTaskBatch,test);
+	    		test.taskStructureFile.init("WebVersion_2022_Chemicals_of_High_Concern_List_2023_02_07.sdf",type,TESTConstants.typeTaskBatch,test);
 	    		test.taskStructureFile.go();
 	    		test.timerBatchStructureFile.start();
 
