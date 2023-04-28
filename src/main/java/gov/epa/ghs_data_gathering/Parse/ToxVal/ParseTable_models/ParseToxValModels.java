@@ -143,9 +143,9 @@ Biowin Score	Aerobic biodegredation half-life (days)		Score
 4.25-4.75			1.25
 3.75-4.25			2.33
 3.25-3.75			8.67				(>=3.25)			L
-2.75-€“3.25			15					(> 2.25 & < 3.25) 	M
+2.75-Â€Â“3.25			15					(> 2.25 & < 3.25) 	M
 2.25-2.75			37.5								
-1.75-€“2.25			120					(1.75-2.25) 		H
+1.75-Â€Â“2.25			120					(1.75-2.25) 		H
 1.25-1.75			240					(<1.75)				VH
 < 1.25				720									
 
@@ -153,6 +153,14 @@ Biowin Score	Aerobic biodegredation half-life (days)		Score
 
 		DecimalFormat df = new DecimalFormat("0.00");
 		double biowin = sr.valueMass;
+		
+		
+		//From email from Bryan Lobar (OPPT): 
+		//"I think the information loss from excluding DSL results 
+		//altogether would be acceptable. Thereâ€™s a 99% match, not a 90% match between 
+		//EPISuite and DSL for those 3604 substances that EPISuite rated as Low; there was a flaw in Toddâ€™s Excel code that assigned a Low value to substances with Biowin3 output less than 2.75 (rather than 3.25) that led him to the figure."
+		double scoreForLow=3.25;
+		
 
 		if (biowin < 1.75) {
 			sr.score = ScoreRecord.scoreVH;
@@ -160,12 +168,12 @@ Biowin Score	Aerobic biodegredation half-life (days)		Score
 		} else if (biowin <= 2.25) {
 			sr.score = ScoreRecord.scoreH;
 			sr.rationale = "1.75 <= Biowin 3 Score <= 2.25 days";
-		} else if (biowin <= 2.75) {
+		} else if (biowin <= scoreForLow) {
 			sr.score = ScoreRecord.scoreM;
-			sr.rationale = "2.25 <= Biowin Score 3 <= 2.75";
-		} else { // if (biowin > 2.75) {
+			sr.rationale = "2.25 <= Biowin Score 3 <= "+scoreForLow;
+		} else { // if (biowin > scoreForLow) {
 			sr.score = ScoreRecord.scoreL;
-			sr.rationale = "Biowin 3 Score > 2.75";
+			sr.rationale = "Biowin 3 Score > "+scoreForLow;
 		} 
 	}
 

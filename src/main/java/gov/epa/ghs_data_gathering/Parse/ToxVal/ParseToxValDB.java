@@ -667,7 +667,7 @@ public class ParseToxValDB {
 		String [] fieldValuesBCF= {model,"Biodegradation Score"};			
 		String query=createSQLQuery(chemical.CAS, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
 		
-		System.out.println(query);
+//		System.out.println(query);
 		
 		ResultSet rs=MySQL_DB.getRecords(statToxVal, query);			
 

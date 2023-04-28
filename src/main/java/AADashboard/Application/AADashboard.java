@@ -22,6 +22,8 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -29,6 +31,7 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
+import com.google.gson.Gson;
 
 //import AADashboard.Parse.*;
 //import AADashboard.ParseNew.ParseOSPAR;
@@ -63,7 +66,9 @@ public class AADashboard {
 
 	WebTEST wt;
 	GenerateRecordsFromTEST generateRecordsFromTEST = new GenerateRecordsFromTEST();
-
+	
+	private static final Logger logger = LogManager.getLogger(AADashboard.class);
+	
 	boolean debug=true;
 
 	public static final String dataFolder = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\ghs-data-gathering\\AA Dashboard\\Data";
@@ -1059,6 +1064,7 @@ public class AADashboard {
 		//		generateRecordsFromTEST.createRecords(chemical, WebTEST2.DB_Path_TEST_Predictions);
 		generateRecordsFromTEST.createRecordsForGUI(chemical, ac,cp);
 
+		
 		//**********************************************************************
 
 		long t2=System.currentTimeMillis();
@@ -1067,15 +1073,21 @@ public class AADashboard {
 		if (filterRecords) {
 			filterRecords(chemical);
 		}
+		
+		
 
 		//**********************************************************************
 		//Get records from ToxVal:
 		ParseToxValDB p=new ParseToxValDB();
 		p.getDataFromToxValDB(chemical);
+		
+		
 		//**********************************************************************
 
-
 		removeDuplicateRecords(chemical);
+		
+		//[TMM] Change for OCSPP/OPP made on 11/23/22
+		removeDSL_TSCA_Persistence(chemical);
 
 		//Use trumping algorithm to assign final scores:
 		if (finalScoreScheme.equals(finalScoreSchemeTrumping)) {
@@ -1085,10 +1097,35 @@ public class AADashboard {
 		} else {
 			System.out.println("Invalid final score scheme");
 		}
+		
 
 		return chemical;
 	}
 
+	/**
+	 * OCSPP/OPPT does not want these records for persistence scoring:
+	 * 
+	 * "The DSL persistence calls were often based on estimated half-life in air
+	 * which is not generally a persistence driver under TSCA. The “TSCA Workplan”
+	 * scores, as far as I’ve been able to determine, come from a table of early
+	 * screening level results. In some cases those ratings were revised as
+	 * additional information was collected."
+	 * 
+	 * @param chemical
+	 */
+	void removeDSL_TSCA_Persistence(Chemical chemical) {
+		Score score=chemical.getScore(Chemical.strPersistence);
+//		Gson gson=new Gson();
+		for (int i=0;i<score.records.size();i++) {			
+			ScoreRecord sr=score.records.get(i);			
+			if (sr.source.equals(ScoreRecord.sourceDSL) || sr.source.equals(ScoreRecord.sourceTSCA_Work_Plan)) {
+//				System.out.println(gson.toJson(sr));
+				score.records.remove(i);
+				i--;
+			}
+		}
+	}
+	
 
 	void deleteDuplicateScoreRecord(Score score,String source,String sourceOriginal) {
 
