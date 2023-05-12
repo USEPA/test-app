@@ -775,6 +775,10 @@ public class RunFromSmiles {
 
 	private static void saveJson(String destJsonPath, Object obj) {
 		try {
+			
+			File file=new File(destJsonPath);
+			file.getParentFile().mkdirs();
+			
 			FileWriter fw= new FileWriter(destJsonPath);
 			fw.write(gson.toJson(obj));
 			fw.flush();
