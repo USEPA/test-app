@@ -15,8 +15,8 @@ public class RecordToxVal {
 
 		
 		public String dtxsid;
-		public String casrn;
-		public String name;
+//		public String casrn;
+//		public String name;
 		public String toxval_id;
 		public String source;
 		public String subsource;
@@ -44,9 +44,11 @@ public class RecordToxVal {
 		public String study_duration_units;
 		public String study_duration_units_original;
 		public String species_id;
-		public String species_original;
-		public String species_common;
-		public String species_supercategory;
+		public String species_original;		
+		public String species_common;//toxval_v8
+		public String species_supercategory;//toxval_v8
+		public String species_scientific;//toxval_v94
+		
 		public String habitat;
 		public String human_eco;
 		public String strain;
@@ -85,7 +87,7 @@ public class RecordToxVal {
 		
 		
 		
-		public transient static String[] varlist = { "dtxsid", "casrn", "name", "toxval_id", "source", "subsource", "toxval_type",
+		public transient static String[] varlist = { "dtxsid", "toxval_id", "source", "subsource", "toxval_type",
 				"toxval_type_original", "toxval_subtype", "toxval_subtype_original", "toxval_type_supercategory",
 				"toxval_numeric_qualifier", "toxval_numeric_qualifier_original", "toxval_numeric",
 				"toxval_numeric_original", "toxval_numeric_converted", "toxval_units", "toxval_units_original",

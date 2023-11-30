@@ -6,14 +6,14 @@ import java.lang.reflect.Field;
 
 public class RecordToxValBCFBAF {
 
-	public String casrn;
-	public String name;
+//	public String casrn;
+//	public String name;
+	public String chemical_id;
+	public String dtxsid;
 
 	public String bcfbaf_id;
-	public String chemical_id;
 	public String bcfbaf_hash;
 	public String bcfbaf_uuid;
-	public String dtxsid;
 	public String value_type;
 	public String units;
 	public String score;

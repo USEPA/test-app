@@ -21,6 +21,7 @@ import java.util.Vector;
 import com.google.gson.Gson;
 
 import AADashboard.Application.AADashboard;
+import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.Utilities.Utilities;
 
 //import gov.epa.ghs_data_gathering.Database.MySQL_DB;
@@ -148,7 +149,7 @@ public class ScoreRecord {
 	public static final String sourceAcute_Toxicity_Data_from_EPA_HPVIS = "Acute Toxicity Data from EPA HPVIS";
 	public static final String sourceReproductive_Toxicity_Data_In_Vitro_from_EPA_HPVIS = "Reproductive Toxicity Data in Vitro from EPA HPVIS";
 
-	public static final String sourceToxVal="ToxVal v8";
+	public static final String sourceToxVal="ToxVal "+TESTApplication.versionToxVal;
 	
 	
 //	public static final float weightECHA_CLP = 20.0f;

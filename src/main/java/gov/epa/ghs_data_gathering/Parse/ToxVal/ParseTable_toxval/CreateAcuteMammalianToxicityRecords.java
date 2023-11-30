@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import gov.epa.api.Chemical;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 /* Inclusion criteria for Acute Mammalian Toxicity:
  All routes
@@ -49,6 +50,7 @@ public class CreateAcuteMammalianToxicityRecords {
 				r.toxval_type.contentEquals("LC50") &&
 				r.human_eco.contentEquals("human health")){
 			createAcuteMammalianToxicityInhalationRecord(chemical, r);
+			//TODO convert ppm records?
 		}
 
 		/* 1 mg/L = 1000 mg/m3
@@ -119,7 +121,8 @@ public class CreateAcuteMammalianToxicityRecords {
 				System.out.println(chemical.CAS + "\toral\t" + strDose);
 			}
 		} else {
-			System.out.println("Unknown operator: "+sr.valueMassOperator+" for acute oral");
+			if(ParseToxValDB.debug)
+				System.out.println("Unknown operator: "+sr.valueMassOperator+" for acute oral");
 		}
 	}
 
@@ -148,7 +151,7 @@ public class CreateAcuteMammalianToxicityRecords {
 			} else {
 				sr.score = ScoreRecord.scoreNA;
 				sr.rationale = "Dermal LD50 does not provide enough information to assign a score";	
-				System.out.println(chemical.CAS + "\tless than operator detected for dermal\t" + dose);
+//				System.out.println(chemical.CAS + "\tless than operator detected for dermal\t" + dose);
 			}
 
 		} else if (sr.valueMassOperator.equals("") || sr.valueMassOperator.equals("=") || sr.valueMassOperator.equals("~") || sr.valueMassOperator.equals(">=") || sr.valueMassOperator.equals("<=")) {
@@ -171,7 +174,8 @@ public class CreateAcuteMammalianToxicityRecords {
 				System.out.println(chemical.CAS + "\tDermal\t" + strDose);
 			}
 		} else {
-			System.out.println("Unknown operator: "+sr.valueMassOperator+" for acute dermal");
+			if(ParseToxValDB.debug)
+				System.out.println("Unknown operator: "+sr.valueMassOperator+" for acute dermal");
 		}
 
 	}
@@ -207,7 +211,7 @@ public class CreateAcuteMammalianToxicityRecords {
 			} else {
 				sr.score = ScoreRecord.scoreNA;
 				sr.rationale = "Inhalation LC50 does not provide enough information to assign a score";
-				System.out.println(chemical.CAS + "\tless than operator detected for inhalation\t" + dose);
+//				System.out.println(chemical.CAS + "\tless than operator detected for inhalation\t" + dose);
 			}
 			/* Need to fix the code for these operators.
    Need to add code for "<".
@@ -241,13 +245,10 @@ public class CreateAcuteMammalianToxicityRecords {
 
 
 		} else {
-			System.out.println("Unknown operator: "+sr.valueMassOperator+" for acute inhalation");
+			if(ParseToxValDB.debug)
+				System.out.println("Unknown operator: "+sr.valueMassOperator+" for acute inhalation");
 		}
 	}
-
-
-
-
 
 
 
@@ -269,7 +270,7 @@ public class CreateAcuteMammalianToxicityRecords {
 
 		Score score=chemical.scoreAcute_Mammalian_ToxicityOral;
 		
-		ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr);
+		ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr,chemical);
 		sr.hazardName=score.hazard_name;
 		
 		setOralScore(sr, chemical);
@@ -296,7 +297,7 @@ public class CreateAcuteMammalianToxicityRecords {
 		if(!isOkMammalianSpecies(tr)) return;
 			
 		Score score=chemical.scoreAcute_Mammalian_ToxicityDermal;
-		ScoreRecord sr =ParseToxVal.saveToxValInfo(score,tr);
+		ScoreRecord sr =ParseToxVal.saveToxValInfo(score,tr,chemical);
 		sr.hazardName=score.hazard_name;
 		setDermalScore(sr, chemical);
 		score.records.add(sr);
@@ -388,7 +389,7 @@ public class CreateAcuteMammalianToxicityRecords {
 		if(!isOkMammalianSpecies(tr)) return;
 
 		Score score=chemical.scoreAcute_Mammalian_ToxicityInhalation;
-		ScoreRecord sr =ParseToxVal.saveToxValInfo(score,tr);
+		ScoreRecord sr =ParseToxVal.saveToxValInfo(score,tr, chemical);
 		sr.hazardName=score.hazard_name;
 		setInhalationScore(sr, chemical);
 		score.records.add(sr);

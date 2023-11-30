@@ -409,10 +409,10 @@ public class ParseToxVal  {
 	 * genetox_call = "inconclusive" OR "not clastogen" then score= N/A -Leora
 	 */
 
-	static ScoreRecord saveToxValInfo(Score score,RecordToxVal tr) {
 		// Organism Test Type Route Reported Dose (Normalized Dose) Effect Source
+	static ScoreRecord saveToxValInfo(Score score,RecordToxVal tr,Chemical chemical) {
 
-		ScoreRecord sr=new ScoreRecord(score.hazard_name,tr.casrn,tr.name);
+		ScoreRecord sr=new ScoreRecord(score.hazard_name,chemical.getCAS(),chemical.getName());
 		
 		sr.route=tr.exposure_route;
 		
@@ -453,8 +453,15 @@ public class ParseToxVal  {
 		Vector<String>authoritativeSources=new Vector<>();
 //		authSources.add("ECHA");
 		authoritativeSources.add("ATSDR");
-		authoritativeSources.add("PPRTV (NCEA)");
-		authoritativeSources.add("PPRTV (ORNL)");				
+		
+		authoritativeSources.add("ATSDR PFAS");//toxval_v94
+		authoritativeSources.add("ATSDR PFAS 2021");//toxval_v94, retired
+
+		authoritativeSources.add("PPRTV (CPHEA)");//most up to date
+		authoritativeSources.add("PPRTV (NCEA)");//has additional metadata
+		authoritativeSources.add("PPRTV (ORNL)");//should be retired	
+		
+		
 		authoritativeSources.add("EPA AEGL");
 		authoritativeSources.add("HEAST");		
 		authoritativeSources.add("EPA OPP");
@@ -470,6 +477,9 @@ public class ParseToxVal  {
 
 		authoritativeSources.add("NIOSH");//Leora check // Yes, NIOSH is authoritative.  -Leora
 		authoritativeSources.add("NTP ROC");//Leora check // Yes, NTP ROC is authoritative.  -Leora
+		authoritativeSources.add("PFAS 150 SEM v2");
+		
+		authoritativeSources.add("NTP RoC");//2023-11-15
 		
 				
 		Vector<String>screeningSources=new Vector<>();
@@ -489,9 +499,19 @@ public class ParseToxVal  {
 		screeningSources.add("COSMOS");
 		screeningSources.add("DOD");
 		screeningSources.add("DOE Wildlife Benchmarks");
-		screeningSources.add("HAWC");
+		
+		screeningSources.add("HAWC");//toxval_v8
+		screeningSources.add("HAWC PFAS 150");//toxval_v94
+		screeningSources.add("HAWC PFAS 430");//toxval_v94
+		screeningSources.add("HAWC Project");//toxval_v94
+		
+		
 		screeningSources.add("HESS");
 		screeningSources.add("TEST");
+		screeningSources.add("ChemIDplus");
+		screeningSources.add("Copper Manufacturers");
+		screeningSources.add("Uterotrophic Hershberger DB");
+		
 		
 		if (authoritativeSources.contains(sr.sourceOriginal)) {
 			sr.listType=ScoreRecord.typeAuthoritative;
@@ -624,7 +644,7 @@ public class ParseToxVal  {
 
 		//		p.getRecordsForCAS(CAS,filePathDatabaseAsText, filePathRecordsForCAS);		
 
-		p.goThroughRecords(filePathRecordsForCAS, filePathRecordsForCAS_json, filePathRecordsForCAS_txt);
+		p.goThroughRecords(filePathRecordsForCAS, filePathRecordsForCAS_json, filePathRecordsForCAS_txt,ParseToxValDB.v8);
 
 		//		Vector<String>vecCAS=new Vector<>();
 		//		vecCAS.add("79-06-1");

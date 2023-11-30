@@ -54,18 +54,19 @@ public class CreateReproductiveDevelopmentalToxicityRecords {
 		// System.out.println("Creating records");
 		// This prints.  It works up to here.
 		
+		//TODO should we allow human too? 2023-11-27
+		
 		if(!CreateAcuteMammalianToxicityRecords.isOkMammalianSpecies(r)) return;
 
 		Score score=getScore(chemical, r);
-		ScoreRecord sr=ParseToxVal.saveToxValInfo(score,r);
+		ScoreRecord sr=ParseToxVal.saveToxValInfo(score,r,chemical);
 		
 		
 		if (r.toxval_type.contains("NOAEL") || r.toxval_type.contains("LOAEL")) {
-			//	System.out.println("NOAEL or LOAEL");
+			//			System.out.println("NOAEL or LOAEL\t"+score.hazard_name+"\t"+r.toxval_units+"\t"+r.exposure_route+"\t"+r.toxval_subtype);
 			if (r.toxval_units.contentEquals("mg/kg-day") &&
 					(r.exposure_route.contentEquals("oral") || r.toxval_subtype.toLowerCase().contains("oral"))) {
 				setScore(sr, chemical, "Oral", 50, 250);				
-					
 				//		System.out.println("creating RepDev oral record");
 			} else if(r.toxval_units.contentEquals("mg/kg-day") &&
 					(r.exposure_route.contentEquals("dermal") || r.toxval_subtype.toLowerCase().contains("dermal"))) {
@@ -81,9 +82,7 @@ public class CreateReproductiveDevelopmentalToxicityRecords {
 					r.toxval_numeric = toxval_numeric2 + "";
 					r.toxval_units = "mg/L (converted from mg/m3)";
 				}
-								
 				setScore(sr, chemical, "Inhalation", 1, 2.5);
-				
 				//				System.out.println("creating rep/dev inhalation record");
 			}
 		}

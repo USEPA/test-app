@@ -15,7 +15,7 @@ public class ParseToxValBCFBAF {
 		if (!r.species_supercategory.contentEquals("Vertebrate"))
 			return;
 
-		if (!r.tissue.contentEquals("Whole body"))
+		if (r.tissue==null || !r.tissue.contentEquals("Whole body"))
 			return;
 
 		Score score=chemical.scoreBioaccumulation;

@@ -3,13 +3,15 @@ package gov.epa.ghs_data_gathering.Parse.ToxVal;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -19,12 +21,11 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import ToxPredictor.Application.WebTEST4;
-import ToxPredictor.Application.GUI.TESTApplication;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
-//import gov.epa.api.FlatFileRecord;
-//import gov.epa.api.FlatFileRecord2;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 

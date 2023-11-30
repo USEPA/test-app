@@ -24,6 +24,7 @@ public class ParseToxValCancer {
 		
 		Hashtable<String,String>dictCC=new Hashtable<String,String>();
 		
+		dictCC.put("Known human carcinogen", ScoreRecord.scoreVH);//2023-11-15
 		dictCC.put("A (Human carcinogen)", ScoreRecord.scoreVH);
 		dictCC.put("A (Human carcinogen) (Inhalation route)", ScoreRecord.scoreVH);
 		dictCC.put("B1 (Probable human carcinogen - based on limited evidence of carcinogenicity in humans)", ScoreRecord.scoreVH);
@@ -39,6 +40,8 @@ public class ParseToxValCancer {
 		dictCC.put("D (Not classifiable as to human carcinogenicity) (Oral route)", ScoreRecord.scoreNA);
 		dictCC.put("Data are inadequate for an assessment of human carcinogenic potential", ScoreRecord.scoreNA);
 		dictCC.put("Data are inadequate for an assessment of human carcinogenic potential (Oral route)", ScoreRecord.scoreNA);
+		dictCC.put("Data are Inadequate for an Assessment of Human Carcinogenic Potential", ScoreRecord.scoreNA);//2023-11-15
+		
 		dictCC.put("E (Evidence of non-carcinogenicity for humans)", ScoreRecord.scoreL);
 		dictCC.put("Group 1 - Carcinogenic to humans", ScoreRecord.scoreVH);
 		dictCC.put("Group 2A - Probably carcinogenic to humans", ScoreRecord.scoreVH);
@@ -93,10 +96,12 @@ public class ParseToxValCancer {
 		dictCC.put("Known/likely human carcinogen (Inhalation route)", ScoreRecord.scoreVH);
 		dictCC.put("Known/likely human carcinogen (Oral route)", ScoreRecord.scoreVH);
 		dictCC.put("Likely Human Carcinogen", ScoreRecord.scoreVH);
+		dictCC.put("Likely to be Carcinogenic to Humans", ScoreRecord.scoreVH);//2023-11-15
 		dictCC.put("Carcinogenic to Humans", ScoreRecord.scoreVH);
 		
 		dictCC.put("Likely to be Carcinogenic in Humans at High Doses; Not Likely to be Carcinogenic to Humans at Low Doses", ScoreRecord.scoreH);
 		dictCC.put("Likely to be carcinogenic to humans", ScoreRecord.scoreVH);
+		dictCC.put("Reasonably Anticipated to be a Human Carcinogen", ScoreRecord.scoreVH);//2023-11-15
 		dictCC.put("Likely to be carcinogenic to humans (Combined route)", ScoreRecord.scoreVH);
 		dictCC.put("Likely to be Carcinogenic to Humans (High Doses), Not Likely to be Carcinogenic to Humans (Low Doses)", ScoreRecord.scoreH);
 		dictCC.put("Likely to be carcinogenic to humans (inhalation route. IN for oral route)", ScoreRecord.scoreVH);
@@ -121,6 +126,7 @@ public class ParseToxValCancer {
 		dictCC.put("Suggestive evidence of carcinogenic potential for oral exposure.", ScoreRecord.scoreH);
 		dictCC.put("Suggestive evidence of carcinogenic potential for oral exposure. Inadequate information for inhalation.", ScoreRecord.scoreH);
 		dictCC.put("Suggestive Evidence of Carcinogenicity but Not Sufficient to Assess Human Carcinogenic Potential", ScoreRecord.scoreH);
+		dictCC.put("Suggestive evidence of carcinogenicity, but not sufficient to assess human carcinogenic potential", ScoreRecord.scoreH);//2023-11-15
 		dictCC.put("Suggestive evidence of carcinogenicity in humans", ScoreRecord.scoreH);
 		dictCC.put("Suggestive Evidence of Carcinogenicity to Humans", ScoreRecord.scoreH);
 		dictCC.put("Suggestive evidence of carcinogenicity, but not sufficient to assess human carcinogenic potential (Inhalation route)", ScoreRecord.scoreH);
@@ -138,9 +144,7 @@ public class ParseToxValCancer {
 		Score score=chemical.scoreCarcinogenicity;
 		
 		ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
-						
-		sr.name=rc.name;
-		
+								
 		sr.source = ScoreRecord.sourceToxVal;
 		sr.sourceOriginal=rc.source;
 		
@@ -149,7 +153,9 @@ public class ParseToxValCancer {
 		sr.url=rc.url;
 		
 		if (dictCC.get(rc.cancer_call)==null) {
-			System.out.println("Need dictionary entry for " +rc.cancer_call);
+			if (!rc.cancer_call.equals("-")) {
+				System.out.println("Need cancer dictionary entry for " +rc.cancer_call);
+			}
 			return;
 		}
 		

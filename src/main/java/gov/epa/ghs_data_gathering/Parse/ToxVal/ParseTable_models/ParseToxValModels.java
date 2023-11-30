@@ -8,8 +8,8 @@ import gov.epa.api.ScoreRecord;
 
 public class ParseToxValModels {
 
-	private static ScoreRecord createScoreRecord(RecordToxValModels r,String hazard_name,String CAS,String name) {
-		ScoreRecord sr = new ScoreRecord(hazard_name,CAS,name);
+	private static ScoreRecord createScoreRecord(RecordToxValModels r,String hazard_name,Chemical chemical) {
+		ScoreRecord sr = new ScoreRecord(hazard_name,chemical.getCAS(),chemical.getName());
 		sr.name=r.name;
 		
 		sr.source = ScoreRecord.sourceToxVal;
@@ -27,7 +27,7 @@ public class ParseToxValModels {
 
 		Score score=chemical.scoreBioaccumulation;
 		
-		ScoreRecord sr = createScoreRecord(rBCF,score.hazard_name,chemical.CAS,chemical.name);
+		ScoreRecord sr = createScoreRecord(rBCF,score.hazard_name,chemical);
 		sr.hazardName=score.hazard_name;
 		
 		sr.valueMass = Math.log10(Double.parseDouble(rBCF.value));
@@ -53,7 +53,7 @@ public class ParseToxValModels {
 		
 		Score score=chemical.scoreBioaccumulation;
 		
-		ScoreRecord sr = createScoreRecord(rBCF,score.hazard_name,chemical.CAS,chemical.name);
+		ScoreRecord sr = createScoreRecord(rBCF,score.hazard_name,chemical);
 		sr.hazardName=score.hazard_name;
 		
 		sr.valueMass = Math.log10(Double.parseDouble(rBCF.value));
@@ -122,7 +122,7 @@ public class ParseToxValModels {
 	public static void createScoreRecordPersistence_EpiSuite(Chemical chemical, RecordToxValModels r) {
 		Score score=chemical.scorePersistence;
 		
-		ScoreRecord sr =createScoreRecord(r,score.hazard_name,chemical.CAS,chemical.name);	
+		ScoreRecord sr =createScoreRecord(r,score.hazard_name,chemical);	
 		sr.hazardName=score.hazard_name;
 		sr.valueMass = Double.parseDouble(r.value);
 		sr.valueMassUnits=r.units;

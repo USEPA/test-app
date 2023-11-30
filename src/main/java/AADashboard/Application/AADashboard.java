@@ -1035,7 +1035,7 @@ public class AADashboard {
 		return chemical;
 	}
 
-	public Chemical runChemicalForGUI(String CAS,String name, AtomContainer ac,CalculationParameters cp) {
+	public Chemical runChemicalForGUI(String CAS,String name, String dtxsid, AtomContainer ac,CalculationParameters cp,String versionToxVal,Statement statToxVal) {
 
 		long t1_AA=System.currentTimeMillis();
 		if (debug) System.out.print("Getting AA dashboard records from GHS database..."); 		
@@ -1051,9 +1051,9 @@ public class AADashboard {
 		if (debug) System.out.println("done in "+(t2_AA-t1_AA)+ " milliseconds");
 
 			
-
 		chemical.CAS=CAS;
 		chemical.name=name;
+		chemical.dtxsid=dtxsid;		
 		chemical.molecularWeight=CDKUtilities.calculateMolecularWeight(ac);
 		chemical.atomContainer=ac;
 
@@ -1074,13 +1074,11 @@ public class AADashboard {
 			filterRecords(chemical);
 		}
 		
-		
-
+	
 		//**********************************************************************
 		//Get records from ToxVal:
 		ParseToxValDB p=new ParseToxValDB();
-		p.getDataFromToxValDB(chemical);
-		
+		p.getDataFromToxValDB(chemical,versionToxVal,statToxVal);
 		
 		//**********************************************************************
 
@@ -1100,6 +1098,12 @@ public class AADashboard {
 		
 
 		return chemical;
+	}
+	
+	
+	public Chemical runChemicalForGUI(AtomContainer ac,CalculationParameters cp,String versionToxVal,Statement statToxVal) {
+		DSSToxRecord dr=ac.getProperty("DSSToxRecord");
+		return runChemicalForGUI(dr.cas,dr.name,dr.sid, ac,cp,versionToxVal,statToxVal);
 	}
 
 	/**
@@ -1160,7 +1164,11 @@ public class AADashboard {
 		//Delete TEST experimental value since covered by chemidplus record for acute mammalian tox
 		deleteDuplicateScoreRecord(chemical.scoreAcute_Mammalian_ToxicityOral, ScoreRecord.sourceTEST_Experimental,null);//Delete TEST experimental value since covered by chemidplus record for acute mammalian tox
 		deleteDuplicateScoreRecord(chemical.scoreAcute_Mammalian_ToxicityOral, ScoreRecord.sourceToxVal,"TEST");//ToxVal has duplicate of TEST experimental value
-
+		
+		deleteDuplicateScoreRecord(chemical.scoreAcute_Mammalian_ToxicityOral, ScoreRecord.sourceToxVal,ScoreRecord.sourceChemIDplus);//ToxVal has duplicate of chemidplus
+		deleteDuplicateScoreRecord(chemical.scoreAcute_Mammalian_ToxicityInhalation, ScoreRecord.sourceToxVal,ScoreRecord.sourceChemIDplus);//ToxVal has duplicate of chemidplus
+		deleteDuplicateScoreRecord(chemical.scoreAcute_Mammalian_ToxicityDermal, ScoreRecord.sourceToxVal,ScoreRecord.sourceChemIDplus);//ToxVal has duplicate of chemidplus
+		
 		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceROC,null);
 		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceNIOSH_Potential_Occupational_Carcinogens,null);
 		deleteDuplicateScoreRecord(chemical.scoreCarcinogenicity, ScoreRecord.sourceProp65,null);
@@ -1721,7 +1729,7 @@ public class AADashboard {
 
 		AADashboard a = new AADashboard();
 		//NCCT_ID.db
-		//		a.runSdfFile(args[0]);
+				a.runSdfFile(args[0]);
 		//		a.runMostRecords();
 		//		a.runChemicalsWithGHSRecords();
 		//		a.mergeAADashboardResults();

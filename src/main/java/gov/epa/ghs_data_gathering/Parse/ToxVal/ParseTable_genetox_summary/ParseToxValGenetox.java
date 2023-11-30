@@ -22,7 +22,8 @@ public class ParseToxValGenetox {
 	public static Hashtable<String,String> populateGenetoxCallToScoreValue() {
 		
 		Hashtable<String,String>dictCC=new Hashtable<String,String>();
-		
+
+		//For toxval v8:
 		dictCC.put("gentox", ScoreRecord.scoreH);
 		dictCC.put("pred gentox", ScoreRecord.scoreH);
 		dictCC.put("pred clastogen", ScoreRecord.scoreH);
@@ -33,7 +34,17 @@ public class ParseToxValGenetox {
 
 		dictCC.put("inconclusive", ScoreRecord.scoreNA);
 		dictCC.put("not clastogen", ScoreRecord.scoreNA);
+
+		//**********************************************************************
+		//For toxval v94:
+		dictCC.put("positive", ScoreRecord.scoreH);
+		dictCC.put("positive (single report)", ScoreRecord.scoreH);//TODO
+		dictCC.put("negative", ScoreRecord.scoreL);
+		dictCC.put("negative (single report)", ScoreRecord.scoreL);//TODO
+		dictCC.put("no call", ScoreRecord.scoreNA);
 		
+		
+
 		return dictCC;
 		
 	}
@@ -46,7 +57,6 @@ public class ParseToxValGenetox {
 		ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 						
 		sr.source = ScoreRecord.sourceToxVal;
-		sr.name=rc.name;
 		
 		sr.toxvalID="genetox_summary_"+rc.genetox_summary_id;
 		

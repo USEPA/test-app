@@ -32,6 +32,7 @@ public class Chemical {
 	public String EC_number;//EU classification number (or ID number from whatever source we got data from)
 	public String name;// name of chemical (for display)
 	public String CAS;// chemical abstracts service number for chemical
+	public String dtxsid;
 	
 	public double molecularWeight;//molecular weight- need to convert from molar to mass units
 	public String molecularFormula;
@@ -1555,5 +1556,13 @@ public class Chemical {
 			Score score2=chemical2.getScore(score.hazard_name);
 			score.records.addAll(score2.records);
 		}
+	}
+
+	public String getDtxsid() {
+		return dtxsid;
+	}
+
+	public void setDtxsid(String dtxsid) {
+		this.dtxsid = dtxsid;
 	}
 }

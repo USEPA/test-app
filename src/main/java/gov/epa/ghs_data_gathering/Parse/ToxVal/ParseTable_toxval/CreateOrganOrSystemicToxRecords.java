@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import gov.epa.api.Chemical;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 public class CreateOrganOrSystemicToxRecords {
 
@@ -56,7 +57,7 @@ public class CreateOrganOrSystemicToxRecords {
 //  Note that "Systemic Toxicity" actually could be Organ or Systemic Toxicity.		
 
 		
-		ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr);		
+		ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr, chemical);		
 		sr.duration=study_dur_in_days;
 		sr.durationUnits="days";
 
@@ -198,23 +199,24 @@ public class CreateOrganOrSystemicToxRecords {
 
 		double study_dur_in_days=-1.0;
 
-
-		if (tr.study_duration_units.contentEquals("day")) {
+		//in ToxVal v94 the study_duration_units became plural
+		if (tr.study_duration_units.contentEquals("day") || tr.study_duration_units.contentEquals("days")) {
 			study_dur_in_days=study_duration_value;
-		} else if (tr.study_duration_units.contentEquals("week")) {
+		} else if (tr.study_duration_units.contentEquals("week") || tr.study_duration_units.contentEquals("weeks")) {
 			study_dur_in_days=study_duration_value*7.0;
-		} else if (tr.study_duration_units.contentEquals("month")) {
+		} else if (tr.study_duration_units.contentEquals("month") || tr.study_duration_units.contentEquals("months")) {
 			study_dur_in_days=study_duration_value*30.0;
-		} else if (tr.study_duration_units.contentEquals("year")) {
+		} else if (tr.study_duration_units.contentEquals("year") || tr.study_duration_units.contentEquals("years")) {
 			study_dur_in_days=study_duration_value*365.0;
-		} else if (tr.study_duration_units.contentEquals("hour")) {
+		} else if (tr.study_duration_units.contentEquals("hour") || tr.study_duration_units.contentEquals("hours")) {
 			study_dur_in_days=study_duration_value/24.0;
-		} else if (tr.study_duration_units.contentEquals("minute")) {
+		} else if (tr.study_duration_units.contentEquals("minute") || tr.study_duration_units.contentEquals("minutes")) {
 			study_dur_in_days=study_duration_value/1440.0;
 		} else if (tr.study_duration_units.contentEquals("-")) {
 			return -1;
 		} else {
-			System.out.println("unknown units="+tr.study_duration_units);
+			if(ParseToxValDB.debug)
+				System.out.println("unknown units="+tr.study_duration_units);
 			return -1;
 		}
 

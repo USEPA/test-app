@@ -1,8 +1,12 @@
 package gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import gov.epa.api.Chemical;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 public class CreateAquaticToxicityRecords {
 
@@ -24,35 +28,108 @@ public class CreateAquaticToxicityRecords {
 		-Leora
 	 */	
 
+	
+	public static boolean validAquaticSpeciesToxvalv94(RecordToxVal r) {
+		
+		//Toxval v8 was queried for valid species which was then matched up with species in toxval v94 latin names using a spreadsheet
+		/**
+		 * select * from species where habitat='aquatic' and
+		 * lower(species_supercategory) like '%standard test species%' and
+		 * lower(species_supercategory) not like '%nuisance%' and 
+		 * (species_supercategory like '%fish%' or 
+		 * species_supercategory like '%algae%' or
+		 * species_supercategory like '%crustacean%');
+		 */
+		
+		List<String>valid_latin_names=new ArrayList<>();
+		valid_latin_names.add("Alburnus alburnus");
+		valid_latin_names.add("Americamysis bahia");
+		valid_latin_names.add("Ampelisca abdita");
+		valid_latin_names.add("Anabaena cylindrica");
+		valid_latin_names.add("Anabaena flosaquae");
+		valid_latin_names.add("Ankistrodesmus sp.");
+		valid_latin_names.add("Atherinops affinis");
+		valid_latin_names.add("Catostomus commersoni");
+		valid_latin_names.add("Ceriodaphnia dubia");
+		valid_latin_names.add("Champia parvula");
+		valid_latin_names.add("Chlamydomonas reinhardtii");
+		valid_latin_names.add("Chlorella vulgaris");
+		valid_latin_names.add("Cymatogaster aggregata");
+		valid_latin_names.add("Cypridopsis sp.");
+		valid_latin_names.add("Cyprinodon variegatus");
+		valid_latin_names.add("Danio rerio");
+		valid_latin_names.add("Daphnia magna");
+		valid_latin_names.add("Daphnia pulex");
+		valid_latin_names.add("Dicentrarchus labrax");
+		valid_latin_names.add("Diporeia sp.");
+		valid_latin_names.add("Eohaustorius estuarius");
+		valid_latin_names.add("Esox lucius");
+		valid_latin_names.add("Gammarus lacustris");
+		valid_latin_names.add("Gammarus pseudolimnaeus");
+		valid_latin_names.add("Grandidierella japonica");
+		valid_latin_names.add("Hyalella azteca");
+		valid_latin_names.add("Ictalurus punctatus");
+		valid_latin_names.add("Jordanella floridae");
+		valid_latin_names.add("Leiostomus xanthurus");
+		valid_latin_names.add("Lepomis macrochirus");
+		valid_latin_names.add("Leptocheirus plumulosus");
+		valid_latin_names.add("Menidia beryllina");
+		valid_latin_names.add("Menidia menidia");
+		valid_latin_names.add("Menidia peninsulae");
+		valid_latin_names.add("Navicula pelliculosa");
+		valid_latin_names.add("Oncorhynchus kisutch");
+		valid_latin_names.add("Oncorhynchus mykiss");
+		valid_latin_names.add("Oncorhynchus tshawytscha");
+		valid_latin_names.add("Oryzias latipes");
+		valid_latin_names.add("Parophrys vetulus");
+		valid_latin_names.add("Penaeus aztecus");
+		valid_latin_names.add("Penaeus setiferus");
+		valid_latin_names.add("Pimephales promelas");
+		valid_latin_names.add("Poecilia reticulata");
+		valid_latin_names.add("Rhepoxynius abronius");
+		valid_latin_names.add("Salmo salar");
+		valid_latin_names.add("Salmo trutta");
+		valid_latin_names.add("Salvelinus fontinalis");
+		valid_latin_names.add("Salvelinus namaycush");
+		valid_latin_names.add("Scenedesmus acutus");
+		valid_latin_names.add("Skeletonema costatum");
+		valid_latin_names.add("Stigeoclonium sp.");
+		valid_latin_names.add("Pseudokirchneriella sp.");//found manually in list of toxvalv94 species
+		valid_latin_names.add("Farfantepenaeus duorarum");//found manually in list of toxvalv94 species
+		
+		return valid_latin_names.contains(r.species_scientific);
+	}
+	
+	
 
 	public static void createDurationRecord(Chemical chemical, RecordToxVal tr) {
 
-		double study_dur_in_days=-1.0;
-		/* I think there is no way to make a variable blank so I made it -1, which is not ideal. */
+//		System.out.println("aquatic");
+		
+		Double study_dur_in_days=null;
 
 		double study_duration_value = Double.parseDouble(tr.study_duration_value);
-		/* Do I need to do this to change it from whatever format it was in into double? */
 
-		if (tr.study_duration_units.contentEquals("day")) {
+		//in toxval 94 units became plural
+		if (tr.study_duration_units.contentEquals("day") || tr.study_duration_units.contentEquals("days")) {
 			study_dur_in_days=study_duration_value;
-		} else if (tr.study_duration_units.contentEquals("week")) {
+		} else if (tr.study_duration_units.contentEquals("week") || tr.study_duration_units.contentEquals("weeks")) {
 			study_dur_in_days=study_duration_value*7.0;
-		} else if (tr.study_duration_units.contentEquals("month")) {
+		} else if (tr.study_duration_units.contentEquals("month") || tr.study_duration_units.contentEquals("months")) {
 			study_dur_in_days=study_duration_value*30.0;
-		} else if (tr.study_duration_units.contentEquals("year")) {
+		} else if (tr.study_duration_units.contentEquals("year") || tr.study_duration_units.contentEquals("years")) {
 			study_dur_in_days=study_duration_value*365.0;
-		} else if (tr.study_duration_units.contentEquals("hour")) {
+		} else if (tr.study_duration_units.contentEquals("hour") || tr.study_duration_units.contentEquals("hours")) {
 			study_dur_in_days=study_duration_value/24.0;
-		} else if (tr.study_duration_units.contentEquals("minute")) {
+		} else if (tr.study_duration_units.contentEquals("minute") || tr.study_duration_units.contentEquals("minutes")) {
 			study_dur_in_days=study_duration_value/1440.0;
 		} else if (tr.study_duration_units.contentEquals("-")) {
 			return;
 		} else {
-//			System.out.println("unknown units="+tr.study_duration_units);
+			if(ParseToxValDB.debug)
+				System.out.println("unknown units="+tr.study_duration_units);
 			return;
 		}
-
-
 
 
 		// I added duration-based criteria based on GHS criteria,
@@ -77,10 +154,10 @@ public class CreateAquaticToxicityRecords {
 		//			System.out.println("here1123"+"\t"+tr.toxval_type+"\t"+study_dur_in_days);
 		//		}
 
-		if (tr.species_supercategory.toLowerCase().contains("exotic") ||
-				tr.species_supercategory.toLowerCase().contains("nuisance") ||
-				tr.species_supercategory.toLowerCase().contains("invasive"))
-			return;
+//		if (tr.species_supercategory.toLowerCase().contains("exotic") ||
+//				tr.species_supercategory.toLowerCase().contains("nuisance") ||
+//				tr.species_supercategory.toLowerCase().contains("invasive"))
+//			return;
 		// Excluding invasive species.
 
 		//		if ((study_dur_in_days<5) &&
@@ -104,7 +181,7 @@ public class CreateAquaticToxicityRecords {
 				(fish4day || crustacean2day || algae3or4day)) {
 			Score score=chemical.scoreAcute_Aquatic_Toxicity;
 
-			ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr);
+			ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr, chemical);
 
 			sr.duration=study_dur_in_days;
 			sr.durationUnits="days";
@@ -121,7 +198,7 @@ public class CreateAquaticToxicityRecords {
 //		So we're making the criteria > 6 days.	"							
 			
 			Score score=chemical.scoreChronic_Aquatic_Toxicity;
-			ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr);
+			ScoreRecord sr = ParseToxVal.saveToxValInfo(score,tr,chemical);
 			sr.duration=study_dur_in_days;
 			sr.durationUnits="days";
 			setAquaticToxChronicScore(sr, chemical);
