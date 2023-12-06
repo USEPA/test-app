@@ -919,8 +919,7 @@ public class WebTEST5 {
 
 		DescriptorFactory df = new DescriptorFactory(false);
 
-		logger.info("Calculating '{}' using '{}' methods...", Arrays.toString(params.endpoints),
-				Arrays.toString(params.methods));
+		logger.info("Calculating '{}' using '{}' methods...", params.endpoints,params.methods);
 		long start = System.currentTimeMillis();
 		totalDescriptorCalculationTime = 0;
 		totalPredictionGenerationTime = 0;
@@ -960,8 +959,8 @@ public class WebTEST5 {
 
 
 		for (String method : params.methods) {
-			for (int j = 0; j < params.endpoints.length; j++) {
-				String endpoint = params.endpoints[j];
+			for (int j = 0; j < params.endpoints.size(); j++) {
+				String endpoint = params.endpoints.get(j);
 
 
 				ReportOptions options = getReportOptions(params, CAS, endpoint);

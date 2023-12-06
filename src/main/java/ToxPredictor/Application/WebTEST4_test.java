@@ -1,6 +1,7 @@
 package ToxPredictor.Application;
 
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -35,10 +36,9 @@ public class WebTEST4_test {
 			AtomContainer m=cf.FindChemicalFromCAS(CAS);
 
 			CalculationParameters params=new CalculationParameters();
-			params.endpoints= new String[1];
-			params.endpoints[0]=endpoint;			
-			params.methods= new String[1];
-			params.methods[0]=method;
+			params.endpoints= Arrays.asList(endpoint);
+			params.methods= Arrays.asList(method);
+			
 			
 			Set<WebReportType> wrt = WebReportType.getNone();
 			wrt.add(WebReportType.HTML);

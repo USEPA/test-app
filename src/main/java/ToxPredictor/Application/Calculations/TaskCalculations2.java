@@ -9,7 +9,11 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
@@ -51,6 +55,8 @@ import gov.epa.api.Chemicals;
 import gov.epa.api.RecordLink;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.SqlUtilities;
 //import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import ToxPredictor.Utilities.SaveStructureToFile;
 import ToxPredictor.Utilities.TESTPredictedValue;
@@ -328,10 +334,8 @@ public class TaskCalculations2 {
 //		this.endpoint = endpoint;
 		
 		this.params=new CalculationParameters();
-		params.endpoints= new String[1];
-		params.endpoints[0]=endpoint;			
-		params.methods= new String[1];
-		params.methods[0]=method;
+		params.endpoints= Arrays.asList(endpoint);
+		params.methods= Arrays.asList(method);
 		params.outputFile=fileOutputFolder.getAbsolutePath();
 				
 			
@@ -465,8 +469,8 @@ public class TaskCalculations2 {
 				
 		TESTApplication ta=(TESTApplication)gui;
 		
-		String endpoint=params.endpoints[0];
-		String method=params.methods[0];
+		String endpoint=params.endpoints.get(0);
+		String method=params.methods.get(0);
 		
 		String query=ac.getProperty("Query");
 		
@@ -578,7 +582,7 @@ public class TaskCalculations2 {
 
 	}
 
-	void loadTrainingData(CalculationParameters params) {
+	public void loadTrainingData(CalculationParameters params) {
 		long t1 = System.currentTimeMillis();
 		for (String endpoint : params.endpoints) {		
 			setMessage("Loading training files for "+endpoint);			
@@ -641,6 +645,27 @@ public class TaskCalculations2 {
 		}
 		
 		private void runAA() {
+			
+			Connection conn=null;
+			Statement statToxVal=null;
+
+			try {
+				if (TESTApplication.versionToxVal.equals(ParseToxValDB.v8)) {
+					conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v8);
+				} else if (TESTApplication.versionToxVal.equals(ParseToxValDB.v94)) {
+					conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v94);
+//					conn=SqlUtilities.getConnectionToxVal();//get connection to database server				
+				} else {
+					System.out.println("Invalid toxval version");
+					return;
+				}
+				statToxVal=conn.createStatement();
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				System.out.println("Couldnt connect to toxval db");
+				return;
+			}
+			
 
 			if (TESTApplication.forMDH) {
 				AADashboard.statAA_Dashboard_Records=MySQL_DB.getStatement("databases\\AA dashboard MDH.db");
@@ -709,13 +734,13 @@ public class TaskCalculations2 {
 //						TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity,
 //						TESTConstants.ChoiceWaterSolubility};
 				
-				String [] endpoints= {TESTConstants.ChoiceRat_LD50,
+				List<String> endpoints= Arrays.asList(TESTConstants.ChoiceRat_LD50,
 						TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50,
 						TESTConstants.ChoiceMutagenicity,TESTConstants.ChoiceReproTox,
 						TESTConstants.ChoiceBCF,
-						TESTConstants.ChoiceWaterSolubility};
+						TESTConstants.ChoiceWaterSolubility);
 
-				String [] methods= {TESTConstants.ChoiceConsensus};
+				List<String> methods= Arrays.asList(TESTConstants.ChoiceConsensus);
 				
 				Set<WebReportType> wrt = WebReportType.getNone();
 				wrt.add(WebReportType.HTML);
@@ -731,7 +756,11 @@ public class TaskCalculations2 {
 					AtomContainer ac=(AtomContainer)moleculeSet.getAtomContainer(i);
 					String CAS=ac.getProperty(DSSToxRecord.strCAS);
 					String name=ac.getProperty(DSSToxRecord.strName);
+					String dtxsid=ac.getProperty(DSSToxRecord.strSID);
 									
+					
+//					System.out.println(CAS+"\t"+name+"\t"+dtxsid);
+					
 					String error=ac.getProperty("Error");
 					error=error.replace("\n", "");
 					error=error.replace("\r", "");
@@ -740,7 +769,7 @@ public class TaskCalculations2 {
 
 
 					statMessage = "Molecule ID = " + CAS + " (" + (i + 1) + " of " + moleculeSet.getAtomContainerCount() + ")";
-					Chemical chemical=aad.runChemicalForGUI(CAS, name, ac,cp);
+					Chemical chemical=aad.runChemicalForGUI(CAS, name,dtxsid, ac,cp,TESTApplication.versionToxVal,statToxVal);
 					
 					if (TESTApplication.forMDH) {
 						removeExtraScoresForMDH(chemical);
@@ -937,8 +966,8 @@ public class TaskCalculations2 {
 //			folder.mkdirs();
 			TESTApplication f=(TESTApplication) gui;	
 			
-			String endpoint=params.endpoints[0];
-			String method=params.methods[0];
+			String endpoint=params.endpoints.get(0);
+			String method=params.methods.get(0);
 			
 			if (runCTS) {
 
@@ -1472,3 +1501,4 @@ public class TaskCalculations2 {
 //		}
 	}
 }
+

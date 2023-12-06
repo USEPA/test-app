@@ -895,7 +895,7 @@ public class WebTEST2 {
 //				prepDescriptors=createDescriptorPreparedStatement(connDescriptors);
 			}
 
-			logger.info("Calculating '{}' using '{}' methods for {} molecule(s)...", Arrays.toString(params.endpoints), Arrays.toString(params.methods), moleculeSet.getAtomContainerCount());
+			logger.info("Calculating '{}' using '{}' methods for {} molecule(s)...", params.endpoints, params.methods, moleculeSet.getAtomContainerCount());
 			totalDescriptorCalculationTime = 0;
 			totalPredictionGenerationTime = 0;
 			totalReportGenerationTime = 0;
@@ -942,16 +942,14 @@ public class WebTEST2 {
 				
 				long descriptorCalculationTime = System.currentTimeMillis() - startDescriptors;
 
-				if (params.endpoints[0].equals(TESTConstants.ChoiceDescriptors)) {
+				if (params.endpoints.get(0).equals(TESTConstants.ChoiceDescriptors)) {
 					logger.info("Descriptor Calcs: {}\t{}\t{}", i, dd.ID, descriptorCalculationTime);
 					continue;
 				}
 
 				totalDescriptorCalculationTime += descriptorCalculationTime;
 
-				for (int j = 0; j < params.endpoints.length; j++) {
-					String endpoint = params.endpoints[j];
-
+				for (String endpoint:params.endpoints) {
 
 					//if (checkParams(endpoint, method) != null) {
 					//    continue;
@@ -1004,8 +1002,8 @@ public class WebTEST2 {
 
 		logger.debug("Time to generate output for {} using {} method: {}s "
 				+ "including time to calculate descriptors {}s, " 
-				+ "predictions {}s, reports {}s", Arrays.toString(params.endpoints), 
-				Arrays.toString(params.methods), 
+				+ "predictions {}s, reports {}s", params.endpoints, 
+				params.methods, 
 				(System.currentTimeMillis()-start) / 1000d, 
 				totalDescriptorCalculationTime / 1000d,
 				totalPredictionGenerationTime / 1000d,

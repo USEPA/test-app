@@ -2164,8 +2164,8 @@ public class WebTEST {
 
 		DescriptorFactory df = new DescriptorFactory(false);
 
-		logger.info("Calculating '{}' using '{}' methods for {} molecule(s)...", Arrays.toString(params.endpoints),
-				Arrays.toString(params.methods), moleculeSet.getAtomContainerCount());
+		logger.info("Calculating '{}' using '{}' methods for {} molecule(s)...", params.endpoints,
+				params.methods, moleculeSet.getAtomContainerCount());
 		long start = System.currentTimeMillis();
 		totalDescriptorCalculationTime = 0;
 		totalPredictionGenerationTime = 0;
@@ -2173,23 +2173,23 @@ public class WebTEST {
 
 		List<TESTPredictedValue> result = new ArrayList<TESTPredictedValue>();
 		try {
-			Writer[] fws = new Writer[params.endpoints.length];
-			CsvWriter[] csv = new CsvWriter[params.endpoints.length];
+			Writer[] fws = new Writer[params.endpoints.size()];
+			CsvWriter[] csv = new CsvWriter[params.endpoints.size()];
 			for (int i = 0; i < fws.length; i++) {
 				fws[i] = StringUtils.isEmpty(outputFilePath) ? new StringWriter()
 						: new FileWriter(FileUtils.replaceExtension(outputFilePath, "") + "-"
-								+ TESTConstants.getAbbrevEndpoint(params.endpoints[i]) + ".tsv");
-				if (!params.endpoints[i].equals(TESTConstants.abbrevChoiceDescriptors)) {
+								+ TESTConstants.getAbbrevEndpoint(params.endpoints.get(i)) + ".tsv");
+				if (!params.endpoints.get(i).equals(TESTConstants.abbrevChoiceDescriptors)) {
 					if (!Strings.isEmpty(outputFilePath))
 						csv[i] = new CsvWriter(FileUtils.replaceExtension(outputFilePath, "") + "-"
-								+ TESTConstants.getAbbrevEndpoint(params.endpoints[i]) + ".csv");
+								+ TESTConstants.getAbbrevEndpoint(params.endpoints.get(i)) + ".csv");
 					if (csv[i] != null)
-						writeCsvHeader(csv[i], params.endpoints[i], params.methods[0]);
+						writeCsvHeader(csv[i], params.endpoints.get(i), params.methods.get(0));
 				}
-				if (params.endpoints[i].equals(TESTConstants.abbrevChoiceDescriptors)) {
+				if (params.endpoints.get(i).equals(TESTConstants.abbrevChoiceDescriptors)) {
 					df.WriteCSVHeader(fws[i], del);
 				} else {
-					WriteOverallTextHeader(fws[i], del, params.endpoints[i]);
+					WriteOverallTextHeader(fws[i], del, params.endpoints.get(i));
 				}
 			}
 
@@ -2244,8 +2244,8 @@ public class WebTEST {
 				
 
 				for (String method : params.methods) {
-					for (int j = 0; j < params.endpoints.length; j++) {
-						String endpoint = params.endpoints[j];
+					for (int j = 0; j < params.endpoints.size(); j++) {
+						String endpoint = params.endpoints.get(j);
 
 						// if (checkParams(endpoint, method) != null) {
 						// continue;
@@ -2355,7 +2355,7 @@ public class WebTEST {
 		logger.debug(
 				"Time to generate output for {} using {} method: {}s " + "including time to calculate descriptors {}s, "
 						+ "predictions {}s, reports {}s",
-				Arrays.toString(params.endpoints), Arrays.toString(params.methods),
+				params.endpoints, params.methods,
 				(System.currentTimeMillis() - start) / 1000d, totalDescriptorCalculationTime / 1000d,
 				totalPredictionGenerationTime / 1000d, totalReportGenerationTime / 1000d);
 
@@ -2599,9 +2599,9 @@ public class WebTEST {
 		
 		String endpoints=cmd.getOptionValue("endpoint");
 		if (endpoints.contains(",")) {
-			params.endpoints=endpoints.split(",");	
+			params.endpoints=Arrays.asList(endpoints.split(","));	
 		} else {
-			params.endpoints = cmd.getOptionValues("endpoint");
+			params.endpoints = Arrays.asList(cmd.getOptionValues("endpoint"));
 		}
 		
 		for (String endpoint:params.endpoints ) {
@@ -2609,7 +2609,7 @@ public class WebTEST {
 		}
 		
 				
-		params.methods = cmd.getOptionValues("method");
+		params.methods = Arrays.asList(cmd.getOptionValues("method"));
 		params.reportTypes = new HashSet<>();
 		
 		if (cmd.getOptionValues("report")!=null) {
@@ -2660,16 +2660,17 @@ public class WebTEST {
 		}
 
 		// Endpoint checks
-		String[] endpoints = TESTConstants.getFullEndpoints(params.endpoints);
-		if (ArrayUtils.contains(endpoints, "?")) {
+		List<String> endpoints = TESTConstants.getFullEndpoints(params.endpoints);
+		if (endpoints.contains("?")) {
 			logger.error("invalid endpoint(s)");
 			pass = false;
 		}
 
 		// Methods checks
-		String[] methods = TESTConstants.getFullMethods(params.methods);
-		if (!ArrayUtils.contains(endpoints, TESTConstants.abbrevChoiceDescriptors)
-				&& ArrayUtils.contains(methods, "?")) {
+		List<String> methods = TESTConstants.getFullMethods(params.methods);
+		
+		if (!endpoints.contains(TESTConstants.abbrevChoiceDescriptors)
+				&& methods.contains("?")) {
 			logger.error("invalid method");
 			pass = false;
 		}
@@ -3103,30 +3104,17 @@ public class WebTEST {
 
 	public static List<TESTPredictedValue> go(String input, int inputType, Set<String> endpoints, Set<String> methods,
 			Set<WebReportType> reportTypes) throws Exception {
-
-		String[] m = new String[methods.size()];
-		methods.toArray(m);
-
-		String[] e = new String[endpoints.size()];
-		endpoints.toArray(e);
-
 		AtomContainerSet ms = loadMolecules(input, inputType);
-
-		return WebTEST.go(ms, new CalculationParameters(null, null, e, m, reportTypes));
+		return WebTEST.go(ms, new CalculationParameters(null, null, new ArrayList<>(endpoints), new ArrayList<>(methods), reportTypes));
 	}
 
 	public static List<TESTPredictedValue> go(Set<String> query, int inputType, Set<String> endpoints,
 			Set<String> methods, Set<WebReportType> reportTypes) throws Exception {
 
-		String[] m = new String[methods.size()];
-		methods.toArray(m);
-
-		String[] e = new String[endpoints.size()];
-		endpoints.toArray(e);
 
 		AtomContainerSet ms = loadMolecules(query, inputType);
 
-		return WebTEST.go(ms, new CalculationParameters(null, null, e, m, reportTypes));
+		return WebTEST.go(ms, new CalculationParameters(null, null, new ArrayList<>(endpoints), new ArrayList<>(methods), reportTypes));
 	}
 
 	/**

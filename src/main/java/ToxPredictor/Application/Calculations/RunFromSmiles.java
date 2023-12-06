@@ -1,5 +1,6 @@
 package ToxPredictor.Application.Calculations;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -13,26 +14,28 @@ import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.text.StringEscapeUtils;
+import org.json.CDL;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLV3000Reader;
-import org.openscience.cdk.io.iterator.IteratingSDFReader;
+import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
@@ -41,39 +44,64 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import ToxPredictor.Application.CalculationParameters;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
-import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
 import ToxPredictor.Database.DSSToxRecord;
+import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
+import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.TESTPredictedValue;
 
 
-
 public class RunFromSmiles {
-
+	
+	static boolean debug=true;
+	
+	//	public static String status;
 	public static final String strSID="DTXSID";
 	public static final String strCID="DTXCID";
 	private static final String strCAS = "CASRN";
+	private static final String strSmiles = "Smiles";//?
 
-	static String [] allEndpoints= {TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50,
+	public static List<String>allEndpoints= Arrays.asList(TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50,
 			TESTConstants.ChoiceTP_IGC50,TESTConstants.ChoiceRat_LD50,
 			TESTConstants.ChoiceBCF,TESTConstants.ChoiceReproTox,
-			TESTConstants.ChoiceMutagenicity,TESTConstants.ChoiceEstrogenReceptor,
-			TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity,
-			TESTConstants.ChoiceBoilingPoint,TESTConstants.ChoiceMeltingPoint,
-			TESTConstants.ChoiceFlashPoint,TESTConstants.ChoiceVaporPressure,
-			TESTConstants.ChoiceDensity,TESTConstants.ChoiceSurfaceTension,
-			TESTConstants.ChoiceThermalConductivity,TESTConstants.ChoiceViscosity,
-			TESTConstants.ChoiceWaterSolubility};
+			TESTConstants.ChoiceMutagenicity,
+//			TESTConstants.ChoiceEstrogenReceptor,
+//			TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity,
+			TESTConstants.ChoiceBoilingPoint,
+			TESTConstants.ChoiceVaporPressure,
+			TESTConstants.ChoiceMeltingPoint,
+			TESTConstants.ChoiceDensity,
+			TESTConstants.ChoiceFlashPoint,
+			TESTConstants.ChoiceSurfaceTension,
+			TESTConstants.ChoiceThermalConductivity,
+			TESTConstants.ChoiceViscosity,
+			TESTConstants.ChoiceWaterSolubility);
+
+	
+	public static String [] twoEndpoints= {TESTConstants.ChoiceFHM_LC50,
+			TESTConstants.ChoiceMutagenicity};
+
 
 	//	private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().serializeSpecialFloatingPointValues().create();
-	private static Gson gson = new GsonBuilder().setPrettyPrinting().serializeSpecialFloatingPointValues().create();
+	public static Gson gson = new GsonBuilder().setPrettyPrinting().serializeSpecialFloatingPointValues().create();
+	public static Gson gsonNotPretty = new GsonBuilder().serializeSpecialFloatingPointValues().disableHtmlEscaping().create();
 
-
+	
 	public static AtomContainer createMolecule(String smiles,String DTXSID, String CAS) {
 		return createMolecule(smiles,DTXSID,null, CAS);
+	}
+
+
+	public static AtomContainer createMolecule(String smiles) {
+		AtomContainer m = WebTEST4.prepareSmilesMolecule(smiles);
+		m.setProperty(DSSToxRecord.strSmiles, smiles);//need orig
+		ResolverDb2.assignRecordByStructureViaInchis(m, "");
+		//		Gson gson=new Gson();
+		//		System.out.println(gson.toJson(m.getProperties()));
+		return m;
 	}
 
 	public static AtomContainer createMolecule(String smiles,String DTXSID,String DTXCID, String CAS) {
@@ -132,10 +160,10 @@ public class RunFromSmiles {
 		// *******************************************************
 		WebTEST4.loadTrainingData(endpoint,method);//Note: need to use webservice approach to make this data persistent
 
-		String [] endpoints= {endpoint};
+		List<String> endpoints= Arrays.asList(endpoint);
 
 		for (int i = 0; i < moleculeSet.getAtomContainerCount(); i++) {
-			AtomContainer ac = (AtomContainer) moleculeSet.getAtomContainer(i);
+			IAtomContainer ac =  moleculeSet.getAtomContainer(i);
 			ac=calculate(ac,endpoints,method);
 			PredictionResults pr=getResults(ac,method); 
 
@@ -176,6 +204,63 @@ public class RunFromSmiles {
 	}
 
 
+	/**
+	 * Run predictions in batch so don't have to reload model info each time 
+	 * Results stored in hashtable by DTXSID
+	 * 
+	 * @param moleculeSet
+	 * @param endpoint
+	 * @param method
+	 * @param createReports
+	 * @param createDetailedReports
+	 * @return hashtable of results with key as DTXSID and prediction results + report as TESTPredictedValue
+	 * 
+	 */
+	public static PredictionResults runEndpoint(IAtomContainer ac, String endpoint,String method,boolean createReports,boolean createDetailedReports,String key) {				
+
+		DescriptorFactory.debug=false;
+		WebTEST4.createDetailedReports=createDetailedReports;
+		WebTEST4.createReports=createReports;
+		WebTEST4.generateWebpages=false;
+		PredictToxicityJSONCreator.forGUI=true;
+
+
+		// *******************************************************
+		WebTEST4.loadTrainingData(endpoint,method);//Note: need to use webservice approach to make this data persistent
+
+		
+		List<String> endpoints= Arrays.asList(endpoint);
+
+		ac=calculate(ac,endpoints,method);
+		PredictionResults pr=getResults(ac,method); 
+
+		String DTXSID=ac.getProperty(DSSToxRecord.strSID);
+		String Smiles=ac.getProperty(DSSToxRecord.strSmiles);
+		String error=(String) ac.getProperty("Error");
+		String CAS=null;
+
+
+		if (pr==null) {
+			pr=new PredictionResults();
+			pr.setEndpoint(endpoint);
+			pr.setMethod(method);
+		}
+
+		if (ac.getProperty(DSSToxRecord.strCAS)!=null) {				
+			CAS=ac.getProperty(DSSToxRecord.strCAS);
+			pr.setCAS(CAS);	
+		}
+
+		pr.setDTXSID(DTXSID);
+		pr.setSmiles(Smiles);
+		pr.setError(error);
+
+
+		return pr;
+
+	}
+
+
 
 	/**
 	 * Run predictions in batch so don't have to reload model info each time 
@@ -189,7 +274,7 @@ public class RunFromSmiles {
 	 * @return hashtable of results with key as DTXSID and prediction results + report as TESTPredictedValue
 	 * 
 	 */
-	public static Hashtable<String,List<PredictionResults>> runEndpoints(AtomContainerSet moleculeSet, String [] endpoints,String method,boolean createReports,boolean createDetailedReports,String key) {				
+	public static Hashtable<String,List<PredictionResults>> runEndpoints(AtomContainerSet moleculeSet, List<String> endpoints,String method,boolean createReports,boolean createDetailedReports,String key) {				
 
 		DescriptorFactory.debug=false;
 		WebTEST4.createDetailedReports=createDetailedReports;
@@ -206,7 +291,7 @@ public class RunFromSmiles {
 			WebTEST4.loadTrainingData(endpoint,method);//Note: need to use webservice approach to make this data persistent
 
 		for (int i = 0; i < moleculeSet.getAtomContainerCount(); i++) {
-			AtomContainer ac = (AtomContainer) moleculeSet.getAtomContainer(i);
+			IAtomContainer ac = (AtomContainer) moleculeSet.getAtomContainer(i);
 			ac=calculate(ac,endpoints,method);
 			List<PredictionResults> resultsArray=getResultsArray(ac,method);
 
@@ -216,17 +301,17 @@ public class RunFromSmiles {
 			if (ac.getProperty(strSID)!=null) DTXSID=ac.getProperty(strSID);
 			else if (ac.getProperty(DSSToxRecord.strSID)!=null) DTXSID=ac.getProperty(DSSToxRecord.strSID);
 			ac.setProperty(DSSToxRecord.strSID, DTXSID);
-			
+
 			String DTXCID=null;
 			if (ac.getProperty(strCID)!=null) DTXCID=ac.getProperty(strCID);
 			else if (ac.getProperty(DSSToxRecord.strCID)!=null) DTXCID=ac.getProperty(DSSToxRecord.strCID);
 			ac.setProperty(DSSToxRecord.strCID, DTXCID);
-			
+
 			String CAS=null;
 			if (ac.getProperty(strCAS)!=null)	CAS=ac.getProperty(strCAS);
 			else if (ac.getProperty(DSSToxRecord.strCAS)!=null)	CAS=ac.getProperty(DSSToxRecord.strCAS);
 			ac.setProperty(DSSToxRecord.strCAS, CAS);
-			
+
 
 			String Smiles=ac.getProperty(DSSToxRecord.strSmiles);
 			String error=(String) ac.getProperty("Error");
@@ -234,13 +319,13 @@ public class RunFromSmiles {
 			//			System.out.println(DTXSID);
 
 
-			for (int j=0;j<endpoints.length;j++) {
+			for (int j=0;j<endpoints.size();j++) {
 
 				PredictionResults pr=null;
 
 				if (resultsArray.get(j)==null) {
 					pr=new PredictionResults();
-					pr.setEndpoint(endpoints[j]);
+					pr.setEndpoint(endpoints.get(j));
 					pr.setMethod(method);	
 				} else {
 					pr=resultsArray.get(j);
@@ -267,8 +352,8 @@ public class RunFromSmiles {
 		} // end loop over molecules
 		return htResults;
 	}
-	
-	
+
+
 	/**
 	 * Run predictions in batch so don't have to reload model info each time 
 	 * Results stored in hashtable by DTXSID
@@ -281,7 +366,7 @@ public class RunFromSmiles {
 	 * @return hashtable of results with key as DTXSID and prediction results + report as TESTPredictedValue
 	 * 
 	 */
-	public static List<PredictionResults> runEndpointsAsList(AtomContainerSet moleculeSet, String [] endpoints,String method,boolean createReports,boolean createDetailedReports,String key) {				
+	public static List<PredictionResults> runEndpointsAsList(AtomContainerSet moleculeSet, List<String> endpoints,String method,boolean createReports,boolean createDetailedReports,String key) {				
 
 		DescriptorFactory.debug=false;
 		WebTEST4.createDetailedReports=createDetailedReports;
@@ -294,47 +379,48 @@ public class RunFromSmiles {
 
 		// *******************************************************
 
+		if (debug) System.out.print("Loading models/datasets ...");
+		
 		for (String endpoint:endpoints)
 			WebTEST4.loadTrainingData(endpoint,method);//Note: need to use webservice approach to make this data persistent
 
+		if (debug) System.out.println("done");
+		
 		for (int i = 0; i < moleculeSet.getAtomContainerCount(); i++) {
-			AtomContainer ac = (AtomContainer) moleculeSet.getAtomContainer(i);
+			IAtomContainer ac = moleculeSet.getAtomContainer(i);
 
 			String DTXSID=null;
 			if (ac.getProperty(strSID)!=null) DTXSID=ac.getProperty(strSID);
 			else if (ac.getProperty(DSSToxRecord.strSID)!=null) DTXSID=ac.getProperty(DSSToxRecord.strSID);
 			ac.setProperty(DSSToxRecord.strSID, DTXSID);
-			
+
 			String DTXCID=null;
 			if (ac.getProperty(strCID)!=null) DTXCID=ac.getProperty(strCID);
 			else if (ac.getProperty(DSSToxRecord.strCID)!=null) DTXCID=ac.getProperty(DSSToxRecord.strCID);
 			ac.setProperty(DSSToxRecord.strCID, DTXCID);
-			
-			System.out.println(ac.getProperty(DSSToxRecord.strSmiles)+"");
-			
-			ac=calculate(ac,endpoints,method);
-			List<PredictionResults> resultsArray=getResultsArray(ac,method);
 
-			
 			String CAS=null;
 			if (ac.getProperty(strCAS)!=null)	CAS=ac.getProperty(strCAS);
 			else if (ac.getProperty(DSSToxRecord.strCAS)!=null)	CAS=ac.getProperty(DSSToxRecord.strCAS);
 			ac.setProperty(DSSToxRecord.strCAS, CAS);
-			
+
+			//			status=ac.getProperty(DSSToxRecord.strSmiles)+"";
+			//			System.out.println((i+1)+"\t"+ac.getProperty(DSSToxRecord.strSmiles)+"");
+
+			ac=calculate(ac,endpoints,method);
+			List<PredictionResults> resultsArray=getResultsArray(ac,method);
 
 			String Smiles=ac.getProperty(DSSToxRecord.strSmiles);
 			String error=(String) ac.getProperty("Error");
 
-			//			System.out.println(DTXSID);
 
-
-			for (int j=0;j<endpoints.length;j++) {
+			for (int j=0;j<endpoints.size();j++) {
 
 				PredictionResults pr=null;
 
 				if (resultsArray.get(j)==null) {
 					pr=new PredictionResults();
-					pr.setEndpoint(endpoints[j]);
+					pr.setEndpoint(endpoints.get(j));
 					pr.setMethod(method);	
 				} else {
 					pr=resultsArray.get(j);
@@ -347,9 +433,98 @@ public class RunFromSmiles {
 				pr.setSmiles(Smiles);
 				pr.setError(error);
 				Results.add(pr);
+
+				//				Vector<SimilarChemical>similarChemicals0=pr.getSimilarChemicals().get(0).getSimilarChemicalsList();
+				//				SimilarChemical sc0_0=similarChemicals0.get(0);
+				//				System.out.println("here123:"+sc0_0.getCAS());
+
 			}
 
 		} // end loop over molecules
+		return Results;
+	}
+	
+	
+	public static List<PredictionResults> runEndpointsAsList(IAtomContainer ac, List<String> endpoints,String method,boolean createReports,boolean createDetailedReports) {				
+
+		DescriptorFactory.debug=false;
+		WebTEST4.createDetailedReports=createDetailedReports;
+		WebTEST4.createReports=createReports;
+		WebTEST4.generateWebpages=false;
+		PredictToxicityJSONCreator.forGUI=true;
+
+		List<PredictionResults>Results=new ArrayList<>();
+
+
+		// *******************************************************
+
+		String DTXSID=null;
+		if (ac.getProperty(strSID)!=null) DTXSID=ac.getProperty(strSID);
+		else if (ac.getProperty(DSSToxRecord.strSID)!=null) DTXSID=ac.getProperty(DSSToxRecord.strSID);
+		ac.setProperty(DSSToxRecord.strSID, DTXSID);
+
+		String DTXCID=null;
+		if (ac.getProperty(strCID)!=null) DTXCID=ac.getProperty(strCID);
+		else if (ac.getProperty(DSSToxRecord.strCID)!=null) DTXCID=ac.getProperty(DSSToxRecord.strCID);
+		ac.setProperty(DSSToxRecord.strCID, DTXCID);
+
+		String CAS=null;
+		if (ac.getProperty(strCAS)!=null)	CAS=ac.getProperty(strCAS);
+		else if (ac.getProperty(DSSToxRecord.strCAS)!=null)	CAS=ac.getProperty(DSSToxRecord.strCAS);
+		ac.setProperty(DSSToxRecord.strCAS, CAS);
+		
+		String Smiles=null;
+		if (ac.getProperty(strSmiles)!=null)	Smiles=ac.getProperty(strSmiles);
+		else if (ac.getProperty(DSSToxRecord.strSmiles)!=null)	Smiles=ac.getProperty(DSSToxRecord.strSmiles);
+		ac.setProperty(DSSToxRecord.strSmiles, Smiles);
+
+		
+		DSSToxRecord rec = ac.getProperty("DSSToxRecord");
+		if (DTXSID == null && rec != null )	DTXSID = rec.sid;
+		if (DTXCID == null && rec != null )	DTXCID = rec.cid;
+		if (CAS == null && rec != null )CAS=rec.cas;
+		if (Smiles== null && rec != null)Smiles=rec.smiles;
+		
+		//			status=ac.getProperty(DSSToxRecord.strSmiles)+"";
+		//			System.out.println((i+1)+"\t"+ac.getProperty(DSSToxRecord.strSmiles)+"");
+
+		ac=calculate(ac,endpoints,method);
+		List<PredictionResults> resultsArray=getResultsArray(ac,method);
+
+		
+		String error=(String) ac.getProperty("Error");
+
+
+		for (int j=0;j<endpoints.size();j++) {
+
+			PredictionResults pr=null;
+
+			if (resultsArray.get(j)==null) {
+				pr=new PredictionResults();
+				pr.setEndpoint(endpoints.get(j));
+				pr.setMethod(method);	
+			} else {
+				pr=resultsArray.get(j);
+			}
+
+			pr.setVersion(TESTConstants.SoftwareVersion);
+			pr.setCAS(CAS);	
+			pr.setDTXSID(DTXSID);
+			pr.setDTXCID(DTXCID);
+			pr.setSmiles(Smiles);
+			
+			if(pr.getError()==null)
+				pr.setError(error);			
+			
+			Results.add(pr);
+
+			//				Vector<SimilarChemical>similarChemicals0=pr.getSimilarChemicals().get(0).getSimilarChemicalsList();
+			//				SimilarChemical sc0_0=similarChemicals0.get(0);
+			//				System.out.println("here123:"+sc0_0.getCAS());
+
+		}
+
+
 		return Results;
 	}
 	private static void writeReportsAsHTML_Files(Hashtable<String,PredictionResults>htResults,String reportBase) {				
@@ -385,7 +560,7 @@ public class RunFromSmiles {
 	}
 
 
-	private static PredictionResults getResults (AtomContainer ac,String method) {
+	private static PredictionResults getResults (IAtomContainer ac,String method) {
 
 		List<TESTPredictedValue>listTPV=ac.getProperty("listTPV");
 
@@ -400,7 +575,7 @@ public class RunFromSmiles {
 	}
 
 
-	private static List<PredictionResults> getResultsArray (AtomContainer ac,String method) {		
+	private static List<PredictionResults> getResultsArray (IAtomContainer ac,String method) {		
 		List<TESTPredictedValue>listTPV=ac.getProperty("listTPV");		
 		List<PredictionResults>listPR=new ArrayList<PredictionResults>();
 
@@ -408,6 +583,7 @@ public class RunFromSmiles {
 			TESTPredictedValue tpv=listTPV.get(j);
 			if (tpv.method.equals(method)) {					
 				listPR.add(tpv.predictionResults);
+
 			}
 		}
 		return listPR;
@@ -483,7 +659,7 @@ public class RunFromSmiles {
 	//		return ac;
 	//	}
 
-	private static AtomContainer calculate(AtomContainer ac,String []endpoints,String method) {
+	private static IAtomContainer calculate(IAtomContainer ac,List<String>endpoints,String method) {
 		String error=(String) ac.getProperty("Error");
 		List<TESTPredictedValue>listTPV=null;
 
@@ -494,22 +670,27 @@ public class RunFromSmiles {
 			//Note: descriptor calculations for each chemical are the most time consuming. One could run calculations using the same descriptors and run all endpoints
 			dd=WebTEST4.goDescriptors(ac);
 
+			//Make sure dd.ID is not null
 			if (ac.getProperty(DSSToxRecord.strCAS)!=null)  {
 				dd.ID=ac.getProperty(DSSToxRecord.strCAS);//need to properly run nearest neighbor method to exclude test chemical by CAS	
 			} else if (ac.getProperty(DSSToxRecord.strSID)!=null){
 				dd.ID=ac.getProperty(DSSToxRecord.strSID);
 			} else if (ac.getProperty(DSSToxRecord.strCID)!=null){
 				dd.ID=ac.getProperty(DSSToxRecord.strCID);
-			} else {
+			} else if (ac.getProperty("DSSToxRecord")!=null) {
+				DSSToxRecord dr=ac.getProperty("DSSToxRecord");
+				dd.ID=dr.cas;
+			} 
+			
+			if (dd.ID==null)
 				System.out.println("Cant set ID for DescriptorData: no CAS,SID,or CID");
-			}
+			
 
 			error=(String) ac.getProperty("Error");
 
 			CalculationParameters params=new CalculationParameters();
 			params.endpoints=endpoints;			
-			params.methods= new String[1];
-			params.methods[0]=method;
+			params.methods= Arrays.asList(method);
 
 			listTPV=WebTEST4.doPredictions(ac,dd,params);
 
@@ -529,37 +710,107 @@ public class RunFromSmiles {
 	 * Example of how to run all endpoints at once
 	 */
 	private static void runSingleEndpointExample () {
-		String endpoint =TESTConstants.ChoiceFHM_LC50;//what property or toxicity endpoint being predicted
+//		String endpoint =TESTConstants.ChoiceFHM_LC50;//what property or toxicity endpoint being predicted
+		String endpoint=TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity;
+		
 		String method =TESTConstants.ChoiceConsensus;//what QSAR method being used (default- runs all methods and takes average)
 		boolean createReports=true;//whether to store report
 		boolean createDetailedReports=false;//detailed reports have lots more info and creates more html files
 		String reportBase="reports";//folder to store reports to harddrive
 
 		AtomContainerSet acs=new AtomContainerSet();		
+
 		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242","71-43-2"));//valid simple molecule
-		acs.addAtomContainer(createMolecule("O=P(OC1=CC=CC=C1)(OC1=CC=CC=C1)OC1=CC=CC=C1","DTXSID1021952","115-86-6"));//valid but more complicated molecule
-		acs.addAtomContainer(createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2"));//invalid molecule: salt
+		//		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242",null));//valid simple molecule
+		//		acs.addAtomContainer(createMolecule("c1ccccc1", null,null));//valid simple molecule
+		//		acs.addAtomContainer(createMolecule("O=P(OC1=CC=CC=C1)(OC1=CC=CC=C1)OC1=CC=CC=C1","DTXSID1021952","115-86-6"));//valid but more complicated molecule
+		//		acs.addAtomContainer(createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2"));//invalid molecule: salt
 		//		acs.addAtomContainer(createMolecule("O=C6c4ccc5c1ccc3c2c1c(ccc2C(=O)N(c2ccc(\\N=N/c1ccccc1)cc2)C3=O)c1ccc(c4c51)C(=O)N6c2ccc(\\N=N/c1ccccc1)cc2", "DTXSID1051983","3049-71-6"));//very complicated aromatic molecule, takes longer to run
-		acs.addAtomContainer(createMolecule("XXXX", "DTXSID2","123-45-6"));//bad smiles (cant convert to structure)
-		acs.addAtomContainer(createMolecule("[S]", "DTXSID9034941","7704-34-9"));//has no carbon
+		//		acs.addAtomContainer(createMolecule("XXXX", "DTXSID2","123-45-6"));//bad smiles (cant convert to structure)
+		//		acs.addAtomContainer(createMolecule("[S]", "DTXSID9034941","7704-34-9"));//has no carbon
 
-		Hashtable<String,PredictionResults>htResults=runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
+		List<String> endpoints= Arrays.asList(endpoint);
 
-		//Get DTXSID of a chemical:
-		String DTXSID=acs.getAtomContainer(0).getProperty(DSSToxRecord.strSID);
+		List<PredictionResults>listPR=runEndpointsAsList(acs, endpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
 
 		//Get report for one of the above chemicals as Json string:
-		PredictionResults predictionResults=htResults.get(DTXSID);//can also iterate over hashtable to get all the reports		
+		PredictionResults predictionResults=listPR.get(0);		
 		String json=getReportAsJsonString(predictionResults);
 		System.out.println(json);
 
 		//Get single report as HTML string:
 		String htmlReport=getReportAsHTMLString(predictionResults);
-		System.out.println(htmlReport);
+		//		System.out.println(htmlReport);
+
+		try {
+			File file=new File(reportBase+"/results.html");
+			FileWriter fw=new FileWriter(file);
+			fw.write(htmlReport);
+			fw.flush();
+			fw.close();
+
+			Desktop desktop = Desktop.getDesktop();
+			desktop.browse(file.toURI());
+
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
 
 		//		//Write reports for all chemicals to harddrive:
 		//		writeReportsAsJsonFiles(htResults, endpoint, method, reportBase);
 		//		writeReportsAsHTML_Files(htResults, endpoint, method, reportBase);
+
+	}
+	
+
+
+	/**
+	 * Example of how to run all single chemical for single endpoint
+	 */
+	private static void runSingleChemicalFromSmiles () {
+
+		String endpoint =TESTConstants.ChoiceFHM_LC50;//what property or toxicity endpoint being predicted
+		String method =TESTConstants.ChoiceConsensus;//what QSAR method being used (default- runs all methods and takes average)
+
+		boolean createReports=true;//whether to store report
+		boolean createDetailedReports=false;//detailed reports have lots more info and creates more html files
+
+		String reportBase="reports";//folder to store reports to harddrive
+
+		String smiles="c1ccccc1";
+		//		String smiles="O=P(OC1=CC=CC=C1)(OC1=CC=CC=C1)OC1=CC=CC=C1";//valid but more complicated molecule
+		//		String smiles="Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1";//salt
+		//		String smiles="O=C6c4ccc5c1ccc3c2c1c(ccc2C(=O)N(c2ccc(\\N=N/c1ccccc1)cc2)C3=O)c1ccc(c4c51)C(=O)N6c2ccc(\\N=N/c1ccccc1)cc2";//very complicated aromatic molecule, takes longer to run
+		//		String smiles="XXXX";//bad smiles (cant convert to structure)
+		//		String smiles="[S]";//has no carbon
+		//		String smiles="COCOCCCOCOCOCOCOOCCCCOCOC";// valid compound not in database
+
+
+		AtomContainer ac=createMolecule(smiles);//valid simple molecule
+
+		PredictionResults predictionResults=runEndpoint(ac, endpoint, method,createReports,
+				createDetailedReports,DSSToxRecord.strSID);		
+
+		//Get report for one of the above chemicals as Json string:
+		String json=getReportAsJsonString(predictionResults);
+		System.out.println(json);
+
+		//Get single report as HTML string:
+		String htmlReport=getReportAsHTMLString(predictionResults);
+
+		System.out.println(htmlReport);
+
+		try {
+			FileWriter fw=new FileWriter(reportBase+"/results.html");
+			fw.write(htmlReport);
+			fw.flush();
+			fw.close();
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 
 	}
 
@@ -574,11 +825,12 @@ public class RunFromSmiles {
 
 		AtomContainerSet acs=new AtomContainerSet();		
 		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242","71-43-2"));//valid simple molecule
-		acs.addAtomContainer(createMolecule("O=P(OC1=CC=CC=C1)(OC1=CC=CC=C1)OC1=CC=CC=C1","DTXSID1021952","115-86-6"));//valid but more complicated molecule
-		acs.addAtomContainer(createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2"));//invalid molecule: salt
-		acs.addAtomContainer(createMolecule("O=C6c4ccc5c1ccc3c2c1c(ccc2C(=O)N(c2ccc(\\N=N/c1ccccc1)cc2)C3=O)c1ccc(c4c51)C(=O)N6c2ccc(\\N=N/c1ccccc1)cc2", "DTXSID1051983","3049-71-6"));//very complicated aromatic molecule, takes longer to run
-		acs.addAtomContainer(createMolecule("XXXX", "DTXSID2","123-45-6"));//bad smiles (cant convert to structure)
-		acs.addAtomContainer(createMolecule("[S]", "DTXSID9034941","7704-34-9"));//has no carbon
+
+		//		acs.addAtomContainer(createMolecule("O=P(OC1=CC=CC=C1)(OC1=CC=CC=C1)OC1=CC=CC=C1","DTXSID1021952","115-86-6"));//valid but more complicated molecule
+		//		acs.addAtomContainer(createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2"));//invalid molecule: salt
+		//		acs.addAtomContainer(createMolecule("O=C6c4ccc5c1ccc3c2c1c(ccc2C(=O)N(c2ccc(\\N=N/c1ccccc1)cc2)C3=O)c1ccc(c4c51)C(=O)N6c2ccc(\\N=N/c1ccccc1)cc2", "DTXSID1051983","3049-71-6"));//very complicated aromatic molecule, takes longer to run
+		//		acs.addAtomContainer(createMolecule("XXXX", "DTXSID2","123-45-6"));//bad smiles (cant convert to structure)
+		//		acs.addAtomContainer(createMolecule("[S]", "DTXSID9034941","7704-34-9"));//has no carbon
 
 		//Run all endpoints at once:
 		//		String [] endpoints= {TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50};
@@ -627,7 +879,7 @@ public class RunFromSmiles {
 
 		SmilesParser sp  = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 
-		
+
 		try {
 
 			FileInputStream fis=new FileInputStream(sdfFilePath);
@@ -659,7 +911,7 @@ public class RunFromSmiles {
 				mr.setReader(stream);
 
 				IAtomContainer molecule=null;
-				
+
 				try {
 					molecule = (IAtomContainer) mr.readMolecule(DefaultChemObjectBuilder.getInstance());
 				} catch (Exception ex) {
@@ -681,32 +933,32 @@ public class RunFromSmiles {
 				}
 
 				if(molecule.getAtomCount()==0) {
-				
+
 					AtomContainer molecule2=null;
-					
+
 					String smiles=molecule.getProperty("smiles");
-					
+
 					if (smiles!=null) {
 						try {
 							molecule2 = (AtomContainer)sp.parseSmiles(smiles);
-//						System.out.println(DTXCID+"\t"+smiles+"\t"+molecule2.getAtomCount());
+							//						System.out.println(DTXCID+"\t"+smiles+"\t"+molecule2.getAtomCount());
 						} catch (Exception ex) {
 							molecule2=new AtomContainer();
 						}
-						
+
 					}else {
 						molecule2 = new AtomContainer();
 					}							
-						
+
 					molecule2.setProperties(molecule.getProperties());
 					acs.addAtomContainer(molecule2);
-					
+
 				} else {
 					acs.addAtomContainer(molecule);
 				}
-						
+
 			}
-			
+
 			br.close();
 			mr.close();
 		} catch (Exception ex) {
@@ -717,68 +969,175 @@ public class RunFromSmiles {
 
 
 
-	static void runSDF_all_endpoints(String SDFFilePath, String destJsonPath,boolean skipMissingSID,int maxCount) {
+	public static void runSDF_all_endpoints(String SDFFilePath, String destJsonPath,boolean skipMissingSID,int maxCount) {
 
 		String method = TESTConstants.ChoiceConsensus;// what QSAR method being used (default- runs all methods and
 		boolean createReports = true;// whether to store report
 		boolean createDetailedReports = false;// detailed reports have lots more info and creates more html files
 
 		AtomContainerSet acs=readSDFV3000(SDFFilePath);
-		AtomContainerSet acs2 = filterAtomContainerSet(acs, skipMissingSID, maxCount);
-		
-		System.out.println(acs2.getAtomContainerCount());
 
-//		Hashtable<String,List<PredictionResults>>htResultsAll=
-//				runEndpoints(acs2, allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
+		System.out.println("atom container count="+acs.getAtomContainerCount());
+
+		AtomContainerSet acs2 = filterAtomContainerSet(acs, skipMissingSID,maxCount);
+
+		System.out.println("atom container count="+acs2.getAtomContainerCount());
+
+		//		Hashtable<String,List<PredictionResults>>htResultsAll=
+		//				runEndpoints(acs2, allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
 
 		List<PredictionResults>results=runEndpointsAsList(acs2, allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
-		
+		//		List<PredictionResults>results=runEndpointsAsList(acs2, twoEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
+
 		saveJson(destJsonPath, results);
-		
-//		PredictionResults predictionResults=results.get(0);
-//		String reportBase="reports";
-//		writeWebPage(predictionResults, reportBase, predictionResults.getDTXCID());	
-		
+		//		saveResultsAsTsv(destJsonPath.replace(".json", ".tsv"), results);
+
+		//		PredictionResults predictionResults=results.get(0);
+		//		String reportBase="reports";
+		//		writeWebPage(predictionResults, reportBase, predictionResults.getDTXCID());	
+
 	}
-	
-	static void runSDF(String SDFFilePath, String endpoint,String destJsonPath,boolean skipMissingSID,int maxCount) {
+
+	public static void runSDF_all_endpoints_write_continuously(String SDFFilePath, String destJsonPath,boolean skipMissingSID,int maxCount,boolean removeAlreadyRan) {
 
 		String method = TESTConstants.ChoiceConsensus;// what QSAR method being used (default- runs all methods and
 		boolean createReports = true;// whether to store report
 		boolean createDetailedReports = false;// detailed reports have lots more info and creates more html files
 
 		AtomContainerSet acs=readSDFV3000(SDFFilePath);
-		
-		
-		AtomContainerSet acs2 = filterAtomContainerSet(acs, skipMissingSID, maxCount);
-		
+
+		if(debug) System.out.println("atom container count in sdf="+acs.getAtomContainerCount());
+
+		AtomContainerSet acs2 = filterAtomContainerSet(acs, skipMissingSID,maxCount);
+
+		if(debug) System.out.println("atom container count filtered="+acs2.getAtomContainerCount());
+
+		try {
+
+			File destFile=new File(destJsonPath);
+
+			FileWriter fw;
+			
+			if(removeAlreadyRan) {
+				if (destFile.exists()) {
+					int count=removeAlreadyRanChemicals(destJsonPath, acs2);
+					if(debug) System.out.println(count+" removed since already ran");
+				}
+				fw=new FileWriter(destJsonPath,destFile.exists());
+			} else {
+				fw=new FileWriter(destJsonPath);
+			}
+
+			if (acs2.getAtomContainerCount()==0) {
+				if(debug) System.out.println("All chemicals ran");
+				return;
+			}
+			
+			if(debug) System.out.println("");
+			for (String endpoint:allEndpoints) {
+				if (debug) System.out.println("Loading "+endpoint);
+				WebTEST4.loadTrainingData(endpoint,method);//Note: need to use webservice approach to make this data persistent
+			}
+			if(debug) System.out.println("");
+			
+			for (int i=0;i<acs2.getAtomContainerCount();i++) {
+				
+				AtomContainer ac=(AtomContainer) acs2.getAtomContainer(i);
+				
+				if (debug) System.out.println(ac.getProperty("smiles")+"");
+				
+				List<PredictionResults>results=runEndpointsAsList(ac, allEndpoints, method,createReports,createDetailedReports);
+				for (PredictionResults pr:results) {
+					fw.write(gsonNotPretty.toJson(pr)+"\r\n");
+					fw.flush();
+				}
+			}
+			fw.close();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+
+	}
+
+	public static int removeAlreadyRanChemicals(String destJsonPath, AtomContainerSet acs2) throws IOException {
+
+		BufferedReader br=new BufferedReader(new FileReader(destJsonPath));
+		String lastLine="";
+		//		for (String line:lines) {
+		while (true) {
+			String line=br.readLine();
+			if(line==null) break;
+			lastLine=line;
+		}
+		br.close();
+
+
+		PredictionResults pr=gson.fromJson(lastLine,PredictionResults.class);
+
+		int count=0;
+
+		for (int i=0;i<acs2.getAtomContainerCount();i++) {
+			AtomContainer ac=(AtomContainer) acs2.getAtomContainer(i);
+			String DTXCID=ac.getProperty("DTXCID");
+			//			System.out.println(DTXCID+"\t"+pr.getDTXCID());
+
+			acs2.removeAtomContainer(i--);
+
+			count++;
+
+			if (DTXCID.equals(pr.getDTXCID())) break;
+		}
+
+		//		System.out.println("Removed "+count+" chemicals since already ran");
+		return count;
+	}
+
+
+
+
+	public static void runSDF(String SDFFilePath, String endpoint,String destJsonPath,boolean skipMissingSID,int maxCount) {
+
+		String method = TESTConstants.ChoiceConsensus;// what QSAR method being used (default- runs all methods and
+		boolean createReports = true;// whether to store report
+		boolean createDetailedReports = false;// detailed reports have lots more info and creates more html files
+
+		AtomContainerSet acs=readSDFV3000(SDFFilePath);
+
+
+		AtomContainerSet acs2 = filterAtomContainerSet(acs, skipMissingSID,maxCount);
+
 		acs=null;
 		System.out.println(acs2.getAtomContainerCount());
 
-//		Hashtable<String,List<PredictionResults>>htResultsAll=
-//				runEndpoints(acs2, allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
+		//		Hashtable<String,List<PredictionResults>>htResultsAll=
+		//				runEndpoints(acs2, allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
 
-		String [] endpoints= {endpoint};
-		
+		List<String> endpoints= Arrays.asList(endpoint);
+
 		List<PredictionResults>results=runEndpointsAsList(acs2, endpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
-		
+
 		saveJson(destJsonPath, results);
 
 		//Write webpages to look at them
-//		for (PredictionResults predictionResults:results) {
-//			String reportBase="reports";
-//			writeWebPage(predictionResults, reportBase, predictionResults.getDTXCID());	
-//		}
+		//		for (PredictionResults predictionResults:results) {
+		//			String reportBase="reports";
+		//			writeWebPage(predictionResults, reportBase, predictionResults.getDTXCID());	
+		//		}
 
 
 	}
 
+
 	private static void saveJson(String destJsonPath, Object obj) {
 		try {
-			
+
 			File file=new File(destJsonPath);
 			file.getParentFile().mkdirs();
-			
+
 			FileWriter fw= new FileWriter(destJsonPath);
 			fw.write(gson.toJson(obj));
 			fw.flush();
@@ -788,25 +1147,51 @@ public class RunFromSmiles {
 		}
 	}
 
+	private static void saveResultsAsTsv(String destJsonPath, List<PredictionResults>results) {
+		try {
 
-	private static AtomContainerSet filterAtomContainerSet(AtomContainerSet acs, boolean skipMissingSID, int maxCount) {
+			File file=new File(destJsonPath);
+			file.getParentFile().mkdirs();
+
+			FileWriter fw= new FileWriter(destJsonPath);
+
+			fw.write("DTXSID\tDTXCID\tEndpoint\tReport\r\n");
+
+			for (PredictionResults pr:results) {
+				fw.write(pr.getDTXSID()+"\t"+pr.getDTXCID()+"\t"+pr.getEndpoint()+"\t"+gsonNotPretty.toJson(pr)+"\r\n");
+
+			}
+
+			fw.flush();
+			fw.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+
+	public static AtomContainerSet filterAtomContainerSet(AtomContainerSet acs, boolean skipMissingSID, int maxCount) {
 		AtomContainerSet acs2=new AtomContainerSet();
-		
+
 		Iterator<IAtomContainer> iterator= acs.atomContainers().iterator();
-		
+
 		int count=0;
-		
+
 		while (iterator.hasNext()) {
 			AtomContainer ac=(AtomContainer) iterator.next();
 			String SID=ac.getProperty("DTXSID");
-			if(skipMissingSID && SID==null) continue;
+			if(skipMissingSID && SID==null) {
+				//				System.out.println("Skipping");
+				continue;
+			}
 			acs2.addAtomContainer(ac);
 			count++;
-//			System.out.println(ac.getProperty("DTXSID")+"\t"+ac.getProperty("smiles"));
-			
+			//			System.out.println(ac.getProperty("DTXSID")+"\t"+ac.getProperty("smiles"));
+
+
 			WebTEST4.checkAtomContainer(ac);//theoretically the webservice has its own checking
-			
-			if(count==maxCount)break;
+
+			if(count==maxCount) break;
 		}
 		return acs2;
 	}
@@ -832,20 +1217,20 @@ public class RunFromSmiles {
 
 	}
 
-	static class PredictionDashboard {
-		String source;
-		String property_name;
-		String method;
+	public static class PredictionDashboard {
+		public String source;
+		public String property_name;
+		public String method;
 
 
-		String dtxsid;
-		String smiles;
-		Double prediction_value;
-		String prediction_units;
-		String prediction_string;
-		String prediction_error;
+		public String dtxsid;
+		public String smiles;
+		public Double prediction_value;
+		public String prediction_units;
+		public String prediction_string;
+		public String prediction_error;
 
-		static String [] fields= {"source","property_name","method","dtxsid","prediction_value","prediction_units","prediction_string","prediction_error","smiles"};
+		public static String [] fields= {"dtxsid","property_name","method","source","prediction_value","prediction_units","prediction_string","prediction_error","smiles"};
 
 		//		static String getHeader(String del) {
 		//			return "source"+del+"property_name"+del+"method"+del+"dtxsid"+del+"prediction_value"+del+"prediction_units"+del+"prediction_string"+del+"prediction_error"+del+"smiles";
@@ -930,7 +1315,7 @@ public class RunFromSmiles {
 
 
 
-	static PredictionDashboard convertResultsToPredictionFormat(PredictionResults pr) {
+	public static PredictionDashboard convertResultsToPredictionFormat(PredictionResults pr,boolean convertPredictionMolarUnits) {
 
 		PredictionDashboard pd=new PredictionDashboard();
 
@@ -951,7 +1336,7 @@ public class RunFromSmiles {
 				pd.dtxsid=pr.getDTXSID();
 
 
-				if (pr.getError()!=null && !pr.getError().isBlank()) {
+				if (pr.getError()!=null && !pr.getError().isEmpty()) {
 					pd.prediction_error=pr.getError();
 				} else {
 					if (pr.isBinaryEndpoint()) {
@@ -968,25 +1353,14 @@ public class RunFromSmiles {
 						if (pt.getPredToxValue().equals("N/A")) {
 							pd.prediction_error=pt.getMessage();
 						} else {
-							if (pd.property_name.equals("Fathead minnow LC50 (96 hr)") || pd.property_name.equals("Daphnia magna LC50 (48 hr)") || pd.property_name.equals("T. pyriformis IGC50 (48 hr)") || pd.property_name.equals("Water solubility at 25°C")) {								
-								pd.prediction_value=Math.pow(10.0,-Double.parseDouble(pt.getPredToxValue()));
-								pd.prediction_units="M";
-							} else if (pd.property_name.equals("Oral rat LD50")) {
-								pd.prediction_value=Math.pow(10.0,-Double.parseDouble(pt.getPredToxValue()));
-								pd.prediction_units="mol/kg";
-							} else if (pd.property_name.equals("Bioconcentration factor")) {
-								pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
-								pd.prediction_units="L/kg";								
-							} else if (pd.property_name.contains("Vapor pressure")) {
-								pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
-								pd.prediction_units="mmHg";								
-							} else if (pd.property_name.contains("Viscosity")) {
-								pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
-								pd.prediction_units="cP";								
-							} else if (pd.property_name.equals("Estrogen Receptor RBA")) {
-								pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
-								pd.prediction_units="Dimensionless";
+							if (convertPredictionMolarUnits)
+								convertLogMolarUnits(pd, pt);
+							else {
+								pd.prediction_value=Double.parseDouble(pt.getPredToxValue());
+								pd.prediction_units=pt.getMolarLogUnits();
 							}
+
+
 						}
 					} else {
 
@@ -1033,6 +1407,33 @@ public class RunFromSmiles {
 		return pd;
 	}
 
+	private static void convertLogMolarUnits(PredictionDashboard pd, PredictionResultsPrimaryTable pt) {
+		if (pd.property_name.equals("Fathead minnow LC50 (96 hr)")
+				|| pd.property_name.equals("Daphnia magna LC50 (48 hr)")
+				|| pd.property_name.equals("T. pyriformis IGC50 (48 hr)")
+				|| pd.property_name.contains("Water solubility")) {
+			pd.prediction_value=Math.pow(10.0,-Double.parseDouble(pt.getPredToxValue()));
+			pd.prediction_units="M";
+		} else if (pd.property_name.equals("Oral rat LD50")) {
+			pd.prediction_value=Math.pow(10.0,-Double.parseDouble(pt.getPredToxValue()));
+			pd.prediction_units="mol/kg";
+		} else if (pd.property_name.equals("Bioconcentration factor")) {
+			pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
+			pd.prediction_units="L/kg";								
+		} else if (pd.property_name.contains("Vapor pressure")) {
+			pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
+			pd.prediction_units="mmHg";								
+		} else if (pd.property_name.contains("Viscosity")) {
+			pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
+			pd.prediction_units="cP";								
+		} else if (pd.property_name.equals("Estrogen Receptor RBA")) {
+			pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
+			pd.prediction_units="Dimensionless";
+		} else {
+			System.out.println("Not handled:"+pd.property_name);
+		}
+	}
+
 	static void runFromSampleJsonFile() {
 
 		Type listOfMyClassObject = new TypeToken<Hashtable<String,List<PredictionResults>>>() {}.getType();
@@ -1050,7 +1451,7 @@ public class RunFromSmiles {
 				List<PredictionResults>listPredictionResults=htResultsAll.get(DTXSID);
 
 				for (PredictionResults pr:listPredictionResults) {
-					PredictionDashboard pd=convertResultsToPredictionFormat(pr);
+					PredictionDashboard pd=convertResultsToPredictionFormat(pr,true);
 					System.out.println(pd.toString("|",PredictionDashboard.fields));
 				}
 			}
@@ -1061,31 +1462,274 @@ public class RunFromSmiles {
 
 	}
 
-	public static void main(String[] args) {
-		//		runSingleEndpointExample();
 
-		//		String json=runFromAPI("CCCO", TESTConstants.abbrevChoiceFHM_LC50);
-		//		System.out.println(json);
+	void loadReportsJson() {
+		String filepath="reports/TEST_results_all_endpoints_snapshot_compounds1.json";
+
+		Type typeListPredictionResults = new TypeToken<List<PredictionResults>>() {}.getType();
+
+		try {
+			List<PredictionResults>results=gson.fromJson(new FileReader(filepath), typeListPredictionResults);
+
+			System.out.println(PredictionDashboard.getHeaderString("\t", PredictionDashboard.fields));
+
+			for (PredictionResults pr:results) {
+
+				PredictionDashboard pd=convertResultsToPredictionFormat(pr,false);
+
+				//				System.out.println(gsonNotPretty.toJson(pr)+"\r\n");
+				//				System.out.println(gsonNotPretty.toJson(pd)+"\r\n");
+				System.out.println(pd.toString("\t", PredictionDashboard.fields));
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+
+	}
 
 
-		//		runAllEndpointsExample();
-		//		runFromSampleJsonFile();
-		
-		
-		String folderSrc="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\hibernate_qsar_model_building\\data\\dsstox\\sdf\\";
-		String fileNameSDF="snapshot_compounds1.sdf";
-		String filepathSDF=folderSrc+fileNameSDF;
 
-		int maxCount=10;//set to -1 to run all in sdf
+	void parseTsv() {
+		String filepath="reports/TEST_results_all_endpoints_snapshot_compounds1.tsv";
+		Path path = Paths.get(filepath);
+
+
+		try {
+			List<String> lines = Files.readAllLines(path);
+
+
+			for (int i=1;i<lines.size();i++)  {
+				String line=lines.get(i);
+
+				String [] values=line.split("\t");
+
+				String DTXSID=values[0];
+				String report=values[3];
+
+				//				System.out.println(report);
+
+				JsonObject joReport=gson.fromJson(report, JsonObject.class);
+				System.out.println(DTXSID);
+				System.out.println(gson.toJson(joReport));
+			}
+
+			//			System.out.println(strTsv);
+
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+	}
+
+	static void convertJsonReportsToHtml() {
+
+		String dtxsid="DTXSID40177523";
+		File folder=new File("C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\reports\\"+dtxsid);
+
+		for (File file:folder.listFiles()) {
+
+			try {
+				BufferedReader br=new BufferedReader(new FileReader(file));
+
+				String json=br.readLine();
+
+
+				PredictionResults predictionResults=gson.fromJson(json,PredictionResults.class);
+
+				String htmlReport=getReportAsHTMLString(predictionResults);
+
+
+				FileWriter fw=new FileWriter(file.getAbsolutePath().replace(".json", ".html"));
+
+				fw.write(htmlReport);
+				fw.flush();
+				fw.close();
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+
+	static void runSampleSDF() {
+		boolean removeAlreadyRan=false;
+//		String filepathSDF="reports/sample.sdf";
+		String filepathSDF="reports/snapshot_compounds35.sdf";
+
+		int maxCount=10000;//set to -1 to run all in sdf
 		boolean skipMissingSID=true;
-		String destJsonPath="reports/TEST_results_all_endpoints_"+fileNameSDF.replace(".sdf", ".json");
-		runSDF_all_endpoints(filepathSDF,destJsonPath,skipMissingSID,maxCount);
-
-//		String endpoint=TESTConstants.ChoiceFHM_LC50;
-//		String destJsonPath="reports/TEST_results_"+endpoint+"_"+fileNameSDF.replace(".sdf", ".json");
-//		runSDF(filepathSDF,endpoint,destJsonPath,skipMissingSID,10);
-
 		
+		String destJsonPath=filepathSDF.replace("sdf", "json");
+		runSDF_all_endpoints_write_continuously(filepathSDF,destJsonPath,skipMissingSID,maxCount, removeAlreadyRan);
+
+	}
+	
+
+
+	public static IAtomContainer createMoleculeFromResolverBySID(String sid) {
+		
+		ArrayList<DSSToxRecord>recs=ResolverDb2.lookupByDTXSID(sid);
+
+		if(recs.size()==0) {
+			System.out.println(sid +"\tnot in snapshot");	
+			return null; 
+		}
+		
+		DSSToxRecord dr=recs.get(0);
+		MDLV3000Reader mr=new MDLV3000Reader();
+		InputStream stream = new ByteArrayInputStream(dr.mol.getBytes());
+		
+		try {
+			mr.setReader(stream);
+			IAtomContainer m = (IAtomContainer) mr.readMolecule(DefaultChemObjectBuilder.getInstance());
+			m.setProperty("Error", "");
+			WebTEST4.checkAtomContainer(m);
+			m.setProperty("DSSToxRecord",dr);
+			mr.close();
+			
+			if(dr.smiles==null) {
+				try {
+					dr.smiles=CDKUtilities.generateSmiles(m, SmiFlavor.Canonical);
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+			
+			return m;
+		} catch (Exception e) {
+			System.out.println("couldnt read mol for "+sid);
+			
+//			System.out.println(dr.mol);
+			AtomContainer ac=new AtomContainer();
+			ac.setProperty("DSSToxRecord",dr);
+			WebTEST4.checkAtomContainer(ac);
+			return ac;
+		}
+	}
+	
+	static void runSIDList() {
+
+		String method=TESTConstants.ChoiceConsensus;
+		
+
+//		List<String>endpoints= Arrays.asList(TESTConstants.ChoiceFHM_LC50);
+		List<String>endpoints= allEndpoints;
+		
+
+		boolean createReports = true;// whether to store report
+		boolean createDetailedReports = false;// detailed reports have lots more info and creates more html files
+
+
+		String filepath="reports/DTXSIDs for Todd.txt";
+		
+		
+		String destJsonPath=filepath.replace("txt", "json");
+		
+		if(debug) System.out.println("");
+		for (String endpoint:endpoints) {
+			if (debug) System.out.println("Loading "+endpoint);
+			WebTEST4.loadTrainingData(endpoint,method);//Note: need to use webservice approach to make this data persistent
+		}
+
+		try {
+
+			BufferedReader br=new BufferedReader(new FileReader(filepath));
+			FileWriter fw=new FileWriter(destJsonPath);
+			
+			while (true) {
+				String sid=br.readLine();
+				if (sid==null) break;
+								
+				IAtomContainer ac=createMoleculeFromResolverBySID(sid);//mismatch with standalone
+				
+				if (ac==null) {
+					System.out.println("cant load "+sid);
+					continue;
+				}
+				
+				
+				DSSToxRecord dr=ac.getProperty("DSSToxRecord");
+
+				System.out.println(sid+"\t"+dr.name+"\t"+dr.cas);
+				
+				
+				List<PredictionResults>results=runEndpointsAsList(ac, endpoints, method,createReports,createDetailedReports);
+				for (PredictionResults pr:results) {
+					fw.write(gsonNotPretty.toJson(pr)+"\r\n");
+					fw.flush();
+				}
+			}
+
+			br.close();
+			fw.close();
+
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+	
+	static void runSIDListCalcDescriptors() {
+
+
+		String filepath="reports/DTXSIDs for Todd-mismatch.txt";
+		
+		
+		String destJsonPath=filepath.replace("txt", "tsv");
+
+		WebTEST4 webtest=new WebTEST4();
+		WebTEST4.createDetailedReports=false;
+		WebTEST4.createReports=false;
+		
+		try {
+
+			BufferedReader br=new BufferedReader(new FileReader(filepath));
+			FileWriter fw=new FileWriter(destJsonPath);
+			
+			while (true) {
+				
+				String sid=br.readLine();
+				
+//				System.out.println(sid);
+				
+				if (sid==null) break;
+								
+				IAtomContainer ac=createMoleculeFromResolverBySID(sid);//mismatch with standalone
+				
+				if (ac==null) {
+					System.out.println("cant load "+sid);
+					continue;
+				}
+				
+				DescriptorData dd = webtest.goDescriptors(ac);
+				fw.write(sid+"\t"+dd.XLOGP+"\n");
+				System.out.println(sid+"\t"+dd.XLOGP);
+			}
+
+			br.close();
+			fw.close();
+
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	public static void main(String[] args) {
+//		runSingleEndpointExample();
+		runSampleSDF();
+//		runSIDList();
+//		runSIDListCalcDescriptors();
 	}
 
 }

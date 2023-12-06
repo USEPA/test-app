@@ -192,11 +192,8 @@ public class WebTEST4 {
 	
 	private static CalculationParameters createCalculationParameters(String method, String endpoint) {
 		CalculationParameters params=new CalculationParameters();
-
-		params.endpoints= new String[1];
-		params.endpoints[0]=endpoint;			
-		params.methods= new String[1];
-		params.methods[0]=method;
+		params.endpoints= Arrays.asList(endpoint);			
+		params.methods= Arrays.asList(method);
 		return params;
 	}
 	
@@ -434,17 +431,25 @@ public class WebTEST4 {
 		}
 	}
 
-	private static List<TESTPredictedValue> calculate(AtomContainer m, DescriptorData dd, DescriptorFactory df,
+	private static List<TESTPredictedValue> calculate(IAtomContainer m, DescriptorData dd, DescriptorFactory df,
 			String endpoint, String method, Set<WebReportType> reportTypes, ReportOptions reportOptions) {
 
 		List<TESTPredictedValue> res = new ArrayList<TESTPredictedValue>();
 
 		long start = System.currentTimeMillis();
 
-		String CAS = dd.ID;
+//		String CAS = dd.ID;
+		String CAS = m.getProperty(DSSToxRecord.strCAS);
 		String dtxcid = m.getProperty(DSSToxRecord.strCID);// already looked up in do predictions
 		String dtxsid = m.getProperty(DSSToxRecord.strSID);// already looked up in do predictions
 
+		DSSToxRecord rec = m.getProperty("DSSToxRecord");
+		if (dtxsid == null && rec != null )	dtxsid = rec.sid;
+		if (dtxcid == null && rec != null )	dtxcid = rec.cid;
+		if (CAS == null && rec != null )CAS=rec.cas;
+		
+//		System.out.println("CAS="+CAS);
+		
 		// ******************************************************************
 
 		if (!"OK".equals(dd.Error)) {
@@ -669,6 +674,8 @@ public class WebTEST4 {
 		long timeFinishPredictions = System.currentTimeMillis();
 
 		long t1 = System.currentTimeMillis();
+		
+		
 		tpv.predictionResults = jsonCreator.generatePredictionResultsConsensus(d, tpv, predictedToxicities,
 				predictedUncertainties, predToxVal, options, createReports);
 		long t2 = System.currentTimeMillis();
@@ -830,13 +837,13 @@ public class WebTEST4 {
 		System.out.println(gson.toJson(object));
 	}
 
-	public static synchronized List<TESTPredictedValue> doPredictions(AtomContainer m, DescriptorData dd,
+	public static synchronized List<TESTPredictedValue> doPredictions(IAtomContainer m, DescriptorData dd,
 			CalculationParameters params) {
 
 		DescriptorFactory df = new DescriptorFactory(false);
 
-		logger.info("Calculating '{}' using '{}' methods...", Arrays.toString(params.endpoints),
-				Arrays.toString(params.methods));
+		logger.info("Calculating '{}' using '{}' methods...", params.endpoints,
+				params.methods);
 		long start = System.currentTimeMillis();
 		totalDescriptorCalculationTime = 0;
 		totalPredictionGenerationTime = 0;
@@ -854,6 +861,7 @@ public class WebTEST4 {
 
 		} catch (Exception ex) {
 //			System.out.println("try to look up in db");
+			//TODO can this exception happen?
 
 			if (ResolverDb2.isAvailable()) {
 				if (!Strings.isEmpty(CAS) && !CAS.matches("C\\d*_\\d{8,}")) {
@@ -873,8 +881,8 @@ public class WebTEST4 {
 		}
 
 		for (String method : params.methods) {
-			for (int j = 0; j < params.endpoints.length; j++) {
-				String endpoint = params.endpoints[j];
+			for (int j = 0; j < params.endpoints.size(); j++) {
+				String endpoint = params.endpoints.get(j);
 
 				ReportOptions options = getReportOptions(params, CAS, endpoint);
 
@@ -953,7 +961,7 @@ public class WebTEST4 {
 		logger.debug(
 				"Time to generate output for {} using {} method: {}s " + "including time to calculate descriptors {}s, "
 						+ "predictions {}s, reports {}s",
-				Arrays.toString(params.endpoints), Arrays.toString(params.methods),
+				params.endpoints, params.methods,
 				(System.currentTimeMillis() - start) / 1000d, totalDescriptorCalculationTime / 1000d,
 				totalPredictionGenerationTime / 1000d, totalReportGenerationTime / 1000d);
 
@@ -965,6 +973,9 @@ public class WebTEST4 {
 		options.embedImages = true;
 
 		if (!params.reportTypes.isEmpty()) {
+			
+//			System.out.println("here1");
+			
 //			System.out.println(reportFolderName);
 			String folderOutputMain = reportFolderName;
 			String folderToxRuns = folderOutputMain + File.separator + "ToxRuns";
@@ -1160,7 +1171,7 @@ public class WebTEST4 {
 
 	}
 
-	public static void checkAtomContainer(AtomContainer m) {
+	public static void checkAtomContainer(IAtomContainer m) {
 
 		if (MolFileUtilities.HaveBadElement(m)) {
 			m.setProperty("Error", "Molecule contains unsupported element");
@@ -1209,7 +1220,10 @@ public class WebTEST4 {
 
 		} catch (org.openscience.cdk.exception.InvalidSmilesException e) {
 			m = new AtomContainer();
-			String error = e.getMessage() + ", SMILES=" + Smiles;
+//			String error = e.getMessage() + ", SMILES=" + Smiles;
+			
+			String error="Could not parse "+Smiles;
+			
 			m.setProperty("Error", error);
 			m.setProperty("ErrorCode", ERROR_CODE_STRUCTURE_ERROR);
 			logger.error(error);

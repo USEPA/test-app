@@ -1,5 +1,9 @@
 package ToxPredictor.Application;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.util.Strings;
@@ -21,15 +25,17 @@ public class TESTConstants {
 	public static final String ChoiceEstrogenReceptorRelativeBindingAffinity="Estrogen Receptor RBA";//mg/L
 	public static final String ChoiceEstrogenReceptor="Estrogen Receptor Binding";//mg/L
 	
+	public static final String degreesCelsius = "°C";
+	
 	public static final String ChoiceBoilingPoint="Normal boiling point"; //(°C)
-	public static final String ChoiceVaporPressure="Vapor pressure at 25°C"; //mmHg
+	public static final String ChoiceVaporPressure="Vapor pressure at 25"+degreesCelsius; //mmHg
 	public static final String ChoiceMeltingPoint="Melting point"; //(°C)
 	public static final String ChoiceFlashPoint="Flash point";// (°C)
 	public static final String ChoiceDensity="Density"; // (g/cm³)
-	public static final String ChoiceSurfaceTension="Surface tension at 25°C";//  (dyn/cm)
-	public static final String ChoiceThermalConductivity="Thermal conductivity at 25°C";// (mW/mK)
-	public static final String ChoiceViscosity="Viscosity at 25°C";//(cP)
-	public static final String ChoiceWaterSolubility="Water solubility at 25°C";//mg/L
+	public static final String ChoiceSurfaceTension="Surface tension at 25"+degreesCelsius;//  (dyn/cm)
+	public static final String ChoiceThermalConductivity="Thermal conductivity at 25"+degreesCelsius;// (mW/mK)
+	public static final String ChoiceViscosity="Viscosity at 25"+degreesCelsius;//(cP)
+	public static final String ChoiceWaterSolubility="Water solubility at 25"+degreesCelsius;//mg/L
 	
 	public static final String ChoiceDescriptors="Descriptors";
 	
@@ -456,19 +462,20 @@ public class TESTConstants {
 	
 	/**
 	 * Translates an array of abbreviated endpoint names into an array of full names. If none is given returns all endpoints, but descriptors. 
-	 * @param endpoints
+	 * @param endpointAbbrevs
 	 * @return
 	 */
-	public static String[] getFullEndpoints(String[] endpoints) {
-		if ( endpoints != null && endpoints.length != 0 ) {
-			String[] result = new String[endpoints.length]; 
-			for (int i=0; i<endpoints.length; i++) {
-				result[i] = getFullEndpoint(endpoints[i]);
+	public static List<String> getFullEndpoints(List<String> endpointAbbrevs) {
+		if ( endpointAbbrevs != null && endpointAbbrevs.size() != 0 ) {
+			List<String> result = new ArrayList<>(); 
+
+			for (String endpointAbbrev:endpointAbbrevs) {
+				result.add(getFullEndpoint(endpointAbbrev));
 			}
 			return result;
 		}
 		else {
-			return new String[] {
+			return Arrays.asList(
 					TESTConstants.ChoiceFHM_LC50,
 					TESTConstants.ChoiceDM_LC50,
 					TESTConstants.ChoiceTP_IGC50,
@@ -488,8 +495,8 @@ public class TESTConstants {
 					TESTConstants.ChoiceSurfaceTension,
 					TESTConstants.ChoiceThermalConductivity,
 					TESTConstants.ChoiceViscosity,
-					TESTConstants.ChoiceWaterSolubility,
-			};
+					TESTConstants.ChoiceWaterSolubility
+			);
 		}
 	}
 	
@@ -573,16 +580,18 @@ public class TESTConstants {
 		}
 	}
 	
-	public static String[] getFullMethods(String[] methods) {
-		if ( methods != null && methods.length != 0 ) {
-			String[] result = new String[methods.length]; 
-			for (int i=0; i<methods.length; i++) {
-				result[i] = getFullMethod(methods[i]);
+	public static List<String> getFullMethods(List<String> methods) {
+		if ( methods != null && methods.size() != 0 ) {
+			List<String> result = new ArrayList<>(); 
+			
+			for(String method:methods) {
+				result.add(getFullMethod(method));
 			}
+			
 			return result;	
 		}
 		else {
-			return new String[] { ChoiceConsensus };
+			return Arrays.asList(ChoiceConsensus);
 		}
 	}
 	
@@ -646,13 +655,15 @@ public class TESTConstants {
 			return "mg/L";
 		} else if (endpoint.equals(TESTConstants.ChoiceRat_LD50)) {
 			return "mg/kg";
-		} else if (endpoint.equals(TESTConstants.ChoiceBCF) || endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
-			// return "L/kg";
-			return "";
-		} else if (endpoint.equals(TESTConstants.ChoiceReproTox) || endpoint.equals(TESTConstants.ChoiceMutagenicity) || endpoint.equals(TESTConstants.ChoiceEstrogenReceptor)) {
+		} else if (endpoint.equals(TESTConstants.ChoiceBCF)) {
+     		return "L/kg";
+		} else if (endpoint.equals(TESTConstants.ChoiceReproTox) || 
+				endpoint.equals(TESTConstants.ChoiceMutagenicity) || 
+				endpoint.equals(TESTConstants.ChoiceEstrogenReceptor) || 
+				endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
 			return "";
 		} else if (endpoint.equals(TESTConstants.ChoiceBoilingPoint) || endpoint.equals(TESTConstants.ChoiceFlashPoint) || endpoint.equals(TESTConstants.ChoiceMeltingPoint)) {
-			return "°C";
+			return degreesCelsius;
 		} else if (endpoint.equals(TESTConstants.ChoiceDensity)) {
 			return "g/cm³";
 		} else if (endpoint.equals(TESTConstants.ChoiceSurfaceTension)) {
@@ -674,11 +685,14 @@ public class TESTConstants {
 			return "-Log10(mol/L)";
 		} else if (endpoint.equals(TESTConstants.ChoiceRat_LD50)) {
 			return "-Log10(mol/kg)";
-		} else if (endpoint.equals(TESTConstants.ChoiceBCF) || endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
-			// return "Log(L/kg)";
+		} else if (endpoint.equals(TESTConstants.ChoiceBCF)) {
+			
+			 return "Log10(L/kg)";
 			// return "Log<sub>10</sub>";
+//			return "Log10";
+			 
+		} else if (endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
 			return "Log10";
-
 		} else if (endpoint.equals(TESTConstants.ChoiceViscosity)) {
 			// return "Log<sub>10</sub>(cP)";
 			return "Log10(cP)";
