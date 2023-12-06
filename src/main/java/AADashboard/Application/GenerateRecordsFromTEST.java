@@ -9,6 +9,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -109,14 +110,14 @@ public class GenerateRecordsFromTEST {
 		AtomContainerSet acs=new AtomContainerSet();
 		acs.addAtomContainer(chemical.atomContainer);
 				
-		String [] endpoints= {TESTConstants.ChoiceWaterSolubility,TESTConstants.ChoiceRat_LD50,
+		List<String> endpoints= Arrays.asList(TESTConstants.ChoiceWaterSolubility,TESTConstants.ChoiceRat_LD50,
 				TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50,
 				TESTConstants.ChoiceMutagenicity,TESTConstants.ChoiceReproTox,
 				TESTConstants.ChoiceBCF,
 				TESTConstants.ChoiceEstrogenReceptor,
-				TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity};
+				TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity);
 
-		String [] methods= {TESTConstants.ChoiceConsensus};
+		List<String> methods= Arrays.asList(TESTConstants.ChoiceConsensus);
 		
 		Set<WebReportType> wrt = WebReportType.getNone();
 		
@@ -1063,8 +1064,6 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		}
 
 	}
-	
-	
 	
 	public static void main(String[] args) {
 

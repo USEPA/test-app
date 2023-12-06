@@ -10,6 +10,7 @@ import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.Utilities;
 
 
@@ -61,7 +62,7 @@ public class ParseToxVal  {
 
 	}
 
-	void goThroughRecords(String filepath, String destFilepathJSON, String destFilepathTXT) {
+	void goThroughRecords(String filepath, String destFilepathJSON, String destFilepathTXT,String versionToxVal) {
 
 		try {
 
@@ -83,7 +84,7 @@ public class ParseToxVal  {
 
 				Score score = null;
 
-				createScoreRecord(chemical, r);
+				createScoreRecord(chemical, r,versionToxVal);
 
 			}
 
@@ -98,113 +99,114 @@ public class ParseToxVal  {
 
 	}
 
-	void goThroughRecordsMultipleChemicals(String filepathText, String destfilepathJson, String destfilepathText,
-			Vector<String> casList) {
-
-		try {
-
-			//			FileInputStream inputStream = new FileInputStream(new File(filepathXLSX));
-			//			Workbook workbook = new XSSFWorkbook(inputStream);
-			//			Sheet firstSheet = workbook.getSheetAt(0);
-			//			Row rowHeader=firstSheet.getRow(0);
-			//			for (int i=0;i<rowHeader.getLastCellNum();i++) {
-			//				System.out.println(rowHeader.getCell(i));
-			//			}
-
-			BufferedReader br = new BufferedReader(new FileReader(filepathText));
-
-			String header = br.readLine();
-
-			String[] hlist = header.split("\t");
-
-			Chemicals chemicals = new Chemicals();
-
-			Chemical chemical = new Chemical();
-
-			String oldCAS = "";
-
-			while (true) {
-
-				String Line = br.readLine();
-				//				System.out.println(Line);
-
-				if (Line == null)
-					break;
-
-				RecordToxVal r = RecordToxVal.createRecord(header, Line);
-
-				if (!casList.contains(r.casrn))
-					continue;
-
-				if (!r.casrn.contentEquals(oldCAS)) {
-					chemical = new Chemical();
-					chemical.CAS = r.casrn;
-					chemical.name = r.name;
-					chemicals.add(chemical);
-					oldCAS = r.casrn;
-				}
-
-				createScoreRecord(chemical, r);
-				//				System.out.println(Line);
-
-			}
-
-			chemicals.writeToFile(destfilepathJson);
-			chemicals.toFlatFile(destfilepathText, "\t");
-			//			writeChemicalToFile(chemical, destfilepath);
-
-			br.close();
-
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
-
-	}
+//	void goThroughRecordsMultipleChemicals(String filepathText, String destfilepathJson, String destfilepathText,
+//			Vector<String> casList,String versionToxVal) {
+//
+//		try {
+//
+//			//			FileInputStream inputStream = new FileInputStream(new File(filepathXLSX));
+//			//			Workbook workbook = new XSSFWorkbook(inputStream);
+//			//			Sheet firstSheet = workbook.getSheetAt(0);
+//			//			Row rowHeader=firstSheet.getRow(0);
+//			//			for (int i=0;i<rowHeader.getLastCellNum();i++) {
+//			//				System.out.println(rowHeader.getCell(i));
+//			//			}
+//
+//			BufferedReader br = new BufferedReader(new FileReader(filepathText));
+//
+//			String header = br.readLine();
+//
+//			String[] hlist = header.split("\t");
+//
+//			Chemicals chemicals = new Chemicals();
+//
+//			Chemical chemical = new Chemical();
+//
+//			String oldCAS = "";
+//
+//			while (true) {
+//
+//				String Line = br.readLine();
+//				//				System.out.println(Line);
+//
+//				if (Line == null)
+//					break;
+//
+//				RecordToxVal r = RecordToxVal.createRecord(header, Line);
+//
+//				if (!casList.contains(r.casrn))
+//					continue;
+//
+//				if (!r.casrn.contentEquals(oldCAS)) {
+//					chemical = new Chemical();
+//					chemical.CAS = r.casrn;
+//					chemical.name = r.name;
+//					chemicals.add(chemical);
+//					oldCAS = r.casrn;
+//				}
+//
+//				createScoreRecord(chemical, r,versionToxVal);
+//				//				System.out.println(Line);
+//
+//			}
+//
+//			chemicals.writeToFile(destfilepathJson);
+//			chemicals.toFlatFile(destfilepathText, "\t");
+//			//			writeChemicalToFile(chemical, destfilepath);
+//
+//			br.close();
+//
+//		} catch (Exception ex) {
+//			ex.printStackTrace();
+//		}
+//
+//	}
 
 
 	// Deleted the NeuroCriticalEffect commented code because that code is included elsewhere.
 	
 
 
-	public static void createScoreRecord(Chemical chemical, RecordToxVal r) {
-//			if (!r.toxval_id.contentEquals("660309"))
-//			return;
+	public static void createScoreRecord(Chemical chemical, RecordToxVal r,String versionToxVal) {
 		
+		//2023-11-16- refactor to remove reliance on human_eco because it's not reliable
 		
-//  Omitting this chemical for the toxval table for now.  It is in the other
-//	spreadsheets for checking (bcfbaf, cancer, genetox, models), but is not in the
-//	toxval checking spreadsheet.
-//		if (r.casrn.contentEquals("108-95-2"))
-//				return;
-	
-		
-		// Not using the risk_assessment_class (RAC) anymore due to errors and inconsistencies in the RAC. 
-		//		CalculateRiskAssessmentClass.assignRAC(r);
-		//			
-		//		if ( r.risk_assessment_class_calc==null || !r.risk_assessment_class.contentEquals(r.risk_assessment_class_calc))
-		//			System.out.println(r.risk_assessment_class+"\t"+r.risk_assessment_class_calc);
-		//		crac2.getRAC(r);
-		//		if (r.risk_assessment_class.contentEquals("acute")) {
+		if ((r.species_supercategory.toLowerCase().contains("fish") ||
+				r.species_supercategory.toLowerCase().contains("crustacean") ||
+				r.species_supercategory.toLowerCase().contains("algae"))) {
 
-		if (chemical.CAS == null) {
-			chemical.CAS = r.casrn;
-			chemical.name = r.name;
-		}
-		
-		if (r.human_eco.contentEquals("human health")) {			
+			if (versionToxVal.equals(ParseToxValDB.v8)) {
+
+				if (r.toxval_units.contentEquals("mg/L") && r.habitat.contentEquals("aquatic")) {
+
+					if (r.species_supercategory.toLowerCase().contains("standard test species") && 
+							!r.species_supercategory.toLowerCase().contains("exotic") &&
+							!r.species_supercategory.toLowerCase().contains("nuisance") &&
+							!r.species_supercategory.toLowerCase().contains("invasive"))
+					handleEco(chemical, r);
+				}
+			} else if (versionToxVal.equals(ParseToxValDB.v94)) {
+				
+				if (r.toxval_units.contentEquals("mg/m3") && CreateAquaticToxicityRecords.validAquaticSpeciesToxvalv94(r)) {
+					try {
+						double dvalue=Double.parseDouble(r.toxval_numeric);
+						r.toxval_numeric = dvalue/1000.0+"";
+						r.toxval_units="mg/L";
+						handleEco(chemical, r);
+					} catch (Exception ex) {
+						ex.printStackTrace();
+					}
+				} else {
+					if(ParseToxValDB.debug)
+						System.out.println(r.toxval_units+"\tbad units for aquatic tox\t"+r.toxval_type+"\t"+r.species_common);
+				}
+			}
+			
+		} else if(r.human_eco.equals("human health")) {
 			handleHuman(chemical, r);
-		} else if (r.human_eco.contentEquals("eco") &&
-				r.habitat.contentEquals("aquatic") &&
-				r.toxval_units.contentEquals("mg/L") &&
-				r.species_supercategory.toLowerCase().contains("standard test species") &&
-				(r.species_supercategory.toLowerCase().contains("fish") ||
-						r.species_supercategory.toLowerCase().contains("crustacean") ||
-						r.species_supercategory.toLowerCase().contains("algae"))) {
-//				!r.lifestage.toLowerCase().contains("egg"))
-//				Including all lifestages.  Reproductive tox is more sensitive but is part of ecotox.
-			handleEco(chemical, r);
-		}	
-
+		} else {
+			//TODO add print
+		}
 	}
 
 	private static void handleEco(Chemical chemical, RecordToxVal r) {

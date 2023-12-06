@@ -4,6 +4,7 @@ package gov.epa.ghs_data_gathering.Parse.ToxVal;
 import java.io.File;
 import java.io.FileInputStream;
 import java.lang.reflect.Field;
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -20,9 +21,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
@@ -46,17 +44,29 @@ public class ParseToxValDB {
 	//	public static final String DB_Path_AA_Dashboard_Records = "C:\\Users\\Leora\\Desktop\\Tele\\ToxVal\\databases\\toxval_v8.db";//fast if you add index for CAS: "CREATE INDEX idx_CAS ON "+tableName+" (CAS)"
 
 	//use relative path so dont have to keep changing this- i.e. it is relative to java installation:  "D:\Users\TMARTI02\OneDrive - Environmental Protection Agency (EPA)\0 java\ghs-data-gathering\AA Dashboard\databases\toxval_v8.db"
-//	public static final String DB_Path_AA_Dashboard_Records = "AA Dashboard/databases/toxval_v8.db";
-	public static final String DB_Path_AA_Dashboard_Records = "databases/toxval_v8.db";
-	
-//  The "databases/toxval_v8.db" folder didn't work even when I moved the database there, so I switched it back to the "AA Dashboard/databases/toxval_v8.db" folder.
-	public static Statement statToxVal = MySQL_DB.getStatement(DB_Path_AA_Dashboard_Records);
+	//	public static final String DB_Path_AA_Dashboard_Records = "AA Dashboard/databases/toxval_v8.db";
+	public static final String DB_Path_AA_Dashboard_Records_v8 = "databases/toxval_v8.db";
+	public static final String DB_Path_AA_Dashboard_Records_v94 = "databases/toxval_v94.db";
 
-	
+	//  The "databases/toxval_v8.db" folder didn't work even when I moved the database there, so I switched it back to the "AA Dashboard/databases/toxval_v8.db" folder.
+	public static Statement statToxValv8 = MySQL_DB.getStatement(DB_Path_AA_Dashboard_Records_v8);
+
+
 	private static final Logger logger = LogManager.getLogger(ParseToxValDB.class);
-	
 
-	@Deprecated	
+	public static final String v8="v8";
+	public static final String v94="v94";
+
+	public static boolean debug=false;
+
+
+	/**
+	 * Get data from toxval table by CAS
+	 * 
+	 * @param CAS
+	 * @return
+	 */
+	@Deprecated
 	private String createSQLQuery_toxval(String CAS) {
 
 		String SQL="SELECT ";
@@ -102,57 +112,16 @@ public class ParseToxValDB {
 
 		SQL+="WHERE chemical.casrn=\""+CAS+"\";";		
 
-//		System.out.println("\n"+SQL);
+		//		System.out.println("\n"+SQL);
 
 		return SQL;
 
 
 
 	}
-	
-	/**
-	 * Richard Judson used this query to create spreadsheet from toxval table (toxval db v8) 
-	 * 
-	 * Note: did not filter on human_eco field (since we need some eco data for aquatic tox)
-	 * 
-	 * @param CAS
-	 * @return
-	 */
-	private String createSQLQuery_toxval2(String CAS) {
-		
-		String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
-				"b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
-				"b.toxval_numeric_qualifier,b.toxval_numeric_qualifier_original,b.toxval_numeric,b.toxval_numeric_original,\r\n" + 
-				"b.toxval_numeric_converted, b.toxval_units,b.toxval_units_original,b.toxval_units_converted, b.risk_assessment_class,\r\n" + 
-				"b.study_type,b.study_type_original,b.study_duration_class,b.study_duration_class_original, b.study_duration_value,\r\n" + 
-				"b.study_duration_value_original,b.study_duration_units,b.study_duration_units_original,b.human_eco,\r\n" + 
-				"b.strain,b.strain_original,b.sex,b.sex_original,b.generation,\r\n" + 
-				"d.species_id,b.species_original,\r\n" + 
-				"d.species_common,d.species_supercategory,d.habitat,\r\n" + 
-				"b.lifestage,b.exposure_route,b.exposure_route_original,b.exposure_method,b.exposure_method_original,\r\n" + 
-				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.quality_id,b.priority_id,\r\n" + 
-				"b.source_source_id,b.details_text,b.toxval_uuid,b.toxval_hash,b.datestamp,\r\n" + 
-				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
-				"\r\n" + 
-				
-				"FROM toxval b\r\n" + 
-				"INNER JOIN chemical a on a.dtxsid=b.dtxsid\r\n" + 
-				"LEFT JOIN species d on b.species_id=d.species_id\r\n" + 
-				"INNER JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
-				"LEFT JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
-				"WHERE\r\n"+
-				"b.toxval_units in ('mg/kg-day','mg/kg','(mg/kg-day)-1','mg/L','mg/m3','(mg/m3)-1','mg/L','(ug/m3)-1','(g/m3)-1','(mg/L)-1')\r\n" + 				
-				"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
-				"AND b.toxval_numeric>0\r\n" + 									
-				"AND a.casrn=\""+CAS+"\";";		
-
-//		System.out.println("\n"+SQL);
-
-		return SQL;
 
 
-	}
-	
+
 	/**
 	 * Modified version 2 to not retrieve data from record_source table so that have 1 record per toxval_id 
 	 * 
@@ -161,8 +130,9 @@ public class ParseToxValDB {
 	 * @param CAS
 	 * @return
 	 */
-	private static String createSQLQuery_toxval3(String CAS) {
-		
+	@Deprecated
+	private String createSQLQuery_toxval_v8_by_CAS(String CAS) {
+
 		String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
 				"b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
 				"b.toxval_numeric_qualifier,b.toxval_numeric_qualifier_original,b.toxval_numeric,b.toxval_numeric_original,\r\n" + 
@@ -175,28 +145,243 @@ public class ParseToxValDB {
 				"b.lifestage,b.exposure_route,b.exposure_route_original,b.exposure_method,b.exposure_method_original,\r\n" + 
 				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.quality_id,b.priority_id,\r\n" + 
 				"b.source_source_id,b.details_text,b.toxval_uuid,b.toxval_hash,b.datestamp\r\n" + 
-//				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
+				//				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
 				"\r\n" + 
-				
+
 				"FROM toxval b\r\n" + 
 				"INNER JOIN chemical a on a.dtxsid=b.dtxsid\r\n" + 
 				"LEFT JOIN species d on b.species_id=d.species_id\r\n" + 
 				"INNER JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
-//				"LEFT JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
+				//				"LEFT JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
 				"WHERE\r\n"+
 				"b.toxval_units in ('mg/kg-day','mg/kg','(mg/kg-day)-1','mg/L','mg/m3','(mg/m3)-1','mg/L','(ug/m3)-1','(g/m3)-1','(mg/L)-1')\r\n" + 				
 				"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
 				"AND b.toxval_numeric>0\r\n" + 									
 				"AND a.casrn=\""+CAS+"\";";		
 
-//		System.out.println("\n"+SQL);
+		//		System.out.println("\n"+SQL);
 
 		return SQL;
 
 
 	}
+
+	/**
+	 * Modified version 2 to not retrieve data from record_source table so that have 1 record per toxval_id 
+	 * 
+	 * Note: did not filter on human_eco field (since we need some eco data for aquatic tox)
+	 * 
+	 * @param CAS
+	 * @return
+	 */
+	private String createSQLQuery_toxval_v8_by_DTXSID(String dtxsid) {
+
+		String SQL="SELECT b.dtxsid, b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
+				"b.toxval_numeric_qualifier,b.toxval_numeric_qualifier_original,b.toxval_numeric,b.toxval_numeric_original,\r\n" + 
+				"b.toxval_numeric_converted, b.toxval_units,b.toxval_units_original,b.toxval_units_converted, b.risk_assessment_class,\r\n" + 
+				"b.study_type,b.study_type_original,b.study_duration_class,b.study_duration_class_original, b.study_duration_value,\r\n" + 
+				"b.study_duration_value_original,b.study_duration_units,b.study_duration_units_original,b.human_eco,\r\n" + 
+				"b.strain,b.strain_original,b.sex,b.sex_original,b.generation,\r\n" + 
+				"d.species_id,b.species_original,\r\n" + 
+				"d.species_common,d.species_supercategory,d.habitat,\r\n" + 
+				"b.lifestage,b.exposure_route,b.exposure_route_original,b.exposure_method,b.exposure_method_original,\r\n" + 
+				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.quality_id,b.priority_id,\r\n" + 
+				"b.source_source_id,b.details_text,b.toxval_uuid,b.toxval_hash,b.datestamp\r\n" + 
+				//				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
+				"\r\n" + 
+
+				"FROM toxval b\r\n" + 
+				"LEFT JOIN species d on b.species_id=d.species_id\r\n" + 
+				"INNER JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
+				//				"LEFT JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
+				"WHERE\r\n"+
+				"b.toxval_units in ('mg/kg-day','mg/kg','(mg/kg-day)-1','mg/L','mg/m3','(mg/m3)-1','mg/L','(ug/m3)-1','(g/m3)-1','(mg/L)-1')\r\n" + 				
+				"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
+				"AND b.toxval_numeric>0\r\n" + 									
+				"AND b.dtxsid='"+dtxsid+"';";		
+
+		//		System.out.println("\n"+SQL);
+
+		return SQL;
+
+
+	}
+
+	/**
+	 * Modified version 2 to not retrieve data from record_source table so that have 1 record per toxval_id 
+	 * 
+	 * Note: did not filter on human_eco field (since we need some eco data for aquatic tox)
+	 * 
+	 * @param CAS
+	 * @return
+	 */
+	@Deprecated
+	private String createSQLQuery_toxval_v94_by_CAS(String CAS) {
+
+		String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
+				"b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
+				"b.toxval_numeric_qualifier,b.toxval_numeric_qualifier_original,b.toxval_numeric,b.toxval_numeric_original,\r\n" + 
+				"b.toxval_numeric_converted, b.toxval_units,b.toxval_units_original,b.toxval_units_converted, b.risk_assessment_class,\r\n" + 
+				"b.study_type,b.study_type_original,b.study_duration_class,b.study_duration_class_original, b.study_duration_value,\r\n" + 
+				"b.study_duration_value_original,b.study_duration_units,b.study_duration_units_original,b.human_eco,\r\n" + 
+				"b.strain,b.strain_original,b.sex,b.sex_original,b.generation,\r\n" + 
+				"d.species_id,b.species_original,\r\n" + 
+				"d.latin_name as species_scientific, d.common_name as species_common,d.ecotox_group as species_supercategory,\r\n" + 
+				"b.lifestage,b.exposure_route,b.exposure_route_original,b.exposure_method,b.exposure_method_original,\r\n" + 
+				//				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.quality_id,b.priority_id,\r\n" + 
+				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.priority_id,\r\n" + 
+				"b.source_source_id,b.details_text,b.toxval_uuid,b.toxval_hash,b.datestamp\r\n" + 
+				//				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
+				"\r\n" + 
+
+				"FROM toxval b\r\n" + 
+				"INNER JOIN chemical a on a.dtxsid=b.dtxsid\r\n" + 
+				"LEFT JOIN species d on b.species_id=d.species_id\r\n" + 
+				"INNER JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
+				//				"LEFT JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
+				"WHERE\r\n"+
+				"b.toxval_units in ('mg/kg-day','mg/kg','(mg/kg-day)-1','mg/L','mg/m3','(mg/m3)-1','mg/L','(ug/m3)-1','(g/m3)-1','(mg/L)-1')\r\n" + 				
+				"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
+				"AND b.toxval_numeric>0\r\n" + 									
+				"AND a.casrn=\""+CAS+"\";";		
+
+		//		System.out.println("\n"+SQL);
+
+		return SQL;
+
+
+	}
+
+
 	
-	
+	/**
+	 * Search by SID instead of CAS since the cas and name in chemical table isnt from the original source
+	 * 
+	 * NOTE: it wasn't necessary to create extra database columns for columns like species_common because can use sql to label it to match the java variable name
+
+	 * 
+	 * @param dtxsid
+	 * @return
+	 */
+	private String createSQLQuery_toxval_v94_by_DTXSID(String dtxsid) {
+
+		String SQL="SELECT b.dtxsid, b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
+				"b.toxval_numeric_qualifier,b.toxval_numeric_qualifier_original,b.toxval_numeric,b.toxval_numeric_original,\r\n" + 
+				"b.toxval_numeric_converted, b.toxval_units,b.toxval_units_original,b.toxval_units_converted, b.risk_assessment_class,\r\n" + 
+				"b.study_type,b.study_type_original,b.study_duration_class,b.study_duration_class_original, b.study_duration_value,\r\n" + 
+				"b.study_duration_value_original,b.study_duration_units,b.study_duration_units_original,b.human_eco,\r\n" + 
+				"b.strain,b.strain_original,b.sex,b.sex_original,b.generation,\r\n" + 
+				"d.species_id,b.species_original,\r\n" +
+				//				"d.latin_name as species_scientific, d.common_name as species_common,d.ecotox_group as species_supercategory,\r\n" + 
+				"d.latin_name as species_scientific, d.species_common, d.species_supercategory,\r\n" + 
+				"b.lifestage,b.exposure_route,b.exposure_route_original,b.exposure_method,b.exposure_method_original,\r\n" + 
+				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.priority_id,\r\n" + 
+				"b.source_source_id,b.details_text,b.toxval_uuid,b.toxval_hash,b.datestamp,\r\n" + 
+				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
+				"\r\n" + 
+
+				"FROM toxval b\r\n" + 
+				"LEFT JOIN species d on b.species_id=d.species_id\r\n" + 
+				"JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
+				"JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
+				"WHERE\r\n"+
+				"b.toxval_units in ('mg/kg-day','mg/kg','(mg/kg-day)-1','mg/L','mg/m3','(mg/m3)-1','mg/L','(ug/m3)-1','(g/m3)-1','(mg/L)-1')\r\n" + 				
+				"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
+				"AND b.toxval_numeric>0\r\n" + 									
+				"AND b.dtxsid='"+dtxsid+"';";		
+
+		//		System.out.println("\n"+SQL);
+
+		return SQL;
+
+
+	}
+
+	/**
+	 * Get all data from toxval table for given source (includes reference info from record_source table since they are 1 to 1 now
+	 * 
+	 * NOTE: it wasn't necessary to create extra database columns for columns like species_common because can use sql to label it to match the java variable name
+	 * In toxval v94 there is one to one relationship between toxval table and record_source table so dont need separate query to get record_source info
+	 * 
+	 * @param dtxsid
+	 * @return
+	 */
+	private String createSQLQuery_toxval_v94_by_source(String source) {
+
+		String SQL="SELECT b.dtxsid, b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
+				"b.toxval_numeric_qualifier,b.toxval_numeric_qualifier_original,b.toxval_numeric,b.toxval_numeric_original,\r\n" + 
+				"b.toxval_numeric_converted, b.toxval_units,b.toxval_units_original,b.toxval_units_converted, b.risk_assessment_class,\r\n" + 
+				"b.study_type,b.study_type_original,b.study_duration_class,b.study_duration_class_original, b.study_duration_value,\r\n" + 
+				"b.study_duration_value_original,b.study_duration_units,b.study_duration_units_original,b.human_eco,\r\n" + 
+				"b.strain,b.strain_original,b.sex,b.sex_original,b.generation,\r\n" + 
+				"d.species_id,b.species_original,\r\n" + 
+				//				"d.latin_name as species_scientific, d.common_name as species_common,d.ecotox_group as species_supercategory,\r\n" + 
+				"d.latin_name as species_scientific, d.species_common, d.species_supercategory,\r\n" + 
+				"b.lifestage,b.exposure_route,b.exposure_route_original,b.exposure_method,b.exposure_method_original,\r\n" + 
+				//				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.quality_id,b.priority_id,\r\n" + 
+				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.priority_id,\r\n" + 
+				"b.source_source_id,b.details_text,b.toxval_uuid,b.toxval_hash,b.datestamp,\r\n" + 
+				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
+				"\r\n" + 
+
+				"FROM toxval b\r\n" + 
+				"LEFT JOIN species d on b.species_id=d.species_id\r\n" + 
+				"JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
+				"JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
+				"WHERE\r\n"+
+				"b.toxval_units in ('mg/kg-day','mg/kg','(mg/kg-day)-1','mg/L','mg/m3','(mg/m3)-1','mg/L','(ug/m3)-1','(g/m3)-1','(mg/L)-1')\r\n" + 				
+				"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
+				"AND b.toxval_numeric>0\r\n" + 									
+				"AND b.source='"+source+"';";		
+
+		//		System.out.println("\n"+SQL);
+
+		return SQL;
+
+	}
+
+	/**
+	 * Get all data from toxval table for a given source
+	 * 
+	 * @param source
+	 * @return
+	 */
+	private String createSQLQuery_toxval_v8_by_source(String source) {
+
+		//	String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
+		String SQL="SELECT b.dtxsid, b.toxval_id, b.source,b.subsource,b.toxval_type,b.toxval_type_original,b.toxval_subtype,b.toxval_subtype_original,e.toxval_type_supercategory,\r\n" + 
+				"b.toxval_numeric_qualifier,b.toxval_numeric_qualifier_original,b.toxval_numeric,b.toxval_numeric_original,\r\n" + 
+				"b.toxval_numeric_converted, b.toxval_units,b.toxval_units_original,b.toxval_units_converted, b.risk_assessment_class,\r\n" + 
+				"b.study_type,b.study_type_original,b.study_duration_class,b.study_duration_class_original, b.study_duration_value,\r\n" + 
+				"b.study_duration_value_original,b.study_duration_units,b.study_duration_units_original,b.human_eco,\r\n" + 
+				"b.strain,b.strain_original,b.sex,b.sex_original,b.generation,\r\n" + 
+				"d.species_id,b.species_original,\r\n" + 
+				"d.species_common,d.species_supercategory,d.habitat,\r\n" + 
+				"b.lifestage,b.exposure_route,b.exposure_route_original,b.exposure_method,b.exposure_method_original,\r\n" + 
+				"b.exposure_form,b.exposure_form_original, b.media,b.media_original,b.critical_effect,b.year,b.quality_id,b.priority_id,\r\n" + 
+				"b.source_source_id,b.details_text,b.toxval_uuid,b.toxval_hash,b.datestamp\r\n" + 
+//				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
+				"\r\n" + 
+
+			"FROM toxval b\r\n" + 
+			"LEFT JOIN species d on b.species_id=d.species_id\r\n" + 
+			"JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
+//			"JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +				
+			"WHERE\r\n"+
+			"b.toxval_units in ('mg/kg-day','mg/kg','(mg/kg-day)-1','mg/L','mg/m3','(mg/m3)-1','mg/L','(ug/m3)-1','(g/m3)-1','(mg/L)-1')\r\n" + 				
+			"AND e.toxval_type_supercategory in ('Point of Departure','Toxicity Value','Lethality Effect Level')\r\n" + 
+			"AND b.toxval_numeric>0\r\n" + 									
+			"AND b.source='"+source+"';";		
+
+//			System.out.println("\n"+SQL);
+
+		return SQL;
+
+
+	}
+
+
+
 	/**
 	 * Getting the reference info
 	 * 
@@ -204,7 +389,7 @@ public class ParseToxValDB {
 	 * @return
 	 */
 	private String createReferenceQuery(String CAS) {
-		
+
 		String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
 				"b.toxval_id, b.toxval_units, b.toxval_numeric, e.toxval_type_supercategory,"+
 				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
@@ -219,14 +404,14 @@ public class ParseToxValDB {
 				"AND b.toxval_numeric>0\r\n" + 									
 				"AND a.casrn=\""+CAS+"\";";		
 
-//		System.out.println("\n"+SQL);
+		//		System.out.println("\n"+SQL);
 
 		return SQL;
 
 
 	}
-	
-	
+
+
 	/**
 	 * Getting the reference info
 	 * 
@@ -234,31 +419,18 @@ public class ParseToxValDB {
 	 * @return
 	 */
 	private String createReferenceQueryByToxval_id(String toxval_id) {
-		
-		
-		String SQL="SELECT\r\na.dtxsid, a.casrn,a.name,\r\n" + 
-				"b.toxval_id, b.toxval_units, b.toxval_numeric, e.toxval_type_supercategory,"+
+
+		String SQL="SELECT b.dtxsid, b.toxval_id, b.toxval_units, b.toxval_numeric, e.toxval_type_supercategory,"+
 				"c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash\r\n" + 
 				"\r\n" + 				
 				"FROM toxval b\r\n" + 
-				"INNER JOIN chemical a on a.dtxsid=b.dtxsid\r\n" + 
 				"LEFT JOIN record_source c ON b.toxval_id=c.toxval_id\r\n" +	
 				"INNER JOIN toxval_type_dictionary e on b.toxval_type=e.toxval_type\r\n" + 
 				"WHERE\r\n"+
 				"b.toxval_id="+toxval_id+";"; 		
-		
 
-		//TODO simplify this query to speed it up:
-//		SELECT 
-//		b.toxval_id, b.toxval_units, b.toxval_numeric, 
-//		c.long_ref, c.title, c.author, c.journal, c.volume, c.issue, c.url, c.document_name, c.record_source_type, c.record_source_hash
-//		FROM toxval b				
-//		JOIN record_source c ON b.toxval_id=c.toxval_id
-//		WHERE
-//		b.toxval_id=123
-		
 
-//		System.out.println("\n"+SQL);
+//				System.out.println("\n"+SQL);
 
 		return SQL;
 
@@ -266,8 +438,8 @@ public class ParseToxValDB {
 	}
 
 
-
-	private String createSQLQuery(String CAS,String table,String [] varlist) {
+	@Deprecated
+	private String createSQLQueryByCAS(String CAS,String table,String [] varlist) {
 
 		String SQL="SELECT ";    	    	    	    	
 		for(String field : varlist) {    		
@@ -281,7 +453,7 @@ public class ParseToxValDB {
 
 		SQL+="chemical.casrn, chemical.name\n";   	    	
 		SQL+="FROM chemical\n";    	
-		SQL+="LEFT JOIN "+table+" ON "+table+".dtxsid = chemical.dtxsid\n";
+		SQL+="JOIN "+table+" ON "+table+".dtxsid = chemical.dtxsid\n";
 
 		SQL+="WHERE chemical.casrn=\""+CAS+"\" AND "+table+".dtxsid is not null;";		
 		//    	SQL+="WHERE chemical.casrn=\""+CAS+"\";";
@@ -293,7 +465,63 @@ public class ParseToxValDB {
 
 	}
 
-	private String createSQLQuery(String CAS,String table,String [] varlist,String [] fieldNames,String [] fieldValues) {
+	/**
+	 * Get all data from a table in toxval
+	 * 
+	 * @param table
+	 * @param varlist
+	 * @return
+	 */
+	private String createSQLQueryByTable(String table,String [] varlist) {
+
+		String SQL="SELECT ";    	    	    	    	
+
+		//		for(String field : varlist) {
+		for (int i=0;i<varlist.length;i++) {
+
+			String field=varlist[i];
+
+			//Following comes from chemical_list table:
+			if(field.contentEquals("casrn")) continue;
+			if(field.contentEquals("name")) continue;
+			SQL+=table+"."+field;
+
+			if(i<varlist.length-1) SQL+=", ";
+
+		}
+
+		//		SQL+="chemical.casrn, chemical.name\n";   	    	
+		//		SQL+="FROM chemical\n";    	
+		//		SQL+="JOIN "+table+" ON "+table+".dtxsid = chemical.dtxsid\n";
+
+		SQL+="\nFrom "+table;
+		SQL+="\nWHERE "+table+".dtxsid is not null;";		
+		return SQL;
+
+
+	}
+
+	private String createSQLQueryByDTXSID(String dtxsid, String table,String [] varlist) {
+
+		String SQL="SELECT ";    	    	    	    	
+
+		//		for(String field : varlist) {
+		for (int i=0;i<varlist.length;i++) {
+			String field=varlist[i];
+			if(field.contentEquals("casrn")) continue;
+			if(field.contentEquals("name")) continue;
+			SQL+=table+"."+field;
+			if(i<varlist.length-1) SQL+=", ";
+		}
+
+		SQL+="\nFrom "+table;
+		SQL+="\nWHERE "+table+".dtxsid ='"+dtxsid+"';";		
+		return SQL;
+	}
+
+
+	@Deprecated
+	private String createSQLQueryByCAS(String CAS,String table,String [] varlist,String [] fieldNames,String [] fieldValues) {
 
 		String SQL="SELECT ";    	    	    	    	
 		for(String field : varlist) {    		
@@ -307,7 +535,7 @@ public class ParseToxValDB {
 
 		SQL+="chemical.casrn, chemical.name\n";   	    	
 		SQL+="FROM chemical\n";    	
-		SQL+="LEFT JOIN "+table+" ON "+table+".dtxsid = chemical.dtxsid\n";
+		SQL+="JOIN "+table+" ON "+table+".dtxsid = chemical.dtxsid\n";
 
 		SQL+="WHERE chemical.casrn=\""+CAS+"\" AND ";
 
@@ -324,112 +552,277 @@ public class ParseToxValDB {
 
 
 	}
+	
+	/**
+	 * Used to get records from model table by dtxsid
+	 * 
+	 * @param dtxsid
+	 * @param table
+	 * @param varlist
+	 * @param fieldNames
+	 * @param fieldValues
+	 * @return
+	 */
+	private String createSQLQueryByDTXSID(String dtxsid,String table,String [] varlist,String [] fieldNames,String [] fieldValues) {
+
+		String SQL="SELECT ";    	    	    	    	
+		for (int i=0;i<varlist.length;i++) {
+			String field=varlist[i];
+			if(field.contentEquals("casrn")) continue;
+			if(field.contentEquals("name")) continue;
+			SQL+=table+"."+field;
+			if(i<varlist.length-1) SQL+=", ";
+		}
+
+		SQL+="\nFrom "+table;
+		SQL+="\nWHERE dtxsid=\""+dtxsid+"\" AND ";
+
+		for (int i=0;i<fieldNames.length;i++) {
+			SQL+=fieldNames[i]+" = \""+fieldValues[i]+"\"";
+			if (i<fieldNames.length-1) SQL+=" AND ";
+		}
+
+		SQL+=";";
+//		System.out.println("\n"+SQL);
+		return SQL;
+	}
 
 
-/**
- * Refactored so that it only pulled the reference info for the toxval records that were actually used one at a time
- * 
- * @param chemical
- */
-	void getDataFromTable_toxval(Chemical chemical) {
+
+	/**
+	 * Refactored so that it only pulled the reference info for the toxval records that were actually used one at a time
+	 * 
+	 * @param chemical
+	 */
+	void getDataFromTable_toxval(Chemical chemical,String versionToxVal,Statement statToxVal) {
 
 		try {
 
-			
-//			String sql=createSQLQuery_toxval(chemical.CAS);				
-			String sql=createSQLQuery_toxval3(chemical.CAS);
-						
+			//			String sql=createSQLQuery_toxval(chemical.CAS);	
+
+			String sql=null;
+
+			if (chemical.getDtxsid()==null) return;
+
+			if(versionToxVal.equals(ParseToxValDB.v8)) {
+				sql=createSQLQuery_toxval_v8_by_DTXSID(chemical.dtxsid);
+			} else if (versionToxVal.equals(ParseToxValDB.v94)) {
+				sql=createSQLQuery_toxval_v94_by_DTXSID(chemical.dtxsid);
+			} else {
+				System.out.println("Bad version:"+versionToxVal);
+				return;
+			}
+
+			//			System.out.println(sql);
+
 			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
 
 			Vector<RecordToxVal>records=new Vector();
-									
+
 			while (rs.next()) {						 
 				RecordToxVal r=new RecordToxVal();							
 				createRecord(rs,r);
 				records.add(r);						
 			}
-								
+
 			//***************************************************************************************************************************************
-						
+
 			for (int i=0;i<records.size();i++) {
 				RecordToxVal ri=records.get(i);
-				
-				Vector<RecordToxVal>recordsRef=new Vector<>();
 
-				//create second query to get reference info: (there is potentially more than 1 reference record for each toxval_id)
-				String sqlRef=createReferenceQueryByToxval_id(ri.toxval_id);
-				ResultSet rsRef=MySQL_DB.getRecords(statToxVal, sqlRef);
+				if(versionToxVal.equals(ParseToxValDB.v8)) {
+					Vector<RecordToxVal>recordsRef=new Vector<>();
 
-				while (rsRef.next()) {
-					RecordToxVal recordRef=new RecordToxVal();
-					createRecord(rsRef,recordRef,chemical.CAS);		
-					recordsRef.add(recordRef);
+					//create second query to get reference info: (there is potentially more than 1 reference record for each toxval_id)
+					String sqlRef=createReferenceQueryByToxval_id(ri.toxval_id);
+					ResultSet rsRef=MySQL_DB.getRecords(statToxVal, sqlRef);
+
+					while (rsRef.next()) {
+						RecordToxVal recordRef=new RecordToxVal();
+						createRecord(rsRef,recordRef);		
+						recordsRef.add(recordRef);
+					}
+					addReferenceInfo(recordsRef, ri);	
+				} else if (versionToxVal.equals(ParseToxValDB.v94)) {
+					editReferenceInfo(ri);
 				}
-				addReferenceInfo(recordsRef, ri);	
 				
-//				if (recordsRef.size()>1)
-//					System.out.println(ri.toxval_id+"\t"+recordsRef.size());
-				
+				//				if (recordsRef.size()>1)
+				//					System.out.println(ri.toxval_id+"\t"+recordsRef.size());
+
 				//Create score records:
-				ParseToxVal.createScoreRecord(chemical, ri);
-					
+				ParseToxVal.createScoreRecord(chemical, ri,versionToxVal);
+
 			}
-			
-//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+records.size());
-//			System.out.println("# refs="+numRefs);
-			
-//			System.out.println("CAS="+chemical.CAS);
-//			System.out.println("records.size()="+records.size());
-//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+count);
+
+			//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+records.size());
+			//			System.out.println("# refs="+numRefs);
+
+			//			System.out.println("CAS="+chemical.CAS);
+			//			System.out.println("records.size()="+records.size());
+			//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+count);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
 	}
+
+	Hashtable<String, Chemical> getDataFromTable_toxval(String source,Statement statToxVal,String toxvalVersion) {
+
+		try {
+
+			Hashtable<String, Chemical>htChemicals=new Hashtable<>();
+			//			String sql=createSQLQuery_toxval(chemical.CAS);
+			String sql=null;
+
+			if(toxvalVersion.equals(v94)) {
+				sql=createSQLQuery_toxval_v94_by_source(source);
+			} else if (toxvalVersion.equals(v8)) {
+				sql=createSQLQuery_toxval_v8_by_source(source);
+			}
+
+			//System.out.println(sql);
+
+			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
+
+			Vector<RecordToxVal>records=new Vector();
+			
+			while (rs.next()) {						 
+				RecordToxVal ri=new RecordToxVal();							
+				createRecord(rs,ri);
+				records.add(ri);
+				Chemical chemical=null;
+
+				if(ri.dtxsid==null) {
+					continue;
+				}
+				if(htChemicals.get(ri.dtxsid)!=null) {
+					chemical=htChemicals.get(ri.dtxsid);
+				} else {
+					chemical=new Chemical();
+					htChemicals.put(ri.dtxsid, chemical);
+				}
+				ParseToxVal.createScoreRecord(chemical, ri,toxvalVersion);
+			}
+
+//			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
+			//***************************************************************************************************************************************
+
+			int recordCount=0;
+
+			for (String dtxsid:htChemicals.keySet()) {
+				Chemical chemical=htChemicals.get(dtxsid);
+
+				int recordCountChemical=0;
+
+				for (int i=0;i<chemical.getScores().size();i++) {
+					Score score=chemical.getScores().get(i);
+					recordCount+=score.records.size();
+					recordCountChemical+=score.records.size();
+
+					if (score.records.size()==0) {
+						chemical.getScores().remove(i--);
+					} else {
+						//						System.out.println(chemical.getDtxsid()+"\t"+score.hazard_name);
+					}
+				}
+
+				//	if (recordCountChemical>0)
+				//		System.out.println(gson.toJson(chemical));
+			}
+
+			System.out.println(source+"\t"+records.size()+"\t"+recordCount);
+
+			return htChemicals;
+
+		} catch (Exception ex) {			
+			ex.printStackTrace();
+			return null;
+		}
+
+	}
 	
+	List<String>getNA_refs() {
+		return Arrays.asList("-","- - - -","- - - NA","- Unnamed - NA","- Unnamed - -");
+	}
+	
+	
+	/**
+	 * Edits reference info for long_ref and url
+	 * 
+	 * @param recordsRef
+	 * @param ri
+	 */
+
+	private void editReferenceInfo(RecordToxVal ri) {
+
+		if (getNA_refs().contains(ri.long_ref)) {//dont store NA references with usable info
+			ri.long_ref="";
+		}	
+
+		if (ri.long_ref.contains("doi:")) {				
+			String DOI=ri.long_ref.substring(ri.long_ref.indexOf("doi: ")+5,ri.long_ref.length());
+			
+			if (ri.url.isEmpty())  ri.url=DOI;
+			else ri.url+="<br>"+DOI;		
+		}									
+
+		ri.long_ref=ri.long_ref.trim();
+		ri.url=ri.url.trim();
+
+		if (ri.long_ref.indexOf("<br>")==0) {
+			ri.long_ref=ri.long_ref.substring(5,ri.long_ref.length());
+		}
+
+		if (ri.url.indexOf("<br>")==0) {
+			ri.url=ri.url.substring(5,ri.url.length());
+		}
+
+	}
+
 	void getDataFromTable_toxval_old(Chemical chemical) {
 
 		try {
 
-			
-//			String sql=createSQLQuery_toxval(chemical.CAS);				
-			String sql=createSQLQuery_toxval3(chemical.CAS);
-						
-			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
+
+			//			String sql=createSQLQuery_toxval(chemical.CAS);				
+			String sql=createSQLQuery_toxval_v8_by_CAS(chemical.CAS);
+
+			ResultSet rs=MySQL_DB.getRecords(statToxValv8, sql);
 
 			Vector<RecordToxVal>records=new Vector();
-									
+
 			while (rs.next()) {						 
 				RecordToxVal r=new RecordToxVal();							
 				createRecord(rs,r);
 				records.add(r);						
 			}
-								
+
 			//***************************************************************************************************************************************
 			//create second query to get reference info: (there is potentially more than 1 reference record for each toxval_id)
 			String sqlRef=createReferenceQuery(chemical.CAS);
-			ResultSet rsRef=MySQL_DB.getRecords(statToxVal, sqlRef);
-			
-//			logger.warn("here3:");
-			
+			ResultSet rsRef=MySQL_DB.getRecords(statToxValv8, sqlRef);
+
+			//			logger.warn("here3:");
+
 			Hashtable<String,Vector<RecordToxVal>>recordsRef=new Hashtable<>();
-			
+
 			int numRefs=0;
-			
-			
-//			if (chemical.CAS.equals("10108-64-2")) {
-//				logger.warn(sqlRef+"\n");
-//			}
-						
+
+
+			//			if (chemical.CAS.equals("10108-64-2")) {
+			//				logger.warn(sqlRef+"\n");
+			//			}
+
 			while (rsRef.next()) {
 				numRefs++;
-				
-//				if (numRefs==2000 && TESTApplication.forMDH) break;//temporary bug fix to stop it from hanging for 10108-64-2 in MDL list
-				
+
+				//				if (numRefs==2000 && TESTApplication.forMDH) break;//temporary bug fix to stop it from hanging for 10108-64-2 in MDL list
+
 				RecordToxVal r=new RecordToxVal();							
-				createRecord(rsRef,r,chemical.CAS);		
-				
+				createRecord(rsRef,r);		
+
 				//store reference info by toxval_id for easy retrieval when looping through tox data
 				if (recordsRef.get(r.toxval_id)==null) {										
 					Vector<RecordToxVal>recs=new Vector<>();
@@ -439,53 +832,53 @@ public class ParseToxValDB {
 					Vector<RecordToxVal>recs=recordsRef.get(r.toxval_id);
 					recs.add(r);
 				}
-				
+
 			}
 
-//			logger.warn("here4:");
-	
+			//			logger.warn("here4:");
+
 			//**************************************************************************************************************
 			//Add the reference info to the records:
 
-//			GsonBuilder builder = new GsonBuilder();
-//			builder.setPrettyPrinting();
-//			Gson gson = builder.create();
+			//			GsonBuilder builder = new GsonBuilder();
+			//			builder.setPrettyPrinting();
+			//			Gson gson = builder.create();
 
-			
+
 			for (int i=0;i<records.size();i++) {
 				RecordToxVal ri=records.get(i);
 				addReferenceInfo(recordsRef.get(ri.toxval_id), ri);				
-				
+
 				//Create score records:
-				ParseToxVal.createScoreRecord(chemical, ri);
-							
-//				String json=gson.toJson(ri);				
-//				System.out.println(json);
-			
-//				if (recs.size()>1) {
-//					System.out.println("**"+r0.long_ref+"**");
-//					System.out.println("@@"+r0.url+"@@\n");
-//				}
+				ParseToxVal.createScoreRecord(chemical, ri,ParseToxValDB.v8);
 
-			
-					
+				//				String json=gson.toJson(ri);				
+				//				System.out.println(json);
+
+				//				if (recs.size()>1) {
+				//					System.out.println("**"+r0.long_ref+"**");
+				//					System.out.println("@@"+r0.url+"@@\n");
+				//				}
+
+
+
 			}
-			
-//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+records.size());
-//			System.out.println("# refs="+numRefs);
+
+			//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+records.size());
+			//			System.out.println("# refs="+numRefs);
 
 
-			
-//			System.out.println("CAS="+chemical.CAS);
-//			System.out.println("records.size()="+records.size());
-//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+count);
+
+			//			System.out.println("CAS="+chemical.CAS);
+			//			System.out.println("records.size()="+records.size());
+			//			System.out.println("Records in toxval table for "+chemical.CAS+" = "+count);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 
 	}
-	
+
 
 	/**
 	 * Flattens reference info and stores inside ri record
@@ -494,66 +887,69 @@ public class ParseToxValDB {
 	 * @param ri
 	 */
 	private void addReferenceInfo(Vector<RecordToxVal>recsRef, RecordToxVal ri) {
-					
-		
-													
-//				System.out.println("0"+"\t"+r0.toxval_id);
-						
-//		System.out.println("toxvalid="+ri.toxval_id);
-		
+
+
+
+		//				System.out.println("0"+"\t"+r0.toxval_id);
+
+		//		System.out.println("toxvalid="+ri.toxval_id);
+
 		ri.long_ref="";
 		ri.url="";
-		
-		
+
+
 		for (int j=0;j<recsRef.size();j++) {								
 			RecordToxVal recRef=recsRef.get(j);
-																
-			if (ri.long_ref.isEmpty()) ri.long_ref=recRef.long_ref; 
-			else ri.long_ref+="<br>"+recRef.long_ref;
-			
-						
+
+			if (!getNA_refs().contains(recRef.long_ref)) {
+				if (ri.long_ref.isEmpty()) ri.long_ref=recRef.long_ref; 
+				else ri.long_ref+="<br>"+recRef.long_ref;
+			}
+
 			if (ri.url.isEmpty())  ri.url=recRef.url;
 			else ri.url+="<br>"+recRef.url;
-			
+
 			if (recRef.long_ref.contains("doi:")) {				
 				String DOI=recRef.long_ref.substring(recRef.long_ref.indexOf("doi: ")+5,recRef.long_ref.length());
 
 				if (ri.url.isEmpty())  ri.url=DOI;
 				else ri.url+="<br>"+DOI;		
-				
-//				System.out.println(DOI);
+
+				//				System.out.println(DOI);
 			}									
 		}
-		
+
 		ri.long_ref=ri.long_ref.trim();
 		ri.url=ri.url.trim();
-		
+
 		if (ri.long_ref.indexOf("<br>")==0) {
 			ri.long_ref=ri.long_ref.substring(5,ri.long_ref.length());
 		}
-		
+
 		if (ri.url.indexOf("<br>")==0) {
 			ri.url=ri.url.substring(5,ri.url.length());
 		}
-//		System.out.println(ri.toxval_id+"\t"+ri.url);
-		
+		//		System.out.println(ri.toxval_id+"\t"+ri.url);
+
 
 	}
-	
+
 	void getDOI(RecordToxVal r) {
-		
+
 		if (r.long_ref.contains("doi:") && r.url.isEmpty()) {
 			r.url=r.long_ref.substring(r.long_ref.indexOf("doi: ")+5,r.long_ref.length());
-//			System.out.println("new url="+r.url);
+			//			System.out.println("new url="+r.url);
 		}
-		
+
 	}
 
-	void getDataFromTable_cancer_summary(Chemical chemical) {
+	void getDataFromTable_cancer_summary(Chemical chemical,Statement statToxVal) {
 
 		try {
 
-			String sql=createSQLQuery(chemical.CAS,"cancer_summary",RecordToxValCancer.varlist);				
+			String sql=createSQLQueryByDTXSID(chemical.dtxsid,"cancer_summary",RecordToxValCancer.varlist);				
+
+
 			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
 
 			int count=0;
@@ -569,7 +965,7 @@ public class ParseToxValDB {
 				count++;
 			}
 
-//			System.out.println("Records in cancer_summary table for "+chemical.CAS+" = "+count);
+			//			System.out.println("Records in cancer_summary table for "+chemical.CAS+" = "+count);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -577,11 +973,12 @@ public class ParseToxValDB {
 
 	}
 
-	void getDataFromTable_genetox_summary(Chemical chemical) {
+
+	void getDataFromTable_genetox_summary(Chemical chemical,Statement statToxVal) {
 
 		try {
 
-			String sql=createSQLQuery(chemical.CAS,"genetox_summary",RecordToxValGenetox.varlist);				
+			String sql=createSQLQueryByDTXSID(chemical.dtxsid,"genetox_summary",RecordToxValGenetox.varlist);				
 			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
 
 			int count=0;
@@ -596,7 +993,7 @@ public class ParseToxValDB {
 				count++;
 			}
 
-//			System.out.println("Records in genetox_summary table for "+chemical.CAS+" = "+count);
+			//			System.out.println("Records in genetox_summary table for "+chemical.CAS+" = "+count);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -604,22 +1001,19 @@ public class ParseToxValDB {
 
 	}
 
-	void getDataFromTable_models(Chemical chemical) {
+	void getDataFromTable_models(Chemical chemical,Statement statToxVal) {
 
 		try {
 
-
-			createRecordBCF_OPERA(chemical);
-
-
-			createRecordBCF_EPISUITE(chemical);
+			createRecordBCF_OPERA(chemical,statToxVal);
+			createRecordBCF_EPISUITE(chemical,statToxVal);
 
 			//Create record based on opera biodegradation prediction:
 			//			createRecordPersistence_OPERA(chemical);
 			//  Not including this model.
 
 			//Create record based on episuite biodegradation prediction:
-			createRecordPersistence_EPISUITE(chemical);		
+			createRecordPersistence_EPISUITE(chemical,statToxVal);		
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -659,17 +1053,17 @@ public class ParseToxValDB {
 	//	}
 
 
-	private void createRecordPersistence_EPISUITE(Chemical chemical) throws SQLException {
+	private void createRecordPersistence_EPISUITE(Chemical chemical,Statement statToxVal) throws SQLException {
 		//Get EpiSuite Persistence:
 
 		String model="EpiSuite";
 		String [] fieldNames= {"model","metric"};
 
 		String [] fieldValuesBCF= {model,"Biodegradation Score"};			
-		String query=createSQLQuery(chemical.CAS, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
-		
-//		System.out.println(query);
-		
+		String query=createSQLQueryByDTXSID(chemical.dtxsid, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
+
+		//		System.out.println(query);
+
 		ResultSet rs=MySQL_DB.getRecords(statToxVal, query);			
 
 
@@ -677,6 +1071,7 @@ public class ParseToxValDB {
 		//		RecordToxValModels rBCF_AD=null;
 
 		if (rs.next()) {
+			System.out.println("Found persistence record");
 			r=new RecordToxValModels();						
 			createRecord(rs, r);				
 			//			System.out.println("BCF value="+r.value);				
@@ -689,13 +1084,13 @@ public class ParseToxValDB {
 	}
 
 
-	private void createRecordBCF_OPERA(Chemical chemical) throws SQLException {
+	private void createRecordBCF_OPERA(Chemical chemical,Statement statToxVal) throws SQLException {
 		//Get OPERA BCF:
 
 		String model="OPERA";
 		String [] fieldNames= {"model","metric"};
 		String [] fieldValuesBCF= {model,"BCF"};	
-		String queryBCF=createSQLQuery(chemical.CAS, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
+		String queryBCF=createSQLQueryByDTXSID(chemical.dtxsid, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
 		ResultSet rsBCF=MySQL_DB.getRecords(statToxVal, queryBCF);	
 
 		RecordToxValModels rBCF=null;
@@ -710,7 +1105,7 @@ public class ParseToxValDB {
 		}
 
 		String [] fieldValuesBCF_AD= {model,"BCF_AD"};		
-		String queryBCF_AD=createSQLQuery(chemical.CAS, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF_AD);			
+		String queryBCF_AD=createSQLQueryByDTXSID(chemical.dtxsid, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF_AD);			
 		ResultSet rsBCF_AD=MySQL_DB.getRecords(statToxVal, queryBCF_AD);
 
 		if (rsBCF_AD.next()) {
@@ -729,14 +1124,14 @@ public class ParseToxValDB {
 
 
 
-	private void createRecordBCF_EPISUITE(Chemical chemical) throws SQLException {
+	private void createRecordBCF_EPISUITE(Chemical chemical,Statement statToxVal) throws SQLException {
 		//Get OPERA BCF:
 
 		String model="EpiSuite";
 
 		String [] fieldNames= {"model","metric"};
 		String [] fieldValuesBCF= {model,"BCF"};			
-		String queryBCF=createSQLQuery(chemical.CAS, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
+		String queryBCF=createSQLQueryByDTXSID(chemical.dtxsid, "models", RecordToxValModels.varlist, fieldNames, fieldValuesBCF);			
 		ResultSet rsBCF=MySQL_DB.getRecords(statToxVal, queryBCF);			
 
 		RecordToxValModels rBCF=null;
@@ -763,11 +1158,11 @@ public class ParseToxValDB {
 
 			// The column count starts from 1
 			for (int i = 1; i <= columnCount; i++ ) {
-				String name = rsmd.getColumnName(i);
+				String name = rsmd.getColumnLabel(i);
 				//				System.out.println(name);								
 				String val=rs.getString(i);
 
-//				logger.warn(name+"\t"+val);
+				//				logger.warn(name+"\t"+val);
 
 				if (val!=null) {
 					Field myField = r.getClass().getDeclaredField(name);			
@@ -783,48 +1178,48 @@ public class ParseToxValDB {
 			logger.warn("here3a"+e.getStackTrace().toString());
 		}
 	}
-	
-	
-	public static void createRecord(ResultSet rs, Object r,String CAS) {
-		ResultSetMetaData rsmd;
-		try {
-			rsmd = rs.getMetaData();
-
-			int columnCount = rsmd.getColumnCount();
-
-			// The column count starts from 1
-			for (int i = 1; i <= columnCount; i++ ) {
-				String name = rsmd.getColumnName(i);
-				//				System.out.println(name);								
-				String val=rs.getString(i);
-
-//				if (CAS.equals("10108-64-2")) {
-//					logger.warn(i+" of "+columnCount+"\t"+r.getClass().getName()+"\t"+name+"\t"+val);
-////					logger.warn("*\t"+r.getClass().getName()+"\t"+name+"\t"+val.length());
-//				}
 
 
-				if (val!=null) {
-					Field myField = r.getClass().getDeclaredField(name);			
-					myField.set(r, val);
-				}
-				
-//				if (CAS.equals("10108-64-2")) {
-//					logger.warn(i+" set");
-//				}
+	//	public static void createRecord(ResultSet rs, Object r,String CAS) {
+	//		ResultSetMetaData rsmd;
+	//		try {
+	//			rsmd = rs.getMetaData();
+	//
+	//			int columnCount = rsmd.getColumnCount();
+	//
+	//			// The column count starts from 1
+	//			for (int i = 1; i <= columnCount; i++ ) {
+	//				String name = rsmd.getColumnName(i);
+	//				//				System.out.println(name);								
+	//				String val=rs.getString(i);
+	//
+	////				if (CAS.equals("10108-64-2")) {
+	////					logger.warn(i+" of "+columnCount+"\t"+r.getClass().getName()+"\t"+name+"\t"+val);
+	//////					logger.warn("*\t"+r.getClass().getName()+"\t"+name+"\t"+val.length());
+	////				}
+	//
+	//
+	//				if (val!=null) {
+	//					Field myField = r.getClass().getDeclaredField(name);			
+	//					myField.set(r, val);
+	//				}
+	//				
+	////				if (CAS.equals("10108-64-2")) {
+	////					logger.warn(i+" set");
+	////				}
+	//
+	//
+	//			}
+	//
+	//		} catch (Exception e) {
+	//			// TODO Auto-generated catch block
+	//			e.printStackTrace();
+	//			logger.warn("error creating tox val record:"+e.getMessage());
+	////			logger.warn("here3a"+e.getStackTrace().toString());
+	//		}
+	//	}
 
-
-			}
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			logger.warn("error creating tox val record:"+e.getMessage());
-//			logger.warn("here3a"+e.getStackTrace().toString());
-		}
-	}
-
-	public Chemicals goThroughRecordsMultipleChemicals(Vector<String>casList,String destfilepathJson, String destfilepathText) {
+	public Chemicals goThroughRecordsMultipleChemicals(Vector<String>casList,String destfilepathJson, String destfilepathText,String versionToxVal,Statement statToxVal) {
 
 
 		try {
@@ -841,13 +1236,13 @@ public class ParseToxValDB {
 				chemical.CAS = CAS;				
 				chemicals.add(chemical);
 
-				getDataFromTable_toxval(chemical);
-				
-// ***Uncomment these later.***
-				getDataFromTable_cancer_summary(chemical);
-				getDataFromTable_genetox_summary(chemical);
-				getDataFromTable_models(chemical);
-			    getDataFromTable_bcfbaf(chemical);//TODO
+				getDataFromTable_toxval(chemical,versionToxVal, statToxVal);
+
+				// ***Uncomment these later.***
+				getDataFromTable_cancer_summary(chemical, statToxVal);
+				getDataFromTable_genetox_summary(chemical, statToxVal);
+				getDataFromTable_models(chemical, statToxVal);
+				getDataFromTable_bcfbaf(chemical, statToxVal);//TODO
 
 			}
 
@@ -865,11 +1260,11 @@ public class ParseToxValDB {
 	}
 
 
-	void getDataFromTable_bcfbaf(Chemical chemical) {
+	void getDataFromTable_bcfbaf(Chemical chemical,Statement statToxVal) {
 
 		try {
 
-			String sql=createSQLQuery(chemical.CAS,"bcfbaf",RecordToxValBCFBAF.varlist);				
+			String sql=createSQLQueryByDTXSID(chemical.dtxsid,"bcfbaf",RecordToxValBCFBAF.varlist);				
 
 			//				System.out.println(sql);
 
@@ -886,7 +1281,7 @@ public class ParseToxValDB {
 				count++;
 			}
 
-//			System.out.println("Records in bcfbaf table for "+chemical.CAS+" = "+count);
+			//			System.out.println("Records in bcfbaf table for "+chemical.CAS+" = "+count);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -894,98 +1289,379 @@ public class ParseToxValDB {
 
 	}
 
+	void getDataFromTable_bcfbaf(Statement statToxVal) {
+
+		try {
+
+			Hashtable<String, Chemical>htChemicals=new Hashtable<>();
+
+			String sql=createSQLQueryByTable("bcfbaf",RecordToxValBCFBAF.varlist);				
+
+			//			System.out.println(sql);
+
+			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
+
+			int count=0;
+
+			List<RecordToxValBCFBAF>records=new ArrayList<>();
+
+			while (rs.next()) {						 
+				RecordToxValBCFBAF r=new RecordToxValBCFBAF();			
+				createRecord(rs, r);
+
+				records.add(r);
+
+				Chemical chemical=null;
+
+				if(r.dtxsid==null) continue;
+
+				if(htChemicals.get(r.dtxsid)!=null) {
+					chemical=htChemicals.get(r.dtxsid);
+				} else {
+					chemical=new Chemical();
+					htChemicals.put(r.dtxsid, chemical);
+				}
+
+				ParseToxValBCFBAF.createScoreRecord(chemical, r);
+				count++;
+			}
+
+			int recordCount=0;
+
+			for (String dtxsid:htChemicals.keySet()) {
+				Chemical chemical=htChemicals.get(dtxsid);
+
+				int recordCountChemical=0;
+
+				for (int i=0;i<chemical.getScores().size();i++) {
+					Score score=chemical.getScores().get(i);
+					recordCount+=score.records.size();
+					recordCountChemical+=score.records.size();
+
+					if (score.records.size()==0) {
+						chemical.getScores().remove(i--);
+					} else {
+						//						System.out.println(chemical.getDtxsid()+"\t"+score.hazard_name);
+					}
+				}
+
+				//				if (recordCountChemical>0)
+				//					System.out.println(gson.toJson(chemical));
+			}
+
+			System.out.println("bcfbaf\t"+records.size()+"\t"+recordCount);
+
+
+			//			System.out.println("Records in bcfbaf table for "+chemical.CAS+" = "+count);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	void getDataFromTable_cancer_summary(Statement statToxVal) {
+
+		try {
+
+			Hashtable<String,String>dictCC=ParseToxValCancer.populateCancerCallToScoreValue();
+
+			Hashtable<String, Chemical>htChemicals=new Hashtable<>();
+
+			String sql=createSQLQueryByTable("cancer_summary",RecordToxValCancer.varlist);				
+
+			//			System.out.println(sql);
+
+			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
+
+			int count=0;
+
+			List<RecordToxValCancer>records=new ArrayList<>();
+
+			while (rs.next()) {						 
+				RecordToxValCancer r=new RecordToxValCancer();			
+				createRecord(rs, r);
+
+				records.add(r);
+
+				Chemical chemical=null;
+
+				if(r.dtxsid==null) continue;
+
+				if(htChemicals.get(r.dtxsid)!=null) {
+					chemical=htChemicals.get(r.dtxsid);
+				} else {
+					chemical=new Chemical();
+					htChemicals.put(r.dtxsid, chemical);
+				}
+
+				ParseToxValCancer.createScoreRecord(chemical, r,dictCC);
+				count++;
+			}
+
+			int recordCount=0;
+
+			for (String dtxsid:htChemicals.keySet()) {
+				Chemical chemical=htChemicals.get(dtxsid);
+
+				int recordCountChemical=0;
+
+				for (int i=0;i<chemical.getScores().size();i++) {
+					Score score=chemical.getScores().get(i);
+					recordCount+=score.records.size();
+					recordCountChemical+=score.records.size();
+
+					if (score.records.size()==0) {
+						chemical.getScores().remove(i--);
+					} else {
+						//						System.out.println(chemical.getDtxsid()+"\t"+score.hazard_name);
+					}
+				}
+
+				//				if (recordCountChemical>0)
+				//					System.out.println(gson.toJson(chemical));
+			}
+
+			System.out.println("cancer_summary\t"+records.size()+"\t"+recordCount);
+
+
+			//			System.out.println("Records in bcfbaf table for "+chemical.CAS+" = "+count);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+	void getDataFromTable_genetox_summary(Statement statToxVal) {
+
+		try {
+
+			Hashtable<String,String>dictCC=ParseToxValGenetox.populateGenetoxCallToScoreValue();
+
+			Hashtable<String, Chemical>htChemicals=new Hashtable<>();
+
+			String sql=createSQLQueryByTable("genetox_summary",RecordToxValGenetox.varlist);				
+
+			//			System.out.println(sql);
+
+			ResultSet rs=MySQL_DB.getRecords(statToxVal, sql);
+
+			int count=0;
+
+			List<RecordToxValGenetox>records=new ArrayList<>();
+
+			while (rs.next()) {						 
+				RecordToxValGenetox r=new RecordToxValGenetox();			
+				createRecord(rs, r);
+
+				records.add(r);
+
+				Chemical chemical=null;
+
+				if(r.dtxsid==null) continue;
+
+				if(htChemicals.get(r.dtxsid)!=null) {
+					chemical=htChemicals.get(r.dtxsid);
+				} else {
+					chemical=new Chemical();
+					htChemicals.put(r.dtxsid, chemical);
+				}
+
+				ParseToxValGenetox.createScoreRecord(chemical, r,dictCC);
+				count++;
+			}
+
+			int recordCount=0;
+
+			for (String dtxsid:htChemicals.keySet()) {
+				Chemical chemical=htChemicals.get(dtxsid);
+
+				int recordCountChemical=0;
+
+				for (int i=0;i<chemical.getScores().size();i++) {
+					Score score=chemical.getScores().get(i);
+					recordCount+=score.records.size();
+					recordCountChemical+=score.records.size();
+
+					if (score.records.size()==0) {
+						chemical.getScores().remove(i--);
+					} else {
+						//						System.out.println(chemical.getDtxsid()+"\t"+score.hazard_name);
+					}
+				}
+
+				//				if (recordCountChemical>0)
+				//					System.out.println(gson.toJson(chemical));
+			}
+
+			System.out.println("genetox_summary\t"+records.size()+"\t"+recordCount);
+
+
+			//			System.out.println("Records in bcfbaf table for "+chemical.CAS+" = "+count);
+
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+
+	}
+
+
+	void runSingleCalculation() {
+		
+		Statement statToxVal= ParseToxValDB.statToxValv8;
+		String versionToxVal=ParseToxValDB.v8;
+
+		String CAS="79-06-1";
+		Vector<String>casList=new Vector<String>();		
+		casList.add(CAS);
+
+		String folder="AA dashboard/toxval/test spreadsheets";//use relative path so dont have to keep changing this- i.e. it is relative to java installation:  "D:\Users\TMARTI02\OneDrive - Environmental Protection Agency (EPA)\0 java\ghs-data-gathering\AA Dashboard\toxval"
+
+		String filePathRecordsForCAS_json=folder+File.separator+"records_"+CAS+".json"; //
+		String filePathRecordsForCAS_txt=folder+File.separator+"records_"+CAS+".txt";			
+
+		Chemicals chemicals=goThroughRecordsMultipleChemicals(casList, filePathRecordsForCAS_json,filePathRecordsForCAS_txt,versionToxVal,statToxVal);
+
+	}
+	
+	void runBatchCalculation() {
+
+		Statement statToxVal= ParseToxValDB.statToxValv8;
+		String versionToxVal=ParseToxValDB.v8;
+
+		String folder="AA dashboard/toxval/test spreadsheets";//use relative path so dont have to keep changing this- i.e. it is relative to java installation:  "D:\Users\TMARTI02\OneDrive - Environmental Protection Agency (EPA)\0 java\ghs-data-gathering\AA Dashboard\toxval"
+
+		String filePathRecordsForCASList_json=folder+File.separator+"toxval_pod_summary_top 10.json"; String
+		filePathRecordsForCASList_txt=folder+File.separator+"toxval_pod_summary_Top10.txt"; 			
+
+		Vector<String>casList=new Vector<String>();					
+
+		//Cas numbers in order of appearance on toxval.xls checking spreadsheet:
+		casList.add("79-06-1"); 
+		casList.add("79-01-6"); 
+		casList.add("111-30-8");
+		casList.add("75-21-8");
+		casList.add("101-77-9");
+		casList.add("7803-57-8");
+		casList.add("50-00-0");
+		casList.add("10588-01-9");
+		casList.add("302-01-2");
+
+		//TODO which is 10th?
+		// Yes, 108-95-2 is the chemical that isn't in the toxval checking spreadsheet.
+		//			casList.add("108-95-2");//dont add it until it is in the toxval spreadsheet
+
+		Vector<String>tableNames=new Vector<>();//tables in toxval, we have a manual xls file for each
+		tableNames.add("toxval");
+		tableNames.add("bcfbaf");
+		tableNames.add("cancer_summary");
+		tableNames.add("genetox_summary");
+		tableNames.add("models");
+
+		Chemicals chemicals=goThroughRecordsMultipleChemicals(casList, filePathRecordsForCASList_json,filePathRecordsForCASList_txt,versionToxVal,statToxVal);			
+		String filePathExcelManual=folder+"/toxval.xlsx";
+		compareWithManual(chemicals,folder,tableNames,casList);
+	}
+	
+
+	List<String> getToxValSourceList(Connection conn) {
+		
+		List<String>sources=new ArrayList<>();
+		
+		String sql="select distinct source from toxval order by source";
+		
+		ResultSet rs=SqlUtilities.runSQL2(conn, sql);
+		
+		try {
+			while (rs.next()) {
+				String source=rs.getString(1);
+//				System.out.println(source);
+				sources.add(source);
+				
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return sources;
+		
+	}
+	private void getRecordCountsToxValTables() {
+
+//		String toxvalVersion=ParseToxValDB.v8;  //
+		String toxvalVersion=ParseToxValDB.v94; //
+
+		Connection conn=null;
+		Statement stat=null;
+
+		try {
+		
+			if (toxvalVersion.equals(ParseToxValDB.v8)) {
+				conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v8);
+			} else {
+				conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v94);
+			}
+			stat=conn.createStatement();
+
+			List<String>sources=getToxValSourceList(conn);
+
+			for (String source:sources) {
+				Hashtable<String, Chemical>htChemicals=getDataFromTable_toxval(source,stat,toxvalVersion);
+			}
+			
+//			Hashtable<String, Chemical>htChemicals=getDataFromTable_toxval("Chiu",stat,toxvalVersion);
+			
+			getDataFromTable_bcfbaf(stat);//v8: 6973/4182; v94: 6967/4182
+			getDataFromTable_cancer_summary(stat);//v8: 2886/2885; v94: 3016/3016
+			getDataFromTable_genetox_summary(stat);//16663/16663; v94: 9224/9224
+			//TODO in toxval v94 models table is blank- need to pull OPERA/EPISUITE predictions from res_qsar database when they are available
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * This method runs the calculations and compares to manual results stored in a series of spreadsheets
 	 * @param args
 	 */	
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-		
-		String sql=createSQLQuery_toxval3("71-43-2");
-		System.out.println(sql);
-		
-		
-		if (true) return;
-		
 		ParseToxValDB p = new ParseToxValDB();
-		String folder="AA dashboard/toxval/test spreadsheets";//use relative path so dont have to keep changing this- i.e. it is relative to java installation:  "D:\Users\TMARTI02\OneDrive - Environmental Protection Agency (EPA)\0 java\ghs-data-gathering\AA Dashboard\toxval"
-
-		boolean runSingle=false;
 		
-		if (runSingle) {
-
-			String CAS="79-06-1";
-			Vector<String>casList=new Vector<String>();		
-			casList.add(CAS);
-
-			String filePathRecordsForCAS_json=folder+File.separator+"records_"+CAS+".json"; //
-			String filePathRecordsForCAS_txt=folder+File.separator+"records_"+CAS+".txt";			
-
-			Chemicals chemicals=p.goThroughRecordsMultipleChemicals(casList, filePathRecordsForCAS_json,filePathRecordsForCAS_txt);
-			
-		} else {
-			String filePathRecordsForCASList_json=folder+File.separator+"toxval_pod_summary_top 10.json"; String
-			filePathRecordsForCASList_txt=folder+File.separator+"toxval_pod_summary_Top10.txt"; 			
-			
-			Vector<String>casList=new Vector<String>();					
-
-			//Cas numbers in order of appearance on toxval.xls checking spreadsheet:
-			casList.add("79-06-1"); 
-			casList.add("79-01-6"); 
-			casList.add("111-30-8");
-			casList.add("75-21-8");
-			casList.add("101-77-9");
-			casList.add("7803-57-8");
-			casList.add("50-00-0");
-			casList.add("10588-01-9");
-			casList.add("302-01-2");
-			
-			//TODO which is 10th?
-			// Yes, 108-95-2 is the chemical that isn't in the toxval checking spreadsheet.
-//			casList.add("108-95-2");//dont add it until it is in the toxval spreadsheet
-			  			
-			Vector<String>tableNames=new Vector<>();//tables in toxval, we have a manual xls file for each
-			tableNames.add("toxval");
-			tableNames.add("bcfbaf");
-			tableNames.add("cancer_summary");
-			tableNames.add("genetox_summary");
-			tableNames.add("models");
-						 		
-			Chemicals chemicals=p.goThroughRecordsMultipleChemicals(casList, filePathRecordsForCASList_json,filePathRecordsForCASList_txt);			
-			String filePathExcelManual=folder+"/toxval.xlsx";
-			compareWithManual(chemicals,folder,tableNames,casList);
-		}
+//		p.runSingleCalculation();
+//		p.runBatchCalculation();
+		p.getRecordCountsToxValTables();
 		
 	}
 
 	static Vector<ScoreRecord> getManualResults(String folder,String tableName,Vector<ScoreRecord>recs) {
-		
-				
+
+
 		try
 		{
-											
+
 			FileInputStream file = new FileInputStream(new File(folder+File.separator+tableName+".xlsx"));
 
 			//Create Workbook instance holding reference to .xlsx file
 			XSSFWorkbook workbook = new XSSFWorkbook(file);
 
-			
+
 			for (int i=0;i<workbook.getNumberOfSheets();i++) {
 				//Get first/desired sheet from the workbook
 				XSSFSheet sheet = workbook.getSheetAt(i);
-				
+
 				getRecordsFromSheet(recs, sheet,tableName);
 			}
-//			System.out.println("here size="+recs.size());
-			
-		
+			//			System.out.println("here size="+recs.size());
+
+
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 		return recs;
-		
+
 	}
 
 	private static void getRecordsFromSheet(Vector<ScoreRecord> recs, XSSFSheet sheet,String tableName) {
@@ -994,8 +1670,8 @@ public class ParseToxValDB {
 
 			Hashtable<String,Integer>htColNums=new Hashtable<>();
 
-//			System.out.println(sheet.getSheetName());
-			
+			//			System.out.println(sheet.getSheetName());
+
 			for (int i=0;i<row.getLastCellNum();i++) {
 				Cell cell=row.getCell(i);
 				String colName=cell.getStringCellValue();
@@ -1004,27 +1680,27 @@ public class ParseToxValDB {
 
 			for (int i=1;i<=sheet.getLastRowNum();i++) {
 				Row rowi=sheet.getRow(i);
-				
-//				System.out.println("column number for cas="+htColNums.get("casrn"));
-				
+
+				//				System.out.println("column number for cas="+htColNums.get("casrn"));
+
 				String hazard_name=rowi.getCell(htColNums.get("ManualHazardEndpointCategorization")).getStringCellValue();
-				
+
 				String name=null;
 				String CAS=null;
-				
+
 				if (htColNums.get("name")!=null) {
 					name=rowi.getCell(htColNums.get("name")).getStringCellValue();										
 				}
-				
+
 				if (htColNums.get("casrn")!=null) {
 					CAS=rowi.getCell(htColNums.get("casrn")).getStringCellValue();	
 				}
-				
-				
+
+
 				ScoreRecord f=new ScoreRecord(hazard_name,CAS,name);
-				
-//				System.out.println((i+1)+"\t"+sheet.getSheetName());
-				
+
+				//				System.out.println((i+1)+"\t"+sheet.getSheetName());
+
 				if (tableName.contentEquals("toxval")) {
 					f.toxvalID=(int)(rowi.getCell(htColNums.get("toxval_id")).getNumericCellValue())+"";	
 				} else if (tableName.contentEquals("bcfbaf")) {					
@@ -1033,35 +1709,35 @@ public class ParseToxValDB {
 					f.toxvalID="cancer_summary_"+(int)(rowi.getCell(htColNums.get("chemical_id")).getNumericCellValue())+"";									
 				} else if (tableName.contentEquals("genetox_summary")) {
 					f.toxvalID="genetox_summary_"+(int)(rowi.getCell(htColNums.get("genetox_summary_id")).getNumericCellValue())+"";					
-//					f.toxvalID="genetox_summary_"+(int)(rowi.getCell(htColNums.get("genetox_summary_id")).getNumericCellValue())+"";														f.toxvalID="genetox_summary_"+(int)(rowi.getCell(htColNums.get("genetox_summary")).getNumericCellValue())+"";									
+					//					f.toxvalID="genetox_summary_"+(int)(rowi.getCell(htColNums.get("genetox_summary_id")).getNumericCellValue())+"";														f.toxvalID="genetox_summary_"+(int)(rowi.getCell(htColNums.get("genetox_summary")).getNumericCellValue())+"";									
 				} else if (tableName.contentEquals("models")) {					
 					f.toxvalID="models_"+(int)(rowi.getCell(htColNums.get("model_id")).getNumericCellValue())+"";									
 				} else {
 					System.out.println("Need to specify ID column name");
 				}
-				
-//				f.hazard_name=rowi.getCell(htColNums.get("ManualHazardEndpointCategorization")).getStringCellValue();
+
+				//				f.hazard_name=rowi.getCell(htColNums.get("ManualHazardEndpointCategorization")).getStringCellValue();
 				f.score=rowi.getCell(htColNums.get("ManualScore")).getStringCellValue();
-				
-						
-					
-				
+
+
+
+
 
 
 				if (htColNums.get("Note")!=null) {
 					Cell cell=rowi.getCell(htColNums.get("Note"),Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
-									
-//					System.out.println("cell value="+cell.getStringCellValue());
-					
+
+					//					System.out.println("cell value="+cell.getStringCellValue());
+
 					f.note=cell.getStringCellValue();//store leora's note
 				}
 
 				if (!hasRecord(recs, f.toxvalID)) {
 					recs.add(f);
-//					if (tableName.contentEquals("bcfbaf"))
-//						System.out.println(sheet.getSheetName()+"\t"+f.toxvalID);
+					//					if (tableName.contentEquals("bcfbaf"))
+					//						System.out.println(sheet.getSheetName()+"\t"+f.toxvalID);
 				}
-					
+
 
 				//				System.out.println(f.toxval_id+"\t"+f.hazard_name+"\t"+f.score);
 
@@ -1070,146 +1746,161 @@ public class ParseToxValDB {
 			ex.printStackTrace();
 		}
 	}
-	
+
 	static boolean hasRecord(Vector<ScoreRecord> recs,String toxval_id) {
 		for (int i=0;i<recs.size();i++) {
 			if (recs.get(i).toxvalID.contentEquals(toxval_id)) return true;
 		}
 		return false;
 	}
-	
+
 	static Hashtable<String,ScoreRecord>getHashtable(Vector<ScoreRecord>records) {
 		Hashtable<String,ScoreRecord> ht=new Hashtable<>();
-		
+
 		for (int i=0;i<records.size();i++) {
 			ScoreRecord rec=records.get(i);
-//			System.out.println(rec.toxvalID);
+			//			System.out.println(rec.toxvalID);
 			ht.put(rec.toxvalID, rec);
 		}
 		return ht;
 	}
-	
-	
+
+
 	private static void compareWithManual(Chemicals chemicals,String folderExcel, Vector<String>tableNames,Vector<String>casList) {
-		
-				
+
+
 		Vector<ScoreRecord>recordsManual=new Vector<>();
-		
+
 		for (String tableName:tableNames) {
 			getManualResults(folderExcel, tableName, recordsManual);
-//			System.out.println(tableName);
+			//			System.out.println(tableName);
 		}
-		
-//		for (int i=0;i<recordsManual.size();i++) {
-//			ScoreRecord recManual=recordsManual.get(i);
-//			System.out.println("recManual: "+i+"\t"+recManual.toxvalID);
-//		}
-				
+
+		//		for (int i=0;i<recordsManual.size();i++) {
+		//			ScoreRecord recManual=recordsManual.get(i);
+		//			System.out.println("recManual: "+i+"\t"+recManual.toxvalID);
+		//		}
+
 		Vector<ScoreRecord>recordsJava=getJavaRecords(chemicals);
-		
-		
+
+
 		for (int i=0;i<recordsJava.size();i++) {
 			ScoreRecord recJava=recordsJava.get(i);
-//			System.out.println("recJava: "+i+"\t"+recJava.toxvalID);
+			//			System.out.println("recJava: "+i+"\t"+recJava.toxvalID);
 		}
-		
+
 		Hashtable<String,ScoreRecord>htManual=getHashtable(recordsManual);
 		Hashtable<String,ScoreRecord>htJava=getHashtable(recordsJava);
-		
+
 		System.out.println("\nLooping through manual records:");
 		//First loop through manual records to find records present in manual but not in java:
 		for (int i=0;i<recordsManual.size();i++) {
 			ScoreRecord recManual=recordsManual.get(i);
 
-//			The following line works if there is a "casrn" column in the spreadsheet:
-			
-//			System.out.println("here1234:"+recManual.toxvalID+"\t"+recManual.CAS);
-			
-			
+			//			The following line works if there is a "casrn" column in the spreadsheet:
+
+			//			System.out.println("here1234:"+recManual.toxvalID+"\t"+recManual.CAS);
+
+
 			if (!casList.contains(recManual.CAS)) continue;//skip record if we hadnt run it in java
-			
-			
-			
-//			if (!recManual.toxval_id.contentEquals("660309"))
-//				return;
-			
+
+
+
+			//			if (!recManual.toxval_id.contentEquals("660309"))
+			//				return;
+
 			if (recManual.hazardName.contentEquals("Exclude")) continue;
-			
+
 			if (htJava.get(recManual.toxvalID)==null) {
-			
-//				System.out.println(tableName);
-//				I want to get it to print the table name but I can't access the tableName variable.
+
+				//				System.out.println(tableName);
+				//				I want to get it to print the table name but I can't access the tableName variable.
 				System.out.println(recManual.toxvalID+" present in manual, not in Java");
-			
+
 			} else  {
 				ScoreRecord recJava=htJava.get(recManual.toxvalID);
-				
-			//	System.out.println("here");
-			//	System.out.println(recManual.score);
-			//	System.out.println(recJava.score);
-				
+
+				//	System.out.println("here");
+				//	System.out.println(recManual.score);
+				//	System.out.println(recJava.score);
+
 				if (!recManual.hazardName.contentEquals(recJava.hazardName)) {						
 					System.out.println(recJava.toxvalID+"\t"+recJava.hazardName+"\t"+recManual.hazardName+"\tmismatch hazard name\t"+recManual.note);						
 				}
-				
+
 				if (!recManual.score.contentEquals(recJava.score)) {						
 					System.out.println(recJava.toxvalID+"\t"+recJava.score+"\t"+recManual.score+"\tmismatch score\t"+recManual.note);						
 				} 
-				
+
 			}
 		}
-		
-					
+
+
 		//Second loop through java records to find records in java but not in manual:
-		
+
 		System.out.println("\nLooping through java records:");
-		
+
 		for (int i=0;i<recordsJava.size();i++) {
 			ScoreRecord recJava=recordsJava.get(i);
-									
+
 			if ((htManual.get(recJava.toxvalID)==null) ||
 					htManual.get(recJava.toxvalID).hazardName.contentEquals("Exclude")) {		
 				System.out.println(recJava.toxvalID+" present in Java, not in manual");			
 			} 
 		}
-				
+
 	}
 
 	private static Vector<ScoreRecord> getJavaRecords(Chemicals chemicals) {
 		Vector<ScoreRecord>recordsJava=new Vector<>();
-		
+
 		//Go through the all the records
 		for (int i=0;i<chemicals.size();i++) {
 			Chemical chemical=chemicals.get(i);
-									
+
 			for (int j=0;j<chemical.scores.size();j++) {
-				
+
 				Score score=chemical.scores.get(j);
-				
+
 				for (int k=0;k<score.records.size();k++) {
-					
+
 					ScoreRecord sr=score.records.get(k);
-					
+
 					ScoreRecord recJava=new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 					recJava.toxvalID=sr.toxvalID;					
 					recJava.score=sr.score;					
-					
+
 					recordsJava.add(recJava);					
 				}				
 			}
 		}
-//		System.out.println(recordsJava.size());
+		//		System.out.println(recordsJava.size());
 		return recordsJava;
 	}
 
-	public void getDataFromToxValDB(Chemical chemical) {
-		
-		
-		getDataFromTable_toxval(chemical);
-		getDataFromTable_cancer_summary(chemical);
-		getDataFromTable_genetox_summary(chemical);
-		getDataFromTable_models(chemical);
-		getDataFromTable_bcfbaf(chemical);//TODO
+	public void getDataFromToxValDB(Chemical chemical,String versionToxVal,Statement statToxVal) {
+
+		boolean debug=false;
+
+		if (debug) System.out.print("Getting toxval records...");
+		getDataFromTable_toxval(chemical,versionToxVal, statToxVal);
+		if (debug) System.out.print("done\n");
+
+		if (debug) System.out.print("Getting cancer records...");
+		getDataFromTable_cancer_summary(chemical, statToxVal);
+		if (debug) System.out.print("done\n");
+
+		if (debug) System.out.print("Getting genetox records...");
+		getDataFromTable_genetox_summary(chemical, statToxVal);
+		if (debug) System.out.print("done\n");
+
+		if (debug) System.out.print("Getting model records...");
+		getDataFromTable_models(chemical, statToxVal);//TODO instead get from res_qsar
+		if (debug) System.out.print("done\n");
+
+		if (debug) System.out.print("Getting bcf records...");
+		getDataFromTable_bcfbaf(chemical, statToxVal);//TODO
+		if (debug) System.out.print("done\n");
 	}
 
 }

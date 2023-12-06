@@ -2,14 +2,15 @@ package ToxPredictor.Application;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class CalculationParameters {
 
 	public String outputFile;
 	public String smilesColumn; // For CSV input files only
-	public String[] endpoints;
-	public String[] methods;
+	public List<String> endpoints;
+	public List<String> methods;
 	// do not keep results in memory for command line tools
 	public boolean discardResults;
 	public Set<WebReportType> reportTypes = new HashSet<>();
@@ -18,8 +19,8 @@ public class CalculationParameters {
         super();
     }
 
-    public CalculationParameters(String outputFile, String smilesColumn, String[] endpoints,
-            String[] methods, Set<WebReportType> reportTypes) {
+    public CalculationParameters(String outputFile, String smilesColumn, List<String> endpoints,
+            List<String> methods, Set<WebReportType> reportTypes) {
         super();
         this.outputFile = outputFile;
         this.smilesColumn = smilesColumn;
@@ -33,14 +34,14 @@ public class CalculationParameters {
         super();
         this.outputFile = outputFile;
         this.smilesColumn = smilesColumn;
-        this.endpoints = new String[] { endpoint };
-        this.methods = new String[] { method };
+        this.endpoints = Arrays.asList(endpoint);
+        this.methods = Arrays.asList(method);
         this.reportTypes = reportTypes;
     }
 
 	public String toString() {
 		return String.format("Output: %s; SMILES Column: %s; Report Types: %s; Endpoints: %s; Methods: %s", 
-		        outputFile, smilesColumn, reportTypes.toString(), Arrays.toString(endpoints), Arrays.toString(methods));
+		        outputFile, smilesColumn, reportTypes.toString(), endpoints.toString(), methods.toString());
 	}
 
 }

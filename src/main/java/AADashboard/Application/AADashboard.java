@@ -51,6 +51,7 @@ import gov.epa.api.ScoreRecord;
 //import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
+
 /**
  * This class generates AA reports from a list of chemicals
  * 
@@ -1084,6 +1085,8 @@ public class AADashboard {
 
 		removeDuplicateRecords(chemical);
 		
+		deleteRecordsFromRetiredSources(chemical);
+		
 		//[TMM] Change for OCSPP/OPP made on 11/23/22
 		removeDSL_TSCA_Persistence(chemical);
 
@@ -1100,6 +1103,29 @@ public class AADashboard {
 		return chemical;
 	}
 	
+	/**
+	 * Deleting records from toxval sources that should be retired according to Richard Judson
+	 * @param chemical
+	 */
+	void deleteRecordsFromRetiredSources(Chemical chemical) {
+		deleteRecordsFromSource(chemical,"ATSDR MRLs 2020");
+		deleteRecordsFromSource(chemical,"ATSDR PFAS 2021");
+		deleteRecordsFromSource(chemical,"PPRTV (ORNL)");
+	}
+	
+
+	private void deleteRecordsFromSource(Chemical chemical, String sourceName) {
+		for (Score score:chemical.getScores()) {
+			for (int i=0;i<score.records.size();i++) {
+				ScoreRecord sr=score.records.get(i);
+				if(sr.source.equals(sourceName)) {
+					System.out.println("Deleting:"+sourceName+"\t"+score.hazard_name);
+					score.records.remove(i--);
+				}
+			}
+		}
+	}
+
 	
 	public Chemical runChemicalForGUI(AtomContainer ac,CalculationParameters cp,String versionToxVal,Statement statToxVal) {
 		DSSToxRecord dr=ac.getProperty("DSSToxRecord");

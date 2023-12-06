@@ -253,16 +253,29 @@ public class TableGeneratorExcel {
 							cell.setCellValue(value);
 						} else {
 							value=list.get(i);
-							cell.setCellValue(value);
+							
+							if (headers[i].equals("valueMass") && !value.isEmpty()) {
+								try {
+									cell.setCellValue(Double.parseDouble(value));
+								} catch (Exception ex) {							
+								}
 
-							if (headers[i].equals("url")) {
-								String strValue = (String) value;
+							} else if (headers[i].equals("toxvalID") && !value.isEmpty()) {
+								try {
+									cell.setCellValue(Integer.parseInt(value));
+								} catch (Exception ex) {							
+								}
+							} else { 
+								cell.setCellValue(value);	
+							}
+							
+							if (headers[i].equals("url") && !value.contains(";")) {
 
 								try {
 									URL u = new URL(value); // this would check for the protocol
 									u.toURI();
 									Hyperlink href = workbook.getCreationHelper().createHyperlink(HyperlinkType.URL);
-									href.setAddress(strValue);
+									href.setAddress(value);
 									cell.setHyperlink(href);
 									cell.setCellStyle(hlink_style);						
 
@@ -271,8 +284,6 @@ public class TableGeneratorExcel {
 								}
 							}
 						}
-
-
 					}
 				}
 
