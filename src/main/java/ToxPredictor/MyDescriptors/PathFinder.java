@@ -771,10 +771,13 @@ public class PathFinder {
                 
                 
                 if ((System.currentTimeMillis()-start) > TESTConstants.pathGenerationTimeout) {
-                    throw new RuntimeException(
-                            String.format("Timeout %s ms while generating paths for %s.", 
-                                    TESTConstants.pathGenerationTimeout, 
-                                    (String)m.getProperty("CAS")));
+//                    throw new RuntimeException(
+//                            String.format("Timeout %s ms while generating paths for %s.", 
+//                                    TESTConstants.pathGenerationTimeout, 
+//                                    (String)m.getProperty("CAS")));
+                	
+                	  throw new RuntimeException("Timeout while finding paths");
+                	
                 }
                 
                 for (int k=0;k<list.size();k++) {

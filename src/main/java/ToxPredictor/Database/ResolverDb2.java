@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
 import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainer;
 
 import ToxPredictor.Application.Calculations.NameToStructureOpsin;
 import ToxPredictor.Utilities.CDKUtilities;
@@ -440,7 +441,7 @@ public class ResolverDb2 {
 	}
 
 	
-	public static ArrayList<DSSToxRecord> lookupByAtomContainer (AtomContainer ac) {		
+	public static ArrayList<DSSToxRecord> lookupByAtomContainer (IAtomContainer ac) {		
 		Inchi inchi = Inchi.generateInChiKeyIndigo(ac);									
 		if (inchi==null) return new ArrayList<DSSToxRecord>();
 		

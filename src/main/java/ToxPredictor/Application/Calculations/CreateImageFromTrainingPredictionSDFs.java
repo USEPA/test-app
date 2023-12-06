@@ -43,15 +43,12 @@ public class CreateImageFromTrainingPredictionSDFs {
 		try {
 			
 			AtomContainer ac=getAtomContainer(endpointAbbrev, CAS, "training");
-			
 			if (ac==null) ac=getAtomContainer(endpointAbbrev, CAS, "prediction");
-			
 			if (ac==null) return null;
 			
-			SmilesGenerator smigen = new SmilesGenerator(SmiFlavor.Isomeric);
-			String smiles=smigen.create(ac);
-			
-			return StructureImageUtil.generateImageSrcBase64FromSmiles(smiles);
+//			SmilesGenerator smigen = new SmilesGenerator(SmiFlavor.Isomeric);
+//			String smiles=smigen.create(ac);
+			return StructureImageUtil.generateImageSrcBase64FromAtomContainer(ac);
 
 		} catch (Exception ex) {
 			ex.printStackTrace();

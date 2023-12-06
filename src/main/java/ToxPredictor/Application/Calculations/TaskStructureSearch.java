@@ -1423,7 +1423,7 @@ private static String trimQuotes(String identifier) {
 		
 	}
 
-	private static AtomContainer lookupByCAS(String CAS) {
+	public static AtomContainer lookupByCAS(String CAS) {
 
 		AtomContainer m=null;
 		

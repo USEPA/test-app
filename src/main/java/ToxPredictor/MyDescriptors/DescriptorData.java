@@ -3691,6 +3691,12 @@ public class DescriptorData {
 		return lhm;
 	}
 	
+	public double getValue(String nameTEST) throws NoSuchFieldException, IllegalAccessException {
+		Field myField2= this.getClass().getField(nameTEST);
+		return myField2.getDouble(this);
+	}
+
+	
 	public static String getValue(String field,Vector<String>descriptorNames,Vector<String>vec) {
 		
 		for (int i=0;i<descriptorNames.size();i++) {

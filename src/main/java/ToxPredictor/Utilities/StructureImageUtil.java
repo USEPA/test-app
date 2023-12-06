@@ -159,4 +159,11 @@ public class StructureImageUtil {
    		String imgURL="data:image/png;base64, "+base64;
    		return imgURL;
 	}
+	
+	public static String generateImageSrcBase64FromAtomContainer(AtomContainer ac) throws IOException, CDKException, IndigoException {
+		byte[] bytes=writeImageBytes(ac);
+        String base64 = Base64.getEncoder().encodeToString(bytes);//convert to base 64
+   		String imgURL="data:image/png;base64, "+base64;
+   		return imgURL;
+	}
 }

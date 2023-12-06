@@ -3,6 +3,7 @@ package ToxPredictor.Database;
 import java.util.ArrayList;
 
 import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainer;
 
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 
@@ -32,7 +33,7 @@ public class DSSToxRecord {
 	public static String[] fieldNames = { strCAS, strName, strCID, strSID, strGSID, strSmiles, strInchi, strInchiKey,
 			strInchiKey1 ,strMol};
 	
-	public static DSSToxRecord createDSSToxRecord(AtomContainer m) throws Exception {
+	public static DSSToxRecord createDSSToxRecord(IAtomContainer m) throws Exception {
 		DSSToxRecord rec;
 		rec=new DSSToxRecord();
 		rec.cid=m.getProperty(strCID);

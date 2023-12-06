@@ -1007,7 +1007,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		fw.write("<caption>Results for similar chemicals</caption>\n");
 		
 		fw.write("\n<tr bgcolor=\"#D3D3D3\">\n");
-		fw.write("<th>CAS</th>\n");
+		fw.write("<th>ID</th>\n");
 		fw.write("<th>Structure</th>\n");
 		fw.write("<th>Similarity<br>Coefficient</th>\n");
 
@@ -1037,15 +1037,27 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			SimilarChemical simChem = simChems.getSimilarChemicalsList().get(i);
 
 			fw.write("<tr>\n");
+			
 
-			if (simChem.getDSSTOXSID() != null) {
-				fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
-			} else if (simChem.getDSSTOXCID() != null) {
-				fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXCID() + "\" target=\"_blank\">" + simChem.getCAS() + "</td>\n");// TODD
+			if (i==0) {
+				if (simChem.getDSSTOXSID() != null) {
+					fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getDSSTOXSID() + " (test chemical)</td>\n");// TODD
+				} else if (simChem.getDSSTOXCID() != null) {
+					fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXCID() + "\" target=\"_blank\">" + simChem.getDSSTOXCID() + " (test chemical)</td>\n");// TODD
+				} else {
+					fw.write("<td>" + simChem.getCAS() + " (test chemical)</td>\n");
+				}
+				
 			} else {
-				fw.write("<td>" + simChem.getCAS() + "</td>\n");
+				if (simChem.getDSSTOXSID() != null) {
+					fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXSID() + "\" target=\"_blank\">" + simChem.getDSSTOXSID() + "</td>\n");// TODD
+				} else if (simChem.getDSSTOXCID() != null) {
+					fw.write("<td><a href=\"" + pr.getWebPathDashboardPage() + simChem.getDSSTOXCID() + "\" target=\"_blank\">" + simChem.getDSSTOXCID() + "</td>\n");// TODD
+				} else {
+					fw.write("<td>" + simChem.getCAS() + "</td>\n");
+				}
 			}
-
+			
 			
 			fw.write("<td><a href=\"" + simChem.getImageUrl() + "\"><img src=\"" + simChem.getImageUrl() + "\" width="
 					+ pr.getImgSize() + " border=0></a></td>\n");

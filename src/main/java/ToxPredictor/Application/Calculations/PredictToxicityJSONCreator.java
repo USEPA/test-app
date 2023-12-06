@@ -27,6 +27,8 @@ import ToxPredictor.Utilities.StructureImageUtil;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
+//import gov.epa.webtest.calc.TaskCalculations;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import ToxPredictor.Application.Calculations.CreateImageFromTrainingPredictionSDFs;
@@ -87,6 +89,32 @@ public class PredictToxicityJSONCreator {
 	}
 
 
+	/**
+	 * This method is used by other classes than WebTEST4
+	 * 
+	 * @param predToxVal
+	 * @param predToxUnc
+	 * @param method
+	 * @param CAS
+	 * @param dtxcid
+	 * @param dtxsid
+	 * @param smiles
+	 * @param endpoint
+	 * @param abbrev
+	 * @param isBinaryEndpoint
+	 * @param isLogMolarEndpoint
+	 * @param er
+	 * @param MW
+	 * @param message
+	 * @param htTestMatch
+	 * @param htTrainMatch
+	 * @param methods
+	 * @param predictions
+	 * @param uncertainties
+	 * @param createDetailedConsensusReport
+	 * @param options
+	 * @return
+	 */
 	public PredictionResults writeConsensusResultsJSON(double predToxVal, double predToxUnc, String method, String CAS,String dtxcid, String dtxsid,String smiles, String endpoint, String abbrev, boolean isBinaryEndpoint,
 			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ArrayList methods,
 			ArrayList predictions, ArrayList uncertainties, boolean createDetailedConsensusReport, 
@@ -135,9 +163,10 @@ public class PredictToxicityJSONCreator {
 
 			predictionResultsPrimaryTable.setDtxcid(dtxcid);
 			pr.setImgSize(PredictToxicityWebPageCreator.imgSize);
-			pr.setWebImagePathByCID(PredictToxicityWebPageCreator.webImagePathByCID);
-			pr.setWebImagePathBySID(PredictToxicityWebPageCreator.webImagePathBySID);
-			pr.setWebPathDashboardPage(PredictToxicityWebPageCreator.webPathDashboardPage);
+			
+//			pr.setWebImagePathByCID(PredictToxicityWebPageCreator.webImagePathByCID);
+//			pr.setWebImagePathBySID(PredictToxicityWebPageCreator.webImagePathBySID);
+//			pr.setWebPathDashboardPage(PredictToxicityWebPageCreator.webPathDashboardPage);
 
 
 			if (dtxcid == null) {
@@ -193,23 +222,28 @@ public class PredictToxicityJSONCreator {
 		pr.setSCmin(PredictToxicityWebPageCreator.SCmin);
 
 		pr.setImgSize(PredictToxicityWebPageCreator.imgSize);
+		
 		pr.setWebImagePathByCID(PredictToxicityWebPageCreator.webImagePathByCID);
 		pr.setWebImagePathBySID(PredictToxicityWebPageCreator.webImagePathBySID);
 		pr.setWebPathDashboardPage(PredictToxicityWebPageCreator.webPathDashboardPage);
-
+		
 		if (createReports) {
+			
 			if ((d.dtxcid == null && d.dtxsid==null)  || !WebTEST4.dashboardStructuresAvailable) {
 				//Using brute force to make sure path is right:
-				File outputFolder=new File(d.reportOptions.reportBase);
-				File imageFile=new File(outputFolder.getParentFile().getAbsolutePath()+File.separator+"StructureData/structure.png");
 
-				if (forGUI) {
-					pr.setImageURL("../StructureData/structure.png");
-				} else {
-					String strURL = imageFile.toURI().toURL().toString();
-					pr.setImageURL(StructureImageUtil.convertImageToBase64(strURL));
+//				if (forGUI) {
+//					pr.setImageURL("../StructureData/structure.png");
+//				} else {
+////					File outputFolder=new File(d.reportOptions.reportBase);
+////					File imageFile=new File(outputFolder.getParentFile().getAbsolutePath()+File.separator+"StructureData/structure.png");
+////					String strURL = imageFile.toURI().toURL().toString();
+////					pr.setImageURL(StructureImageUtil.convertImageToBase64(strURL));
+//					pr.setImageURL(StructureImageUtil.generateImageSrcBase64FromSmiles(d.smiles));
+//				}
 
-				}
+				pr.setImageURL(StructureImageUtil.generateImageSrcBase64FromSmiles(d.smiles));
+				
 			} else {
 				//use dashboard image if available:
 				
@@ -257,6 +291,25 @@ public class PredictToxicityJSONCreator {
 			setCommonValues(TESTConstants.ChoiceConsensus,d, tpv,pr,predToxVal,-9999,createReports);
 
 			ArrayList<String> methods = TaskCalculations.getMethods(d.endpoint);
+			
+			if(pr.getError()==null || pr.getError().isEmpty()) {
+				int predCount = 0;
+				for (int i = 0; i < predictedToxicities.size(); i++) {
+					if ((Double) predictedToxicities.get(i) != -9999)
+						predCount++;
+				}
+
+				if (predCount == 0) {
+					pr.setError("No prediction could be made due to applicability domain violations");
+				} else if (predCount < TaskCalculations.minPredCount) {
+					pr.setError("The consensus prediction for this chemical is considered unreliable since only one prediction can only be made");
+				}
+				
+//				if(pr.getError()!=null)
+//					System.out.println(pr.getError());
+				
+			}
+			
 			this.writeIndividualPredictionsForConsensus(pr,methods, predictedToxicities, predictedUncertainties, d.createDetailedReport);			
 			
 //			Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -919,6 +972,7 @@ public class PredictToxicityJSONCreator {
 			Vector<String> vecExp2, Vector<String> vecPred2, Vector<Double> vecSC2, ReportOptions options,
 			SimilarChemicals similarChemicals) throws Exception   {
 
+	
 		// ***********************************************************
 		// Write out table of exp and pred values for nearest chemicals:
 		//		SimilarChemicals similarChemicals = predictionResults.getSimilarChemicals();
@@ -1004,8 +1058,9 @@ public class PredictToxicityJSONCreator {
 				
 				CreateImageFromTrainingPredictionSDFs c=new CreateImageFromTrainingPredictionSDFs();
 //				c.CreateStructureImage(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(pr.getEndpoint()));
-				String url=c.CreateStructureImage2(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(pr.getEndpoint()));
+								
 				if (forGUI) {
+					String url=c.CreateStructureImage2(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(pr.getEndpoint()));
 //					similarChemical.setImageUrl("../../Images/"+CASi + ".png");
 					similarChemical.setImageUrl(url);
 				} else {
@@ -1061,7 +1116,7 @@ public class PredictToxicityJSONCreator {
 		
 		
 		testChemical.setSimilarityCoefficient(df.format(1.00));
-		testChemical.setCAS(CAS+" (test chemical)");
+		testChemical.setCAS(CAS);
 		testChemical.setDSSTOXCID(dtxcid);
 		testChemical.setDSSTOXSID(dtxsid);
 		

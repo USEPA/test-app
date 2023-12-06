@@ -6,68 +6,43 @@ import java.util.Vector;
 
 public class PredictionResults {
 
-	private String reportBase;
 	private String version;
-	
-    private String Smiles;//test chemical CAS (chemical being predicted)
-    
-
-	private String DTXSID;//test chemical CAS (chemical being predicted)
-	private String DTXCID;//test chemical CAS (chemical being predicted)
     private String CAS;//test chemical CAS (chemical being predicted)
-
-    private String endpoint; //endpoint being calculated
-    private String method;//method used to calculate endpoint
+    private String DTXSID;//test chemical CAS (chemical being predicted)
+	private String DTXCID;//test chemical CAS (chemical being predicted)
+    private String Smiles;//test chemical CAS (chemical being predicted)
+    private String imageURL;//can be used for test chemical image for consensus table and similar chemicals tables
     private String error;
-    
-    public String getError() {
-		return error;
-	}
 
-	public void setError(String error) {
-		this.error = error;
-	}
-
-	private int imgSize;//size of image to display
-    
-    private String webImagePathByCID;//path to get images on Chemistry Dashboard
-    private String webImagePathBySID;//path to get images on Chemistry Dashboard
-    
-    public String getWebImagePathBySID() {
-		return webImagePathBySID;
-	}
-
-	public void setWebImagePathBySID(String webImagePathBySID) {
-		this.webImagePathBySID = webImagePathBySID;
-	}
-
-	private String webPathDashboardPage;//path to get property prediction page on Chemistry Dashboard 
-    
-    private double SCmin;//minimum similar coefficient for chemicals to display in similar chemicals table
+    private String method;//method used to calculate endpoint
+    private String endpoint; //endpoint being calculated
     private boolean isBinaryEndpoint;//whether endpoint is binary (i.e. mutagenicity)
     private boolean isLogMolarEndpoint;// whether endpoint is log molar (i.e. fathead minnow LC50)
-    
-    private String imageURL;//can be used for test chemical image for consensus table and similar chemicals tables
-
-    private boolean createDetailedReport;
-    
-    private ClusterTable clusterTable;
-    private ClusterTable invalidClusterTable;
 
 
 	// Main results table:
 	private PredictionResultsPrimaryTable predictionResultsPrimaryTable = new PredictionResultsPrimaryTable();
 
-	
-	//Consensus predictions table:
-	private MOATable moaTable = new MOATable();
-
-	
 	//Consensus predictions table:
 	private IndividualPredictionsForConsensus individualPredictionsForConsensus;
     
 	//Similar chemicals tables for test and training sets:
 	private Vector<SimilarChemicals> similarChemicals = new Vector<>();
+
+    private ClusterTable clusterTable;
+    private ClusterTable invalidClusterTable;
+    
+	//Consensus predictions table:
+	private MOATable moaTable = new MOATable();
+
+	private int imgSize;//size of image to display
+    private String webImagePathByCID;//path to get images on Chemistry Dashboard
+    private String webImagePathBySID;//path to get images on Chemistry Dashboard
+	private String webPathDashboardPage;//path to get property prediction page on Chemistry Dashboard 
+    private double SCmin;//minimum similar coefficient for chemicals to display in similar chemicals table
+    
+	private String reportBase;
+    private boolean createDetailedReport;
 
 	
 	public String getReportBase() {
@@ -249,6 +224,22 @@ public class PredictionResults {
 
 	public void setVersion(String version) {
 		this.version = version;
+	}
+
+    public String getWebImagePathBySID() {
+		return webImagePathBySID;
+	}
+
+	public void setWebImagePathBySID(String webImagePathBySID) {
+		this.webImagePathBySID = webImagePathBySID;
+	}
+
+    public String getError() {
+		return error;
+	}
+
+	public void setError(String error) {
+		this.error = error;
 	}
 
 }

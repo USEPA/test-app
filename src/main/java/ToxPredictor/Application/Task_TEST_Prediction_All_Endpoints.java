@@ -13,12 +13,12 @@ public class Task_TEST_Prediction_All_Endpoints implements Runnable {
 //	SwingWorker worker;
 
 	AtomContainer ac=null;
-	String  [] endpoints=null;
-	String  [] methods=null;
+	List<String> endpoints=null;
+	List<String> methods=null;
 	Set<WebReportType> wrt=null;
 	Connection conn=null;
 	
-	public void init(AtomContainer ac,String [] endpoint,String [] method,Set<WebReportType> wrt,Connection conn) throws Exception {
+	public void init(AtomContainer ac,List<String> endpoint,List<String> method,Set<WebReportType> wrt,Connection conn) throws Exception {
 
         try {
         	this.ac=ac;

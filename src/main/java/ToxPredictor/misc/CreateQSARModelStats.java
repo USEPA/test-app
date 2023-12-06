@@ -18,6 +18,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.util.List;
 import java.util.Vector;
 
 
@@ -1361,7 +1362,7 @@ public class CreateQSARModelStats {
 	public static void main(String[] args) {
 		CreateQSARModelStats c=new CreateQSARModelStats();
 		
-		String [] endpoints=TESTConstants.getFullEndpoints(null);
+		List<String> endpoints=TESTConstants.getFullEndpoints(null);
 		
 		String resultsFolder="test-results";
 		
@@ -1381,18 +1382,18 @@ public class CreateQSARModelStats {
 		omitCAS.add("25590-58-3");//nitronate (ion)
 		omitCAS.add("34430-24-5");//nitronate (ion)
 		
-		for (int i=0;i<endpoints.length;i++) {
+		for (String endpoint:endpoints) {
 			
-			if (endpoints[i].equals("Estrogen Receptor RBA")) continue;
+			if (endpoint.equals("Estrogen Receptor RBA")) continue;
 
-			c.createRunSpreadsheet(endpoints[i],resultsFolder,omitCAS);
+			c.createRunSpreadsheet(endpoint,resultsFolder,omitCAS);
 
-			if (!TESTConstants.isBinary(endpoints[i])) {
+			if (!TESTConstants.isBinary(endpoint)) {
 				String method="consensus";
-				String endpointAbbrev=TESTConstants.getAbbrevEndpoint(endpoints[i]);
-				String resultsFilePath=resultsFolder+"/"+endpoints[i]+"/"+method+"/"+endpointAbbrev+"_prediction.txt";
-				String imageFilePath=resultsFolder+"/"+endpoints[i]+"/"+endpoints[i]+"_consensus.png";
-				c.CreatePlot(endpoints[i], resultsFilePath, "\t", omitCAS, imageFilePath);
+				String endpointAbbrev=TESTConstants.getAbbrevEndpoint(endpoint);
+				String resultsFilePath=resultsFolder+"/"+endpoint+"/"+method+"/"+endpointAbbrev+"_prediction.txt";
+				String imageFilePath=resultsFolder+"/"+endpoint+"/"+endpoint+"_consensus.png";
+				c.CreatePlot(endpoint, resultsFilePath, "\t", omitCAS, imageFilePath);
 			}	
 		}
 		

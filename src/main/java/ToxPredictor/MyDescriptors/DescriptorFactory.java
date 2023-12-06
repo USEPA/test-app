@@ -1175,7 +1175,7 @@ public class DescriptorFactory {
 			// ringSet = Cycles.sssr(m).toRingSet();//TODO how does compare to
 			// method above???
 		} catch (Exception e) {
-			this.errorMsg = "FindRings";
+			this.errorMsg = "Timeout while finding rings";
 			logger.catching(e);
 		}
 		double time4 = System.currentTimeMillis() / 1000.0;
