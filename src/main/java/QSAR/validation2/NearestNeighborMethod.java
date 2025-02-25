@@ -52,15 +52,15 @@ public class NearestNeighborMethod{
    String weightfolder="ToxPredictor/DescriptorTextTables/Weighting Files";
    String weightfilename=DescriptorSet+"-"+"100"+".txt";
    
-   public boolean MustExceedSCmin=true;
+   public static boolean MustExceedSCmin=true;
 //   public double SCmin=0.65;
    public double SCmin=0.5;
    
 //   public boolean MustHaveTestChemicalFragments=false;
 //   public boolean MustNotHaveExtraChemicalFragments=false;
    
-	public boolean ExcludeTestChemicalCASFromTrainingSet = true; //if the CAS matches exclude chemical from training cluster
-	public boolean ExcludeTestChemical2dIsomerFromTrainingSet = false; //if the similarity coefficient >= 0.999 exclude chemical from training cluster
+	public static boolean ExcludeTestChemicalCASFromTrainingSet = true; //if the CAS matches exclude chemical from training cluster
+	public static boolean ExcludeTestChemical2dIsomerFromTrainingSet = false; //if the similarity coefficient >= 0.999 exclude chemical from training cluster
 
 //   public boolean RemoveEStateDescriptorsNotInTestChemical=false;
 //   public boolean RemoveAllDescriptorsNotInTestChemical=false;
@@ -767,13 +767,13 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 			return (val1+val2)/2.0;
 		} else if (num>2 && num%2!=0) {
 			int middlenum=(int)(num/2.0)+1;
-			System.out.println("middlenum="+middlenum);
+//			System.out.println("middlenum="+middlenum);
 			double val1=cc.instance(middlenum).classValue();
 			return val1;
 			
 		} else {
 			int middlenum=num/2;
-			System.out.println("middlenum="+middlenum);
+//			System.out.println("middlenum="+middlenum);
 			double val1=cc.instance(middlenum).classValue();
 			double val2=cc.instance(middlenum+1).classValue();
 			return (val1+val2)/2.0;			

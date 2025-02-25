@@ -41,9 +41,9 @@ public class PredictCommand extends Command {
 		params.inputFilePath = namespace.getString("in");
 		params.outputFilePath = namespace.getString("out");
 		params.endpoints = namespace.get("endpoint") == null ? null : 
-		    namespace.getList("endpoint").toArray(new String[] {});
+		    namespace.getList("endpoint");
 		params.methods = namespace.get("method") == null ? null :
-		    namespace.getList("method").toArray(new String[] {});
+		    namespace.getList("method");
 		
 		params.reportTypes = new HashSet<>();
 		if (namespace.get("report") != null) {

@@ -26,10 +26,13 @@ import java.awt.font.*;
  */
 public class fraChart extends JFrame {
 	
+	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 6751103519589645460L;
+	public static int scalingFactor=1;//scaling factor
+
 	
 	public JLabelChart jlChart = new JLabelChart();
 	
@@ -103,6 +106,7 @@ public class fraChart extends JFrame {
 			File myFile = new File(filepath);
 
 			ImageIO.write(ImgSrc, "png", myFile);
+
 			
 		} catch (Exception e) {
 			System.out.println("Exception creating pic file");
@@ -111,6 +115,37 @@ public class fraChart extends JFrame {
 	}
 	
 	void jbInit() throws Exception {
+		
+		int size=400*scalingFactor;
+		jlChart.setBorder( BorderFactory.createLineBorder( Color.black ) );
+		jlChart.setBounds( new Rectangle( 25, 25, size, size ) );
+		jlChart.setVisible(true);
+		
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
+//		this.setModal(true);
+		this.setSize( new Dimension( 700*scalingFactor, 500*scalingFactor ) );
+		this.setTitle("Fit results");
+		this.getContentPane().setLayout( null );
+//		jlPosition.setBounds(new Rectangle(240, 363, 251, 52));
+		jbOK.setBounds(new Rectangle(500*scalingFactor, 381*scalingFactor, 103*scalingFactor, 31*scalingFactor));
+		jbOK.setText("Close");
+		jbOK.addActionListener(new fraChart_jbOK_actionAdapter(this));
+		
+		jlResults.setSize(200*scalingFactor,70*scalingFactor);
+		jlResults.setLocation(500*scalingFactor, 200*scalingFactor);
+		jlResults.setForeground(Color.blue);
+		
+		
+		this.getContentPane().add( jlChart, null );
+		this.getContentPane().add( jlResults, null );
+//		this.getContentPane().add(jlPosition, null);	 
+		this.getContentPane().add(jbOK, null);  
+//		this.setVisible(true);
+	}
+	
+
+	void jbInitOld() throws Exception {
 		
 		int size=400;
 		jlChart.setBorder( BorderFactory.createLineBorder( Color.black ) );
@@ -165,9 +200,10 @@ public class fraChart extends JFrame {
 		public boolean doDrawStatsR2=false;
 		public boolean doDrawLegend=false;
 		
-		Font fontGridLines=new Font( "Arial", Font.PLAIN, 10 );
-		Font fontTitle=new Font( "Arial", Font.BOLD, 11);
-		Font fontLegend = new Font("Arial", Font.PLAIN, 11);
+		public Font fontGridLines=new Font( "Arial", Font.PLAIN, 10 );
+		public 	Font fontTitle=new Font( "Arial", Font.BOLD, 11);
+		public 	Font fontLegend = new Font("Arial", Font.PLAIN, 11);
+		
 		
 		JLabel jlResults;
 
@@ -186,7 +222,8 @@ public class fraChart extends JFrame {
 		DecimalFormat myF=new DecimalFormat("0");		
 		DecimalFormat myF1=new DecimalFormat("0.0");
 		
-		int cw=6; // width of symbols;
+		int cw; // width of symbols;
+
 		
 		public JLabelChart() {
 			int size = 400;
@@ -248,6 +285,9 @@ public class fraChart extends JFrame {
 		} // end paintComponent
 		
 		void DrawChart(Graphics2D g2) {
+			
+			cw=6+scalingFactor-1;
+			
 			w=this.getWidth(); // width of drawing area;
 			
 			margin=(int)((double)w*0.15); // provides space for axis numbers and titles
@@ -355,6 +395,27 @@ public class fraChart extends JFrame {
 				
 				return imgURL;
 				
+			} catch (IOException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
+		
+
+		public byte[] getChartBytes() {
+			
+			try {
+				int w= this.getWidth();
+				BufferedImage ImgSrc = new BufferedImage(w, w,
+						BufferedImage.TYPE_INT_RGB);
+				Graphics2D g2 = (Graphics2D) ImgSrc.getGraphics();
+				this.DrawChart(g2);
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				ImageIO.write( ImgSrc, "png", baos );
+				baos.flush();
+				byte[] bytes = baos.toByteArray();
+				return bytes;
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
@@ -1058,22 +1119,22 @@ public class fraChart extends JFrame {
 			g2.setColor(Color.black);
 			g2.drawRect(xbox, ybox, widthbox, heightbox);
 
-			Font f11 = new Font("Arial", Font.BOLD, 11);
+//			Font f11 = new Font("Arial", Font.BOLD, 11);
 			Font f6 = new Font("Arial", Font.BOLD, 6);
 
 			g2.setColor(Color.black);
-			g2.setFont(f11);
+			g2.setFont(fontLegend);
 
 			// g2.drawString(s1,90,90);
 
 			g2.drawString(s1a, xbox + xpad, ybox + ypad + 5);
 			g2.setFont(f6);
 			g2.drawString(s1b, xbox + xpad + s1awidth, ybox + ypad);
-			g2.setFont(f11);
+			g2.setFont(fontLegend);
 			g2.drawString(s1c, xbox + xpad + s1awidth + s1bwidth, ybox + ypad
 					+ 5);
 
-			g2.setFont(f11);
+			g2.setFont(fontLegend);
 			g2.drawString(s2, xbox + xpad, ybox + ypad + 5 + s1aheight);
 
 		}
@@ -1151,8 +1212,8 @@ public class fraChart extends JFrame {
 			int xpad = 12;
 			int ypad = 12;
 
-			int widthbox = 75;
-			int heightbox = 40;
+			int widthbox = 75+(scalingFactor-1)*16;
+			int heightbox = 40+(scalingFactor-1)*8;
 			
 			boolean havePointInBox=HavePointInBox(xbox, ybox, widthbox, heightbox);
 			
@@ -1175,10 +1236,9 @@ public class fraChart extends JFrame {
 			g2.setColor(Color.black);
 			g2.drawRect(xbox, ybox, widthbox, heightbox);
 
-			Font f11 = new Font("Arial", Font.PLAIN, 11);
 
 			g2.setColor(Color.black);
-			g2.setFont(f11);
+			g2.setFont(fontLegend);
 			
 			int ix=xbox+10;
 			int iy=ybox+10;
@@ -1193,10 +1253,15 @@ public class fraChart extends JFrame {
 			.getHeight();
 
 			g2.setColor(Color.black);
-			g2.setFont(f11);
+			g2.setFont(fontLegend);
 			g2.drawString(s1, ix+15, (int)(iy+s1height/2.0)+2);
 			
 			int iy2=iy+20;
+
+			if(scalingFactor==3) {
+				iy2=iy+30;				
+			}
+			
 			g2.drawLine(ix-5, iy2, ix+10, iy2);
 
 			String s2="Y=X line";
@@ -1408,11 +1473,14 @@ public class fraChart extends JFrame {
 
 //		fraChart fc = new fraChart(x,y);
 
+		scalingFactor=3;
+		
 		String title="Fathead minnow LC50 (96 hr) -Log(mol/L)";
 		String xtitle="exp. "+title;
 		String ytitle="pred. "+title;
+		
 		fraChart fc = new fraChart(x,y,xtitle,ytitle);
-		fc.jlChart.doDrawLegend=false;
+		fc.jlChart.doDrawLegend=true;
 		fc.jlChart.doDrawStatsMAE=false;
 		
 //		fraChart fc = new fraChart(x,y,SC,"Chart with SC",xtitle,ytitle);

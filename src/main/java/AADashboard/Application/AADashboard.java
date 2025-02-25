@@ -9,10 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -32,6 +29,7 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 //import AADashboard.Parse.*;
 //import AADashboard.ParseNew.ParseOSPAR;
@@ -50,6 +48,7 @@ import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
 //import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
+
 
 
 /**
@@ -1070,11 +1069,17 @@ public class AADashboard {
 
 		long t2=System.currentTimeMillis();
 		if (debug) System.out.println("Done getting records from TEST in "+(t2-t1)+" milliseconds");
+		
+		
+//		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
+//		System.out.println(gson.toJson(chemical));
 
+		
 		if (filterRecords) {
 			filterRecords(chemical);
 		}
 		
+//		System.out.println("\nAfter filter:\n"+gson.toJson(chemical));
 	
 		//**********************************************************************
 		//Get records from ToxVal:

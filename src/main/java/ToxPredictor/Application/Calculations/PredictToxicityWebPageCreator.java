@@ -660,7 +660,10 @@ public class PredictToxicityWebPageCreator {
 
 		Color color = null;
 
-		if (SCi >= 0.9) {
+		
+		if (SCi ==1.0) {
+			color = Color.LIGHT_GRAY;
+		} else if (SCi >= 0.9) {
 			color = Color.green;
 		} else if (SCi < 0.9 && SCi >= 0.8) {
 			// color=Color.blue;

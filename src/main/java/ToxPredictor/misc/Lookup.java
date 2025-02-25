@@ -535,7 +535,6 @@ public class Lookup {
 			int keyColumnNumber = ToxPredictor.Utilities.Utilities
 					.FindFieldNumber(header, keyColumnName, delimiter);
 			
-			
 			while (true) {
 				String Line = br.readLine();
 				if (!(Line instanceof String))
@@ -596,6 +595,10 @@ public class Lookup {
 	 * @param valueColumnName
 	 * @param delimiter
 	 * @return
+	 * 
+	 * TODO this needs to exclude FDA when calculating consensus...
+	 * 
+	 * 
 	 */
 	public double CalculateMAE(String filename, String expColumnName,
 			String methodColumnName, String delimiter) {

@@ -1,4 +1,4 @@
-package ToxPredictor.Application.Calculations;
+package ToxPredictor.Application.Calculations.RunFromCommandLine;
 
 import java.awt.Desktop;
 import java.io.BufferedReader;
@@ -44,6 +44,8 @@ import com.mashape.unirest.http.exceptions.UnirestException;
 import ToxPredictor.Application.CalculationParameters;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
+import ToxPredictor.Application.Calculations.PredictToxicityJSONCreator;
+import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJSON;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
 import ToxPredictor.Database.DSSToxRecord;
@@ -56,13 +58,13 @@ import ToxPredictor.Utilities.TESTPredictedValue;
 
 public class RunFromSmiles {
 	
-	static boolean debug=true;
+	public static boolean debug=true;
 	
 	//	public static String status;
 	public static final String strSID="DTXSID";
 	public static final String strCID="DTXCID";
-	private static final String strCAS = "CASRN";
-	private static final String strSmiles = "Smiles";//?
+	static final String strCAS = "CASRN";
+	static final String strSmiles = "Smiles";//?
 
 	public static List<String>allEndpoints= Arrays.asList(TESTConstants.ChoiceFHM_LC50,TESTConstants.ChoiceDM_LC50,
 			TESTConstants.ChoiceTP_IGC50,TESTConstants.ChoiceRat_LD50,
@@ -113,6 +115,15 @@ public class RunFromSmiles {
 		return m;
 	}
 
+	
+	public static AtomContainer createMolecule(DSSToxRecord dr) {
+		AtomContainer m = WebTEST4.prepareMolFileMolecule(dr.mol);
+		m.setProperty(DSSToxRecord.strSID,dr.sid);//store sid so dont need to look up later
+		m.setProperty(DSSToxRecord.strCID,dr.cid);//store sid so dont need to look up later
+		m.setProperty(DSSToxRecord.strSmiles, dr.smiles);//need original smiles NOT QSAR ready smiles
+		if(dr.cas!=null) m.setProperty(DSSToxRecord.strCAS, dr.cas);//need CAS for doing nearest neighbor method (to exclude training chemical by CAS)
+		return m;
+	}
 
 	public static void runSingle (String endpoint,String method, boolean createReports,
 			boolean createDetailedReports,String reportBase,String smiles,String DTXSID,String CAS) {
@@ -409,6 +420,8 @@ public class RunFromSmiles {
 
 			ac=calculate(ac,endpoints,method);
 			List<PredictionResults> resultsArray=getResultsArray(ac,method);
+			
+//			System.out.println(resultsArray.size());		
 
 			String Smiles=ac.getProperty(DSSToxRecord.strSmiles);
 			String error=(String) ac.getProperty("Error");
@@ -419,11 +432,13 @@ public class RunFromSmiles {
 				PredictionResults pr=null;
 
 				if (resultsArray.get(j)==null) {
+
 					pr=new PredictionResults();
 					pr.setEndpoint(endpoints.get(j));
 					pr.setMethod(method);	
 				} else {
 					pr=resultsArray.get(j);
+					
 				}
 
 				pr.setVersion(TESTConstants.SoftwareVersion);
@@ -711,7 +726,8 @@ public class RunFromSmiles {
 	 */
 	private static void runSingleEndpointExample () {
 //		String endpoint =TESTConstants.ChoiceFHM_LC50;//what property or toxicity endpoint being predicted
-		String endpoint=TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity;
+//		String endpoint=TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity;
+		String endpoint=TESTConstants.ChoiceRat_LD50;
 		
 		String method =TESTConstants.ChoiceConsensus;//what QSAR method being used (default- runs all methods and takes average)
 		boolean createReports=true;//whether to store report
@@ -720,11 +736,12 @@ public class RunFromSmiles {
 
 		AtomContainerSet acs=new AtomContainerSet();		
 
-		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242","71-43-2"));//valid simple molecule
+//		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242","71-43-2"));//valid simple molecule
 		//		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242",null));//valid simple molecule
 		//		acs.addAtomContainer(createMolecule("c1ccccc1", null,null));//valid simple molecule
 		//		acs.addAtomContainer(createMolecule("O=P(OC1=CC=CC=C1)(OC1=CC=CC=C1)OC1=CC=CC=C1","DTXSID1021952","115-86-6"));//valid but more complicated molecule
-		//		acs.addAtomContainer(createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2"));//invalid molecule: salt
+//				acs.addAtomContainer(createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2"));//invalid molecule: salt
+		acs.addAtomContainer(createMolecule("NC1=C(C=CC(=C1)NC(=O)C)OCC", "DTXSID7020053","17026-81-2"));
 		//		acs.addAtomContainer(createMolecule("O=C6c4ccc5c1ccc3c2c1c(ccc2C(=O)N(c2ccc(\\N=N/c1ccccc1)cc2)C3=O)c1ccc(c4c51)C(=O)N6c2ccc(\\N=N/c1ccccc1)cc2", "DTXSID1051983","3049-71-6"));//very complicated aromatic molecule, takes longer to run
 		//		acs.addAtomContainer(createMolecule("XXXX", "DTXSID2","123-45-6"));//bad smiles (cant convert to structure)
 		//		acs.addAtomContainer(createMolecule("[S]", "DTXSID9034941","7704-34-9"));//has no carbon
@@ -1408,16 +1425,17 @@ public class RunFromSmiles {
 	}
 
 	private static void convertLogMolarUnits(PredictionDashboard pd, PredictionResultsPrimaryTable pt) {
-		if (pd.property_name.equals("Fathead minnow LC50 (96 hr)")
-				|| pd.property_name.equals("Daphnia magna LC50 (48 hr)")
-				|| pd.property_name.equals("T. pyriformis IGC50 (48 hr)")
+		
+		if (pd.property_name.contentEquals(TESTConstants.ChoiceFHM_LC50)
+				|| pd.property_name.contentEquals(TESTConstants.ChoiceDM_LC50)
+				|| pd.property_name.contentEquals(TESTConstants.ChoiceTP_IGC50)
 				|| pd.property_name.contains("Water solubility")) {
 			pd.prediction_value=Math.pow(10.0,-Double.parseDouble(pt.getPredToxValue()));
 			pd.prediction_units="M";
-		} else if (pd.property_name.equals("Oral rat LD50")) {
+		} else if (pd.property_name.contentEquals("Oral rat LD50")) {
 			pd.prediction_value=Math.pow(10.0,-Double.parseDouble(pt.getPredToxValue()));
 			pd.prediction_units="mol/kg";
-		} else if (pd.property_name.equals("Bioconcentration factor")) {
+		} else if (pd.property_name.contentEquals(TESTConstants.ChoiceBCF)) {
 			pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
 			pd.prediction_units="L/kg";								
 		} else if (pd.property_name.contains("Vapor pressure")) {
@@ -1426,11 +1444,11 @@ public class RunFromSmiles {
 		} else if (pd.property_name.contains("Viscosity")) {
 			pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
 			pd.prediction_units="cP";								
-		} else if (pd.property_name.equals("Estrogen Receptor RBA")) {
+		} else if (pd.property_name.contentEquals("Estrogen Receptor RBA")) {
 			pd.prediction_value=Math.pow(10.0,Double.parseDouble(pt.getPredToxValue()));
 			pd.prediction_units="Dimensionless";
 		} else {
-			System.out.println("Not handled:"+pd.property_name);
+			System.out.println("convertLogMolarUnits, Not handled:\t"+pd.property_name);
 		}
 	}
 
@@ -1726,8 +1744,8 @@ public class RunFromSmiles {
 	}
 
 	public static void main(String[] args) {
-//		runSingleEndpointExample();
-		runSampleSDF();
+		runSingleEndpointExample();
+//		runSampleSDF();
 //		runSIDList();
 //		runSIDListCalcDescriptors();
 	}

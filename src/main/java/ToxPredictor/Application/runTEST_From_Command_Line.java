@@ -379,9 +379,9 @@ public class runTEST_From_Command_Line {
 		runTEST_From_Command_Line r=new runTEST_From_Command_Line();
 //		r.go(args);
 		
-//		r.runFromJava();
+		r.runFromJava();
 //		r.runFromJava2();
-		r.compareDescriptorFiles();
+//		r.compareDescriptorFiles();
 		
 		
 		//For debug, use easy way to choose options:

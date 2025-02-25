@@ -126,7 +126,7 @@ public class QSARTest {
 		WebTEST.reportFolderName=newStrFolder;
 		WebTEST.createDetailedConsensusReport=false;
 
-		String []endpoints=TESTConstants.getFullEndpoints(null);
+		List<String>endpoints=TESTConstants.getFullEndpoints(null);
 		String method=TESTConstants.ChoiceConsensus;
 		
 		Set<WebReportType> wrt = WebReportType.getNone();
@@ -138,9 +138,9 @@ public class QSARTest {
 			String inputFilePath=newStrFolder+"/test.sdf";
 			AtomContainerSet acs=WebTEST.LoadFromSDF(inputFilePath);
 
-			for (int j = 0; j < endpoints.length; j++) {
-				String outputFilePath=newStrFolder+"/"+endpoints[j]+".txt";
-				WebTEST.go(acs,new CalculationParameters(outputFilePath, null, endpoints[j], method, wrt));
+			for (int j = 0; j < endpoints.size(); j++) {
+				String outputFilePath=newStrFolder+"/"+endpoints.get(j)+".txt";
+				WebTEST.go(acs,new CalculationParameters(outputFilePath, null, endpoints.get(j), method, wrt));
 			}
 			
 		} catch (Exception ex) {
@@ -553,8 +553,8 @@ public class QSARTest {
 			wrt.add(WebReportType.HTML);
 			wrt.add(WebReportType.JSON);
 
-			String [] endpoints={TESTConstants.ChoiceTP_IGC50};
-			String [] methods={TESTConstants.ChoiceConsensus,TESTConstants.ChoiceGroupContributionMethod};
+			List<String> endpoints=Arrays.asList(TESTConstants.ChoiceTP_IGC50);
+			List<String> methods=Arrays.asList(TESTConstants.ChoiceConsensus,TESTConstants.ChoiceGroupContributionMethod);
 			
 			CalculationParameters params=new CalculationParameters(null, null, endpoints, methods, wrt);
 			
@@ -700,7 +700,7 @@ public class QSARTest {
         wrt.add(WebReportType.JSON);
 
 
-		String [] endpoints=TESTConstants.getFullEndpoints(null);
+		List<String>endpoints=TESTConstants.getFullEndpoints(null);
 		String method = TESTConstants.ChoiceConsensus;
 
 		try {
@@ -714,16 +714,16 @@ public class QSARTest {
 			
 			
 			
-			for (int i=0;i<endpoints.length;i++) {
+			for (int i=0;i<endpoints.size();i++) {
 				
-				String outputFilePath=of+"/"+endpoints[i].replaceAll(" ", "_")+"_"+method+"_"+CAS+".txt";
+				String outputFilePath=of+"/"+endpoints.get(i).replaceAll(" ", "_")+"_"+method+"_"+CAS+".txt";
 				
 
 				//	Do calcs:
 //				WebTEST.loadTrainingData(endpoints[i], method);
 //				WebTEST.doPredictions(acs, endpoints[i], method,outputFilePath, true);
 				
-				ToxPredictor.Application.CalculationParameters params=new CalculationParameters(outputFilePath, null, endpoints[i], method, wrt);
+				ToxPredictor.Application.CalculationParameters params=new CalculationParameters(outputFilePath, null, endpoints.get(i), method, wrt);
 				WebTEST.go(acs, params);
 			
 			}
@@ -766,7 +766,7 @@ public class QSARTest {
 //        wrt.add(WebReportType.JSON);
 
 
-		String [] endpoints=TESTConstants.getFullEndpoints(null);
+		List<String> endpoints=TESTConstants.getFullEndpoints(null);
 		String method = TESTConstants.ChoiceConsensus;
 
 		try {
@@ -782,7 +782,7 @@ public class QSARTest {
 			WebTEST2.usePreviousDescriptors=true;
 			WebTEST2.compressDescriptorsInDB=false;
 
-			CalculationParameters cp=new CalculationParameters(null, null, endpoints, new String[] { method }, wrt);
+			CalculationParameters cp=new CalculationParameters(null, null, endpoints, Arrays.asList(method), wrt);
 			
 			long t1=System.currentTimeMillis();			
 			List<TESTPredictedValue> predictions=WebTEST2.go(acs,cp );			
@@ -798,7 +798,7 @@ public class QSARTest {
 	
 	void runTESTSets() {
 		
-		String [] endpoints = TESTConstants.getFullEndpoints(null); 
+		List<String> endpoints = TESTConstants.getFullEndpoints(null); 
 
 		Set<WebReportType> wrt = WebReportType.getNone();
 
@@ -806,13 +806,13 @@ public class QSARTest {
 		WebTEST2.compressDescriptorsInDB=false;
 		WebTEST2.displayLoadingMessage=true;
 		
-		for (int i=0;i<endpoints.length;i++) {
+		for (int i=0;i<endpoints.size();i++) {
 			
 //			if (!endpoints[i].equals(TESTConstants.ChoiceFlashPoint)) continue;
 			
 //		for (int i=12;i<endpoints.length;i++) {
 			String method=TESTConstants.ChoiceConsensus;			
-			String abbrev=TESTConstants.getAbbrevEndpoint(endpoints[i]);
+			String abbrev=TESTConstants.getAbbrevEndpoint(endpoints.get(i));
 
 			try {
 //				String sdfPath="data/"+abbrev+"/"+abbrev+"_prediction.sdf";
@@ -822,7 +822,7 @@ public class QSARTest {
 //				String dbPath="databases/TEST_sets_2018_10_19.db";
 //				String dbPath=null;				
 				List<TESTPredictedValue> listTPV = WebTEST2.go(acs,
-					new CalculationParameters(null, null, endpoints[i], method, wrt));
+					new CalculationParameters(null, null, endpoints.get(i), method, wrt));
 			
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -832,7 +832,7 @@ public class QSARTest {
 	
 	void runTESTSetsWebTEST3_multicore() {
 		
-		String [] endpoints = TESTConstants.getFullEndpoints(null); 
+		List<String> endpoints = TESTConstants.getFullEndpoints(null); 
 
 		Set<WebReportType> wrt = WebReportType.getNone();
 
@@ -842,12 +842,12 @@ public class QSARTest {
 
     	long t1=System.currentTimeMillis();
     	
-		for (int i=0;i<endpoints.length;i++) {
+		for (int i=0;i<endpoints.size();i++) {
 			
 //			if (!endpoints[i].equals(TESTConstants.ChoiceFlashPoint)) continue;
 
 			String method=TESTConstants.ChoiceConsensus;			
-			String abbrev=TESTConstants.getAbbrevEndpoint(endpoints[i]);
+			String abbrev=TESTConstants.getAbbrevEndpoint(endpoints.get(i));
 
 			try {
 //				String sdfPath="data/"+abbrev+"/"+abbrev+"_prediction.sdf";
@@ -865,7 +865,7 @@ public class QSARTest {
 //				}
 				
        			Task_TEST_Prediction task=new Task_TEST_Prediction();
-       			task.init(acs,endpoints[i],method,wrt);
+       			task.init(acs,endpoints.get(i),method,wrt);
        			threadExecutor.execute(task ); // start task
         	
 			
@@ -1037,8 +1037,8 @@ public class QSARTest {
 			int stop=50000;//row to stop at
 
 //			String [] endpoints= {TESTConstants.ChoiceBCF};
-			String [] endpoints=TESTConstants.getFullEndpoints(null);
-			String [] methods= {TESTConstants.ChoiceConsensus};
+			List<String> endpoints=TESTConstants.getFullEndpoints(null);
+			List<String> methods= Arrays.asList(TESTConstants.ChoiceConsensus);
 
 			WebTEST5.writePredictionsToDatabase=true;
 			WebTEST5.addDescriptorsToDatabase=false;
@@ -1243,7 +1243,7 @@ public class QSARTest {
 	 */
 	void compileInChiKeysForTESTSets() {
 		
-		String [] endpoints = TESTConstants.getFullEndpoints(null); 
+		List<String> endpoints = TESTConstants.getFullEndpoints(null); 
 
 		Set<WebReportType> wrt = WebReportType.getNone();
 
@@ -1253,9 +1253,9 @@ public class QSARTest {
 		
 		int count=0;
 		
-		for (int i=0;i<endpoints.length;i++) {
+		for (int i=0;i<endpoints.size();i++) {
 //		for (int i=12;i<endpoints.length;i++) {			
-			String abbrev=TESTConstants.getAbbrevEndpoint(endpoints[i]);
+			String abbrev=TESTConstants.getAbbrevEndpoint(endpoints.get(i));
 			
 			String set="prediction";
 			String sdfPath="data/"+abbrev+"/"+abbrev+"_"+set+".sdf";

@@ -19,6 +19,7 @@ import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 
 import ToxPredictor.Application.TESTConstants;
+import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Database.DSSToxRecord;
 

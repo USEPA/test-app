@@ -2,6 +2,7 @@ package ToxPredictor.Application;
 
 import QSAR.qsarOptimal.AllResults;
 import QSAR.validation2.InstanceUtilities;
+import QSAR.validation2.NearestNeighborMethod;
 import ToxPredictor.Application.Calculations.DataForPredictionRun;
 import ToxPredictor.Application.Calculations.PredictToxicityHierarchical;
 import ToxPredictor.Application.Calculations.PredictToxicityJSONCreator;
@@ -34,6 +35,7 @@ import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.graph.ConnectivityChecker;
 import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.io.MDLV3000Reader;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import com.google.gson.Gson;
@@ -43,9 +45,11 @@ import wekalite.CSVLoader;
 import wekalite.Instance;
 import wekalite.Instances;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -153,6 +157,12 @@ public class WebTEST4 {
 //	private static int current;//current % completed for fraMain8 status bar
 //	private static String statMessage;//current message to display in fraMain8 progress bar
 
+	
+	private static boolean ExcludeTestChemicalCASFromTrainingSet=NearestNeighborMethod.ExcludeTestChemicalCASFromTrainingSet;
+	private static boolean ExcludeTestChemical2dIsomerFromTrainingSet=NearestNeighborMethod.ExcludeTestChemical2dIsomerFromTrainingSet;
+	private static boolean MustExceedSCmin=NearestNeighborMethod.MustExceedSCmin;
+	
+	
 	public WebTEST4() {
 	}
 
@@ -461,6 +471,7 @@ public class WebTEST4 {
 			// TODO need to make sure TaskCalculations handles this
 		}
 
+		
 		if (!endpoint.equals(TESTConstants.ChoiceDescriptors)) {
 
 			// array to store predictions for all methods for consensus method:
@@ -522,22 +533,22 @@ public class WebTEST4 {
 				double[] Mean = ccTrainingMOA.getMeans();
 				double[] StdDev = ccTrainingMOA.getStdDevs();
 
-				htTestMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, ccPredictionMOA, true, true, true,
-						Mean, StdDev);
+				htTestMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, ccPredictionMOA, ExcludeTestChemicalCASFromTrainingSet,
+						ExcludeTestChemical2dIsomerFromTrainingSet, MustExceedSCmin,Mean, StdDev);
 
-				htTrainMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, ccTrainingMOA, true, true, true,
-						Mean, StdDev);
+				htTrainMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, ccTrainingMOA, ExcludeTestChemicalCASFromTrainingSet,
+						ExcludeTestChemical2dIsomerFromTrainingSet, MustExceedSCmin,Mean, StdDev);
 
 			} else {
 
 				double[] Mean = trainingDataSet2d.getMeans();
 				double[] StdDev = trainingDataSet2d.getStdDevs();
 
-				htTestMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, testDataSet2d, true, true, true,
-						Mean, StdDev);
+				htTestMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, testDataSet2d, ExcludeTestChemicalCASFromTrainingSet,
+						ExcludeTestChemical2dIsomerFromTrainingSet, MustExceedSCmin,Mean, StdDev);
 
-				htTrainMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, trainingDataSet2d, true, true,
-						true, Mean, StdDev);
+				htTrainMatch = TaskCalculations.FindClosestChemicals(evalInstance2d, trainingDataSet2d, ExcludeTestChemicalCASFromTrainingSet,
+						ExcludeTestChemical2dIsomerFromTrainingSet, MustExceedSCmin, Mean, StdDev);
 
 			}
 
@@ -559,7 +570,7 @@ public class WebTEST4 {
 						evalInstancesFrag, allResultsFrag, reportOptions, createReports);
 			} else if (method.equals(TESTConstants.ChoiceLDA)) {
 				runLDA(method, d, res, reportOptions, CAS, evalInstances2d, createReports);
-			} else if (method.equals(TESTConstants.ChoiceConsensus)) {
+			} else if (method.equals(TESTConstants.ChoiceConsensus)) {				
 				runConsensus(d, res, evalInstances2d, trainingDataSet2d, allResults, evalInstancesFrag,
 						trainingDataSetFrag, allResultsFrag, descriptorCalculationTime, reportOptions);
 			} // end choice consensus
@@ -642,14 +653,22 @@ public class WebTEST4 {
 					"Group contribution method is unavailable for this endpoint",
 					ERROR_CODE_APPLICABILITY_DOMAIN_ERROR));
 		}
+		
+
+		
 		// Nearest neighbor:
 		runNN(d, res, d.DescriptorSet, trainingDataSet2d, evalInstances2d, options, createDetailedReports);
 		predictedToxicities.add(ptNN.predToxVal);
 		predictedUncertainties.add(ptNN.predToxUnc);
+		
 
 		double predToxVal = WebTEST.calculateConsensusToxicity(predictedToxicities);
 		predictedToxicities.add(predToxVal);
 //		double predToxUnc = 1;// TODO: add code to calculate this
+		
+//		System.out.println("predToxVal="+predToxVal);
+		
+
 
 		String method = TESTConstants.ChoiceConsensus;
 
@@ -676,10 +695,13 @@ public class WebTEST4 {
 		long t1 = System.currentTimeMillis();
 		
 		
+
 		tpv.predictionResults = jsonCreator.generatePredictionResultsConsensus(d, tpv, predictedToxicities,
 				predictedUncertainties, predToxVal, options, createReports);
 		long t2 = System.currentTimeMillis();
 
+
+		
 //		System.out.println((t2-t1)+" millsecs");
 
 		if (generateWebpages) writeResultsFiles(d, tpv, method);			
@@ -689,7 +711,10 @@ public class WebTEST4 {
 
 		logger.info("{}\t{}\t{}\t\t{}\t{}\t{}", d.CAS, FormatUtils.toD3(d.er.expToxValue), FormatUtils.toD3(predToxVal),
 				descriptorCalculationTime, predictionGenerationTime, d.endpoint);
-
+		
+		
+		
+		
 		return predToxVal;
 	}
 
@@ -792,10 +817,14 @@ public class WebTEST4 {
 
 	private static void runNN(DataForPredictionRun d, List<TESTPredictedValue> res, String descriptorSet,
 			Instances instancesTrain, Instances instancesEval, ReportOptions options, boolean createReports) {
+		
 		int result = ptNN.CalculateToxicity2(descriptorSet, instancesTrain, instancesEval);
+		
 		double predToxVal = ptNN.predToxVal;
 //		double predToxUnc=ptNN.predToxUnc;//TODO		
 
+		
+		
 //		System.out.println("name of test instance="+instancesEval.instance(0).getName());
 		
 		String method = TESTConstants.ChoiceNearestNeighborMethod;
@@ -811,6 +840,9 @@ public class WebTEST4 {
 		if (generateWebpages && createReports) {
 			writeResultsFiles(d,v,method);
 		}
+		
+		
+		
 		res.add(v);
 	}
 
@@ -885,6 +917,7 @@ public class WebTEST4 {
 				String endpoint = params.endpoints.get(j);
 
 				ReportOptions options = getReportOptions(params, CAS, endpoint);
+				
 
 				// if (checkParams(endpoint, method) != null) {
 				// continue;
@@ -903,11 +936,14 @@ public class WebTEST4 {
 					}
 
 					String error = (String) m.getProperty("Error");
+					
 
 					if (StringUtils.isEmpty(error)) {
 						res = calculate(m, dd, df, endpoint, method, params.reportTypes, options);
+											
 					} else { // something wrong with chemical dont do calculations
 								// but write to file:						
+						
 						res = new ArrayList<>();
 
 						String errorCode = (String) m.getProperty("ErrorCode");
@@ -1198,6 +1234,35 @@ public class WebTEST4 {
 			m.setProperty("Error", "");
 
 	}
+	
+
+	
+	public static AtomContainer prepareMolFileMolecule(String molFile) {
+		
+		MDLV3000Reader mr =new MDLV3000Reader();
+		AtomContainer m = null;
+		try {
+			InputStream stream = new ByteArrayInputStream(molFile.getBytes());
+			mr.setReader(stream);
+
+			m= (AtomContainer) mr.readMolecule(DefaultChemObjectBuilder.getInstance());
+			m.setProperty("Error", "");
+			checkAtomContainer(m);
+			stream.close();
+			mr.close();
+
+		} catch (Exception e) {
+			m = new AtomContainer();
+//			String error = e.getMessage() + ", SMILES=" + Smiles;
+			
+			String error="Could not parse Mol file";
+			m.setProperty("Error", error);
+			m.setProperty("ErrorCode", ERROR_CODE_STRUCTURE_ERROR);
+			logger.error(error);
+		}
+		return m;
+	}
+
 
 	public static AtomContainer prepareSmilesMolecule(String Smiles) {
 
@@ -1275,6 +1340,7 @@ public class WebTEST4 {
 	 */
 	public static List<TESTPredictedValue> go2(boolean areDashboardStructuresAvailable, AtomContainer ac, DescriptorData dd, CalculationParameters params)
 			throws Exception {
+		
 		Statement statRecords = null;
 		PredictToxicityJSONCreator.forGUI = true;
 

@@ -1229,7 +1229,7 @@ public class WebTEST5 {
 
 	}
 
-	public static void LoadTrainingData (String  []endpoints,String [] methods) {
+	public static void LoadTrainingData (List<String>endpoints,List<String> methods) {
 		long t1 = System.currentTimeMillis();
 		for (String endpoint : endpoints) {			
 			for (String method : methods) {
@@ -1241,7 +1241,7 @@ public class WebTEST5 {
 		logger.debug("Loading training data in {}s", (t2 - t1) / 1000.);
 	}
 
-	public static Connection setupDatabase(String [] endpoints) {
+	public static Connection setupDatabase(List<String> endpoints) {
 
 		try {
 			Connection conn=createConnectionToTEST_Predictions_DB(mySQL_DB_URL,USER,PASS);

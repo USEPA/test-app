@@ -61,6 +61,7 @@ import ToxPredictor.Utilities.HueckelAromaticityDetector;
 //import ToxPredictor.Utilities.ChemicalFinder;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.Utilities.chemicalcompare;
+import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 
 public class TESTApplication extends JFrame{
@@ -69,6 +70,10 @@ public class TESTApplication extends JFrame{
 	public static boolean defaultToSingleChemicalMode=true;
 	public boolean includeLDA=true;
 	public boolean includeAA_Dashboard=false;
+	
+//	public static String versionToxVal=ParseToxValDB.v8;
+	public static String versionToxVal=ParseToxValDB.v94;
+	
 	public boolean includeRecentMolFileMenu=false;
 	public boolean includeER=false;
 	public boolean includeCTS=true;
@@ -1491,7 +1496,8 @@ public class TESTApplication extends JFrame{
 		} else {
 			if (defaultToSingleChemicalMode) {
 				f.aa.switchToSingleChemicalMode();
-//				f.loadChemicalForDebug("71-43-2");
+//				f.loadChemicalForDebug("79-06-1");
+//				f.loadChemicalForDebug("80-05-7");
 //				f.loadChemicalForDebug("115-86-6");
 //				f.loadChemicalForDebug("perchloroethane");
 //				f.loadChemicalForDebug("61-94-9");
@@ -1514,7 +1520,7 @@ public class TESTApplication extends JFrame{
 				
 				
 //				f.loadBatchForDebug();
-				//f.loadBatchForDebugFromString();
+//				f.loadBatchForDebugFromString();
 			}
 
 		}

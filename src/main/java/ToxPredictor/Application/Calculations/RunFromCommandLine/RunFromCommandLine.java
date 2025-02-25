@@ -1,4 +1,4 @@
-package ToxPredictor.Application.Calculations;
+package ToxPredictor.Application.Calculations.RunFromCommandLine;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -26,7 +26,8 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.AtomContainer;
 
 import ToxPredictor.Application.TESTConstants;
-
+import ToxPredictor.Application.Calculations.TaskCalculations2;
+import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.HueckelAromaticityDetector;

@@ -932,7 +932,7 @@ public class WebTEST3 {
 			long t1=System.currentTimeMillis();
 			Connection conn=createConnectionToTEST_Predictions_DB(mySQL_DB_URL,USER,PASS);
 			WebTESTDBs.createDescriptorsTableMySQL(conn,searchKey);
-			WebTESTDBs.createPredictionsTables(conn, params, searchKey);
+			WebTESTDBs.createPredictionsTables(conn, params.endpoints, searchKey);
 			long t2=System.currentTimeMillis();
 			
 //			System.out.println((t2-t1)/1000.0+" seconds to get connection/create tables");

@@ -1,4 +1,4 @@
-package ToxPredictor.Application.Calculations;
+package ToxPredictor.Application.Calculations.RunFromCommandLine;
 
 
 import java.util.Vector;

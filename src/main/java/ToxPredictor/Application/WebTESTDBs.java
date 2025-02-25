@@ -317,11 +317,11 @@ public class WebTESTDBs {
 		return conn;
 	}
 	
-	static Connection createPredictionsTables(Connection conn,CalculationParameters params,String primaryKey) throws SQLException {
+	static Connection createPredictionsTables(Connection conn,List<String>endpoints,String primaryKey) throws SQLException {
 		
 		Statement stat=conn.createStatement();
 
-		for (String endpoint:params.endpoints) {
+		for (String endpoint:endpoints) {
 			String abbrev=TESTConstants.getAbbrevEndpoint(endpoint);
 
 			String [] fields=getFieldsPredictionsFormat2(endpoint);
