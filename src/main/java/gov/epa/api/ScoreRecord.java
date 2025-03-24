@@ -30,9 +30,14 @@ import ToxPredictor.Utilities.Utilities;
 //Revised version of this class removed need to have FlatFileRecord class
 
 public class ScoreRecord {
+	
 	public String hazardName;//used to be in FlatFileRecord
+	
+	public String dtxcid;
+	public String dtxsid;
 	public String CAS;////used to be in FlatFileRecord
 	public String name;//chemical name
+	
 	public String source;// where the record came from
 	public String sourceOriginal;// where the record came from
 	public String score;// i.e. L,M,H,VH
@@ -82,6 +87,8 @@ public class ScoreRecord {
 	
 	public String url;
 	public String longRef;
+
+	public String sourceTable;
 	
 
 

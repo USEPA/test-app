@@ -833,28 +833,19 @@ private String[] getFieldsSimple(String endpoint) {
 		
 		try {
 			
-			
-
 			String sql = "create table if not exists " + table + " (";
-
+			sql+="ID INTEGER PRIMARY KEY AUTOINCREMENT,";//add autonumbered id
 			int count = 0;// number of fields
-
 
 			for (int i = 0; i < fields.length; i++) {
 				sql += fields[i] + " TEXT,";
 				count++;
 			}
-			
 
-			// Trim off trailing comma:
-			if (sql.substring(sql.length() - 1, sql.length()).equals(",")) {
-				sql = sql.substring(0, sql.length() - 1);
-			}
-
+			sql+="dateCreated DATETIME DEFAULT CURRENT_TIMESTAMP";//add date created stamp
 			sql += ");";
 			
 //			System.out.println(sql);
-			
 			stat.executeUpdate(sql);
 			
 		} catch (Exception ex) {

@@ -1,76 +1,48 @@
 package ToxPredictor.Application.Calculations;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import javax.swing.JOptionPane;
 import javax.swing.table.TableModel;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.util.Strings;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
-import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.smiles.SmilesGenerator;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import com.hp.hpl.jena.util.FileUtils;
 
 
-import AADashboard.Application.TableGeneratorExcel;
-import AADashboard.Application.TableGeneratorHTML;
 import AADashboard.Application.AADashboard;
 import AADashboard.Application.MySQL_DB;
 import QSAR.validation2.InstanceUtilities;
-import edu.stanford.ejalbert.BrowserLauncher;//new one
 import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.RecordLink;
 import gov.epa.api.Score;
-import gov.epa.api.ScoreRecord;
-import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
-import gov.epa.ghs_data_gathering.Parse.ToxVal.SqlUtilities;
 //import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
-import ToxPredictor.Utilities.SaveStructureToFile;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
 import ToxPredictor.Application.CalculationParameters;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebReportType;
-import ToxPredictor.Application.WebTEST;
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.GUI.Miscellaneous.SwingWorker;
 //import ToxPredictor.Application.Calculations.CTS_Generate_Breakdown_Products.ChildChemical;
 import ToxPredictor.Application.Calculations.ResultsCTS.Data.Tree.Child;
-import ToxPredictor.Application.GUI.MyBrowserLauncher;
 import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.MyDescriptors.DescriptorData;
@@ -649,22 +621,22 @@ public class TaskCalculations2 {
 			Connection conn=null;
 			Statement statToxVal=null;
 
-			try {
-				if (TESTApplication.versionToxVal.equals(ParseToxValDB.v8)) {
-					conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v8);
-				} else if (TESTApplication.versionToxVal.equals(ParseToxValDB.v94)) {
-					conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v94);
-//					conn=SqlUtilities.getConnectionToxVal();//get connection to database server				
-				} else {
-					System.out.println("Invalid toxval version");
-					return;
-				}
-				statToxVal=conn.createStatement();
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				System.out.println("Couldnt connect to toxval db");
-				return;
-			}
+//			try {
+//				if (TESTApplication.versionToxVal.equals(ParseToxValDB.v8)) {
+//					conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v8);
+//				} else if (TESTApplication.versionToxVal.equals(ParseToxValDB.v94)) {
+//					conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v94);
+////					conn=SqlUtilities.getConnectionToxVal();//get connection to database server				
+//				} else {
+//					System.out.println("Invalid toxval version");
+//					return;
+//				}
+//				statToxVal=conn.createStatement();
+//			} catch (Exception ex) {
+//				ex.printStackTrace();
+//				System.out.println("Couldnt connect to toxval db");
+//				return;
+//			}
 			
 
 			if (TESTApplication.forMDH) {
@@ -769,7 +741,7 @@ public class TaskCalculations2 {
 
 
 					statMessage = "Molecule ID = " + CAS + " (" + (i + 1) + " of " + moleculeSet.getAtomContainerCount() + ")";
-					Chemical chemical=aad.runChemicalForGUI(CAS, name,dtxsid, ac,cp,TESTApplication.versionToxVal,statToxVal);
+					Chemical chemical=aad.runChemicalForGUI(CAS, name,dtxsid, ac,cp);
 					
 					if (TESTApplication.forMDH) {
 						removeExtraScoresForMDH(chemical);

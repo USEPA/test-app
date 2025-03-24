@@ -46,8 +46,6 @@ import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.Score;
 import gov.epa.api.ScoreRecord;
-//import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
-import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 
 
@@ -84,9 +82,9 @@ public class AADashboard {
 	public static Statement statAA_Dashboard_Records = MySQL_DB.getStatement(DB_Path_AA_Dashboard_Records);
 
 
-	private static final String DB_Path_OPERA_Records = "databases/OPERA ER AR hazard records.db";
+//	private static final String DB_Path_OPERA_Records = "databases/OPERA ER AR hazard records.db";
 
-	public static Statement statOPERA_Records = MySQL_DB.getStatement(DB_Path_OPERA_Records);
+//	public static Statement statOPERA_Records = MySQL_DB.getStatement(DB_Path_OPERA_Records);
 	
 	//	public static final String DB_Path_TEST_Results="databases/test_results.db";//Link stored in WebTEST2
 	//Note: 700K NCCT chemical info database located at "WebTEST.DB_Path_NCCT_ID_Records"//Link stored in WebTEST2
@@ -1035,17 +1033,19 @@ public class AADashboard {
 		return chemical;
 	}
 
-	public Chemical runChemicalForGUI(String CAS,String name, String dtxsid, AtomContainer ac,CalculationParameters cp,String versionToxVal,Statement statToxVal) {
+//	public Chemical runChemicalForGUI(String CAS,String name, String dtxsid, AtomContainer ac,CalculationParameters cp,String versionToxVal,Statement statToxVal) {
+	public Chemical runChemicalForGUI(String CAS,String name, String dtxsid, AtomContainer ac,CalculationParameters cp) {
 
 		long t1_AA=System.currentTimeMillis();
 		if (debug) System.out.print("Getting AA dashboard records from GHS database..."); 		
 
 		//**********************************************************************
 
-		Chemical chemical=getChemicalFromRecords(statAA_Dashboard_Records,CAS);
+		//Get everything from one database (including OPERA, toxval, ECOTOX, etc):
+		Chemical chemical=getChemicalFromRecords(statAA_Dashboard_Records,CAS);//TODO update this db to have everything
 		
-		Chemical chemical2=getChemicalFromRecords(statOPERA_Records,CAS);		
-		chemical.addRecords(chemical2);
+//		Chemical chemical2=getChemicalFromRecords(statOPERA_Records,CAS);		
+//		chemical.addRecords(chemical2);
 		
 		long t2_AA=System.currentTimeMillis();
 		if (debug) System.out.println("done in "+(t2_AA-t1_AA)+ " milliseconds");
@@ -1083,9 +1083,8 @@ public class AADashboard {
 	
 		//**********************************************************************
 		//Get records from ToxVal:
-		ParseToxValDB p=new ParseToxValDB();
-		p.getDataFromToxValDB(chemical,versionToxVal,statToxVal);
-		
+//		ParseToxValDB p=new ParseToxValDB();
+//		p.getDataFromToxValDB(chemical,versionToxVal,statToxVal);
 		//**********************************************************************
 
 		removeDuplicateRecords(chemical);
@@ -1132,9 +1131,9 @@ public class AADashboard {
 	}
 
 	
-	public Chemical runChemicalForGUI(AtomContainer ac,CalculationParameters cp,String versionToxVal,Statement statToxVal) {
+	public Chemical runChemicalForGUI(AtomContainer ac,CalculationParameters cp) {
 		DSSToxRecord dr=ac.getProperty("DSSToxRecord");
-		return runChemicalForGUI(dr.cas,dr.name,dr.sid, ac,cp,versionToxVal,statToxVal);
+		return runChemicalForGUI(dr.cas,dr.name,dr.sid, ac,cp);
 	}
 
 	/**

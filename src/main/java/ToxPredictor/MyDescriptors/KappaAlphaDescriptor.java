@@ -1,6 +1,9 @@
 package ToxPredictor.MyDescriptors;
 
 import org.openscience.cdk.*;
+import org.openscience.cdk.atomtype.CDKAtomTypeMatcher;
+import org.openscience.cdk.config.AtomTypeFactory;
+import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.*;
 import java.util.LinkedList;
 
@@ -87,12 +90,21 @@ public class KappaAlphaDescriptor {
 
 		double[] Radius= new double[m.getAtomCount()]; // covalent radius;
 		
+//		CDKAtomTypeMatcher cdkMatcher 
+//        = CDKAtomTypeMatcher.getInstance(m.getBuilder());
+		
 		for (int I = 0; I <= m.getAtomCount() - 1; I++) {
 
 			double BondCount=m.getConnectedBondsCount(m.getAtom(I));
 			double BondSum=m.getBondOrderSum(m.getAtom(I));
+
+//			IAtomType type = null;//TODO
+//			try {
+//				type = cdkMatcher.findMatchingAtomType(m, m.getAtom(I));
+//			} catch (CDKException e) {
+//				e.printStackTrace();
+//			}
 						
-			
 			/*AtomType at=null;
 			try {
 				at=this.hsam.findMatchingAtomType(m,m.getAtom(I));
@@ -111,6 +123,7 @@ public class KappaAlphaDescriptor {
 			String symbol = m.getAtom(I).getSymbol();
 			int charge = m.getAtom(I).getFormalCharge();
 
+			//TODO use type.getHybridization() to set the radii rather than bondsum and bondcount
 					
 			if (symbol.equals("C")) // 40 (carbon)
 			{
@@ -122,6 +135,9 @@ public class KappaAlphaDescriptor {
 					Radius[I] = 0.6;
 				}
 			} else if (symbol.equals("N")) {
+				
+//				System.out.println(type.getHybridization());
+				
 				if (BondSum - BondCount == 0) { // sp3
 					Radius[I] = 0.74;
 

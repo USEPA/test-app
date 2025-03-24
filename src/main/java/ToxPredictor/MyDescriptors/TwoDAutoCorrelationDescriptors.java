@@ -84,7 +84,9 @@ public class TwoDAutoCorrelationDescriptors {
 		
 		Sumw=0;
 		for (int i=0;i<=m.getAtomCount()-1;i++) {
-			Sumw+=Math.pow(w[i]-wmean,2);			
+			Sumw+=Math.pow(w[i]-wmean,2);	
+			
+//			System.out.println(strw+"\t"+w[i]+"\t"+wmean);
 		}
 		
 		
@@ -96,12 +98,15 @@ public class TwoDAutoCorrelationDescriptors {
 			
 			for (int i=0;i<=m.getAtomCount()-1;i++) {								
 				for (int j=0;j<=m.getAtomCount()-1;j++) {
-					//System.out.println(i+"\t"+j+"\t"+Distance[i][j]);					
+//					System.out.println(i+"\t"+j+"\t"+Distance[i][j]);					
 					if(Distance[i][j]==d) {
 						Deltaij=1;
 					} else {
 						Deltaij=0;
 					}
+					
+//					System.out.println(i+"\t"+j+"\t"+Distance[i][j]+"\t"+Deltaij);
+					
 					
 					if (j>i) 
 						SumMB+=Deltaij*w[i]*w[j];
@@ -113,7 +118,8 @@ public class TwoDAutoCorrelationDescriptors {
 				}
 			}
 			
-//			System.out.println(SumDeltaij);
+//			System.out.println(strw+"\t"+d+"\t"+SumDeltaij+"\t"+Sumw);
+			
 //			System.out.println(Sum);
 			
 			if (SumDeltaij>0) {				

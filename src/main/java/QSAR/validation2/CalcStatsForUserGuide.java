@@ -1,5 +1,6 @@
 package QSAR.validation2;
 
+import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -97,10 +98,9 @@ public class CalcStatsForUserGuide {
 			String ytitle="Pred. "+axistitle;
 //			String title="Test set predictions for the "+methodColumnName+" method";
 			String title="External prediction results";
+
 			fraChart fc = new fraChart(x,y,title,xtitle,ytitle);
-			
 			fc.jlChart.doDrawLegend=true;
-			
 			fc.WriteImageToFile(destFilePath);
 
 

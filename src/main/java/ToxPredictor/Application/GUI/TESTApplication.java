@@ -61,7 +61,6 @@ import ToxPredictor.Utilities.HueckelAromaticityDetector;
 //import ToxPredictor.Utilities.ChemicalFinder;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.Utilities.chemicalcompare;
-import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 
 
 public class TESTApplication extends JFrame{
@@ -71,8 +70,7 @@ public class TESTApplication extends JFrame{
 	public boolean includeLDA=true;
 	public boolean includeAA_Dashboard=false;
 	
-//	public static String versionToxVal=ParseToxValDB.v8;
-	public static String versionToxVal=ParseToxValDB.v94;
+	public static String versionToxVal="v96";
 	
 	public boolean includeRecentMolFileMenu=false;
 	public boolean includeER=false;

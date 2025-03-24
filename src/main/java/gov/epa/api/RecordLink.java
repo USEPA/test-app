@@ -7,7 +7,6 @@ import java.sql.Statement;
 import java.util.Vector;
 
 import gov.epa.ghs_data_gathering.Parse.ToxVal.MySQL_DB;
-import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseTable_toxval.RecordToxVal;
 
 public class RecordLink{
 	public String CAS;

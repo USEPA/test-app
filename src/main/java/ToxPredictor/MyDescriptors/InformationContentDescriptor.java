@@ -459,6 +459,19 @@ public class InformationContentDescriptor {
 			}
 		}
 		
+//		for (int i=0;i<=EdgeDistance.length-1;i++) {
+//			for (int j=0;j<=i-1;j++) {// use lower triangular distance submatrix															
+//				System.out.println(i+"\t"+j+"\t"+EdgeDistance[i][j]);		
+//			}
+//		}
+		
+//		for (int i=0;i<Distance[0].length;i++) {
+//			for (int j=0;j<=i-1;j++) {															
+//				System.out.println(i+"\t"+j+"\t"+Distance[i][j]);		
+//			}
+//		}
+
+		
 		
 	}
 	
@@ -599,8 +612,6 @@ public class InformationContentDescriptor {
 		 }
 		
 		//System.out.println(d.We);
-		
-		
 		
 	}
 	
