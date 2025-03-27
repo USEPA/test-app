@@ -8,11 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Field;
-import java.sql.Connection;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarOutputStream;
@@ -49,6 +49,7 @@ import gov.epa.api.ScoreRecord;
 
 
 
+
 /**
  * This class generates AA reports from a list of chemicals
  * 
@@ -77,7 +78,8 @@ public class AADashboard {
 	//you get 100x faster search:
 	//    public static final String DB_Path_AA_Dashboard_Records = "databases/AA dashboard_w_primary_key.db";
 
-	public static final String DB_Path_AA_Dashboard_Records = "databases/AA dashboard.db";//fast if you add index for CAS: "CREATE INDEX idx_CAS ON "+tableName+" (CAS)"
+	public static final String DB_Path_AA_Dashboard_Records="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\ghs-data-gathering\\databases\\RevisedHazardDB\\HazardRecordsComplete.db";	
+//	public static final String DB_Path_AA_Dashboard_Records = "databases/AA dashboard.db";//fast if you add index for CAS: "CREATE INDEX idx_CAS ON "+tableName+" (CAS)"
 
 	public static Statement statAA_Dashboard_Records = MySQL_DB.getStatement(DB_Path_AA_Dashboard_Records);
 
@@ -909,8 +911,8 @@ public class AADashboard {
 
 			while (rs.next()) {
 
-
-				ScoreRecord sr=createScoreRecord(rs,rsmd);
+				ScoreRecord sr=new ScoreRecord();			
+				createRecord(rs,sr);
 
 				//				System.out.println(sr.toString("|", ScoreRecord.allFieldNames));
 
@@ -945,42 +947,135 @@ public class AADashboard {
 	 * @param rsmd 
 	 * @return
 	 */
-	public  static ScoreRecord createScoreRecord(ResultSet rs, ResultSetMetaData rsmd) {
-		ScoreRecord f=new ScoreRecord(null,null,null);
-
+//	public  static ScoreRecord createScoreRecord(ResultSet rs, ResultSetMetaData rsmd) {
+//		ScoreRecord f=new ScoreRecord(null,null,null);
+//
+//		try {
+//			for (int i = 1; i<= rsmd.getColumnCount(); i++) {
+//				try {
+//
+//					//						System.out.println(i+"\t"+rsmd.getColumnLabel(i));
+//
+//					Field myField = f.getClass().getDeclaredField(rsmd.getColumnLabel(i));
+//
+//					if (myField.getType().getName().contains("Double")) {
+//						double val=rs.getDouble(i);
+//						//						System.out.println("*"+val);
+//
+//						if (val!=0)	myField.set(f, val);
+//
+//					} else {
+//						String val=rs.getString(i);
+//
+//						if (val!=null) {
+//							myField.set(f, val);
+//						} 
+//					}
+//
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//
+//			}
+//		} catch (SQLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return f;
+//
+//	}
+//	
+	
+	public static void createRecord(ResultSet rs, Object r) {
+		ResultSetMetaData rsmd;
 		try {
-			for (int i = 1; i<= rsmd.getColumnCount(); i++) {
-				try {
+			rsmd = rs.getMetaData();
 
-					//						System.out.println(i+"\t"+rsmd.getColumnLabel(i));
+			int columnCount = rsmd.getColumnCount();
 
-					Field myField = f.getClass().getDeclaredField(rsmd.getColumnLabel(i));
+			// The column count starts from 1
+			for (int i = 1; i <= columnCount; i++ ) {
+				String name = rsmd.getColumnLabel(i);
+				
+				if(name.equals("class")) name="class_";
+												
+				String val=rs.getString(i);
+				
+				if(val==null || val.equals("-") || val.isBlank()) continue;
 
-					if (myField.getType().getName().contains("Double")) {
-						double val=rs.getDouble(i);
-						//						System.out.println("*"+val);
+				//				System.out.println(name+"\t"+val);
 
-						if (val!=0)	myField.set(f, val);
+				if (val!=null) {
+					Field myField = r.getClass().getDeclaredField(name);	
+					
+					String type=myField.getType().getName();
+					
+					if (type.contentEquals("boolean")) {
+						myField.setBoolean(r, rs.getBoolean(i));
+					} else if (type.contentEquals("double")) {
+						myField.setDouble(r, rs.getDouble(i));
+					} else if (type.contentEquals("int")) {
+						myField.setInt(r, rs.getInt(i));
+					} else if (type.contentEquals("long")) {
+						myField.setLong(r, rs.getLong(i));
 
+//					} else if (type.contentEquals("java.lang.Long") || type.contentEquals("java.lang.Double") || type.contentEquals("java.lang.Integer")) {
+//						myField.set(r, rs.getObject(i));
+
+					} else if (type.contentEquals("java.lang.Double")) {
+						//Following parses from string- so if need to change data types, this will let you do it:
+						try {
+							Double dval=Double.parseDouble(val);						
+							myField.set(r, dval);
+						} catch (Exception ex) {
+							System.out.println("Error parsing "+val+" for field "+name+" to Double for "+rs.getString(1));
+						}
+					} else if (type.contentEquals("java.lang.Integer")) {
+						
+//						Integer ival=Integer.parseInt(val);
+						myField.set(r,rs.getObject(i));
+						
+					} else if (type.contentEquals("[B")) {		
+						myField.set(r,rs.getBytes(i));
+					} else if (type.contentEquals("java.lang.String")) {
+						myField.set(r, val);
+					} else if (type.contentEquals("java.util.Set")) {
+//						System.out.println(name+"\t"+val);
+						val=val.replace("[", "").replace("]", "");
+						
+						String  [] values = val.split(", ");
+						Set<String>list=new HashSet<>();
+						for (String value:values) {
+							list.add(value.trim());
+						}
+						myField.set(r,list);
+
+					} else if (type.contentEquals("java.util.List")) {
+						
+						//TODO use getArray instead and then convert array to list?
+						
+//						System.out.println(name+"\t"+val);
+						val=val.replace("[", "").replace("]", "");
+						
+						String  [] values = val.split(",");
+						ArrayList<String>list=new ArrayList<>();
+						for (String value:values) {
+							list.add(value.trim());
+						}
+						myField.set(r,list);
 					} else {
-						String val=rs.getString(i);
-
-						if (val!=null) {
-							myField.set(f, val);
-						} 
-					}
-
-				} catch (Exception e) {
-					e.printStackTrace();
+						System.out.println("Need to implement: "+type);
+					}					
+										
 				}
 
 			}
-		} catch (SQLException e) {
+
+
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return f;
-
 	}
 
 
@@ -1086,11 +1181,9 @@ public class AADashboard {
 //		ParseToxValDB p=new ParseToxValDB();
 //		p.getDataFromToxValDB(chemical,versionToxVal,statToxVal);
 		//**********************************************************************
-
+		
 		removeDuplicateRecords(chemical);
-		
 		deleteRecordsFromRetiredSources(chemical);
-		
 		//[TMM] Change for OCSPP/OPP made on 11/23/22
 		removeDSL_TSCA_Persistence(chemical);
 

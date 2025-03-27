@@ -30,6 +30,7 @@ import ToxPredictor.Utilities.Utilities;
 //Revised version of this class removed need to have FlatFileRecord class
 
 public class ScoreRecord {
+	public Integer ID;
 	
 	public String hazardName;//used to be in FlatFileRecord
 	
@@ -66,6 +67,7 @@ public class ScoreRecord {
 	
 	public String toxvalID;
 	public String testOrganism;//common name for animal used in testing
+	public String testOrganismType;
 //	public String reported_dose;
 //	public String normalized_dose;
 
@@ -89,22 +91,22 @@ public class ScoreRecord {
 	public String longRef;
 
 	public String sourceTable;
-	
+	public String dateCreated;
 
 
 //	All the fields in the class in the desired order:	
-		public static String[] allFieldNames= {"CAS","name","hazardName","source","sourceOriginal", 
+		public static String[] allFieldNames= {"dtxsid","CAS","name","hazardName","source","sourceOriginal", 
 				"listType","score", "route", "category", "hazardCode",
 				"hazardStatement",  "rationale","note","note2","toxvalID",
-				"testOrganism","testType","valueMassOperator","valueMass","valueMassUnits","effect",
+				"testOrganism","testOrganismType","testType","valueMassOperator","valueMass","valueMassUnits","effect",
 				"duration","durationUnits","url","longRef"};
 		
 		//Following for displaying results of hazard comparison in webpage:	
-		public static String[] displayFieldNames = { "Name","Source", "Original Source","Score", "Rationale","Route", "Category", "Hazard Code",
-				"Hazard Statement",  "Test duration","Test organism","Toxicity Type","Toxicity Value","Reference","Note" };
+		public static String[] displayFieldNames = { "DSSTox Substance ID","Name","Source", "Original Source","Score", "Rationale","Route", "Category", "Hazard Code",
+				"Hazard Statement",  "Test duration","Test organism","Test Organism Type","Toxicity Type","Toxicity Value","Reference","Note" };
 
-		public static String[] actualFieldNames = { "name","source", "sourceOriginal","score", "rationale","route", "category", "hazardCode",
-				"hazardStatement", "duration","testOrganism", "testType","valueMass","longRef","note" };
+		public static String[] actualFieldNames = {"dtxsid","name","source", "sourceOriginal","score", "rationale","route", "category", "hazardCode",
+				"hazardStatement", "duration","testOrganism","testOrganismType", "testType","valueMass","longRef","note" };
 
 
 
@@ -364,6 +366,8 @@ public class ScoreRecord {
 		this.url=url;
 		
 	}
+	
+	public ScoreRecord() {}
 	
 	public ScoreRecord(String hazard_name,String CAS,String name) {
 		this.hazardName=hazard_name;
