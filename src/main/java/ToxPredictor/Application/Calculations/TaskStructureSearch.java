@@ -1740,7 +1740,74 @@ private static String trimQuotes(String identifier) {
 		return moleculeSet;
 	}
 
-	
+	/**
+	 * Create a molecule from smiles without looking it up in the database
+	 * 
+	 * @param smiles
+	 * @param f
+	 */
+	public void runSingle(String smiles,TESTApplication f) {
+		//			AtomContainerSet acs=null;
+		
+		Inchi inchi = Inchi.generateInChiKeyIndigo(smiles);			
+
+		ArrayList<DSSToxRecord>recs=new ArrayList<>();
+		DSSToxRecord r=new DSSToxRecord();
+		r.cas="C_"+inchi.inchiKey;				
+		r.smiles=smiles;
+		recs.add(r);
+		
+		System.out.println(smiles+"\t"+inchi.inchiKey);
+
+		AtomContainer molecule = getMoleculeFromDSSToxRecords(recs);
+
+		//			System.out.println("here1 inchiKey="+Inchi.generateInChiKeyIndigo(molecule).inchiKey);
+
+		done = true;
+
+		String error=molecule.getProperty("Error");
+		if (error.contentEquals("Multiple molecules")) {
+			JOptionPane.showMessageDialog(f,"Molecule consists of multiple structural fragments, please select another compound");
+			return;
+		}
+
+		molecule=f.configureModel(molecule);
+
+		//			System.out.println("here2 inchiKey="+Inchi.generateInChiKeyIndigo(molecule).inchiKey);
+
+		//			StereoElementFactory stereo    = StereoElementFactory.using2DCoordinates(molecule);
+		//			molecule.setStereoElements(stereo.createAll());
+
+
+		if (molecule.getAtomCount()==0) {
+			JOptionPane.showMessageDialog(f, filepath.replace("\n", "")+" is not found");
+			f.panelSingleStructureDatabaseSearch.jtfCAS.setText("");
+			f.panelSingleStructureDatabaseSearch.jtfName.setText("");
+		} else {
+			//				setCAS(molecule);
+
+			f.panelSingleStructureDatabaseSearch.jtfCAS.setText(molecule.getProperty(DSSToxRecord.strCAS));
+
+			if (molecule.getProperty(DSSToxRecord.strName)!=null) {
+				f.panelSingleStructureDatabaseSearch.jtfName.setText(molecule.getProperty(DSSToxRecord.strName));
+			} else {
+				f.panelSingleStructureDatabaseSearch.jtfName.setText("");
+			}
+
+		}
+
+		String Query=filepath.replace("\n", "");
+		molecule.setProperty("Query", Query);
+		//			f.setNameCAS(molecule);
+
+		//			System.out.println("here3 inchiKey="+Inchi.generateInChiKeyIndigo(molecule).inchiKey);
+
+		f.setTitle(TESTConstants.SoftwareTitle);			
+		f.panelSingleStructureDatabaseSearch.jtfIdentifier.requestFocus();
+
+	}
+
+
 	/**
 	 * The actual long running task. This runs in a SwingWorker thread.
 	 */
@@ -1941,7 +2008,6 @@ private static String trimQuotes(String identifier) {
 
 
 
-		
 		private void runBatch() {
 			AtomContainerSet moleculeSet=null;
 
