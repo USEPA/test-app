@@ -48,7 +48,7 @@ public class DSSToxRecord {
 		return rec;
 	}
 	
-	public static void  assignDSSToxInfoFromFirstRecord(AtomContainer m,ArrayList<DSSToxRecord> recs) {
+	public static void  assignDSSToxInfoFromFirstRecord(IAtomContainer m,ArrayList<DSSToxRecord> recs) {
 		if ( recs.size()> 0 ) {
 			DSSToxRecord.assignFromDSSToxRecord(m, recs.get(0));
 		}
@@ -56,7 +56,7 @@ public class DSSToxRecord {
 	}
 
 	
-	public static void assignFromDSSToxRecord(AtomContainer m, DSSToxRecord rec) {
+	public static void assignFromDSSToxRecord(IAtomContainer m, DSSToxRecord rec) {
 	
 		m.setProperty(strCAS, rec.cas);
 		m.setProperty(strName, rec.name);

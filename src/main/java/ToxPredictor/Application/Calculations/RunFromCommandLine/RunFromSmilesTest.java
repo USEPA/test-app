@@ -53,7 +53,7 @@ public class RunFromSmilesTest {
 				acs3.addAtomContainer(ac);
 
 
-				List<PredictionResults>results=RunFromSmiles.runEndpointsAsList(acs3, RunFromSmiles.allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
+				List<PredictionResults>results=RunFromSmiles.runEndpointsAsList(acs3, RunFromSmiles.allEndpoints, method,createReports,createDetailedReports);
 				
 				for (PredictionResults pr:results) {
 					fw.write(RunFromSmiles.gsonNotPretty.toJson(pr)+"\r\n");
@@ -105,7 +105,7 @@ public static void runSDF_all_endpoints_write_continuously_single(String SDFFile
 			acs3.addAtomContainer(ac);
 
 
-			List<PredictionResults>results=RunFromSmiles.runEndpointsAsList(acs3, endpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
+			List<PredictionResults>results=RunFromSmiles.runEndpointsAsList(acs3, endpoints, method,createReports,createDetailedReports);
 
 			for (PredictionResults pr:results) {
 				fw.write(RunFromSmiles.gson.toJson(pr)+"\r\n");

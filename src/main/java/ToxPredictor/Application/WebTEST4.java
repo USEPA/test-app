@@ -173,7 +173,7 @@ public class WebTEST4 {
 
 		try {
 
-			AtomContainer ac = WebTEST4.getMoleculeFromIdentifier(identifier);
+			IAtomContainer ac = WebTEST4.getMoleculeFromIdentifier(identifier);
 			
 			if (ac==null) {
 				dd=new DescriptorData();
@@ -213,7 +213,7 @@ public class WebTEST4 {
 
 		try {
 
-			AtomContainer ac = WebTEST4.getMoleculeFromIdentifier(identifier);//requires snapshot db
+			IAtomContainer ac = WebTEST4.getMoleculeFromIdentifier(identifier);//requires snapshot db
 //			AtomContainer ac = WebTEST4.loadSMILES(identifier);
 
 			if (ac==null) {
@@ -1237,15 +1237,15 @@ public class WebTEST4 {
 	
 
 	
-	public static AtomContainer prepareMolFileMolecule(String molFile) {
+	public static IAtomContainer prepareMolFileMolecule(String molFile) {
 		
 		MDLV3000Reader mr =new MDLV3000Reader();
-		AtomContainer m = null;
+		IAtomContainer m = null;
 		try {
 			InputStream stream = new ByteArrayInputStream(molFile.getBytes());
 			mr.setReader(stream);
 
-			m= (AtomContainer) mr.readMolecule(DefaultChemObjectBuilder.getInstance());
+			m= mr.readMolecule(DefaultChemObjectBuilder.getInstance());
 			m.setProperty("Error", "");
 			checkAtomContainer(m);
 			stream.close();
@@ -1264,14 +1264,14 @@ public class WebTEST4 {
 	}
 
 
-	public static AtomContainer prepareSmilesMolecule(String Smiles) {
+	public static IAtomContainer prepareSmilesMolecule(String Smiles) {
 
 		SmilesParser sp = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 
-		AtomContainer m = null;
+		IAtomContainer m = null;
 		try {
 			// m=sp.parseSmiles(Smiles);
-			m = (AtomContainer) sp.parseSmiles(Smiles);
+			m = sp.parseSmiles(Smiles);
 			
 
 			m.setProperty("Error", "");
@@ -1296,7 +1296,7 @@ public class WebTEST4 {
 		return m;
 	}
 
-	public static AtomContainer getMoleculeFromIdentifier(String identifier) {
+	public static IAtomContainer getMoleculeFromIdentifier(String identifier) {
 		//			AtomContainerSet acs=null;
 		ArrayList<DSSToxRecord>recs=ResolverDb2.lookup(identifier.trim());
 		
@@ -1306,9 +1306,9 @@ public class WebTEST4 {
 			return null;
 	}
 	
-	public static AtomContainer loadSMILES(String smiles) {
+	public static IAtomContainer loadSMILES(String smiles) {
 
-		AtomContainer m = prepareSmilesMolecule(smiles);
+		IAtomContainer m = prepareSmilesMolecule(smiles);
 
 		String ID;
 
@@ -1338,7 +1338,7 @@ public class WebTEST4 {
 	 * @return
 	 * @throws Exception
 	 */
-	public static List<TESTPredictedValue> go2(boolean areDashboardStructuresAvailable, AtomContainer ac, DescriptorData dd, CalculationParameters params)
+	public static List<TESTPredictedValue> go2(boolean areDashboardStructuresAvailable, IAtomContainer ac, DescriptorData dd, CalculationParameters params)
 			throws Exception {
 		
 		Statement statRecords = null;

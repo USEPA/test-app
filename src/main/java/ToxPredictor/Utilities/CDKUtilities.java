@@ -171,10 +171,10 @@ public class CDKUtilities {
 	 * @param atomContainer
 	 * @return
 	 */
-	public static AtomContainer addHydrogens(IAtomContainer atomContainer) {
-		AtomContainer ac;
+	public static IAtomContainer addHydrogens(IAtomContainer atomContainer) {
+		IAtomContainer ac;
 		try {
-			ac = (AtomContainer) atomContainer.clone();
+			ac = atomContainer.clone();
 			AtomContainerManipulator.percieveAtomTypesAndConfigureUnsetProperties(ac);
 			CDKHydrogenAdder hAdder = CDKHydrogenAdder.getInstance(ac.getBuilder());
 			hAdder.addImplicitHydrogens(ac);

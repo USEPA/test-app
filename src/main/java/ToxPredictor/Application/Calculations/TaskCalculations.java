@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -1613,6 +1614,10 @@ public class TaskCalculations {
 
 		Hashtable ht = new Hashtable();
 
+//		System.out.println("here a\t"+evalInstance2d.toString());
+//	    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//		System.out.println("here a\t"+gson.toJson(Arrays.asList(StdDev)));
+		
 		for (int i = 0; i < dataSet2d.numInstances(); i++) {
 			Instance chemicali = dataSet2d.instance(i);
 			String CAS = chemicali.getName();
@@ -1620,6 +1625,10 @@ public class TaskCalculations {
 			double SimCoeff = -1;
 			SimCoeff = CalculateCosineCoefficient(evalInstance2d, chemicali, Mean, StdDev);
 
+//			if(CAS.equals("6850-57-3") || CAS.equals("2859-78-1")) {
+//				System.out.println("here a\t"+CAS+"\t"+SimCoeff);			
+//			}
+			
 			if (ExcludeTestChemicalCASFromTrainingSet) {
 				String TestCAS = evalInstance2d.getName();
 				if (CAS.equals(TestCAS)) {
@@ -1652,17 +1661,25 @@ public class TaskCalculations {
 		double SumX2 = 0;
 		double SumY2 = 0;
 
-		for (int j = 2; j < c1.numValues(); j++) {
+		for (int j = 0; j < c1.numValues(); j++) {//TMM, Fixed 4/30/25 used to have j=2 as start index (artifact of weka instead of wekalite instance)
 			double xj = c1.value(j);
 			double yj = c2.value(j);
 
-			if (StdDev[j] == 0) {
-				xj = 0;
-				yj = 0;
+			if (StdDev[j]>0) {
+				xj=(xj-Mean[j])/StdDev[j];
+				yj=(yj-Mean[j])/StdDev[j];
 			} else {
-				xj = (xj - Mean[j]) / StdDev[j];
-				yj = (yj - Mean[j]) / StdDev[j];
+				xj=(xj-Mean[j]);
+				yj=(yj-Mean[j]);
 			}
+						
+//			if (StdDev[j] == 0) {
+//				xj = 0;//TMM, 4/30/25: this is wrong see above
+//				yj = 0;
+//			} else {
+//				xj = (xj - Mean[j]) / StdDev[j];
+//				yj = (yj - Mean[j]) / StdDev[j];
+//			}
 
 			SumXY += xj * yj;
 			SumX2 += xj * xj;

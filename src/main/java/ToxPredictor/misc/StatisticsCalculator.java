@@ -458,7 +458,7 @@ public class StatisticsCalculator {
 		
 	}
 
-	public class ModelPrediction {
+	public static class ModelPrediction {
 		public String  id;
 		public Double exp;
 		public Double pred;

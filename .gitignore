@@ -17,3 +17,15 @@ test downloadable HCD/
 *.bat
 MNDOH/
 *.xls
+Java jdk/
+reports/bob.html
+reports/
+tony/
+*.sql
+*.sqbpro
+SCDCD/
+*.json
+output.tsv
+output.txt
+smiles.csv
+Smiles.smi

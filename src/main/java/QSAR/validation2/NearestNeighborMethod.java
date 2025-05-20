@@ -1,6 +1,7 @@
 package QSAR.validation2;
 import java.io.*;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -8,7 +9,11 @@ import java.util.LinkedList;
 //import java.util.ListIterator;
 import java.util.Vector;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import wekalite.*;
+import ToxPredictor.Application.Calculations.TaskCalculations;
 import ToxPredictor.Utilities.Utilities;
 
 
@@ -650,20 +655,32 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 	Hashtable<Double,Instance> ht = new Hashtable<Double,Instance>();//Store instances by similarity
 	
 	
+	
+//	System.out.println("here b\t"+chemical.toString());
+//	System.out.println("here b\t"+Arrays.asList(trainingSet.getMeans()));
+	
+//    Gson gson = new GsonBuilder().setPrettyPrinting().create();
+//	System.out.println("here b\t"+gson.toJson(Arrays.asList(trainingSet.getStdDevs())));
 
+	
 	for (int i = 0; i < trainingSet.numInstances(); i++) {
 		Instance chemicali = trainingSet.instance(i);
 		String CAS = chemicali.getName();
-		
 					
 		double SimCoeff=-1;
 		
-		SimCoeff = this.CalculateCosineCoefficient(chemical,
-				chemicali);	
+		SimCoeff = this.CalculateCosineCoefficient(chemical,chemicali);	
+		
+//		SimCoeff = TaskCalculations.CalculateCosineCoefficient(chemical,chemicali,trainingSet.getMeans(),trainingSet.getStdDevs());	
+		
 
-		
-//		System.out.println(CAS+"\t"+SimCoeff);
-		
+//		if(CAS.equals("6850-57-3") || CAS.equals("2859-78-1")) {
+//			System.out.println("here b\t"+CAS+"\t"+SimCoeff);			
+//		}
+//		if(CAS.equals("6850-57-3")) {
+//			System.out.println("here b\t"+SimCoeff);			
+//		}
+
 
 		if (this.ExcludeTestChemicalCASFromTrainingSet) {
 			String TestCAS=chemical.getName();
@@ -795,7 +812,6 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 
 		long t1=System.currentTimeMillis();
 		
-
 		double [] Mean=trainingSet.getMeans();
 		double [] StdDev=trainingSet.getStdDevs();
 

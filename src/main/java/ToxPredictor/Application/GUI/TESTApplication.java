@@ -42,6 +42,7 @@ import org.apache.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.ChemModel;
+import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IChemModel;
 import org.openscience.jchempaint.JCPPropertyHandler;
 import org.openscience.jchempaint.JChemPaintPanel;
@@ -580,7 +581,7 @@ public class TESTApplication extends JFrame{
 	 * @param molecule
 	 * @return
 	 */
-	public AtomContainer configureModel(AtomContainer molecule) {
+	public IAtomContainer configureModel(IAtomContainer molecule) {
 
 
 		TaskStructureSearch.fixNullBondStereo(molecule);
@@ -1494,7 +1495,16 @@ public class TESTApplication extends JFrame{
 		} else {
 			if (defaultToSingleChemicalMode) {
 				f.aa.switchToSingleChemicalMode();
-//				f.loadChemicalForDebug("79-06-1");
+//				f.loadChemicalForDebug("COCOCOCOCOCOCOCOCC");
+//				f.loadChemicalForDebug("DTXSID901297914");
+				
+//				f.taskStructureFile.runSingle("N1C2=NC(NC(N)=C2N=C2C=1c1ccccc1-c1ccccc12)=S",f);
+//				f.taskStructureFile.runSingle("c1cc2C3=NC4=NC(NC(N)=C4N=C3c3c(-c2cc1)cccc3)=S",f);
+//				f.taskStructureFile.runSingle("NC1NC(=S)N=C2N=C3c4ccccc4-c4ccccc4C3=NC=12",f);
+//				f.taskStructureFile.runSingle("S=C1NC(N)=C2N=C3C=4C(C=5C(C3=NC2=N1)=CC=CC5)=CC=CC4",f);
+				
+
+				
 //				f.loadChemicalForDebug("80-05-7");
 //				f.loadChemicalForDebug("115-86-6");
 //				f.loadChemicalForDebug("perchloroethane");

@@ -21,9 +21,9 @@ public class AtomicProperties {
 	
 	private AtomicProperties() throws IOException {
 		
-		
-		
+			
 		String DataFile="whim weights.txt";
+//		String DataFile="SystemData/whim weights v3.0.txt";//use file in src/main/resources instead of jar file
 				
 		InputStream ins=this.getClass().getClassLoader().getResourceAsStream(DataFile);
 		InputStreamReader isr=new InputStreamReader(ins);
@@ -34,6 +34,9 @@ public class AtomicProperties {
 		String Line="";
 		while (true) {
 			Line=br.readLine();
+			
+//			System.out.println(Line);
+			
 			if (!(Line instanceof String)) {
 				break;
 			}

@@ -931,7 +931,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 
 		f.setCursor(Utilities.waitCursor);
 		
-		AtomContainer ac=f.taskStructureFile.loadFromMolFile(inFile,f);
+		IAtomContainer ac=f.taskStructureFile.loadFromMolFile(inFile,f);
 		
 					
 		

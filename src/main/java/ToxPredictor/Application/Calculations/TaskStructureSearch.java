@@ -26,6 +26,8 @@ import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
 import org.openscience.cdk.inchi.InChIToStructure;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.interfaces.IBond;
 import org.openscience.cdk.interfaces.IBond.Stereo;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
@@ -391,7 +393,7 @@ public class TaskStructureSearch {
 				
 //				System.out.println(counter);
 				
-				AtomContainer m=null;
+				IAtomContainer m=null;
 				
 				try {
 					m = (AtomContainer)mr.next();
@@ -461,7 +463,7 @@ public class TaskStructureSearch {
 	}
 	
 	
-	public static void setCAS(AtomContainer ac) {
+	public static void setCAS(IAtomContainer ac) {
 		String CASfield=MolFileUtilities.getCASField(ac);
 		
 		String CAS=null;
@@ -1024,12 +1026,12 @@ public class TaskStructureSearch {
 //
 //	}
 	
-	private static AtomContainer getMoleculeFromDSSToxRecords(ArrayList<DSSToxRecord>recs,InChIGeneratorFactory factory) {
+	private static IAtomContainer getMoleculeFromDSSToxRecords(ArrayList<DSSToxRecord>recs,InChIGeneratorFactory factory) {
 		DSSToxRecord rec=recs.get(0);
 		
 		try {
 			InChIToStructure gen = factory.getInChIToStructure(rec.inchi, DefaultChemObjectBuilder.getInstance());
-			AtomContainer m=(AtomContainer)gen.getAtomContainer();
+			IAtomContainer m=gen.getAtomContainer();
 			m=CleanUpMolecule(m);
 			m.setProperty("Error", "");					
 			WebTEST4.checkAtomContainer(m);
@@ -1042,8 +1044,8 @@ public class TaskStructureSearch {
 		}
 	}
 	
-	public static AtomContainer getMoleculeFromDSSToxRecords(ArrayList<DSSToxRecord> recs) {
-		AtomContainer molecule=new AtomContainer();
+	public static IAtomContainer getMoleculeFromDSSToxRecords(ArrayList<DSSToxRecord> recs) {
+		IAtomContainer molecule=null;
 
 		if (recs.size()>0) {
 
@@ -1059,7 +1061,7 @@ public class TaskStructureSearch {
 					AtomContainerSet acs=MolFileUtilities.loadFromSdfString(rec.mol);
 //							
 					if (acs!=null && acs.getAtomContainer(0)!=null && acs.getAtomContainer(0).getAtomCount()>0) {
-						molecule=(AtomContainer)acs.getAtomContainer(0);					
+						molecule=acs.getAtomContainer(0);					
 					} else if(rec.inchi!=null) {
 						
 						molecule=CDKUtilities.getAtomContainer(rec.inchi);
@@ -1098,11 +1100,11 @@ public class TaskStructureSearch {
 		return molecule;
 	}
 
-	public static void fixNullBondStereo(AtomContainer molecule) {
+	public static void fixNullBondStereo(IAtomContainer molecule) {
 //		if (true) return;
 		
 		for (int i=0;i<molecule.getBondCount();i++) {
-			Bond b=(Bond)molecule.getBond(i);
+			IBond b=molecule.getBond(i);
 			if (b.getStereo()==null) {
 				b.setStereo(Stereo.NONE);//fix molecules loaded from v3000 mol files where stereo isnt set- not sure how to make JChemPaint not give error otherwise!
 			}
@@ -1331,7 +1333,7 @@ public class TaskStructureSearch {
 //		System.out.println("Line="+Line);
 //		System.out.println(identifier+"\t"+ID);
 
-		AtomContainer m=null;
+		IAtomContainer m=null;
 
 		if (type==TypeSmiles) {
 			m=lookupBySmiles(identifier);
@@ -1365,8 +1367,8 @@ private static String trimQuotes(String identifier) {
 	return identifier;
 }
 	
-	private static AtomContainer lookupByAny(String Line) {
-		AtomContainer m=null;
+	private static IAtomContainer lookupByAny(String Line) {
+		IAtomContainer m=null;
 
 		//
 //		System.out.println("Line="+Line);
@@ -1394,11 +1396,11 @@ private static String trimQuotes(String identifier) {
 		
 	}
 
-	private static AtomContainer lookupByName(String Name) {
+	private static IAtomContainer lookupByName(String Name) {
 		//Look up by name:
 		ArrayList<DSSToxRecord> records=ResolverDb2.lookup(Name,ToxPredictor.Database.ChemIdType.Name);
 
-		AtomContainer m=null;
+		IAtomContainer m=null;
 		
 		if (records.size()>0) {
 			m=getMoleculeFromDSSToxRecords(records);
@@ -1423,9 +1425,9 @@ private static String trimQuotes(String identifier) {
 		
 	}
 
-	public static AtomContainer lookupByCAS(String CAS) {
+	public static IAtomContainer lookupByCAS(String CAS) {
 
-		AtomContainer m=null;
+		IAtomContainer m=null;
 		
 //		System.out.println(CAS+"\t"+ResolverDb2.isCAS(CAS));
 		
@@ -1467,7 +1469,7 @@ private static String trimQuotes(String identifier) {
 		return m;
 	}
 
-	static AtomContainer lookupBySmiles(String Smiles) {
+	static IAtomContainer lookupBySmiles(String Smiles) {
 		Inchi inchi = IndigoUtilities.toInchiIndigo(Smiles);							
 		ArrayList<DSSToxRecord>recs = ResolverDb2.lookupByInChis(inchi);			
 		
@@ -1484,7 +1486,7 @@ private static String trimQuotes(String identifier) {
 			ResolverDb2.logit("Smiles but no db match",Smiles,r);									
 		} 
 		
-		AtomContainer m=null;
+		IAtomContainer m=null;
 		
 		if (recs.size()>0) {
 			m=getMoleculeFromDSSToxRecords(recs);
@@ -1511,7 +1513,7 @@ private static String trimQuotes(String identifier) {
 	}
 
 
-	public static AtomContainer CleanUpMolecule(AtomContainer m) throws CDKException {
+	public static IAtomContainer CleanUpMolecule(IAtomContainer m) throws CDKException {
 		
 		DescriptorFactory df=new DescriptorFactory(false);
 		df.Normalize(m);
@@ -1668,7 +1670,7 @@ private static String trimQuotes(String identifier) {
 
 				
 				
-				AtomContainer m = null;
+				IAtomContainer m = null;
 				
 //				if (Smiles.indexOf(".")>-1) {
 //					m = new Molecule();
@@ -1759,7 +1761,7 @@ private static String trimQuotes(String identifier) {
 		
 		System.out.println(smiles+"\t"+inchi.inchiKey);
 
-		AtomContainer molecule = getMoleculeFromDSSToxRecords(recs);
+		IAtomContainer molecule = getMoleculeFromDSSToxRecords(recs);
 
 		//			System.out.println("here1 inchiKey="+Inchi.generateInChiKeyIndigo(molecule).inchiKey);
 
@@ -1958,7 +1960,7 @@ private static String trimQuotes(String identifier) {
 				return;
 			}
 			
-			AtomContainer molecule = getMoleculeFromDSSToxRecords(recs);
+			IAtomContainer molecule = getMoleculeFromDSSToxRecords(recs);
 			
 //			System.out.println("here1 inchiKey="+Inchi.generateInChiKeyIndigo(molecule).inchiKey);
 																																		

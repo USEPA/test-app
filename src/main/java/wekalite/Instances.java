@@ -343,6 +343,7 @@ public class Instances {
         
         //  Rmax = this.numInstances()/ distmax;
     }
+
     
     public double calculateAverageToxicity() {
         if (this.numInstances()<=0) return 0;
@@ -350,9 +351,12 @@ public class Instances {
         double avgToxicity = 0;
         for (int i=0;i<numInstances();i++) {
         	avgToxicity += instance(i).getToxicity();        	
+//        	System.out.println("here99: "+instance(i).getName()+"\t"+instance(i).getToxicity());
         }
         
         avgToxicity /= this.numInstances();
+        
+//        System.out.println("here99: Avg value="+avgToxicity);
         
         return avgToxicity;
     }

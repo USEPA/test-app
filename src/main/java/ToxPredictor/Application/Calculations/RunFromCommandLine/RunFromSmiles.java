@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -46,6 +47,7 @@ import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.Calculations.PredictToxicityJSONCreator;
 import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJSON;
+import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
 import ToxPredictor.Database.DSSToxRecord;
@@ -54,6 +56,7 @@ import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.TESTPredictedValue;
+
 
 
 public class RunFromSmiles {
@@ -92,13 +95,13 @@ public class RunFromSmiles {
 	public static Gson gsonNotPretty = new GsonBuilder().serializeSpecialFloatingPointValues().disableHtmlEscaping().create();
 
 	
-	public static AtomContainer createMolecule(String smiles,String DTXSID, String CAS) {
+	public static IAtomContainer createMolecule(String smiles,String DTXSID, String CAS) {
 		return createMolecule(smiles,DTXSID,null, CAS);
 	}
 
 
-	public static AtomContainer createMolecule(String smiles) {
-		AtomContainer m = WebTEST4.prepareSmilesMolecule(smiles);
+	public static IAtomContainer createMolecule(String smiles) {
+		IAtomContainer m = WebTEST4.prepareSmilesMolecule(smiles);
 		m.setProperty(DSSToxRecord.strSmiles, smiles);//need orig
 		ResolverDb2.assignRecordByStructureViaInchis(m, "");
 		//		Gson gson=new Gson();
@@ -106,8 +109,8 @@ public class RunFromSmiles {
 		return m;
 	}
 
-	public static AtomContainer createMolecule(String smiles,String DTXSID,String DTXCID, String CAS) {
-		AtomContainer m = WebTEST4.prepareSmilesMolecule(smiles);
+	public static IAtomContainer createMolecule(String smiles,String DTXSID,String DTXCID, String CAS) {
+		IAtomContainer m = WebTEST4.prepareSmilesMolecule(smiles);
 		m.setProperty(DSSToxRecord.strSID,DTXSID);//store sid so dont need to look up later
 		m.setProperty(DSSToxRecord.strCID,DTXCID);//store sid so dont need to look up later
 		m.setProperty(DSSToxRecord.strSmiles, smiles);//need original smiles NOT QSAR ready smiles
@@ -116,8 +119,8 @@ public class RunFromSmiles {
 	}
 
 	
-	public static AtomContainer createMolecule(DSSToxRecord dr) {
-		AtomContainer m = WebTEST4.prepareMolFileMolecule(dr.mol);
+	public static IAtomContainer createMolecule(DSSToxRecord dr) {
+		IAtomContainer m = WebTEST4.prepareMolFileMolecule(dr.mol);
 		m.setProperty(DSSToxRecord.strSID,dr.sid);//store sid so dont need to look up later
 		m.setProperty(DSSToxRecord.strCID,dr.cid);//store sid so dont need to look up later
 		m.setProperty(DSSToxRecord.strSmiles, dr.smiles);//need original smiles NOT QSAR ready smiles
@@ -377,7 +380,7 @@ public class RunFromSmiles {
 	 * @return hashtable of results with key as DTXSID and prediction results + report as TESTPredictedValue
 	 * 
 	 */
-	public static List<PredictionResults> runEndpointsAsList(AtomContainerSet moleculeSet, List<String> endpoints,String method,boolean createReports,boolean createDetailedReports,String key) {				
+	public static List<PredictionResults> runEndpointsAsList(AtomContainerSet moleculeSet, List<String> endpoints,String method,boolean createReports,boolean createDetailedReports) {				
 
 		DescriptorFactory.debug=false;
 		WebTEST4.createDetailedReports=createDetailedReports;
@@ -736,19 +739,19 @@ public class RunFromSmiles {
 
 		AtomContainerSet acs=new AtomContainerSet();		
 
-//		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242","71-43-2"));//valid simple molecule
+		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242","71-43-2"));//valid simple molecule
 		//		acs.addAtomContainer(createMolecule("c1ccccc1", "DTXSID3039242",null));//valid simple molecule
 		//		acs.addAtomContainer(createMolecule("c1ccccc1", null,null));//valid simple molecule
 		//		acs.addAtomContainer(createMolecule("O=P(OC1=CC=CC=C1)(OC1=CC=CC=C1)OC1=CC=CC=C1","DTXSID1021952","115-86-6"));//valid but more complicated molecule
 //				acs.addAtomContainer(createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2"));//invalid molecule: salt
-		acs.addAtomContainer(createMolecule("NC1=C(C=CC(=C1)NC(=O)C)OCC", "DTXSID7020053","17026-81-2"));
+//		acs.addAtomContainer(createMolecule("NC1=C(C=CC(=C1)NC(=O)C)OCC", "DTXSID7020053","17026-81-2"));
 		//		acs.addAtomContainer(createMolecule("O=C6c4ccc5c1ccc3c2c1c(ccc2C(=O)N(c2ccc(\\N=N/c1ccccc1)cc2)C3=O)c1ccc(c4c51)C(=O)N6c2ccc(\\N=N/c1ccccc1)cc2", "DTXSID1051983","3049-71-6"));//very complicated aromatic molecule, takes longer to run
 		//		acs.addAtomContainer(createMolecule("XXXX", "DTXSID2","123-45-6"));//bad smiles (cant convert to structure)
 		//		acs.addAtomContainer(createMolecule("[S]", "DTXSID9034941","7704-34-9"));//has no carbon
 
 		List<String> endpoints= Arrays.asList(endpoint);
 
-		List<PredictionResults>listPR=runEndpointsAsList(acs, endpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
+		List<PredictionResults>listPR=runEndpointsAsList(acs, endpoints, method,createReports,createDetailedReports);		
 
 		//Get report for one of the above chemicals as Json string:
 		PredictionResults predictionResults=listPR.get(0);		
@@ -781,6 +784,56 @@ public class RunFromSmiles {
 
 	}
 	
+	public static void runDTXSIDAllEndpoints () {
+		
+		ResolverDb2.sqlitePath="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\TEST_2020_03_18_EPA_Github\\databases\\snapshot.db";
+		
+		String method =TESTConstants.ChoiceConsensus;//what QSAR method being used (default- runs all methods and takes average)
+		boolean createReports=true;//whether to store report
+		boolean createDetailedReports=false;//detailed reports have lots more info and creates more html files
+
+		AtomContainerSet acs=new AtomContainerSet();
+
+//		String dtxsid="DTXSID3039242";
+		String dtxsid="DTXSID40177962";
+		
+		ArrayList<DSSToxRecord>recs=ResolverDb2.lookupByDTXSID(dtxsid);
+
+		IAtomContainer molecule = TaskStructureSearch.getMoleculeFromDSSToxRecords(recs);
+		acs.addAtomContainer(molecule);//valid simple molecule
+		
+		List<String>endpoints= Arrays.asList(TESTConstants.ChoiceFHM_LC50);
+		
+
+//?		List<PredictionResults>listPR=runEndpointsAsList(acs, allEndpoints, method,createReports,createDetailedReports);		
+		List<PredictionResults>listPR=runEndpointsAsList(acs, endpoints, method,createReports,createDetailedReports);		
+
+
+		try {
+			
+			String folder="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\RunTestCalculationsFromJar\\reports sample\\";
+			new File(folder).mkdirs();
+			File file=new File(folder+"/predictionResults_"+dtxsid+".json");
+			FileWriter fw=new FileWriter(file);
+
+			Gson gson=new Gson();
+			
+			Gson gsonPretty = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
+
+			for (PredictionResults pr:listPR) {
+				System.out.println(gsonPretty.toJson(pr));
+				fw.write(gson.toJson(pr)+"\r\n");
+			}
+
+			fw.flush();
+			fw.close();
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	
 
 
 	/**
@@ -805,7 +858,7 @@ public class RunFromSmiles {
 		//		String smiles="COCOCCCOCOCOCOCOOCCCCOCOC";// valid compound not in database
 
 
-		AtomContainer ac=createMolecule(smiles);//valid simple molecule
+		IAtomContainer ac=createMolecule(smiles);//valid simple molecule
 
 		PredictionResults predictionResults=runEndpoint(ac, endpoint, method,createReports,
 				createDetailedReports,DSSToxRecord.strSID);		
@@ -1003,7 +1056,7 @@ public class RunFromSmiles {
 		//		Hashtable<String,List<PredictionResults>>htResultsAll=
 		//				runEndpoints(acs2, allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
 
-		List<PredictionResults>results=runEndpointsAsList(acs2, allEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
+		List<PredictionResults>results=runEndpointsAsList(acs2, allEndpoints, method,createReports,createDetailedReports);
 		//		List<PredictionResults>results=runEndpointsAsList(acs2, twoEndpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
 
 		saveJson(destJsonPath, results);
@@ -1035,15 +1088,24 @@ public class RunFromSmiles {
 
 			FileWriter fw;
 			
+			int countRan=0;
+			
+			
 			if(removeAlreadyRan) {
 				if (destFile.exists()) {
-					int count=removeAlreadyRanChemicals(destJsonPath, acs2);
-					if(debug) System.out.println(count+" removed since already ran");
+					countRan=removeAlreadyRanChemicals(destJsonPath, acs2);
+					if(debug) System.out.println(countRan+" removed since already ran");
 				}
 				fw=new FileWriter(destJsonPath,destFile.exists());
 			} else {
 				fw=new FileWriter(destJsonPath);
 			}
+			
+			if(debug) System.out.println("atom container count to run="+acs2.getAtomContainerCount());
+
+			
+//			if(true)return;
+			
 
 			if (acs2.getAtomContainerCount()==0) {
 				if(debug) System.out.println("All chemicals ran");
@@ -1061,11 +1123,22 @@ public class RunFromSmiles {
 				
 				AtomContainer ac=(AtomContainer) acs2.getAtomContainer(i);
 				
-				if (debug) System.out.println(ac.getProperty("smiles")+"");
+				if (debug) System.out.println((i+countRan)+"\t"+destFile.getName()+"\t"+ac.getProperty("smiles")+"");
 				
 				List<PredictionResults>results=runEndpointsAsList(ac, allEndpoints, method,createReports,createDetailedReports);
+
 				for (PredictionResults pr:results) {
+					
 					fw.write(gsonNotPretty.toJson(pr)+"\r\n");
+					
+					if(pr.getPredictionResultsPrimaryTable()!=null ) {
+						if(pr.getPredictionResultsPrimaryTable().getExpToxValue()!=null) {
+							if(!pr.getPredictionResultsPrimaryTable().getExpToxValue().equals("N/A")) {
+								System.out.println(pr.getDTXSID()+"\t"+pr.getEndpoint());
+							}
+						}
+					}
+					
 					fw.flush();
 				}
 			}
@@ -1081,6 +1154,60 @@ public class RunFromSmiles {
 	}
 
 	public static int removeAlreadyRanChemicals(String destJsonPath, AtomContainerSet acs2) throws IOException {
+
+		System.out.println(destJsonPath);
+		
+		BufferedReader br=new BufferedReader(new FileReader(destJsonPath));
+		
+		//		for (String line:lines) {
+
+		HashSet<String>dtxsids=new HashSet<>();
+		
+		Hashtable<String,Integer>htCountByDTXCID=new Hashtable<>();
+		
+		while (true) {
+			String line=br.readLine();
+			
+			
+			if(line==null) break;
+			
+			PredictionResults pr=gson.fromJson(line,PredictionResults.class);
+			
+			if(pr.getDTXCID()==null) continue;
+			
+//			System.out.println(pr.getDTXCID());
+			
+			if(htCountByDTXCID.containsKey(pr.getDTXCID())) {
+				htCountByDTXCID.put(pr.getDTXCID(), htCountByDTXCID.get(pr.getDTXCID())+1);
+			} else {
+				htCountByDTXCID.put(pr.getDTXCID(), 1);
+			}
+		}
+		
+//		System.out.println(gson.toJson(htCountByDTXCID));
+		
+		br.close();
+
+		int count=0;
+
+		for (int i=0;i<acs2.getAtomContainerCount();i++) {
+			AtomContainer ac=(AtomContainer) acs2.getAtomContainer(i);
+			String DTXCID=ac.getProperty("DTXCID");
+			//			System.out.println(DTXCID+"\t"+pr.getDTXCID());
+
+			if(htCountByDTXCID.containsKey(DTXCID)) {
+				if(htCountByDTXCID.get(DTXCID)==16) {
+					acs2.removeAtomContainer(i--);					
+					count++;
+				}
+			}
+			
+		}
+		System.out.println("Removed "+count+" chemicals since already ran");
+		return count;
+	}
+
+	public static int removeAlreadyRanChemicalsOld(String destJsonPath, AtomContainerSet acs2) throws IOException {
 
 		BufferedReader br=new BufferedReader(new FileReader(destJsonPath));
 		String lastLine="";
@@ -1114,8 +1241,6 @@ public class RunFromSmiles {
 	}
 
 
-
-
 	public static void runSDF(String SDFFilePath, String endpoint,String destJsonPath,boolean skipMissingSID,int maxCount) {
 
 		String method = TESTConstants.ChoiceConsensus;// what QSAR method being used (default- runs all methods and
@@ -1135,7 +1260,7 @@ public class RunFromSmiles {
 
 		List<String> endpoints= Arrays.asList(endpoint);
 
-		List<PredictionResults>results=runEndpointsAsList(acs2, endpoints, method,createReports,createDetailedReports,DSSToxRecord.strSID);
+		List<PredictionResults>results=runEndpointsAsList(acs2, endpoints, method,createReports,createDetailedReports);
 
 		saveJson(destJsonPath, results);
 
@@ -1195,7 +1320,7 @@ public class RunFromSmiles {
 		int count=0;
 
 		while (iterator.hasNext()) {
-			AtomContainer ac=(AtomContainer) iterator.next();
+			IAtomContainer ac=iterator.next();
 			String SID=ac.getProperty("DTXSID");
 			if(skipMissingSID && SID==null) {
 				//				System.out.println("Skipping");
@@ -1590,6 +1715,82 @@ public class RunFromSmiles {
 
 	}
 	
+	public void runSDF() {
+		boolean removeAlreadyRan=true;
+		
+		String folderMain="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\";
+		String folder=folderMain+"data\\dsstox\\snapshot-2024-11-12\\sdf\\";
+		String folderDest=folderMain+"data\\TEST5.1.3\\PredictionResults reports\\";
+
+		int num=1;
+		String filenameSDF="prod_compounds_updated_lt_2024-11-12_"+num+".sdf";
+		String filenameJson=filenameSDF.replace(".sdf", ".json");
+		
+		int maxCount=-1;//set to -1 to run all in sdf
+		boolean skipMissingSID=true;
+		
+		String sdfPath=folder+filenameSDF;
+		String destJsonPath=folderDest+filenameJson;
+		
+		runSDF_all_endpoints_write_continuously(sdfPath,destJsonPath,skipMissingSID,maxCount, removeAlreadyRan);
+
+	}
+
+	
+
+	public static void lookAtPrettyJson(String filepathJson) {
+		
+		try {
+			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+			BufferedReader br=new BufferedReader(new FileReader(filepathJson));
+			int count=0;
+
+//			for (String line:lines) {
+			while (true) {
+				String line=br.readLine();
+				if(line==null) break;
+				count++;
+				PredictionResults pr=gson.fromJson(line,PredictionResults.class);
+				
+				if(!pr.getEndpoint().equals(TESTConstants.ChoiceBoilingPoint)) continue;
+					
+				System.out.println(gson.toJson(pr));
+				
+			}
+			
+			br.close();
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+	
+	}
+
+	static void runSDFSample() {
+		
+		String folderSrc="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\RunTestCalculationsFromJar\\sdf\\";
+
+		String fileNameSDF="sample.sdf";
+		String filepathSDF=folderSrc+fileNameSDF;
+		
+		System.out.println(fileNameSDF);
+
+		int maxCount=-1;//set to -1 to run all in sdf
+		boolean skipMissingSID=true;
+		String destJsonPath=folderSrc+fileNameSDF.replace(".sdf", "_2.json");
+
+		System.out.println(new File(destJsonPath).getAbsolutePath());
+		
+		boolean debug=true;
+		runSDF_all_endpoints_write_continuously(filepathSDF,destJsonPath,skipMissingSID,maxCount,debug);
+
+		lookAtPrettyJson(destJsonPath);
+
+		
+	}
+	
 
 
 	public static IAtomContainer createMoleculeFromResolverBySID(String sid) {
@@ -1744,10 +1945,60 @@ public class RunFromSmiles {
 	}
 
 	public static void main(String[] args) {
-		runSingleEndpointExample();
+		RunFromSmiles r=new RunFromSmiles();
+		
+		r.runSDF();
+		
+		
+//		r.lookForExpValue();
+		
+			
+//		runSingleEndpointExample();
+//		runSingleChemicalFromSmiles();
+//		runDTXSIDAllEndpoints();
 //		runSampleSDF();
+//		runSDFSample();
 //		runSIDList();
 //		runSIDListCalcDescriptors();
+	}
+
+
+	private void lookForExpValue() {
+		String folderMain="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\";
+		String folderDest=folderMain+"data\\TEST5.1.3\\PredictionResults reports\\";
+		
+		String filenameJson="prod_compounds_updated_lt_2024-11-12_1.json";
+		String destJsonPath=folderDest+filenameJson;
+		
+		try {
+			Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+			BufferedReader br=new BufferedReader(new FileReader(destJsonPath));
+
+			while (true) {
+				String line=br.readLine();
+				if(line==null) break;
+				PredictionResults pr=gson.fromJson(line,PredictionResults.class);
+
+				if(pr.getPredictionResultsPrimaryTable()==null)continue;
+				
+				if(pr.getPredictionResultsPrimaryTable().getExpCAS()!=null) {
+					if(pr.getPredictionResultsPrimaryTable().getExpSet().toLowerCase().contains("train")) {
+						System.out.println(gson.toJson(pr));
+						break;
+					}
+					
+				}
+				
+			}
+			
+			br.close();
+			
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+
 	}
 
 }

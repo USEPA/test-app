@@ -258,6 +258,8 @@ public class DescriptorFactory {
 		this.done = false;
 
 		IAtomContainer m3d = null;
+		
+//		System.out.println("Atom count="+m.getAtomCount());
 
 		// System.out.println("enter calculate descriptors");
 
@@ -314,9 +316,11 @@ public class DescriptorFactory {
 		// ----------------------------------------------------------------
 		// Preliminary Calculations
 		// find all the rings (well actually cycles)
+		
+//		System.out.println(m.getAtomCount());
+		
 		IRingSet rs = FindRings(m);
 	
-		
 		if (this.done || !errorMsg.equals(""))
 			return -1;
 
@@ -1170,11 +1174,15 @@ public class DescriptorFactory {
 
 			// arf.setTimeout(100000);
 			// TODO: set the threshold instead of timeout
+			
+//			System.out.println("In FindRings atoms="+m.getAtomCount());
+			
 			ringSet = arf.findAllRings(m);
 
 			// ringSet = Cycles.sssr(m).toRingSet();//TODO how does compare to
 			// method above???
 		} catch (Exception e) {
+			e.printStackTrace();
 			this.errorMsg = "Timeout while finding rings";
 			logger.catching(e);
 		}

@@ -705,7 +705,7 @@ public class MoleculeFragmenter4 {
 			
 			
 			SmilesParser   sp  = new SmilesParser(DefaultChemObjectBuilder.getInstance());
-			AtomContainer fragment = (AtomContainer)sp.parseSmiles(smiles);
+			IAtomContainer fragment = sp.parseSmiles(smiles);
 			
 			double time4 = System.currentTimeMillis() / 1000.0;
 			
@@ -731,26 +731,16 @@ public class MoleculeFragmenter4 {
 			for (int i = 0; i < fragment.getAtomCount(); i++) {
 				IAtom a = fragment.getAtom(i);
 				isf.configure(a);
-				
 				//System.out.println(a.getSymbol()+"\t"+a.getHydrogenCount());
 			}
 
-			
-
-			
 			//			System.out.println("");
-
 			List u = null;
-
 			
 			try {
 				if (fragment.getAtomCount() > 2) {
 					List ll = uit.getSubgraphAtomsMaps(molecule, fragment);
-					u = MoleculeFragmenter4.getUniqueSubgraphs(ll); // Remove
-																	// duplicates
-																	// from the
-																	// list
-
+					u = MoleculeFragmenter4.getUniqueSubgraphs(ll); // Remove duplicates from the list
 				} else if (fragment.getAtomCount() == 2) {
 					u = this.GetTwoAtomFragmentLists(molecule, fragment);
 				} else { // one atom

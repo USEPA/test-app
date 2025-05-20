@@ -166,7 +166,7 @@ public class chemicalcompare {
 		
 	}
 	
-	public static boolean isIsomorphUIT(AtomContainer mol1,AtomContainer mol2) {
+	public static boolean isIsomorphUIT(IAtomContainer mol1,IAtomContainer mol2) {
 		
 		
 		org.openscience.cdk.isomorphism.UniversalIsomorphismTester uit=new org.openscience.cdk.isomorphism.UniversalIsomorphismTester();

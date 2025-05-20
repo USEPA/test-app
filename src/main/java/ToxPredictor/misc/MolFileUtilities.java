@@ -2183,7 +2183,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			BufferedReader br=new BufferedReader(new FileReader(oldmolfile));
 			MDLV2000Reader mr=new MDLV2000Reader(br);
 			
-			AtomContainer ac=new AtomContainer();
+			IAtomContainer ac=new AtomContainer();
 			mr.read(ac);
 			IAtomContainer AtomContainerOld=null;
 			
@@ -2192,7 +2192,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			int count2=0;
 			
 			try {
-				AtomContainerOld=(IAtomContainer)ac.clone();
+				AtomContainerOld=ac.clone();
 				ac=CDKUtilities.addHydrogens(ac);	
 				
 			} catch (Exception e) {

@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
+import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.smiles.SmilesGenerator;
 
@@ -897,7 +898,7 @@ public class TaskCalculations2 {
 
 //							System.out.println(cc.data.smiles+"\t"+cc.data.likelihood);
 							
-							AtomContainer m = WebTEST4.loadSMILES(cc.data.smiles);
+							IAtomContainer m = WebTEST4.loadSMILES(cc.data.smiles);
 							m = TaskStructureSearch.CleanUpMolecule(m);
 							m.setProperty("Parent", ac.getProperty("CAS"));
 							m.setProperty("Likelihood", cc.data.likelihood);

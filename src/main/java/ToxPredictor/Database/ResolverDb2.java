@@ -383,7 +383,7 @@ public class ResolverDb2 {
 	}
 	
 	
-	public static void assignRecordByStructureViaInchis (AtomContainer ac,String oldCAS) {
+	public static void assignRecordByStructureViaInchis (IAtomContainer ac,String oldCAS) {
 		
 		Inchi inchi = Inchi.generateInChiKeyIndigo(ac);									
 		if (inchi==null) return;
@@ -422,7 +422,7 @@ public class ResolverDb2 {
 	}
 	
 	
-	public static void assignRecordByStructureNotInDB(AtomContainer m) {
+	public static void assignRecordByStructureNotInDB(IAtomContainer m) {
 		Inchi inchi = Inchi.generateInChiKeyIndigo(m);
 		
 		DSSToxRecord rec=new DSSToxRecord();
@@ -450,7 +450,7 @@ public class ResolverDb2 {
 	}
 
 	
-	private static void assignRecord(AtomContainer m, ArrayList<DSSToxRecord> recs,String oldCAS) {
+	private static void assignRecord(IAtomContainer m, ArrayList<DSSToxRecord> recs,String oldCAS) {
 				
 
 		if (Strings.isBlank(oldCAS) || oldCAS.contains("C_")) {
