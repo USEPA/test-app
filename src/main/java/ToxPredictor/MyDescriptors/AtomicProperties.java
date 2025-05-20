@@ -21,7 +21,7 @@ public class AtomicProperties {
 	
 	private AtomicProperties() throws IOException {
 		
-			
+			//TEST
 		String DataFile="whim weights.txt";
 //		String DataFile="SystemData/whim weights v3.0.txt";//use file in src/main/resources instead of jar file
 				
