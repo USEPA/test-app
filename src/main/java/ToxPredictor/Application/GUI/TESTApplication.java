@@ -1496,7 +1496,7 @@ public class TESTApplication extends JFrame{
 			if (defaultToSingleChemicalMode) {
 				f.aa.switchToSingleChemicalMode();
 //				f.loadChemicalForDebug("COCOCOCOCOCOCOCOCC");
-//				f.loadChemicalForDebug("DTXSID901297914");
+				f.loadChemicalForDebug("DTXSID901297914");
 				
 //				f.taskStructureFile.runSingle("N1C2=NC(NC(N)=C2N=C2C=1c1ccccc1-c1ccccc12)=S",f);
 //				f.taskStructureFile.runSingle("c1cc2C3=NC4=NC(NC(N)=C4N=C3c3c(-c2cc1)cccc3)=S",f);
