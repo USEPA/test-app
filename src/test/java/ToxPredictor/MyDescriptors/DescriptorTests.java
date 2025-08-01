@@ -9,6 +9,7 @@ import org.junit.Test;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.InvalidSmilesException;
+import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.qsar.AbstractMolecularDescriptor;
 import org.openscience.cdk.qsar.descriptors.molecular.ChiClusterDescriptor;
 import org.openscience.cdk.qsar.result.IDescriptorResult;
@@ -27,8 +28,8 @@ import ToxPredictor.Database.DSSToxRecord;
 */
 public class DescriptorTests {
 
-	SmilesGenerator sg=new SmilesGenerator(SmiFlavor.Canonical);
-	SmilesParser sp  = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+	static SmilesGenerator sg=new SmilesGenerator(SmiFlavor.Canonical);
+	static SmilesParser sp  = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 	DescriptorFactory df=new DescriptorFactory(false);
 	double tol=1e-5;
 	
@@ -49,7 +50,7 @@ public class DescriptorTests {
 
 		try {
 
-			AtomContainer ac=TaskStructureSearch.lookupByCAS("50-29-3");
+			IAtomContainer ac=TaskStructureSearch.lookupByCAS("50-29-3");
 			String smiles=sg.create(ac);
 			DescriptorData dd=new DescriptorData();
 			int intResultTEST=df.CalculateDescriptors(ac, dd, true);
@@ -76,7 +77,7 @@ public class DescriptorTests {
 
 		try {
 
-			AtomContainer ac=TaskStructureSearch.lookupByCAS("50-06-6");
+			IAtomContainer ac=TaskStructureSearch.lookupByCAS("50-06-6");
 			String smiles=sg.create(ac);
 			DescriptorData dd=new DescriptorData();
 			int intResultTEST=df.CalculateDescriptors(ac, dd, true);
@@ -97,10 +98,10 @@ public class DescriptorTests {
 
 	
 	
-	public AtomContainer loadMolecule(String smiles) {
-		AtomContainer molecule=null;
+	public static IAtomContainer loadMolecule(String smiles) {
+		IAtomContainer molecule=null;
 		try {
-			molecule = (AtomContainer)sp.parseSmiles(smiles);
+			molecule = sp.parseSmiles(smiles);
 		} catch (InvalidSmilesException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -113,7 +114,7 @@ public class DescriptorTests {
 	public void testChiClusterDescriptors() {
 
 		String smiles="[O-][N+](=O)OCC(CO[N+]([O-])=O)O[N+]([O-])=O";
-		AtomContainer molecule=loadMolecule(smiles);
+		IAtomContainer molecule=loadMolecule(smiles);
 
 		ChiClusterDescriptor ccd = new ChiClusterDescriptor();
 		
@@ -127,7 +128,7 @@ public class DescriptorTests {
 	}
 
 
-	public void compareDescriptorsToCDK(String smiles, AtomContainer molecule, AbstractMolecularDescriptor cdkDescriptorCalculator,Hashtable<String, String> nameDict) {
+	public void compareDescriptorsToCDK(String smiles, IAtomContainer molecule, AbstractMolecularDescriptor cdkDescriptorCalculator,Hashtable<String, String> nameDict) {
 		
 		DescriptorData dd=new DescriptorData();
 		int intResultTEST=df.CalculateDescriptors(molecule, dd, true);

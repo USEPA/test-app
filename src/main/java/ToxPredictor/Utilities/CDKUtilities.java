@@ -266,7 +266,7 @@ public class CDKUtilities {
 		}
 	}
 
-	public static String generateFormula(AtomContainer m) {
+	public static String generateFormula(IAtomContainer m) {
 
 		MolecularFormula mf = (MolecularFormula) MolecularFormulaManipulator.getMolecularFormula(m);
 		String formula = MolecularFormulaManipulator.getString(mf);
@@ -280,7 +280,7 @@ public class CDKUtilities {
 	 * @param m
 	 * @return
 	 */
-	public static String generateHTMLFormula(AtomContainer m) {
+	public static String generateHTMLFormula(IAtomContainer m) {
 
 		MolecularFormula mf = (MolecularFormula) MolecularFormulaManipulator.getMolecularFormula(m);
 		String formula = MolecularFormulaManipulator.getHTML(mf);
@@ -306,7 +306,7 @@ public class CDKUtilities {
 	 * @param m
 	 * @return formula as string
 	 */
-	public static String calculateFormula(AtomContainer m) {
+	public static String calculateFormula(IAtomContainer m) {
 		MolecularFormula mf = (MolecularFormula) MolecularFormulaManipulator.getMolecularFormula(m);
 		String formula = MolecularFormulaManipulator.getString(mf);
 		

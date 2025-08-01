@@ -1832,7 +1832,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 //					continue;
 //				}
 				
-				AtomContainer atomContainer=p.getAtomContainerFromSource(Source,CAS);
+				IAtomContainer atomContainer=p.getAtomContainerFromSource(Source,CAS);
 
 				System.out.println(CAS+"\t"+atomContainer.getAtomCount());
 				
@@ -1841,7 +1841,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 
 				
 				try {
-					IAtomContainer m2=(IAtomContainer)atomContainer.clone();
+					IAtomContainer m2=atomContainer.clone();
 //					ToxPredictor.Utilities.CDKUtilities.RemoveHydrogens(m2);
 					m2=(IAtomContainer)AtomContainerManipulator.removeHydrogens(m2);
 					SMILES=sg.create(m2);
@@ -2717,10 +2717,8 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					Tox=(String)list.get(Col_Tox);
 					Name=(String)list.get(Col_Name);
 					
-					AtomContainer ac=p.getAtomContainerFromSource(Source,CAS);
+					IAtomContainer ac=p.getAtomContainerFromSource(Source,CAS);
 				
-					
-					
 					double MolecularWeight=-1;
 					
 					

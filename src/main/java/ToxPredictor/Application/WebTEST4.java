@@ -1178,7 +1178,7 @@ public class WebTEST4 {
 
 	}
 
-	public static List<TESTPredictedValue> go(AtomContainer ac, CalculationParameters params) throws Exception {
+	public static List<TESTPredictedValue> go(IAtomContainer ac, CalculationParameters params) throws Exception {
 
 		///////////////////////////////////////////////////////////////
 		// load model data (if isn't already in memory):

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainer;
+
 import ToxPredictor.Utilities.ChemicalFinder;
 import ToxPredictor.Utilities.TESTPredictedValue;
 
@@ -33,7 +35,7 @@ public class WebTEST4_test {
 			ChemicalFinder cf = new ChemicalFinder(
 					StructureFolder+strFileSep+"manifest.txt", StructureFolder);
 			
-			AtomContainer m=cf.FindChemicalFromCAS(CAS);
+			IAtomContainer m=cf.FindChemicalFromCAS(CAS);
 
 			CalculationParameters params=new CalculationParameters();
 			params.endpoints= Arrays.asList(endpoint);

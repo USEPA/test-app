@@ -71,14 +71,14 @@ public class ChemicalFinder {
 	 * @param cas (CAS number with hyphens)
 	 * @return IMolecule mol
 	 */
-	public AtomContainer FindChemicalFromCAS(String CAS) {
+	public IAtomContainer FindChemicalFromCAS(String CAS) {
 		
 		ParseChemidplus parseChemidplus=new ParseChemidplus();
 		
 		String filepath = coordfolder+"/" +CAS + ".mol";
 //		javax.swing.JOptionPane.showMessageDialog(null,filepath);
 		
-		AtomContainer mol = null;
+		IAtomContainer mol = null;
 		
 		try {
 		boolean HaveCAS=parseChemidplus.HaveMolFileInJar(filepath);

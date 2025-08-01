@@ -17,7 +17,7 @@ import ToxPredictor.Utilities.SaveStructureToFile;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.Utilities.chemicalcompare;
 
-import org.openscience.cdk.AtomContainer;
+
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.formula.MolecularFormula;
@@ -279,7 +279,7 @@ public class ParseChemidplus {
 //
 //	}
 
-	private void WriteUnassignedTable(FileWriter fw, AtomContainer m,
+	private void WriteUnassignedTable(FileWriter fw, IAtomContainer m,
 			DescriptorFactory df, FileData fd) {
 		try {
 
@@ -997,7 +997,7 @@ public class ParseChemidplus {
 	
 				
 	
-				AtomContainer mSDF; // molecule from SDF File
+				IAtomContainer mSDF; // molecule from SDF File
 	
 				int counter = 0;
 				int count=0;
@@ -1006,7 +1006,7 @@ public class ParseChemidplus {
 	
 					try {
 	
-						mSDF = (AtomContainer) mr.next();
+						mSDF = mr.next();
 						counter++;
 	
 //						if (mSDF.getAtomCount()==0) break;
@@ -1028,7 +1028,7 @@ public class ParseChemidplus {
 					fd.CAS=CAS;
 					
 					this.CheckForMolFiles2(fd);				
-					AtomContainer molecule=this.GetBestMolecule(fd); // molecule from mol files or from smiles
+					IAtomContainer molecule=this.GetBestMolecule(fd); // molecule from mol files or from smiles
 					
 					if (molecule==null) continue;
 					
@@ -1036,8 +1036,8 @@ public class ParseChemidplus {
 					df.Normalize(molecule);
 					
 									
-					AtomContainer mSDF2=CDKUtilities.addHydrogens(mSDF);
-					AtomContainer molecule2=CDKUtilities.addHydrogens(molecule);
+					IAtomContainer mSDF2=CDKUtilities.addHydrogens(mSDF);
+					IAtomContainer molecule2=CDKUtilities.addHydrogens(molecule);
 					
 					boolean IsSalt1=this.IsSalt(molecule2);
 					boolean IsSalt2=this.IsSalt(mSDF2);
@@ -1198,8 +1198,8 @@ public class ParseChemidplus {
 					fd.CAS=CAS;
 
 					this.CheckForMolFiles2(fd);				
-					AtomContainer best_molecule=this.GetBestMoleculeNoDSSTox(fd);
-					AtomContainer DSSTOX_molecule = this.LoadChemicalFromMolFile(fd.CAS+"_DSSTOX2d",this.DSSToxFolder);
+					IAtomContainer best_molecule=this.GetBestMoleculeNoDSSTox(fd);
+					IAtomContainer DSSTOX_molecule = this.LoadChemicalFromMolFile(fd.CAS+"_DSSTOX2d",this.DSSToxFolder);
 
 					String Formula=(String)DSSTOX_molecule.getProperty("STRUCTURE_Formula");					
 					String NAME = "DSSTox";					
@@ -1365,7 +1365,7 @@ public class ParseChemidplus {
 		
 		ArrayList MasterList=new ArrayList();
 
-		AtomContainer molecule0=(AtomContainer) AtomContainerSet.getAtomContainer(0);		
+		IAtomContainer molecule0=AtomContainerSet.getAtomContainer(0);		
 		AtomContainerSet AtomContainerSet1=new AtomContainerSet();		
 		AtomContainerSet1.addAtomContainer(molecule0);
 		AtomContainerSet.removeAtomContainer(molecule0);
@@ -1375,13 +1375,13 @@ public class ParseChemidplus {
 
 		while (AtomContainerSet.getAtomContainerCount()>0) {
 			
-			AtomContainer molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+			IAtomContainer molecule=AtomContainerSet.getAtomContainer(0);
 			
 			boolean HaveMatch=false;
 			
 			for (int i=0;i<MasterList.size();i++) {
 				AtomContainerSet AtomContainerSeti=(AtomContainerSet)MasterList.get(i);
-				AtomContainer moleculei=(AtomContainer) AtomContainerSeti.getAtomContainer(0);
+				IAtomContainer moleculei=AtomContainerSeti.getAtomContainer(0);
 				
 				boolean Isomorph=false;
 				
@@ -1526,7 +1526,7 @@ public class ParseChemidplus {
 	//					System.out.print("\n");
 						
 						
-						AtomContainer best_molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+						IAtomContainer best_molecule=AtomContainerSet.getAtomContainer(0);
 						
 	//					System.out.println(best_molecule.getProperty("Source"));
 											
@@ -1538,7 +1538,7 @@ public class ParseChemidplus {
 						
 						
 						
-						AtomContainer second_best_molecule = (AtomContainer) AtomContainerSet.getAtomContainer(1);
+						IAtomContainer second_best_molecule = AtomContainerSet.getAtomContainer(1);
 											
 						String CAS2=CAS;
 						while (CAS2.length()<12) {
@@ -1830,7 +1830,7 @@ public class ParseChemidplus {
 						// System.out.println(CAS);
 						count1++;
 
-						AtomContainer molecule0 = (AtomContainer) AtomContainerSet.getAtomContainer(0);
+						IAtomContainer molecule0 = AtomContainerSet.getAtomContainer(0);
 						AtomContainerSet AtomContainerSet1 = new AtomContainerSet();
 						AtomContainerSet1.addAtomContainer(molecule0);
 						ArrayList MasterList = new ArrayList();
@@ -2154,7 +2154,7 @@ public class ParseChemidplus {
 //						System.out.println(CAS);
 						count1++;
 
-						AtomContainer molecule0=(AtomContainer) atomContainerSet.getAtomContainer(0);		
+						IAtomContainer molecule0=atomContainerSet.getAtomContainer(0);		
 						AtomContainerSet AtomContainerSet1=new AtomContainerSet();		
 						AtomContainerSet1.addAtomContainer(molecule0);						
 						ArrayList MasterList=new ArrayList();
@@ -2286,9 +2286,9 @@ public class ParseChemidplus {
 //			while (counter<50) {
 				try {
 
-					AtomContainer molSDF=null;
+					IAtomContainer molSDF=null;
 					try {
-						molSDF=(AtomContainer) mr.next();
+						molSDF= mr.next();
 					} catch(Exception e) {
 						break;
 					}
@@ -2394,7 +2394,7 @@ public class ParseChemidplus {
 //						System.out.println(CAS);
 						count1++;
 
-						AtomContainer molecule0=(AtomContainer) AtomContainerSet.getAtomContainer(0);		
+						IAtomContainer molecule0=AtomContainerSet.getAtomContainer(0);		
 						AtomContainerSet AtomContainerSet1=new AtomContainerSet();		
 						AtomContainerSet1.addAtomContainer(molecule0);						
 						ArrayList MasterList=new ArrayList();
@@ -2525,7 +2525,7 @@ public class ParseChemidplus {
 				try {
 
 					
-					AtomContainer molSDF=(AtomContainer)mr.next();
+					IAtomContainer molSDF=mr.next();
 					
 					FileData fd=new FileData();
 					
@@ -2625,7 +2625,7 @@ public class ParseChemidplus {
 //						System.out.println(CAS);
 						count1++;
 
-						AtomContainer molecule0=(AtomContainer) AtomContainerSet.getAtomContainer(0);		
+						IAtomContainer molecule0=AtomContainerSet.getAtomContainer(0);		
 						AtomContainerSet AtomContainerSet1=new AtomContainerSet();		
 						AtomContainerSet1.addAtomContainer(molecule0);						
 						ArrayList MasterList=new ArrayList();
@@ -2787,7 +2787,7 @@ public class ParseChemidplus {
 					if (!fd.HaveSmiles) continue;
 					try {
 						String Source=RevisedSrc;
-						AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+						IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 						molecule.setProperty("Source",Source);
 						if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 
@@ -2798,7 +2798,7 @@ public class ParseChemidplus {
 
 					try {
 						String Source="Smiles";
-						AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+						IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 						molecule.setProperty("Source",Source+" "+fd.Smiles);
 					
 						if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
@@ -2886,7 +2886,7 @@ public class ParseChemidplus {
 		
 		for (int i=0;i<ims.getAtomContainerCount();i++) {
 			
-			AtomContainer mol=(AtomContainer) ims.getAtomContainer(i);
+			IAtomContainer mol=ims.getAtomContainer(i);
 			
 			String Source=(String)mol.getProperty("Source");
 //			String CAS=(String)mol.getProperty("CAS");
@@ -3019,8 +3019,8 @@ public class ParseChemidplus {
 					continue;
 				}
 				
-				AtomContainer moleculeCDK=this.LoadChemicalFromMolFile(CAS+"_Smiles",structureFolder1.getAbsolutePath() );
-				AtomContainer moleculeMarvin=this.LoadChemicalFromMolFile(CAS+"_Smiles_Marvin", structureFolder2.getAbsolutePath());				
+				IAtomContainer moleculeCDK=this.LoadChemicalFromMolFile(CAS+"_Smiles",structureFolder1.getAbsolutePath() );
+				IAtomContainer moleculeMarvin=this.LoadChemicalFromMolFile(CAS+"_Smiles_Marvin", structureFolder2.getAbsolutePath());				
 
 				moleculeCDK.setProperty("Source","CDK");
 				moleculeMarvin.setProperty("Source","Marvin");
@@ -3126,7 +3126,7 @@ public class ParseChemidplus {
 	
 				String[] strData = new String[400];
 	
-				AtomContainer mSDF; // molecule from SDF File
+				IAtomContainer mSDF; // molecule from SDF File
 				
 				int counter = 0; // total chemical count
 				int count1=0; // count of discrepancies in isomorphism
@@ -3136,7 +3136,7 @@ public class ParseChemidplus {
 	
 					try {
 	
-						mSDF = (AtomContainer) mr.next();
+						mSDF = mr.next();
 						counter++;
 						
 	
@@ -3178,7 +3178,7 @@ public class ParseChemidplus {
 	
 								
 					this.CheckForMolFiles2(fd);				
-					AtomContainer molecule=this.GetBestMoleculeNoDSSTox(fd); // molecule from mol files or from smiles
+					IAtomContainer molecule=this.GetBestMoleculeNoDSSTox(fd); // molecule from mol files or from smiles
 					
 	//				System.out.println(fd.FormulaCheckSource);
 					
@@ -3191,8 +3191,8 @@ public class ParseChemidplus {
 					//if (this.GetHydrogenCount(m)!=this.GetHydrogenCount(molecule)) {
 	//					CDKUtilities.AddHydrogens(molecule);
 	//					CDKUtilities.AddHydrogens(mSDF);
-					AtomContainer mSDF2=CDKUtilities.addHydrogens(mSDF);
-					AtomContainer molecule2=CDKUtilities.addHydrogens(molecule);
+					IAtomContainer mSDF2=CDKUtilities.addHydrogens(mSDF);
+					IAtomContainer molecule2=CDKUtilities.addHydrogens(molecule);
 					
 					//}
 	
@@ -3567,11 +3567,11 @@ public class ParseChemidplus {
 					ChemidplusName=(String)infoList.get(1);	
 				}
 
-				AtomContainer mtemp=new AtomContainer();
-				
-				if (!ChemidplusFormula.equals("N/A")) {
-					ChemidplusFormula=CDKUtilities.generateHTMLFormula(mtemp);
-				}
+//				IAtomContainer mtemp=new AtomContainer();
+//				
+//				if (!ChemidplusFormula.equals("N/A")) {
+//					ChemidplusFormula=CDKUtilities.generateHTMLFormula(mtemp);
+//				}
 			} else {
 //				System.out.println(fd.CAS+"\tRecord missing");
 			}
@@ -3617,7 +3617,7 @@ public class ParseChemidplus {
 				for (int i=0;i<MasterList.size();i++) {
 					AtomContainerSet AtomContainerSet=(AtomContainerSet)MasterList.get(i);
 					
-					AtomContainer molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+					IAtomContainer molecule=AtomContainerSet.getAtomContainer(0);
 					
 					File ImageFile=new File(outputfolder+"/images/"+fd.CAS+"_"+i+".png");
 					
@@ -3642,7 +3642,7 @@ public class ParseChemidplus {
 				for (int i=0;i<MasterList.size();i++) {
 					AtomContainerSet AtomContainerSet=(AtomContainerSet)MasterList.get(i);
 					
-					AtomContainer molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+					IAtomContainer molecule=AtomContainerSet.getAtomContainer(0);
 					
 					String Formula=CDKUtilities.generateHTMLFormula(molecule);
 					
@@ -3823,7 +3823,7 @@ public class ParseChemidplus {
 			for (int i=0;i<MasterList.size();i++) {
 				AtomContainerSet AtomContainerSet=(AtomContainerSet)MasterList.get(i);
 				
-				AtomContainer molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+				IAtomContainer molecule=AtomContainerSet.getAtomContainer(0);
 				
 //				File ImageFile=new File(outputfolder+"/images/"+fd.CAS+"_"+i+".png");
 				
@@ -3848,7 +3848,7 @@ public class ParseChemidplus {
 			for (int i=0;i<MasterList.size();i++) {
 				AtomContainerSet AtomContainerSet=(AtomContainerSet)MasterList.get(i);
 				
-				AtomContainer molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+				IAtomContainer molecule=AtomContainerSet.getAtomContainer(0);
 				
 				
 				 MolecularFormula mf=(MolecularFormula)MolecularFormulaManipulator.getMolecularFormula(molecule);
@@ -3910,7 +3910,7 @@ public class ParseChemidplus {
 				}
 				fw.write("</td>\n");
 				
-				AtomContainer molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+				IAtomContainer molecule=AtomContainerSet.getAtomContainer(0);
 				
 				String Formula=CDKUtilities.generateHTMLFormula(molecule);
 				
@@ -3974,7 +3974,7 @@ public class ParseChemidplus {
 				}
 				fw.write("\t");
 				
-				AtomContainer molecule=(AtomContainer) AtomContainerSet.getAtomContainer(0);
+				IAtomContainer molecule=AtomContainerSet.getAtomContainer(0);
 				
 				String Formula=CDKUtilities.generateFormula(molecule);
 				
@@ -4142,7 +4142,7 @@ public class ParseChemidplus {
 //					if (!files[i].getName().equals("140-40-9.htm")) continue;
 					
 					
-					AtomContainer molecule = null;
+//					IAtomContainer molecule = null;
 
 //					System.out.println(files[i].getName());
 					FileData fd = this.RetrieveDataFromFile(files[i]);
@@ -4353,7 +4353,7 @@ public class ParseChemidplus {
 
 	}
 	
-	public AtomContainer GetBestMolecule(FileData fd) {		
+	public IAtomContainer GetBestMolecule(FileData fd) {		
 		String BestSource=this.GetBestSource(fd);	
 		fd.StructureSource=BestSource;
 		
@@ -4361,7 +4361,7 @@ public class ParseChemidplus {
 			
 	}
 	
-	public AtomContainer GetBestMolecule(String CAS) {		
+	public IAtomContainer GetBestMolecule(String CAS) {		
 		
 		FileData fd=new FileData();
 		fd.CAS=CAS;
@@ -4375,9 +4375,9 @@ public class ParseChemidplus {
 			
 	}
 	
-	public AtomContainer getAtomContainerFromSource(String source,String CAS) {
+	public IAtomContainer getAtomContainerFromSource(String source,String CAS) {
 		
-		AtomContainer molecule=null;
+		IAtomContainer molecule=null;
 		
 		
 		try {
@@ -4551,7 +4551,7 @@ public class ParseChemidplus {
 		if (fd.HaveDSSTox2DMolFile) {
 			if (debug) System.out.print("Getting DSSTOXMolFile...");			
 			Source="DSSTox2DMolFile";			
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 			if (debug) System.out.print("done\n");
@@ -4561,7 +4561,7 @@ public class ParseChemidplus {
 		if (fd.HaveChemidplus3DMolFile) {			
 			if (debug) System.out.print("Getting Chemidplus3DMolFile...");
 			Source="Chemidplus3DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);			
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 			if (debug) System.out.print("done\n");
@@ -4570,7 +4570,7 @@ public class ParseChemidplus {
 		if (fd.HaveChemidplus2DMolFile) {			
 			if (debug) System.out.print("Getting Chemidplus2DMolFile...");
 			Source="Chemidplus2DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);			
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 			if (debug) System.out.print("done\n");
@@ -4580,7 +4580,7 @@ public class ParseChemidplus {
 		if (fd.HaveDougDB3DMolFile) {
 			if (debug) System.out.print("Getting Doug3DMolFile...");
 			Source="DougDB3DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 			if (debug) System.out.print("done\n");
@@ -4589,7 +4589,7 @@ public class ParseChemidplus {
 		
 		if (fd.HaveNIST3DMolFile) {
 			Source="NIST3DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 		
@@ -4597,7 +4597,7 @@ public class ParseChemidplus {
 		
 		if (fd.HaveNIST2DMolFile) {						
 			Source="NIST2DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);			
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 
@@ -4605,28 +4605,28 @@ public class ParseChemidplus {
 		
 		if (fd.HaveNIH3DMolFile) {
 			Source="NIH3DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);			
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);			
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 		} 
 		
 		if (fd.HaveIndexNet2DMolFile) {
 			Source="IndexNet2DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);						
 		}
 		
 		if (fd.HaveSmiles) {
 			Source="Smiles";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 		}
 		
 		if (fd.HaveName2DMolFile) {
 			Source="Name2DMolFile";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);
 						
@@ -4634,7 +4634,7 @@ public class ParseChemidplus {
 		
 		if (fd.HaveOther) {
 			Source="Other";
-			AtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
+			IAtomContainer molecule = this.getAtomContainerFromSource(Source,fd.CAS);
 			molecule.setProperty("Source",Source);
 			if (molecule != null) AtomContainerSet.addAtomContainer(molecule);						
 		} 
@@ -4663,7 +4663,7 @@ public class ParseChemidplus {
 	 * @param fd
 	 * @return
 	 */
-	private AtomContainer GetBestMoleculeNoDSSTox(FileData fd) {
+	private IAtomContainer GetBestMoleculeNoDSSTox(FileData fd) {
 		String BestSource=this.GetBestSourceNoDSSTox(fd);
 		fd.StructureSource=BestSource;
 		return this.getAtomContainerFromSource(BestSource, fd.CAS);	
@@ -4740,7 +4740,7 @@ public class ParseChemidplus {
 	}
 	
 	private void EvaluateFormula(FileData fd) {
-		AtomContainer molecule = null;
+		IAtomContainer molecule = null;
 		
 		
 				
@@ -4778,7 +4778,7 @@ public class ParseChemidplus {
 		
 	}
 	
-	public int GetHydrogenCount(AtomContainer m) {
+	public int GetHydrogenCount(IAtomContainer m) {
 		int HCount=0;
 		for (int i=0;i<m.getAtomCount();i++) {
 			if (m.getAtom(i).getSymbol().equals("H")) {
@@ -4813,7 +4813,7 @@ public class ParseChemidplus {
 			
 			MolecularFormula mf=(MolecularFormula)MolecularFormulaManipulator.getMolecularFormula(fd.Formula,DefaultChemObjectBuilder.getInstance());
 			
-			AtomContainer ac=(AtomContainer)MolecularFormulaManipulator.getAtomContainer(mf);
+			IAtomContainer ac=MolecularFormulaManipulator.getAtomContainer(mf);
 			
 			for (int i=0;i<ac.getAtomCount();i++) {
 				
@@ -5082,12 +5082,12 @@ public class ParseChemidplus {
 					ms=this.getAtomContainers2(fd);
 				}
 				
-				AtomContainer mol=null;
+				IAtomContainer mol=null;
 				String srcMol=srcs[i];
 				if (!srcs[i].equals("Smiles")) srcMol+="MolFile";
 				
 				for (int j=0;j<ms.getAtomContainerCount();j++) {
-					AtomContainer mj=(AtomContainer)ms.getAtomContainer(j);
+					IAtomContainer mj=ms.getAtomContainer(j);
 					String srcj=(String)mj.getProperty("Source");
 
 					if (srcj.equals(srcMol)) {
@@ -5104,7 +5104,7 @@ public class ParseChemidplus {
 
 				
 				for (int j=0;j<ms.getAtomContainerCount();j++) {
-					AtomContainer mj=(AtomContainer)ms.getAtomContainer(j);
+					IAtomContainer mj=ms.getAtomContainer(j);
 					String srcj=(String)mj.getProperty("Source");
 
 					if (srcj.equals(srcMol)) continue;
@@ -5149,7 +5149,7 @@ public class ParseChemidplus {
 		
 	}
 	
-	void CheckForBadElement(AtomContainer mol,FileData fd) {
+	void CheckForBadElement(IAtomContainer mol,FileData fd) {
 		
 		try {
 			fd.BadElement = "false";
@@ -5190,7 +5190,7 @@ public class ParseChemidplus {
 	
 	
 	
-	public static boolean IsSalt(AtomContainer molecule) {
+	public static boolean IsSalt(IAtomContainer molecule) {
 		
 		
 	    AtomContainerSet AtomContainerSet;
@@ -5257,33 +5257,35 @@ public class ParseChemidplus {
 	
 	void CompareALOGPForTwoMolFiles(String CAS,String src1,String src2) {
 		try {
-		AtomContainer m1=this.getAtomContainerFromSource(src1, CAS);
-		AtomContainer m2=this.getAtomContainerFromSource(src2, CAS);
-		
-		DescriptorFactory df=new DescriptorFactory(true);
-		DescriptorData dd=new DescriptorData();
-		
-		df.Calculate3DDescriptors=false;
-		df.alogp.debug=true;
-		System.out.println(src1);
-		df.CalculateDescriptors(m1, dd, false);
-		
-		ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(m1, CAS+"_"+src1, "ToxPredictor/Check");
-		ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(m2, CAS+"_"+src2, "ToxPredictor/Check");
-		
-//		for (int i=0;i<df.rs.getAtomContainerCount();i++) {
-//			org.openscience.cdk.Ring r=(org.openscience.cdk.Ring)df.rs.getAtomContainer(i);
-//			System.out.println(i+"\t"+r.getFlag(CDKConstants.ISAROMATIC));
-//		}	
-//		System.out.println(dd.ALOGP);
-//		System.out.println("\n");
-		System.out.println(src2);
-		df.CalculateDescriptors(m2, dd, false);
-//		for (int i=0;i<df.rs.getAtomContainerCount();i++) {
-//			org.openscience.cdk.Ring r=(org.openscience.cdk.Ring)df.rs.getAtomContainer(i);
-//			System.out.println(i+"\t"+r.getFlag(CDKConstants.ISAROMATIC));
-//		}
-//		System.out.println(dd.ALOGP);
+
+			IAtomContainer m1=this.getAtomContainerFromSource(src1, CAS);
+
+			IAtomContainer m2=this.getAtomContainerFromSource(src2, CAS);
+
+			DescriptorFactory df=new DescriptorFactory(true);
+			DescriptorData dd=new DescriptorData();
+
+			df.Calculate3DDescriptors=false;
+			df.alogp.debug=true;
+			System.out.println(src1);
+			df.CalculateDescriptors(m1, dd, false);
+
+			ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(m1, CAS+"_"+src1, "ToxPredictor/Check");
+			ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(m2, CAS+"_"+src2, "ToxPredictor/Check");
+
+			//		for (int i=0;i<df.rs.getAtomContainerCount();i++) {
+			//			org.openscience.cdk.Ring r=(org.openscience.cdk.Ring)df.rs.getAtomContainer(i);
+			//			System.out.println(i+"\t"+r.getFlag(CDKConstants.ISAROMATIC));
+			//		}	
+			//		System.out.println(dd.ALOGP);
+			//		System.out.println("\n");
+			System.out.println(src2);
+			df.CalculateDescriptors(m2, dd, false);
+			//		for (int i=0;i<df.rs.getAtomContainerCount();i++) {
+			//			org.openscience.cdk.Ring r=(org.openscience.cdk.Ring)df.rs.getAtomContainer(i);
+			//			System.out.println(i+"\t"+r.getFlag(CDKConstants.ISAROMATIC));
+			//		}
+			//		System.out.println(dd.ALOGP);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -5552,12 +5554,10 @@ public class ParseChemidplus {
 				String CAS=file.getName().substring(0,file.getName().indexOf("."));
 
 				BufferedReader br=new BufferedReader(new FileReader(file));
-				
 				mr=new MDLV2000Reader(br);
-				
-				AtomContainer molecule=new AtomContainer();
-				mr.read(molecule);
-				br.close();
+	            IAtomContainer molecule = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
+
+	            br.close();
 				
 //				MyHydrogenAdder myHA = new MyHydrogenAdder();
 //				AtomContainer mol_w_hydrogens = myHA.AddExplicitHydrogens(mol);
@@ -6414,11 +6414,9 @@ public class ParseChemidplus {
 	
 	
 	
-	public static AtomContainer LoadChemicalFromMolFile(String CAS,String folder) {
+	public static IAtomContainer LoadChemicalFromMolFile(String CAS,String folder) {
 		
 		try {
-
-			
 			
 			String filePath = folder + File.separator + CAS + ".mol";
 			File f = new File(filePath);
@@ -6431,15 +6429,15 @@ public class ParseChemidplus {
 				return null;
 			}
 
-			AtomContainer m=new AtomContainer();
+			
 			MDLV2000Reader mr=new MDLV2000Reader(new FileInputStream(filePath));
-			mr.read(m);
+            IAtomContainer molecule = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
 						
 //			for (int i=0;i<molecule.getAtomCount();i++) {
 //				System.out.println(i+"\t"+molecule.getAtom(i).getSymbol()+"\t"+molecule.getAtom(i).getFormalCharge());
 //			}
 
-			return m;
+			return molecule;
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -6449,7 +6447,7 @@ public class ParseChemidplus {
 	}
 	
 	
-	public AtomContainer LoadChemicalFromMolFileInJar(String filename) {
+	public IAtomContainer LoadChemicalFromMolFileInJar(String filename) {
 		
 		try {
 
@@ -6466,11 +6464,10 @@ public class ParseChemidplus {
 //			ToxPredictor.Utilities.MDLReader mr=new ToxPredictor.Utilities.MDLReader(); 			
 //			AtomContainer molecule=mr.readMolecule(br);
 
-			AtomContainer molecule=new AtomContainer();
-			MDLV2000Reader mr=new MDLV2000Reader(isr);
-			mr.read(molecule);
-			mr.close();
 			
+			MDLV2000Reader mr=new MDLV2000Reader(isr);
+			IAtomContainer molecule = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
+			mr.close();
 
 			return molecule;
 
@@ -6518,7 +6515,7 @@ public class ParseChemidplus {
 					
 					this.CheckForMolFiles2(fd);
 					
-					AtomContainer bestMolecule=this.GetBestMolecule(fd);
+					IAtomContainer bestMolecule=this.GetBestMolecule(fd);
 					
 //					AtomContainerSet AtomContainerSet=this.getAtomContainers2(fd);
 					
@@ -6550,7 +6547,7 @@ public class ParseChemidplus {
 					}
 					
 					
-					if (bestMolecule instanceof AtomContainer) {
+					if (bestMolecule instanceof IAtomContainer) {
 //						fd.StructureSource=(String)bestMolecule.getProperty("Source");
 						
 						
@@ -6560,7 +6557,7 @@ public class ParseChemidplus {
 						 
 						 fd.CalculatedFormula="";
 						 for (int mol=0;mol<AtomContainerSet2.getAtomContainerCount();mol++) {
-							fd.CalculatedFormula+=CDKUtilities.calculateFormula((AtomContainer)AtomContainerSet2.getAtomContainer(mol));
+							fd.CalculatedFormula+=CDKUtilities.calculateFormula(AtomContainerSet2.getAtomContainer(mol));
 							if (mol<AtomContainerSet2.getAtomContainerCount()-1) {
 								fd.CalculatedFormula+=".";
 							}
@@ -6675,7 +6672,7 @@ public class ParseChemidplus {
 						
 						this.CheckForMolFiles2(fd);
 						
-						AtomContainer bestMolecule=this.GetBestMolecule(fd);
+						IAtomContainer bestMolecule=this.GetBestMolecule(fd);
 						
 //						AtomContainerSet AtomContainerSet=this.getAtomContainers2(fd);
 						
@@ -6709,7 +6706,7 @@ public class ParseChemidplus {
 //						}
 						
 						
-						if (bestMolecule instanceof AtomContainer) {
+						if (bestMolecule instanceof IAtomContainer) {
 //							fd.StructureSource=(String)bestMolecule.getProperty("Source");
 							
 							
@@ -6719,7 +6716,7 @@ public class ParseChemidplus {
 							 
 							 fd.CalculatedFormula="";
 							 for (int mol=0;mol<AtomContainerSet2.getAtomContainerCount();mol++) {
-								 AtomContainer ac=(AtomContainer)AtomContainerSet2.getAtomContainer(mol);
+								 IAtomContainer ac=AtomContainerSet2.getAtomContainer(mol);
 								 fd.CalculatedFormula+=CDKUtilities.calculateFormula(ac);
 								
 								if (mol<AtomContainerSet2.getAtomContainerCount()-1) {
@@ -6878,8 +6875,8 @@ public class ParseChemidplus {
 						continue;
 					}
 					
-					AtomContainer moleculeCDK=this.LoadChemicalFromMolFile(CAS+"_Smiles",structureFolder1.getAbsolutePath() );
-					AtomContainer moleculeMarvin=this.LoadChemicalFromMolFile(CAS+"_Smiles_Marvin", structureFolder2.getAbsolutePath());
+					IAtomContainer moleculeCDK=this.LoadChemicalFromMolFile(CAS+"_Smiles",structureFolder1.getAbsolutePath() );
+					IAtomContainer moleculeMarvin=this.LoadChemicalFromMolFile(CAS+"_Smiles_Marvin", structureFolder2.getAbsolutePath());
 					
 					moleculeCDK.setProperty("Source","CDK");
 					moleculeMarvin.setProperty("Source","Marvin");

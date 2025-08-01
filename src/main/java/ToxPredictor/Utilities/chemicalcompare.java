@@ -199,7 +199,7 @@ public class chemicalcompare {
 	 * @param rs2
 	 * @return
 	 */
-	public static boolean isIsomorphFingerPrinter(AtomContainer mol1, AtomContainer mol2,IRingSet rs1,IRingSet rs2) {
+	public static boolean isIsomorphFingerPrinter(IAtomContainer mol1, IAtomContainer mol2,IRingSet rs1,IRingSet rs2) {
 
 		Fingerprinter fp = new Fingerprinter();
 		DescriptorFactory df = new DescriptorFactory(false);
@@ -952,8 +952,8 @@ public class chemicalcompare {
 				continue;
 			}
 			
-			AtomContainer molecule1=ParseChemidplus.LoadChemicalFromMolFile(CAS, folderpath1);
-			AtomContainer molecule2=ParseChemidplus.LoadChemicalFromMolFile(CAS, folderpath2);
+			IAtomContainer molecule1=ParseChemidplus.LoadChemicalFromMolFile(CAS, folderpath1);
+			IAtomContainer molecule2=ParseChemidplus.LoadChemicalFromMolFile(CAS, folderpath2);
 			
 			try {
 //				IRingSet rs1 = arf.findAllRings(molecule1);
@@ -1043,8 +1043,8 @@ public class chemicalcompare {
 				File molfile2 = new File(folder + "/" + CAS+"_2.mol");
 				// System.out.println(oldmolfile.getName());
 
-				AtomContainer molecule1=ParseChemidplus.LoadChemicalFromMolFile(CAS+"_1", folder);
-				AtomContainer molecule2=ParseChemidplus.LoadChemicalFromMolFile(CAS+"_2", folder);
+				IAtomContainer molecule1=ParseChemidplus.LoadChemicalFromMolFile(CAS+"_1", folder);
+				IAtomContainer molecule2=ParseChemidplus.LoadChemicalFromMolFile(CAS+"_2", folder);
 
 				File ImageFile1 = null;
 				File ImageFile2 = null;

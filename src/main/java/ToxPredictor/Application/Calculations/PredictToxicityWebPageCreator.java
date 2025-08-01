@@ -17,6 +17,8 @@ import ToxPredictor.misc.ParseChemidplus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainer;
+
 import wekalite.Instance;
 import wekalite.Instances;
 
@@ -4104,7 +4106,7 @@ public class PredictToxicityWebPageCreator {
 		for (int i = 0; i < or.getChemicalNames().length; i++) {
 			String CASi = or.getChemicalNames()[i];
 			// System.out.println(CASi);
-			AtomContainer moleculei = null;
+			IAtomContainer moleculei = null;
 
 			File imageFile = new File(imageFolder.getAbsolutePath() + "/" + CASi + ".png");
 

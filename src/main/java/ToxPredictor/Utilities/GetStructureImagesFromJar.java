@@ -9,6 +9,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import org.openscience.cdk.AtomContainer;
+import org.openscience.cdk.interfaces.IAtomContainer;
 
 public class GetStructureImagesFromJar {
 	
@@ -16,7 +17,7 @@ public class GetStructureImagesFromJar {
 	
 	public void CreateImageFileFromStructure(String CAS,String outputfolder) {
 		double time1 = System.currentTimeMillis() / 1000.0;
-		AtomContainer moleculei=p.LoadChemicalFromMolFileInJar("ValidatedStructures/"+CAS+".mol");
+		IAtomContainer moleculei=p.LoadChemicalFromMolFileInJar("ValidatedStructures/"+CAS+".mol");
 		
 		
 //		ToxPredictor.Utilities.SaveStructureToFile.CreateImageFile(moleculei,CAS,outputfolder,false,true,true,200);
