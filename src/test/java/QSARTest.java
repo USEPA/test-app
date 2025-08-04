@@ -29,7 +29,7 @@ import org.openscience.cdk.exception.InvalidSmilesException;
 import org.openscience.cdk.io.MDLV2000Writer;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.smiles.SmilesParser;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -920,14 +920,14 @@ public class QSARTest {
 		
 	}
 
-	static void turnOffLogging() {
-		Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
-		for(String log:loggers) { 
-			Logger logger = (Logger)LoggerFactory.getLogger(log);
-			logger.setLevel(Level.INFO);
-			logger.setAdditive(false);
-		} //end
-	}
+//	static void turnOffLogging() {
+//		Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
+//		for(String log:loggers) { 
+//			Logger logger = (Logger)LoggerFactory.getLogger(log);
+//			logger.setLevel(Level.INFO);
+//			logger.setAdditive(false);
+//		} //end
+//	}
 	
 	/**
 	 * Runs all chemicals in NCCT database for single endpoint with multicores

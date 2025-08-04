@@ -1,9 +1,9 @@
 package gov.epa;
 
-import io.dropwizard.Configuration;
-import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import io.dropwizard.core.Configuration;
+import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
 public class WebTESTConfiguration extends Configuration
 {

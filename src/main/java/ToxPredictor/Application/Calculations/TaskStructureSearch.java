@@ -5,23 +5,16 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
-
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.validator.internal.util.privilegedactions.GetMethodFromPropertyName;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
-import org.openscience.cdk.Bond;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.inchi.InChIGeneratorFactory;
@@ -34,28 +27,18 @@ import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 
 
-import AADashboard.Application.MoleculeUtilities;
 import ToxPredictor.misc.MolFileUtilities;
-import uk.ac.cam.ch.wwmm.opsin.OpsinResult;
-import uk.ac.cam.ch.wwmm.opsin.OpsinWarning;
 import ToxPredictor.Application.TESTConstants;
-import ToxPredictor.Application.WebTEST;
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.GUI.Miscellaneous.SwingWorker;
 import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.Database.DSSToxRecord;
-//import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.IndigoUtilities;
 import ToxPredictor.Utilities.Utilities;
-
-//import uk.ac.cam.ch.wwmm.opsin.NameToStructure;// uk\ac\cam\ch\opsin\opsin-core\2.5.0
-//import uk.ac.cam.ch.wwmm.opsin.NameToStructureConfig;
-//import uk.ac.cam.ch.wwmm.opsin.OpsinResult;
-
 
 
 public class TaskStructureSearch {

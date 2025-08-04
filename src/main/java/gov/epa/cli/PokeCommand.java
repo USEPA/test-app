@@ -18,8 +18,8 @@ import ToxPredictor.Application.TESTConstants;
 import gov.epa.WebTESTConfiguration;
 import gov.epa.api.PredictionQuery;
 import gov.epa.api.PredictionResult;
-import io.dropwizard.cli.ConfiguredCommand;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.core.cli.ConfiguredCommand;
+import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 

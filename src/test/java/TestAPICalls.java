@@ -1,59 +1,32 @@
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.*;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-//import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.slf4j.LoggerFactory;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mashape.unirest.http.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mashape.unirest.http.exceptions.UnirestException;
 
-//import com.mashape.unirest.http.JsonNode;
-//import com.mashape.unirest.http.Unirest;
-//import com.mashape.unirest.http.HttpResponse;
-
-
-
 public class TestAPICalls {
 
 	private final String USER_AGENT = "Mozilla/5.0";
 
-	private boolean suppressLogging=false;
+//	private boolean suppressLogging=false;
+//
+//	public TestAPICalls() {
+//		if (suppressLogging) {
+//			turnoffLogging();
+//		}
+//	}
 
-	public TestAPICalls() {
-		if (suppressLogging) {
-			turnoffLogging();
-		}
-	}
-
-	public static void turnoffLogging () {
-		Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
-		for(String log:loggers) { 
-			Logger logger = (Logger)LoggerFactory.getLogger(log);
-			logger.setLevel(Level.INFO);
-			logger.setAdditive(false);
-		} //end
-	}
+//	public static void turnoffLogging () {
+//		Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
+//		for(String log:loggers) { 
+//			Logger logger = (Logger)LoggerFactory.getLogger(log);
+//			logger.setLevel(Level.INFO);
+//			logger.setAdditive(false);
+//		} //end
+//	}
 	
 	
 	public static void main(String[] args) throws Exception {
@@ -69,17 +42,17 @@ public class TestAPICalls {
 //		testAPICalls.suppressLogging=true;
 
 		// System.out.println("Testing 1 - Send Http GET request");
-//		testAPICalls.sendGet();
+		testAPICalls.sendGet();
 		//
 		// System.out.println("\nTesting 2 - Send Http POST request");
 		
-//		testAPICalls.sendPost();
+		testAPICalls.sendPost();
 //		testAPICalls.sendPost2();
 //		testAPICalls.testMultipleEndpointAndMethods();
 //		testAPICalls.testMultipleEndpointAndMethodsBatch();
 //		testAPICalls.testAADashboard_chemicals();
 		 
-		testAPICalls.runAADashboardBatchTop20();
+//		testAPICalls.runAADashboardBatchTop20();
 
 	}
 	
@@ -194,29 +167,39 @@ public class TestAPICalls {
 	// HTTP GET request
 	private void sendGet() throws Exception {
 
+		String endpoint="WS";
+		
+		
 		String url = "https://comptox.epa.gov/dashboard/web-test/";
 //		 String url = "http://webtest.sciencedataexperts.com/";
 //		 String url = "http://webtest2.sciencedataexperts.com/";
 		// String url="http://localhost:8100/";
 
-		String query = "WS?smiles=CCO";
+		String smiles="CCO";
 
-		HttpClient client = new DefaultHttpClient();
-		HttpGet request = new HttpGet(url + query);
 		
-		// add request header
-		request.addHeader("User-Agent", USER_AGENT);
+		url+=endpoint;
+		
+		HttpResponse<String> response = Unirest.get(url)
+				.queryString("smiles", smiles)
+                .header("Accept", "application/json")                
+                .asString();
+		
+		
+//		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+//		ObjectMapper mapper = new ObjectMapper();
+//		com.fasterxml.jackson.databind.JsonNode json = mapper.readTree(rd);
+//		System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json));
+		
+//		System.out.println(response.getBody().toString());
+		
+		GsonBuilder builder = new GsonBuilder();
+		builder.setPrettyPrinting();
+		Gson gson = builder.create();
+		JsonObject joResult = gson.fromJson(response.getBody().toString(), JsonObject.class);
+		String strJSON=gson.toJson(joResult);//convert back to JSON string to see if we have implemented all the needed fields
+		System.out.println("Get:\n"+strJSON);
 
-		org.apache.http.HttpResponse response = client.execute(request);
-
-		System.out.println("\nSending 'GET' request to URL : " + url);
-		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
-
-		BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-		ObjectMapper mapper = new ObjectMapper();
-		com.fasterxml.jackson.databind.JsonNode json = mapper.readTree(rd);
-		System.out.println(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json));
 
 	}
 
@@ -241,7 +224,7 @@ public class TestAPICalls {
 
 		System.out.println(jo.toString());
 
-		com.mashape.unirest.http.HttpResponse<com.mashape.unirest.http.JsonNode> response = com.mashape.unirest.http.Unirest.post(url + endpoint).header("content-type", "application/json")
+		HttpResponse<JsonNode> response = Unirest.post(url + endpoint).header("content-type", "application/json")
 				.header("accept", "application/json").body(jo.toString()).asJson();
 
 //		System.out.println(response.getBody().getObject());
@@ -253,7 +236,7 @@ public class TestAPICalls {
 		Gson gson = builder.create();
 		JsonObject joResult = gson.fromJson(response.getBody().getObject().toString(2), JsonObject.class);
 		String strJSON=gson.toJson(joResult);//convert back to JSON string to see if we have implemented all the needed fields
-		System.out.println(strJSON);
+		System.out.println("\nPost:\n"+strJSON);
 
 
 		// ObjectMapper mapper = new ObjectMapper();

@@ -9,7 +9,7 @@ import java.util.List;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 
-import com.codahale.metrics.MetricRegistryListener.Base;
+//import com.codahale.metrics.MetricRegistryListener.Base;
 
 public class CsvResultsWriter implements ResultsWriter {
 	private CSVFormat csvFileFormat = CSVFormat.DEFAULT;

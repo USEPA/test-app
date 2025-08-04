@@ -17,7 +17,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Vector;
-import java.util.logging.Handler;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -35,11 +34,7 @@ import javax.swing.JTextField;
 import javax.swing.JToolBar;
 import javax.swing.border.TitledBorder;
 import javax.swing.filechooser.FileFilter;
-import javax.ws.rs.ForbiddenException;
 
-import org.apache.log4j.Level;
-import org.apache.log4j.Logger;
-import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.ChemModel;
 import org.openscience.cdk.interfaces.IAtomContainer;
@@ -59,12 +54,13 @@ import ToxPredictor.Application.Calculations.TaskCalculations2;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.HueckelAromaticityDetector;
-//import ToxPredictor.Utilities.ChemicalFinder;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.Utilities.chemicalcompare;
 
 
 public class TESTApplication extends JFrame{
+
+	private static final long serialVersionUID = 5819421869469443640L;
 
 	//	
 	public static boolean defaultToSingleChemicalMode=true;

@@ -6,8 +6,8 @@ import java.util.HashSet;
 import ToxPredictor.Application.RunParams;
 import ToxPredictor.Application.WebReportType;
 import ToxPredictor.Application.WebTEST;
-import io.dropwizard.cli.Command;
-import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.core.cli.Command;
+import io.dropwizard.core.setup.Bootstrap;
 import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 

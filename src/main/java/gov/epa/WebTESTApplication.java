@@ -28,9 +28,10 @@ import gov.epa.resources.VPResource;
 import gov.epa.resources.ViscosityResource;
 import gov.epa.resources.WSResource;
 import gov.epa.resources.WebReportResource;
-import io.dropwizard.Application;
-import io.dropwizard.setup.Bootstrap;
-import io.dropwizard.setup.Environment;
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
+
 import io.federecio.dropwizard.swagger.SwaggerBundle;
 import io.federecio.dropwizard.swagger.SwaggerBundleConfiguration;
 
