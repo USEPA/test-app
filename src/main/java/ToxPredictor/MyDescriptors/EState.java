@@ -4,9 +4,6 @@ import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.util.*;
 
-import org.openscience.cdk.Atom;
-import org.openscience.cdk.config.IsotopeFactory;
-import org.openscience.cdk.config.Isotopes;
 
 //import org.openscience.cdk.*;
 //import org.openscience.cdk.config.ElementPTFactory;
@@ -40,49 +37,49 @@ public class EState {
 		
 		//TODO- is this needed? might be already in CDK1.5
 		valences = new HashMap();
-        valences.put("H", new Integer(1));
-        valences.put("Li", new Integer(1));
-        valences.put("Be", new Integer(2));
-        valences.put("B", new Integer(3));
-        valences.put("C", new Integer(4));
-        valences.put("N", new Integer(5));
-        valences.put("O", new Integer(6));
-        valences.put("F", new Integer(7));
-        valences.put("Na", new Integer(1));
-        valences.put("Mg", new Integer(2));
-        valences.put("Al", new Integer(3));
-        valences.put("Si", new Integer(4));
-        valences.put("P", new Integer(5));
-        valences.put("S", new Integer(6));
-        valences.put("Cl", new Integer(7));
-        valences.put("K", new Integer(1));
-        valences.put("Ca", new Integer(2));
-        valences.put("Ga", new Integer(3));
-        valences.put("Ge", new Integer(4));
-        valences.put("As", new Integer(5));
-        valences.put("Se", new Integer(6));
-        valences.put("Br", new Integer(7));
-        valences.put("Rb", new Integer(1));
-        valences.put("Sr", new Integer(2));
-        valences.put("In", new Integer(3));
-        valences.put("Sn", new Integer(4));
-        valences.put("Sb", new Integer(5));
-        valences.put("Te", new Integer(6));
-        valences.put("I", new Integer(7));
-        valences.put("Cs", new Integer(1));
-        valences.put("Ba", new Integer(2));
-        valences.put("Tl", new Integer(3));
-        valences.put("Pb", new Integer(4));
-        valences.put("Bi", new Integer(5));
-        valences.put("Po", new Integer(6));
-        valences.put("At", new Integer(7));
-        valences.put("Fr", new Integer(1));
-        valences.put("Ra", new Integer(2));
-        valences.put("Cu", new Integer(2));
-        valences.put("Mn", new Integer(2));
-        valences.put("Co", new Integer(2));
+        valences.put("H", 1);
+        valences.put("Li", 1);
+        valences.put("Be", 2);
+        valences.put("B", 3);
+        valences.put("C", 4);
+        valences.put("N", 5);
+        valences.put("O", 6);
+        valences.put("F", 7);
+        valences.put("Na", 1);
+        valences.put("Mg", 2);
+        valences.put("Al", 3);
+        valences.put("Si", 4);
+        valences.put("P", 5);
+        valences.put("S", 6);
+        valences.put("Cl", 7);
+        valences.put("K", 1);
+        valences.put("Ca", 2);
+        valences.put("Ga", 3);
+        valences.put("Ge", 4);
+        valences.put("As", 5);
+        valences.put("Se", 6);
+        valences.put("Br", 7);
+        valences.put("Rb", 1);
+        valences.put("Sr", 2);
+        valences.put("In", 3);
+        valences.put("Sn", 4);
+        valences.put("Sb", 5);
+        valences.put("Te", 6);
+        valences.put("I", 7);
+        valences.put("Cs", 1);
+        valences.put("Ba", 2);
+        valences.put("Tl", 3);
+        valences.put("Pb", 4);
+        valences.put("Bi", 5);
+        valences.put("Po", 6);
+        valences.put("At", 7);
+        valences.put("Fr", 1);
+        valences.put("Ra", 2);
+        valences.put("Cu", 2);
+        valences.put("Mn", 2);
+        valences.put("Co", 2);
         
-        valences.put("Hg", new Integer(2));//added by TMM
+        valences.put("Hg", 2);//added by TMM
         
         
 	}
@@ -187,7 +184,7 @@ public class EState {
 	
 	private void CalcIntrinsicState() {
 		
-		double Z=0, Zv=0;
+//		double Z=0, Zv=0;
 
 		for (int i = 0; i <= m.getAtomCount() - 1; i++) {
 			IAtom a = m.getAtom(i);

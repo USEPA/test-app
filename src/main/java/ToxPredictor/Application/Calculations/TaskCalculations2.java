@@ -438,7 +438,7 @@ public class TaskCalculations2 {
 		statMessage = message;
 	}
 
-	private AtomContainer calculate(String CAS, AtomContainer ac,boolean areDashboardStructuresAvailable,boolean isBatch) {
+	private IAtomContainer calculate(String CAS, IAtomContainer ac,boolean areDashboardStructuresAvailable,boolean isBatch) {
 				
 		TESTApplication ta=(TESTApplication)gui;
 		
@@ -1007,7 +1007,7 @@ public class TaskCalculations2 {
 				// if (i==10) break;//for debug
 				if (done)
 					return;
-				AtomContainer m = (AtomContainer) moleculeSet.getAtomContainer(i);
+				IAtomContainer m = moleculeSet.getAtomContainer(i);
 				String CAS = (String) m.getProperty("CAS");
 												
 				statMessage = "Molecule ID = " + CAS + " (" + (i + 1) + " of " + moleculeSet.getAtomContainerCount() + ")";

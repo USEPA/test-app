@@ -229,7 +229,7 @@ public class Validation2 {
 					fw.flush();
 				}
 				Collections.sort(vec,Collections.reverseOrder());
-				
+				br.close();
 			}
 			
 			fw2.write("CAS\tExp\tPred\tError\r\n");
@@ -369,11 +369,11 @@ public class Validation2 {
     }
 	
 	private void runRmax() throws Exception {
-		Vector vResults = allResults.getResults();
+		Vector<OptimalResults> vResults = allResults.getResults();
 		// loop through all clusters and make predictions with the clusters
 		// that meet the constraints:
 		for (int i = 0; i < vResults.size(); i++) {
-			OptimalResults results = (OptimalResults) vResults.get(i);
+			OptimalResults results = vResults.get(i);
 
 			// System.out.println(results.getClusterNumber());
 
@@ -388,7 +388,7 @@ public class Validation2 {
             	for (int j=0;j<testData.numInstances();j++) {
             		TestChemical chemical = (TestChemical)testData.instance(j);
                 	chemical.getInvalidErrorMessages().add("Model is not statistically valid");
-                	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                	chemical.getInvalidClusters().add(results.getClusterNumber());
             	}
             }
 		}
@@ -549,17 +549,16 @@ public class Validation2 {
 	
 	void runSmallestUncertainty(TestChemical chemical) throws Exception {
 		
-		Vector cu = chemical.getClustersUsed();
-		Vector nc = chemical.getNumChemicals();
+		Vector<Integer> cu = chemical.getClustersUsed();
+		Vector<Integer> nc = chemical.getNumChemicals();
 
 		int smallestUncertaintyIndex = -1;
 		double MinUncertainty = 99999;
 		double PredictedValue = -9999;
 
 		for (int i = 0; i < cu.size(); i++) {
-			int num = (Integer) cu.get(i);
-
-			int numChem = (Integer) nc.get(i);
+			int num = cu.get(i);
+			int numChem = nc.get(i);
 
 			if (numChem >= MinNumChemicals || MinNumChemicals == -1) {
 				OptimalResults results = this.GetResults(num);
@@ -580,13 +579,11 @@ public class Validation2 {
 			chemical.setPredictedValue(PredictedValue);
 			chemical.setPredictedUncertainty(MinUncertainty);
 
-			chemical.getPredictions().add(new Double(PredictedValue));
-			chemical.getUncertainties()
-					.add(new Double(MinUncertainty));
+			chemical.getPredictions().add(PredictedValue);
+			chemical.getUncertainties().add(MinUncertainty);
 
 			chemical.getClustersUsed().removeAllElements();
-			chemical.getClustersUsed().add(
-					new Integer(smallestUncertaintyIndex));
+			chemical.getClustersUsed().add(smallestUncertaintyIndex);
 
 		} else {
 			chemical.setPredictedValue(-9999);
@@ -597,16 +594,15 @@ public class Validation2 {
 	
 	void runClosestCluster(TestChemical chemical) throws Exception {
 		
-		Vector distances = chemical.getDistances();
-		Vector cu = chemical.getClustersUsed();
-		Vector nc = chemical.getNumChemicals();
+		Vector<Double> distances = chemical.getDistances();
+		Vector<Integer> cu = chemical.getClustersUsed();
+		Vector<Integer> nc = chemical.getNumChemicals();
 
 		int closestCluster = -1;
 		double MinDist = 99999;
 
 		for (int i = 0; i < distances.size(); i++) {
 			double dist = (Double) distances.get(i);
-
 			int numChem = (Integer) nc.get(i);
 
 			if (dist < MinDist) {
@@ -627,18 +623,15 @@ public class Validation2 {
 			chemical.setPredictedValue(predValue);
 			chemical.setPredictedUncertainty(predUncertainty);
 
-			chemical.getPredictions().add(new Double(predValue));
-			chemical.getUncertainties()
-					.add(new Double(predUncertainty));
+			chemical.getPredictions().add(predValue);
+			chemical.getUncertainties().add(predUncertainty);
 
 			chemical.getClustersUsed().removeAllElements();
-			chemical.getClustersUsed().add(new Integer(closestCluster));
+			chemical.getClustersUsed().add(closestCluster);
 
 		} else {
-			double predValue = -9999;
-			double predUncertainty = -9999;
 			chemical.setPredictedValue(-9999);
-			chemical.setPredictedUncertainty(predUncertainty);
+			chemical.setPredictedUncertainty(-9999);
 		}
 	}
 	
@@ -649,7 +642,7 @@ public class Validation2 {
 	private void runOneStepLC50() throws Exception {
 		
 		//just in case we have invalid models but still wanna run em:
-		OptimalResults or=allResults.getResults().get(0);
+		OptimalResults or=allResults.getResults().get(0);//TODO not used?
 		
 		allClusterInfo = new AllClusterInfo(allResults);
 		allClusterInfo.setTrainingDataset(trainingSet);
@@ -685,10 +678,10 @@ public class Validation2 {
 	
 	private void runWeightedAverage(TestChemical chemical) throws Exception {
 
-		Vector cu = chemical.getClustersUsed();
-		Vector nc = chemical.getNumChemicals();
+		Vector<Integer> cu = chemical.getClustersUsed();
+		Vector<Integer> nc = chemical.getNumChemicals();
 
-		Vector rv = new Vector();
+		Vector<OptimalResults> rv = new Vector<>();
 		// Vector iv=new Vector();
 
 		Vector<Integer> cu2 = (Vector<Integer>) cu.clone();
@@ -705,7 +698,7 @@ public class Validation2 {
 				// System.out.println(chemical.stringValue(0)+"\t"+num);
 
 				rv.add(this.GetResults(num));
-				cu.add(new Integer(num)); // only add the numbers for
+				cu.add(num); // only add the numbers for
 				// clusters exceeding min
 				// number if minnumber >-1
 				// iv.add(this.GetClusterInfo(num));
@@ -713,11 +706,8 @@ public class Validation2 {
 		}
 		for (int i = 0; i < rv.size(); i++) {
 			OptimalResults results = (OptimalResults) rv.get(i);
-			
-			chemical.getPredictions().add(
-					new Double(chemical.calculateToxicValue(results)));
-			chemical.getUncertainties()
-			.add(new Double(chemical.calculateUncertainty(results)));
+			chemical.getPredictions().add(chemical.calculateToxicValue(results));
+			chemical.getUncertainties().add(chemical.calculateUncertainty(results));
 		}
 
 		//		 System.out.println(chemical.stringValue(0)+"\t"+chemical.getPredictions().size()+"\t"+chemical.getClustersUsed().size());

@@ -24,7 +24,6 @@ public class TestData extends Instances {
      */
     private int[] previousClosestCluster;
     private double alpha;
-    //private Statistics statistics = new Statistics();
     private static final long serialVersionUID = 3033440524276774221L;
     private static Random rand = new Random(123456789L);
 
@@ -154,26 +153,25 @@ public class TestData extends Instances {
                             	}
                              	
                             	chemical.getInvalidErrorMessages().add(message);
-                            	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                            	chemical.getInvalidClusters().add(results.getClusterNumber());
                             }
                         } else {//ellipsoid constraint failed
                         	 
                         	chemical.getInvalidErrorMessages().add("Model ellipsoid constraint not met");
-                        	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                        	chemical.getInvalidClusters().add(results.getClusterNumber());
                         	
                         }
                     } else { //failed Rmax constraint                    	
                     	chemical.getInvalidErrorMessages().add("Rmax constraint not met");
-                    	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                    	chemical.getInvalidClusters().add(results.getClusterNumber());
                     }
                 } else { //invalid model
                 	chemical.getInvalidErrorMessages().add("Model is not statistically valid");
-                	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                	chemical.getInvalidClusters().add(results.getClusterNumber());
 
                 }
                 
-                Vector msgs=chemical.getInvalidErrorMessages();
-                
+//                Vector msgs=chemical.getInvalidErrorMessages();
 //                if (msgs.size()>0) {
 //                	String msg=(String)msgs.get(msgs.size()-1);
 //                	if (!msg.equals("Model is not statistically valid"))
@@ -238,26 +236,25 @@ public class TestData extends Instances {
                         	}
                          	
                         	chemical.getInvalidErrorMessages().add(message);
-                        	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                        	chemical.getInvalidClusters().add(results.getClusterNumber());
                         }
                     } else {//ellipsoid constraint failed
                     	 
                     	chemical.getInvalidErrorMessages().add("Model ellipsoid constraint not met");
-                    	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                    	chemical.getInvalidClusters().add(results.getClusterNumber());
                     	
                     }
                 } else { //failed Rmax constraint                    	
                 	chemical.getInvalidErrorMessages().add("Rmax constraint not met");
-                	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                	chemical.getInvalidClusters().add(results.getClusterNumber());
                 }
             } else { //invalid model
             	chemical.getInvalidErrorMessages().add("Model is not statistically valid");
-            	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+            	chemical.getInvalidClusters().add(results.getClusterNumber());
 
             }
             
-            Vector msgs=chemical.getInvalidErrorMessages();
-            
+//            Vector msgs=chemical.getInvalidErrorMessages();
 //                if (msgs.size()>0) {
 //                	String msg=(String)msgs.get(msgs.size()-1);
 //                	if (!msg.equals("Model is not statistically valid"))
@@ -277,12 +274,12 @@ public class TestData extends Instances {
         Instances trainingDataset  = clusterInfo.getTrainingSet();
         int clusterNumber =results.getClusterNumber();
 
-        Vector fragIndex = chemical.getFragments();
+        Vector<Integer> fragIndex = chemical.getFragments();
         Instance  instance;
 
-        for (int i=0; i<fragIndex.size(); i++){
+        for (int index:fragIndex){
             boolean haveFrag=false;
-            int index = (Integer)fragIndex.get(i);
+            
             for (int j=0; j<results.getNumChemicals(); j++){
                 instance = trainingDataset.instance(results.getChemicalNames()[j]);
                 if (instance.value(index)!=0) {
@@ -373,34 +370,30 @@ public class TestData extends Instances {
 	                        	}
 	                         	
 	                        	chemical.getInvalidErrorMessages().add(message);
-	                        	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+	                        	chemical.getInvalidClusters().add(results.getClusterNumber());
 	                        }
 	                    } else {//ellipsoid constraint failed
 	                    	 
 	                    	chemical.getInvalidErrorMessages().add("Model ellipsoid constraint not met");
-	                    	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+	                    	chemical.getInvalidClusters().add(results.getClusterNumber());
 	                    	
 	                    }
 	                } else { //failed Rmax constraint                    	
 	                	chemical.getInvalidErrorMessages().add("Rmax constraint not met");
-	                	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+	                	chemical.getInvalidClusters().add(results.getClusterNumber());
 	                }
 	            } else { //invalid model
 	            	chemical.getInvalidErrorMessages().add("Model is not statistically valid");
-	            	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+	            	chemical.getInvalidClusters().add(results.getClusterNumber());
 
 	            }
 	            
-	            Vector msgs=chemical.getInvalidErrorMessages();
-	            
+//	            Vector msgs=chemical.getInvalidErrorMessages();
 //	                if (msgs.size()>0) {
 //	                	String msg=(String)msgs.get(msgs.size()-1);
 //	                	if (!msg.equals("Model is not statistically valid"))
 //	                		System.out.println(chemical.stringValue(0)+"\t"+msg);          
 //	                }
-	            
-	            
-
 	        }//end loop over test instances
 		// TODO Auto-generated method stub
 		
@@ -462,26 +455,25 @@ public class TestData extends Instances {
                         	}
                          	
                         	chemical.getInvalidErrorMessages().add(message);
-                        	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                        	chemical.getInvalidClusters().add(results.getClusterNumber());
                         }
                     } else {//ellipsoid constraint failed
                     	 
                     	chemical.getInvalidErrorMessages().add("Model ellipsoid constraint not met");
-                    	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                    	chemical.getInvalidClusters().add(results.getClusterNumber());
                     	
                     }
                 } else { //failed Rmax constraint                    	
                 	chemical.getInvalidErrorMessages().add("Rmax constraint not met");
-                	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                	chemical.getInvalidClusters().add(results.getClusterNumber());
                 }
             } else { //invalid model
             	chemical.getInvalidErrorMessages().add("Model is not statistically valid");
-            	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+            	chemical.getInvalidClusters().add(results.getClusterNumber());
 
             }
             
-            Vector msgs=chemical.getInvalidErrorMessages();
-            
+//            Vector msgs=chemical.getInvalidErrorMessages();
 //                if (msgs.size()>0) {
 //                	String msg=(String)msgs.get(msgs.size()-1);
 //                	if (!msg.equals("Model is not statistically valid"))
@@ -545,8 +537,8 @@ public class TestData extends Instances {
                         chemical.getUncertainties().add(chemical.calculateUncertainty(results));
                         chemical.getStderr().add(chemical.calculateStdError(results));
                         chemical.getDistances().add(distance);
-                        chemical.getNumChemicals().add((Integer)results.getNumChemicals());
-                        chemical.getClustersUsed().add((Integer)results.getClusterNumber()); //TMM
+                        chemical.getNumChemicals().add(results.getNumChemicals());
+                        chemical.getClustersUsed().add(results.getClusterNumber()); //TMM
                     } else { // failed fragment constraint
                     	
                     	Vector<String>vecMissing=chemical.missingFragmentsInPredictingCluster(clusterInfo);
@@ -559,16 +551,16 @@ public class TestData extends Instances {
                     	
                     	chemical.getInvalidErrorMessages().add(message);
 //                    	chemical.getInvalidErrorMessages().add("Fragment constraint not met");
-                    	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                    	chemical.getInvalidClusters().add(results.getClusterNumber());
                     	
                     }
                 } else {//failed ellipsoid constraint
                 	chemical.getInvalidErrorMessages().add("Model ellipsoid constraint not met");
-                	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));
+                	chemical.getInvalidClusters().add(results.getClusterNumber());
                 }
             } else {//failed Rmax constraint            	            	 
             	chemical.getInvalidErrorMessages().add("Rmax constraint not met");
-            	chemical.getInvalidClusters().add(new Integer(results.getClusterNumber()));            	
+            	chemical.getInvalidClusters().add(results.getClusterNumber());            	
             }
         }
         

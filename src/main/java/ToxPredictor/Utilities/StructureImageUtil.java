@@ -17,11 +17,12 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import org.apache.commons.io.IOUtils;
-import org.openscience.cdk.AtomContainer;
+
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.depict.Depiction;
 import org.openscience.cdk.depict.DepictionGenerator;
 import org.openscience.cdk.exception.CDKException;
+import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import com.epam.indigo.IndigoException;
@@ -117,7 +118,7 @@ public class StructureImageUtil {
 	 * @throws IOException
 	 * @throws CDKException
 	 */
-	public static void writeImageFile(AtomContainer ac, String filepath) throws IOException, CDKException {
+	public static void writeImageFile(IAtomContainer ac, String filepath) throws IOException, CDKException {
 		new DepictionGenerator().withAtomColors().withZoom(1.5).depict(ac).writeTo(filepath);
 	}
 	
@@ -129,7 +130,7 @@ public class StructureImageUtil {
 	 * @throws IOException
 	 * @throws CDKException
 	 */
-	public static byte[] writeImageBytes(AtomContainer ac) throws IOException, CDKException {
+	public static byte[] writeImageBytes(IAtomContainer ac) throws IOException, CDKException {
 		ByteArrayOutputStream baos=new ByteArrayOutputStream();
 		new DepictionGenerator().withAtomColors().withZoom(1.5).depict(ac).writeTo(Depiction.PNG_FMT,baos);
 		return baos.toByteArray();
@@ -147,7 +148,7 @@ public class StructureImageUtil {
 	public static String generateImageSrcBase64FromSmiles(String smiles) throws IOException, CDKException, IndigoException {
 //		String inchikey = StructureUtil.indigoInchikeyFromSmiles(smiles);
 		
-		AtomContainer ac = (AtomContainer) parser.parseSmiles(smiles);
+		IAtomContainer ac = parser.parseSmiles(smiles);
 		
 //		String filepath="image.png";		
 //		writeImageFile(ac, inchikey,filepath);//write temp image file						
@@ -160,7 +161,7 @@ public class StructureImageUtil {
    		return imgURL;
 	}
 	
-	public static String generateImageSrcBase64FromAtomContainer(AtomContainer ac) throws IOException, CDKException, IndigoException {
+	public static String generateImageSrcBase64FromAtomContainer(IAtomContainer ac) throws IOException, CDKException, IndigoException {
 		byte[] bytes=writeImageBytes(ac);
         String base64 = Base64.getEncoder().encodeToString(bytes);//convert to base 64
    		String imgURL="data:image/png;base64, "+base64;

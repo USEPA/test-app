@@ -1,7 +1,8 @@
 package ToxPredictor.Application.Calculations;
 
-import org.openscience.cdk.AtomContainer;
+
 import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
@@ -23,7 +24,7 @@ public class CreateImageFromTrainingPredictionSDFs {
 
 		try {
 			
-			AtomContainer ac=getAtomContainer(endpointAbbrev, CAS, "training");
+			IAtomContainer ac=getAtomContainer(endpointAbbrev, CAS, "training");
 			
 			if (ac==null) ac=getAtomContainer(endpointAbbrev, CAS, "prediction");
 			
@@ -42,7 +43,7 @@ public class CreateImageFromTrainingPredictionSDFs {
 
 		try {
 			
-			AtomContainer ac=getAtomContainer(endpointAbbrev, CAS, "training");
+			IAtomContainer ac=getAtomContainer(endpointAbbrev, CAS, "training");
 			if (ac==null) ac=getAtomContainer(endpointAbbrev, CAS, "prediction");
 			if (ac==null) return null;
 			
@@ -57,7 +58,7 @@ public class CreateImageFromTrainingPredictionSDFs {
 		
 	}
 	
-	private AtomContainer getAtomContainer(String endpointAbbrev,String CAS, String set) {
+	private IAtomContainer getAtomContainer(String endpointAbbrev,String CAS, String set) {
 		
 		try {
 			java.io.InputStream ins = null;
@@ -71,7 +72,7 @@ public class CreateImageFromTrainingPredictionSDFs {
 			IteratingSDFReader mr = new IteratingSDFReader(ins,DefaultChemObjectBuilder.getInstance());
 			
 			while (mr.hasNext()) {
-				AtomContainer ac=(AtomContainer)mr.next();
+				IAtomContainer ac=mr.next();
 				
 				if (ac==null) return null;
 				
