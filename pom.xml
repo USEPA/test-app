@@ -320,11 +320,13 @@
 		-->
 
 
+	
 		<dependency>
 			<groupId>cdk</groupId>
 			<artifactId>JChemPaint</artifactId>
 			<version>3.5</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>junit</groupId>
@@ -397,8 +399,9 @@
 				<!--<version>3.6.1</version>-->
 
 				<configuration>
-					<source>${jdk.version}</source>
-					<target>${jdk.version}</target>
+					<!--<source>${jdk.version}</source>
+					<target>${jdk.version}</target>-->
+					<release>17</release>
 					<excludes>
 						<exclude>ToxPredictor/Application/TableSortDemo.java</exclude>
 					</excludes>
