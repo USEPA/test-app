@@ -1,5 +1,6 @@
 package ToxPredictor.Database;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -34,6 +35,7 @@ public class ResolverDb2 {
 	private static final int BATCH_SIZE = 10000;
 	private static final String TABLE_NAME = "substances";
 	public static String sqlitePath = "databases/snapshot.db";
+//	public static String sqlitePath = "databases/snapshot-2025-07-30.db";
 	
 	NameToStructureOpsin nameToStructureOpsin=new NameToStructureOpsin(); 
 
@@ -223,12 +225,12 @@ public class ResolverDb2 {
 	public static synchronized ArrayList<DSSToxRecord> lookupByInChis(Inchi inchi) {		
 		if (inchi==null) return new ArrayList<DSSToxRecord>();		
 		
-		ArrayList<DSSToxRecord> res = lookupByInChIKey(inchi.inchiKey);
-		if ( res.size() == 0 ) {
-			res = lookupByInChIKey1(inchi.inchiKey1);
+		ArrayList<DSSToxRecord> recs = lookupByInChIKey(inchi.inchiKey);
+		if ( recs.size() == 0 ) {
+			recs = lookupByInChIKey1(inchi.inchiKey1);
 //			System.out.println("Found by inchiKey1");
 		}
-		return res;		
+		return recs;		
 	}
 	
 	public static synchronized ArrayList<DSSToxRecord> lookupByInChiKey(Inchi inchi) {		
@@ -393,13 +395,48 @@ public class ResolverDb2 {
 		
 //		System.out.println(inchi.inchiKey);
 		
-		ArrayList<DSSToxRecord>recs = lookupByInChis(inchi);			
-		
-		if (recs.size()>0)	{
-			assignRecord(ac, recs,oldCAS);			
+//		ArrayList<DSSToxRecord>recs = lookupByInChis(inchi);
+				
+		if (Strings.isBlank(oldCAS) || oldCAS.contains("C_")) {
+			//First try by exact inchiKey match:
+			ArrayList<DSSToxRecord>recs = lookupByInChIKey(inchi.inchiKey);
+
+			if(recs.size()>0)			
+				DSSToxRecord.assignFromDSSToxRecord(ac, recs.get(0));
+			else {//Now try by inchiKey1
+				recs = lookupByInChIKey1(inchi.inchiKey1);
+				if(recs.size()>0)			
+					DSSToxRecord.assignFromDSSToxRecord(ac, recs.get(0));
+			}
 		} else {
-			assignRecordByStructureNotInDB(ac);
+			ArrayList<DSSToxRecord>recs = lookupByInChIKey(inchi.inchiKey);//first try by full inchiKey
+			if(recs.size()>0) {
+				assignRecordMatchingCAS(ac, oldCAS, recs);	
+			} else {
+				recs = lookupByInChIKey1(inchi.inchiKey1);//try by inchiKey1
+				assignRecordMatchingCAS(ac, oldCAS, recs);
+			}
 		}
+		
+		
+//		if (recs.size()>0)	{
+//			assignRecord(ac, recs,oldCAS);			
+//		} else {
+//			assignRecordByStructureNotInDB(ac);
+//		}
+	}
+
+	private static void assignRecordMatchingCAS(IAtomContainer ac, String oldCAS, ArrayList<DSSToxRecord> recs) {
+		boolean match=false;
+		for (DSSToxRecord rec:recs) {
+			if (rec.cas.contentEquals(oldCAS)) {
+				DSSToxRecord.assignFromDSSToxRecord(ac, rec);
+//							System.out.println("old CAS is ok!");
+				match=true;
+				break;
+			}
+		}
+		if (!match) DSSToxRecord.assignDSSToxInfoFromFirstRecord(ac, recs);
 	}
 	
 	public static void assignRecordByStructureViaInchiKey (AtomContainer ac,String oldCAS) {
@@ -456,16 +493,7 @@ public class ResolverDb2 {
 		if (Strings.isBlank(oldCAS) || oldCAS.contains("C_")) {
 			DSSToxRecord.assignFromDSSToxRecord(m, recs.get(0));
 		} else {
-			boolean match=false;
-			for (DSSToxRecord rec:recs) {
-				if (rec.cas.contentEquals(oldCAS)) {
-					DSSToxRecord.assignFromDSSToxRecord(m, rec);
-//							System.out.println("old CAS is ok!");
-					match=true;
-					break;
-				}
-			}
-			if (!match) DSSToxRecord.assignDSSToxInfoFromFirstRecord(m, recs);
+			assignRecordMatchingCAS(m, oldCAS, recs);
 		}
 	}
 
@@ -573,6 +601,16 @@ public class ResolverDb2 {
 				}
 			}
 			
+			//CAS:			
+			if (isCAS(id)) {
+				String CAS=parseSearchCAS(id.replace("\n", ""));								
+				recs = lookupByCAS(CAS);							
+				if (recs.size() > 0) {
+//					System.out.println("Found by CAS\t"+CAS);
+					logit("CAS",id,recs.get(0));						
+					return recs;
+				}				
+			}
 			
 			if (id.contains("-")) {
 				//Look up by inchiKey:
@@ -592,17 +630,6 @@ public class ResolverDb2 {
 				}
 			}			
 
-			
-			//CAS:			
-			if (isCAS(id)) {
-				String CAS=parseSearchCAS(id.replace("\n", ""));								
-				recs = lookupByCAS(CAS);							
-				if (recs.size() > 0) {
-					logit("CAS",id,recs.get(0));						
-					return recs;
-				}				
-			}
-									
 			//Next try name (name, synonym, name to structure):
 			ArrayList<DSSToxRecord> resName=lookupByNameAdvanced(id);			
 			if (resName.size()>0) return resName;
@@ -619,7 +646,7 @@ public class ResolverDb2 {
 				logit(strField,id,recs.get(0));
 //				recs.get(0).smiles=id;//store smiles since structures with unspecified isomer messes up cdk drawing for now
 			} else if (inchi!=null) {
-//				System.out.println("inchikey="+inchis[1]);
+//				System.out.println("inchikey="+inchi.inchiKey);
 
 				DSSToxRecord r=new DSSToxRecord();
 				r.cas="C_"+inchi.inchiKey;				
