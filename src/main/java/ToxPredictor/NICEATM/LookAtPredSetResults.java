@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
 
 
 
@@ -33,11 +34,9 @@ public class LookAtPredSetResults {
 		Hashtable<String,String>ht=new Hashtable<String,String>();
 		
 		
-		try {
+		try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
 			
-			String folder="L:\\Priv\\Cin\\NRMRL\\CompTox\\javax\\web-test\\z build models\\NICEATM\\final analysis";
-			
-			BufferedReader br=new BufferedReader(new FileReader(filepath));
+//			String folder="L:\\Priv\\Cin\\NRMRL\\CompTox\\javax\\web-test\\z build models\\NICEATM\\final analysis";
 			
 			String header=br.readLine();
 			
@@ -146,7 +145,7 @@ public class LookAtPredSetResults {
 //		
 //	}
 	
-	public static String calcCategoryStats(ArrayList<Integer> exp, ArrayList<Integer> pred) {
+	public static String calcCategoryStats(List<Integer> exp, List<Integer> pred) {
 		
 		int [] correct=new int[6];
 		int [] count=new int[6];
@@ -260,81 +259,81 @@ void goThroughPredSetLogMg_Kg() {
 			String fieldPred="LD50 mg/kg";
 			String fieldAD="Inside AD?";
 			
-			BufferedReader br=new BufferedReader(new FileReader(folder+"\\"+fileNamePred));
-			
-			Hashtable<String,String>htPreds=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldPred);
-			Hashtable<String,String>htAD=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldAD);
-			
-			String header=br.readLine();
-			
-			String [] hvals=header.split("\t");
-			
-			int colCAS=this.findFieldNum(hvals, fieldCAS);
-			int colExp=this.findFieldNum(hvals, fieldExp);
-			
-			System.out.println(colExp);
-			
-			int count=0;
-			
-			ArrayList<Double>expVals=new ArrayList<Double>();
-			ArrayList<Double>predVals=new ArrayList<Double>();
-			
-			
-			int expCount=0;
-			int predCount=0;
+			try (BufferedReader br = new BufferedReader(new FileReader(folder+"\\"+fileNamePred))) {
+				Hashtable<String,String>htPreds=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldPred);
+				Hashtable<String,String>htAD=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldAD);
+				
+				String header=br.readLine();
+				
+				String [] hvals=header.split("\t");
+				
+				int colCAS=this.findFieldNum(hvals, fieldCAS);
+				int colExp=this.findFieldNum(hvals, fieldExp);
+				
+				System.out.println(colExp);
+				
+				int count=0;
+				
+				ArrayList<Double>expVals=new ArrayList<Double>();
+				ArrayList<Double>predVals=new ArrayList<Double>();
+				
+				
+				int expCount=0;
+				int predCount=0;
 
-			while (true) {
-				String Line=br.readLine();
-				if (Line==null) break;
-				
-				String [] vals=Line.split("\t");
-				
-				String CAS=vals[colCAS];
-				String exp=vals[colExp];
-				
-				if (exp.equals("")) continue;
-
-				if (htPreds.get(CAS)==null) continue;
+				while (true) {
+					String Line=br.readLine();
+					if (Line==null) break;
 					
-				
-				String pred=htPreds.get(CAS);
-				String AD=htAD.get(CAS);
+					String [] vals=Line.split("\t");
+					
+					String CAS=vals[colCAS];
+					String exp=vals[colExp];
+					
+					if (exp.equals("")) continue;
+
+					if (htPreds.get(CAS)==null) continue;
+						
+					
+					String pred=htPreds.get(CAS);
+					String AD=htAD.get(CAS);
 
 
-				expCount++;
+					expCount++;
 
-				if (useAD) {
-					if (AD.equals("No")) continue;
+					if (useAD) {
+						if (AD.equals("No")) continue;
+					}
+					
+					if (pred.equals("-9999")) continue;
+					
+					predCount++;
+
+					double dexp=Double.parseDouble(exp);
+					double dpred=Double.parseDouble(pred);
+					
+					expVals.add(dexp);
+					predVals.add(dpred);
+					
+					count++;
+					
+					System.out.println(count+"\t"+CAS+"\t"+exp+"\t"+pred+"\t"+AD);
+					
 				}
+				double [] dexpVals=new double [expVals.size()];
+				double [] dpredVals=new double [expVals.size()];
 				
-				if (pred.equals("-9999")) continue;
+				for (int i=0;i<expVals.size();i++) {
+					dexpVals[i]=Math.log10(expVals.get(i));
+					dpredVals[i]=Math.log10(predVals.get(i));
+				}
+				double r2=calcR2(dexpVals, dpredVals);
+				double r2_2=calcR2_2(dexpVals, dpredVals);
 				
-				predCount++;
-
-				double dexp=Double.parseDouble(exp);
-				double dpred=Double.parseDouble(pred);
+				double coverage=(double)predCount/expCount;
 				
-				expVals.add(dexp);
-				predVals.add(dpred);
-				
-				count++;
-				
-				System.out.println(count+"\t"+CAS+"\t"+exp+"\t"+pred+"\t"+AD);
-				
+				System.out.println(df.format(r2)+"\t"+df.format(r2_2)+"\t"+df.format(coverage));
 			}
-			double [] dexpVals=new double [expVals.size()];
-			double [] dpredVals=new double [expVals.size()];
-			
-			for (int i=0;i<expVals.size();i++) {
-				dexpVals[i]=Math.log10(expVals.get(i));
-				dpredVals[i]=Math.log10(predVals.get(i));
-			}
-			double r2=this.calcR2(dexpVals, dpredVals);
-			double r2_2=this.calcR2_2(dexpVals, dpredVals);
-			
-			double coverage=(double)predCount/expCount;
-			
-			System.out.println(df.format(r2)+"\t"+df.format(r2_2)+"\t"+df.format(coverage));
 			
 		
 		} catch (Exception ex) {
@@ -363,82 +362,82 @@ void goThroughPredSetNegLogMol_Kg() {
 		String fieldPred="-LOG(LD50 mol/kg)";
 		String fieldAD="Inside AD?";
 		
-		BufferedReader br=new BufferedReader(new FileReader(folder+"\\"+fileNamePred));
-		
-		Hashtable<String,String>htPreds=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldPred);
-		Hashtable<String,String>htAD=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldAD);
-		
-		String header=br.readLine();
-		
-		String [] hvals=header.split("\t");
-		
-		int colCAS=this.findFieldNum(hvals, fieldCAS);
-		int colExp=this.findFieldNum(hvals, fieldExp);
-		
+		try (BufferedReader br = new BufferedReader(new FileReader(folder+"\\"+fileNamePred))) {
+			Hashtable<String,String>htPreds=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldPred);
+			Hashtable<String,String>htAD=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldAD);
+			
+			String header=br.readLine();
+			
+			String [] hvals=header.split("\t");
+			
+			int colCAS=this.findFieldNum(hvals, fieldCAS);
+			int colExp=this.findFieldNum(hvals, fieldExp);
+			
 //		System.out.println(colExp);
-		
-		int count=0;
-		
-		ArrayList<Double>expVals=new ArrayList<Double>();
-		ArrayList<Double>predVals=new ArrayList<Double>();
-		
-		int expCount=0;
-		int predCount=0;
-		
-		while (true) {
-			String Line=br.readLine();
-			if (Line==null) break;
 			
-			String [] vals=Line.split("\t");
+			int count=0;
 			
-			String CAS=vals[colCAS];
-			String exp=vals[colExp];
+			ArrayList<Double>expVals=new ArrayList<Double>();
+			ArrayList<Double>predVals=new ArrayList<Double>();
 			
-			if (exp.equals("")) continue;
-
-			if (htPreds.get(CAS)==null) continue;
+			int expCount=0;
+			int predCount=0;
+			
+			while (true) {
+				String Line=br.readLine();
+				if (Line==null) break;
 				
-			
-			String pred=htPreds.get(CAS);
-			String AD=htAD.get(CAS);
+				String [] vals=Line.split("\t");
+				
+				String CAS=vals[colCAS];
+				String exp=vals[colExp];
+				
+				if (exp.equals("")) continue;
 
-			
-			expCount++;
+				if (htPreds.get(CAS)==null) continue;
+					
+				
+				String pred=htPreds.get(CAS);
+				String AD=htAD.get(CAS);
 
-			
-			if (useAD) {
-				if (AD.equals("No")) continue;
+				
+				expCount++;
+
+				
+				if (useAD) {
+					if (AD.equals("No")) continue;
+				}
+				
+				
+				if (pred.equals("-9999")) continue;
+				
+				predCount++;
+				
+				double dexp=Double.parseDouble(exp);
+				double dpred=Double.parseDouble(pred);
+				
+				expVals.add(dexp);
+				predVals.add(dpred);
+				
+				count++;
+				
+				System.out.println(count+"\t"+CAS+"\t"+exp+"\t"+pred+"\t"+AD);
+				
 			}
+			double [] dexpVals=new double [expVals.size()];
+			double [] dpredVals=new double [expVals.size()];
 			
+			for (int i=0;i<expVals.size();i++) {
+				dexpVals[i]=expVals.get(i);
+				dpredVals[i]=predVals.get(i);
+			}
+			double r2=calcR2(dexpVals, dpredVals);
+			double r2_2=calcR2_2(dexpVals, dpredVals);
 			
-			if (pred.equals("-9999")) continue;
+			double coverage=(double)predCount/expCount;
 			
-			predCount++;
-			
-			double dexp=Double.parseDouble(exp);
-			double dpred=Double.parseDouble(pred);
-			
-			expVals.add(dexp);
-			predVals.add(dpred);
-			
-			count++;
-			
-			System.out.println(count+"\t"+CAS+"\t"+exp+"\t"+pred+"\t"+AD);
-			
+			System.out.println(df.format(r2)+"\t"+df.format(r2_2)+"\t"+df.format(coverage));
 		}
-		double [] dexpVals=new double [expVals.size()];
-		double [] dpredVals=new double [expVals.size()];
-		
-		for (int i=0;i<expVals.size();i++) {
-			dexpVals[i]=expVals.get(i);
-			dpredVals[i]=predVals.get(i);
-		}
-		double r2=this.calcR2(dexpVals, dpredVals);
-		double r2_2=this.calcR2_2(dexpVals, dpredVals);
-		
-		double coverage=(double)predCount/expCount;
-		
-		System.out.println(df.format(r2)+"\t"+df.format(r2_2)+"\t"+df.format(coverage));
 		
 	
 	} catch (Exception ex) {
@@ -471,75 +470,75 @@ void goThroughPredSetNegLogMol_Kg() {
 						
 			boolean useAD=true;
 			
-			BufferedReader br=new BufferedReader(new FileReader(folder+"\\"+fileNamePred));
-			
-			Hashtable<String,String>htPreds=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldPred);
-			Hashtable<String,String>htAD=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldAD);
-			
-			String header=br.readLine();
-			
-			String [] hvals=header.split("\t");
-			
-			int colCAS=this.findFieldNum(hvals, "CASRN");
-			int colExp=this.findFieldNum(hvals, fieldExp);
-			
-			int countPred=0;
-			int countExp=0;
-			
-			ArrayList<String>expVals=new ArrayList<String>();
-			ArrayList<String>predVals=new ArrayList<String>();
-			
-			while (true) {
-				String Line=br.readLine();
-				if (Line==null) break;
+			try (BufferedReader br = new BufferedReader(new FileReader(folder+"\\"+fileNamePred))) {
+				Hashtable<String,String>htPreds=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldPred);
+				Hashtable<String,String>htAD=this.getPreds(folder+"\\"+fileNameQSAR, "CAS", fieldAD);
 				
+				String header=br.readLine();
+				
+				String [] hvals=header.split("\t");
+				
+				int colCAS=this.findFieldNum(hvals, "CASRN");
+				int colExp=this.findFieldNum(hvals, fieldExp);
+				
+				int countPred=0;
+				int countExp=0;
+				
+				ArrayList<String>expVals=new ArrayList<String>();
+				ArrayList<String>predVals=new ArrayList<String>();
+				
+				while (true) {
+					String Line=br.readLine();
+					if (Line==null) break;
+					
 //				System.out.println(Line);
-				
-				String [] vals=Line.split("\t");
-				
-				String CAS=vals[colCAS];
-				String exp=vals[colExp];
-				
-				if (exp.equals("")) continue;
+					
+					String [] vals=Line.split("\t");
+					
+					String CAS=vals[colCAS];
+					String exp=vals[colExp];
+					
+					if (exp.equals("")) continue;
 
-				if (htPreds.get(CAS)==null) continue;
-				
-				countExp++;
-				
-				String pred=htPreds.get(CAS);
-				String AD=htAD.get(CAS);
+					if (htPreds.get(CAS)==null) continue;
+					
+					countExp++;
+					
+					String pred=htPreds.get(CAS);
+					String AD=htAD.get(CAS);
 
 //				System.out.println(pred);
-				
+					
 //				System.out.println("CAS="+CAS);
-				
-				
-				if (useAD) {
-					if (AD.equals("No")) continue;
-				}
-				
-				if (pred.equals("-9999")) continue;
-				
-				if (pred.equals("")) {
+					
+					
+					if (useAD) {
+						if (AD.equals("No")) continue;
+					}
+					
+					if (pred.equals("-9999")) continue;
+					
+					if (pred.equals("")) {
+						System.out.println(countPred+"\t"+CAS+"\t"+exp+"\t"+pred+"\t"+AD);
+						continue;
+					}
+					
 					System.out.println(countPred+"\t"+CAS+"\t"+exp+"\t"+pred+"\t"+AD);
-					continue;
+					
+					expVals.add(exp);
+					predVals.add(pred);
+					
+					countPred++;
+					
 				}
 				
-				System.out.println(countPred+"\t"+CAS+"\t"+exp+"\t"+pred+"\t"+AD);
+				calcBinaryStats(expVals, predVals);
 				
-				expVals.add(exp);
-				predVals.add(pred);
+				System.out.println(countPred+"\t"+countExp);
 				
-				countPred++;
-				
+				double coverage=(double)countPred/countExp;
+				System.out.println(coverage);
 			}
-			
-			this.calcBinaryStats(expVals, predVals);
-			
-			System.out.println(countPred+"\t"+countExp);
-			
-			double coverage=(double)countPred/countExp;
-			System.out.println(coverage);
 		
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -559,13 +558,11 @@ void goThroughPredSetNegLogMol_Kg() {
 		String filepathBinary="z build models\\NICEATM\\very_toxic\\NN external set\\NN external set-fitvalues.txt";
 		
 		
-		try {
-			
-			BufferedReader brBinary=new BufferedReader(new FileReader(filepathBinary));
+		try (BufferedReader brBinary = new BufferedReader(new FileReader(filepathBinary))) {
 			
 			String headerBinary=brBinary.readLine();
 
-			Hashtable<String,String>htMW=this.getPreds("z build models\\NICEATM\\final analysis\\pred set.txt", "CASRN", "MW");
+//			Hashtable<String,String>htMW=this.getPreds("z build models\\NICEATM\\final analysis\\pred set.txt", "CASRN", "MW");
 			Hashtable<String,String>htExp=this.getPreds("z build models\\NICEATM\\final analysis\\pred set.txt", "CASRN","very_toxic");
 
 			
@@ -623,7 +620,7 @@ void goThroughPredSetNegLogMol_Kg() {
 			
 			double coverage=(double)countPred/countExp;
 			
-			this.calcBinaryStats(expVals, predValsBinary);
+			calcBinaryStats(expVals, predValsBinary);
 			System.out.println(coverage);
 //			System.out.println(countPred+"\t"+countExp);
 			System.out.println("");
@@ -642,9 +639,7 @@ void goThroughPredSetNegLogMol_Kg() {
 //		String filepathBinary="z build models\\NICEATM\\GHS_Category\\NN external set\\NN external set-fitvalues.txt";
 		String filepathBinary="z build models\\NICEATM\\GHS_Category\\HC external set\\HC external set-fitvalues.txt";
 		
-		try {
-			
-			BufferedReader br=new BufferedReader(new FileReader(filepathBinary));
+		try (BufferedReader br = new BufferedReader(new FileReader(filepathBinary))) {
 			
 			String header=br.readLine();
 
@@ -686,7 +681,7 @@ void goThroughPredSetNegLogMol_Kg() {
 				
 //				System.out.println(CAS);
 				expVals.add(Integer.parseInt(exp));
-				predVals.add(new Integer(ipred));
+				predVals.add(ipred);
 				
 //				System.out.println(dpredContinuous+"\t"+MW);
 				System.out.println(countPred+"\t"+CAS+"\t"+exp+"\t"+ipred);
@@ -695,7 +690,7 @@ void goThroughPredSetNegLogMol_Kg() {
 			
 			double coverage=(double)countPred/countExp;
 			
-			this.calcCategoryStats(expVals, predVals);
+			calcCategoryStats(expVals, predVals);
 			System.out.println(coverage);
 			
 			
@@ -734,9 +729,9 @@ void goThroughPredSetNegLogMol_Kg() {
 			int countPred=0;
 			int countExp=0;
 			
-			ArrayList<Integer>expVals=new ArrayList<Integer>();
-			ArrayList<Integer>predValsBinary=new ArrayList<Integer>();
-			ArrayList<Integer>predValsContinuous=new ArrayList<Integer>();
+			List<Integer>expVals=new ArrayList<Integer>();
+			List<Integer>predValsBinary=new ArrayList<Integer>();
+			List<Integer>predValsContinuous=new ArrayList<Integer>();
 
 			while (true) {
 				
@@ -781,8 +776,8 @@ void goThroughPredSetNegLogMol_Kg() {
 				}
 
 				expVals.add(Integer.parseInt(exp));
-				predValsBinary.add(new Integer(ipredBinary));
-				predValsContinuous.add(new Integer(ipredContinuous));
+				predValsBinary.add(ipredBinary);
+				predValsContinuous.add(ipredContinuous);
 
 				
 //				System.out.println(dpredContinuous+"\t"+MW);
@@ -792,11 +787,12 @@ void goThroughPredSetNegLogMol_Kg() {
 			
 			double coverage=(double)countPred/countExp;
 			
-			this.calcCategoryStats(expVals, predValsBinary);
-			this.calcCategoryStats(expVals, predValsContinuous);
+			calcCategoryStats(expVals, predValsBinary);
+			calcCategoryStats(expVals, predValsContinuous);
 			System.out.println(coverage);
 			
-			
+			brBinary.close();
+			brContinuous.close();
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -877,7 +873,7 @@ void predGHS_Category_LD50_mg_kg_Input() {
 					ipred=5;
 				}
 					
-				predVals.add(new Integer(ipred));
+				predVals.add(ipred);
 				
 //				System.out.println(dpredContinuous+"\t"+MW);
 				System.out.println(countPred+"\t"+CAS+"\t"+exp+"\t"+ipred);
@@ -886,9 +882,9 @@ void predGHS_Category_LD50_mg_kg_Input() {
 			
 			double coverage=(double)countPred/countExp;
 			
-			this.calcCategoryStats(expVals, predVals);
+			calcCategoryStats(expVals, predVals);
 			System.out.println(coverage);
-			
+			br.close();
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -989,12 +985,13 @@ void predGHS_Category_LD50_mg_kg_Input() {
 			double coverage=(double)countPred/countExp;
 			
 			
-			this.calcBinaryStats(expVals, predValsBinary);
-			this.calcBinaryStats(expVals, predValsContinuous);
+			calcBinaryStats(expVals, predValsBinary);
+			calcBinaryStats(expVals, predValsContinuous);
 
 			System.out.println(coverage);
 			
-			
+			brBinary.close();
+			brContinuous.close();
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -1081,7 +1078,7 @@ void predGHS_Category_LD50_mg_kg_Input() {
 			
 			double coverage=(double)countPred/countExp;
 			
-			this.calcBinaryStats(expVals, predValsContinuous);
+			calcBinaryStats(expVals, predValsContinuous);
 			System.out.println(coverage);
 			
 			brContinuous.close();
@@ -1114,9 +1111,9 @@ void goThroughPredSetBinary2() {
 //			String fieldExp="non_toxic";
 			
 			String fieldPred="predToxicValue";
-			String fieldAD="Inside AD?";
+//			String fieldAD="Inside AD?";
 						
-			boolean useAD=true;
+//			boolean useAD=true;
 			
 			BufferedReader br=new BufferedReader(new FileReader(folder+"\\"+fileNamePred));
 			
@@ -1176,7 +1173,7 @@ void goThroughPredSetBinary2() {
 				
 			}
 			
-			this.calcBinaryStats(expVals, predVals);
+			calcBinaryStats(expVals, predVals);
 			
 			double coverage=(double)countPred/countExp;
 			
@@ -1184,6 +1181,8 @@ void goThroughPredSetBinary2() {
 			
 			System.out.println(coverage);
 			System.out.println("");
+			
+			br.close();
 		
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -1261,7 +1260,7 @@ void goThroughPredSetBinary2() {
 				int ipred=(int)Double.parseDouble(pred);
 				
 				expVals.add(Integer.parseInt(exp));
-				predVals.add(new Integer(ipred));
+				predVals.add(ipred);
 				
 				count++;
 				
@@ -1269,7 +1268,7 @@ void goThroughPredSetBinary2() {
 				
 			}
 			
-			this.calcCategoryStats(expVals, predVals);
+			calcCategoryStats(expVals, predVals);
 			
 			
 //			double [] dexpVals=new double [expVals.size()];
@@ -1282,6 +1281,7 @@ void goThroughPredSetBinary2() {
 //			double r2=this.calcR2_without_outliers(dexpVals, dpredVals);
 //			System.out.println(r2+"\t"+dpredVals.length);
 			
+			br.close();
 		
 		} catch (Exception ex) {
 			ex.printStackTrace();
