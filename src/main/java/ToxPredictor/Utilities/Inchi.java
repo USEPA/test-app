@@ -25,5 +25,19 @@ public class Inchi {
 		return IndigoUtilities.toInchiIndigo(smiles);	
 	}
 	
+	public static void main(String[] args) {
+
+		String smiles="CC(O)=NC(CC(C)C)C(O)=NC(C(C)CC)C(=N)O";
+		Inchi inchi=IndigoUtilities.toInchiIndigo2(smiles);
+		System.out.println(smiles+"\t"+inchi.inchiKey);
+		
+
+		smiles="CC(=O)NC(CC(C)C)C(=O)NC(C(C)CC)C(N)=O";
+		inchi=IndigoUtilities.toInchiIndigo2(smiles);
+		System.out.println(smiles+"\t"+inchi.inchiKey);
+
+		
+
+	}
 	
 }
