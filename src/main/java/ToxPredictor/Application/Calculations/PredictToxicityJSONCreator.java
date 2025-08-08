@@ -3,6 +3,8 @@ package ToxPredictor.Application.Calculations;
 import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
+import ToxPredictor.Application.Calculations.CreateLookups.GetDTXSIDLookup;
+import ToxPredictor.Application.Calculations.CreateLookups.GetTrainingTestSetPredictions;
 import ToxPredictor.Application.GUI.Miscellaneous.fraChart;
 import ToxPredictor.Application.GUI.Miscellaneous.fraChart.JLabelChart;
 import ToxPredictor.Application.model.CancerStats;
@@ -22,18 +24,15 @@ import ToxPredictor.Application.model.SimilarChemicals;
 import ToxPredictor.Database.DSSToxRecord;
 //import ToxPredictor.Database.ChemistryDashboardRecord;
 import ToxPredictor.Database.ResolverDb2;
-import ToxPredictor.Utilities.ReportUtils;
 import ToxPredictor.Utilities.StructureImageUtil;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
 //import gov.epa.webtest.calc.TaskCalculations;
 import ToxPredictor.misc.StatisticsCalculator;
-import ToxPredictor.misc.StatisticsCalculator.AllStats;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import ToxPredictor.Application.Calculations.CreateImageFromTrainingPredictionSDFs;
 
 import QSAR.qsarOptimal.AllResults;
 import QSAR.qsarOptimal.OptimalResults;
@@ -42,9 +41,6 @@ import QSAR.validation2.TestChemical;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.Strings;
-import org.openscience.cdk.AtomContainer;
-import org.openscience.cdk.DefaultChemObjectBuilder;
-import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
 import wekalite.Instance;
 
@@ -56,7 +52,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
-import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -64,6 +59,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
@@ -88,12 +84,28 @@ public class PredictToxicityJSONCreator {
 
 	Hashtable<String,String>htVarDefs=null;
 
+	Hashtable<String, String>htCAS_to_DTXSID=null;
+	Hashtable<String, Hashtable<String, String>> htDatasetPredictions=null;
+	
 	public PredictToxicityJSONCreator() {
 		htVarDefs=LoadDefinitions();
+		
+		if(useJsonCAS_Lookup) {
+			System.out.println("Loading DTXSID lookup for similar chemicals from datasets from json file");
+			htCAS_to_DTXSID=GetDTXSIDLookup.getDtxsidLookupByCAS();
+
+			System.out.println("Loading training/test set predictions from json file");
+			htDatasetPredictions=GetTrainingTestSetPredictions.getPredictionsLookupByCAS();
+		}
+		
+		
 	}
 	
 	public Map<String, HashMap<String, Double>>allStatsByEndpointMethod=new HashMap<>();
 	StatisticsCalculator sc=new StatisticsCalculator();
+	
+	
+	public static boolean useJsonCAS_Lookup=true; 
 
 
 	/**
@@ -123,14 +135,15 @@ public class PredictToxicityJSONCreator {
 	 * @return
 	 */
 	public PredictionResults writeConsensusResultsJSON(double predToxVal, double predToxUnc, String method, String CAS,String dtxcid, String dtxsid,String smiles, String endpoint, String abbrev, boolean isBinaryEndpoint,
-			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ArrayList methods,
-			ArrayList predictions, ArrayList uncertainties, boolean createDetailedConsensusReport, 
-			ReportOptions options) {
+			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, 
+			Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch,
+			List<String> methods, List<Double> predictions, List<Double> uncertainties, 
+			boolean createDetailedConsensusReport, ReportOptions options) {
+		
 		try {
 
 			PredictionResults pr=new PredictionResults();
 
-			IndividualPredictionsForConsensus individualPredictionsForConsensus = pr.getIndividualPredictionsForConsensus();
 			pr.setCreateDetailedReport(createDetailedConsensusReport);
 			PredictionResultsPrimaryTable predictionResultsPrimaryTable = pr.getPredictionResultsPrimaryTable();
 
@@ -280,20 +293,20 @@ public class PredictToxicityJSONCreator {
 
 		//		double predToxVal=getPredToxVal(tpv, d);
 
-		long t1=System.currentTimeMillis();
+//		long t1=System.currentTimeMillis();
 		
 		if (createReports) writeSimilarChemicals(pr,"test",d.htTestMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid, d.dtxsid,d.smiles,d.reportOptions);
 		if (createReports) writeSimilarChemicals(pr,"training",d.htTrainMatch, d.abbrev, d.er.expToxValue, predToxVal, d.CAS, d.dtxcid,d.dtxsid, d.smiles,d.reportOptions);
 
-		long t2=System.currentTimeMillis();
+//		long t2=System.currentTimeMillis();
 
 //		if (createReports)
 //			System.out.println((t2-t1)+" millsecs to find similar chemicals for "+pr.getCAS()+" for "+pr.getMethod());
 
 		if (d.isBinaryEndpoint) {
-			this.WriteBinaryPredictionTable(pr, d.dtxcid,d.er, predToxVal, tpv.message);
+			WriteBinaryPredictionTable(pr, d.dtxcid,d.er, predToxVal, tpv.message);
 		} else {
-			this.writeMainTable(pr, d.dtxcid, tpv, predToxVal,predToxUnc, d.MW, d.er, tpv.message);
+			writeMainTable(pr, d.dtxcid, tpv, predToxVal,predToxUnc, d.MW, d.er, tpv.message);
 		}
 	
 
@@ -309,7 +322,7 @@ public class PredictToxicityJSONCreator {
 	//		}
 	//	}
 
-	public PredictionResults generatePredictionResultsConsensus(DataForPredictionRun d,TESTPredictedValue tpv,ArrayList<Double>predictedToxicities,ArrayList<Double>predictedUncertainties,double predToxVal,ReportOptions options,boolean createReports) {
+	public PredictionResults generatePredictionResultsConsensus(DataForPredictionRun d,TESTPredictedValue tpv,List<Double>predictedToxicities,List<Double>predictedUncertainties,double predToxVal,ReportOptions options,boolean createReports) {
 		try {
 			
 			PredictionResults pr=new PredictionResults();
@@ -317,9 +330,7 @@ public class PredictToxicityJSONCreator {
 			setCommonValues(TESTConstants.ChoiceConsensus,d, tpv,pr,predToxVal,-9999,createReports);
 
 			
-			ArrayList<String> methods = TaskCalculations.getMethods(d.endpoint);
-			
-			
+			List<String> methods = TaskCalculations.getMethods(d.endpoint);
 			
 			if(pr.getError()==null || pr.getError().isEmpty()) {
 				int predCount = 0;
@@ -721,8 +732,8 @@ public class PredictToxicityJSONCreator {
 	 * @param createDetailedConsensusReport
 	 * @throws Exception
 	 */
-	private void writeIndividualPredictionsForConsensus(PredictionResults pr, ArrayList<String> methods,
-			ArrayList<Double> predictions, ArrayList<Double> uncertainties, boolean createDetailedConsensusReport)
+	private void writeIndividualPredictionsForConsensus(PredictionResults pr, List<String> methods,
+			List<Double> predictions, List<Double> uncertainties, boolean createDetailedConsensusReport)
 					throws Exception {
 
 		IndividualPredictionsForConsensus individualPredictionsForConsensus = new IndividualPredictionsForConsensus();
@@ -843,7 +854,7 @@ public class PredictToxicityJSONCreator {
 
 			// TaskCalculations.CreateStructureImage(CASi, strImageFolder);
 
-			String strKey = d2.format(key);
+//			String strKey = d2.format(key);
 			String expVali = d2.format(i.classValue());
 
 			String predVali=null;
@@ -853,7 +864,14 @@ public class PredictToxicityJSONCreator {
 			else {
 				//Need to fix it so that consensus value in text file does not include FDA method in TEST5.1+:
 				if (pr.getMethod().contentEquals(TESTConstants.ChoiceConsensus)) {
-					predVali=lookup.LookUpValueConsensusValueOmitFDAInJarFile(predfilename, CASi, "CAS","\t");
+//					System.out.println("Lookup from jar file");
+					
+//					predVali=lookup.LookUpValueConsensusValueOmitFDAInJarFile(predfilename, CASi, "CAS","\t");
+					
+					//Instead of using predictions in the old prediction files in the jar file
+					// get cached predictions from ToxPredictor.Application.Calculations.GetTrainingTestSetPredictions()
+					predVali=this.htDatasetPredictions.get(abbrev).get(CASi);
+					
 				} else {
 					predVali = lookup.LookUpValueInJarFile(predfilename, CASi, "CAS", pr.getMethod(), "\t");	
 				}				
@@ -874,7 +892,7 @@ public class PredictToxicityJSONCreator {
 			if (dpredVali != -9999) {
 				vecExp.add(i.classValue());
 				vecPred.add(dpredVali);
-				vecSC.add(new Double(key));
+				vecSC.add(key);
 			} else {
 				predVali = "N/A";
 			}
@@ -1058,41 +1076,33 @@ public class PredictToxicityJSONCreator {
 			
 //			System.out.println(i+"\t"+similarChemical.getDSSTOXSID());
 			
-			
 			String CASi = vecCAS2.get(i);
-			String predVali = vecPred2.get(i);
-
 			String cid_i = null;
 			String sid_i = null;
-			String DSSTOXSIDi = null;
+//			String DSSTOXSIDi = null;
 
 			//			if (htChemistryDashboardInfo != null) {
 			//				gsid_i = htChemistryDashboardInfo.get(CASi).gsid;
 			//				DSSTOXSID = htChemistryDashboardInfo.get(CASi).dsstox_substance_id;
 			//			}
 
-			ArrayList<DSSToxRecord> records=ResolverDb2.lookupByCAS(CASi);
-			
-			if(records.size()>0) {
-				DSSToxRecord record=records.get(0);
-				cid_i = record.cid;
-				sid_i= record.sid;
-				DSSTOXSIDi = record.sid;
+			if(useJsonCAS_Lookup) {
+				if(htCAS_to_DTXSID.containsKey(CASi)) {
+					sid_i=this.htCAS_to_DTXSID.get(CASi);
+//					System.out.println(CASi+"\t"+sid_i);
+				}
+			} else {
+				ArrayList<DSSToxRecord> records=ResolverDb2.lookupByCAS(CASi);
+				if(records.size()>0) {
+					DSSToxRecord record=records.get(0);
+					cid_i = record.cid;//do we need this for anything?
+					sid_i= record.sid;
+				}
 			}
 			
-
-
-			//			ChemistryDashboardRecord cdr=ChemistryDashboardRecord.lookupDashboardRecord("casrn", CASi,statNCCT_ID);
-			//			if (cdr!=null) {
-			//				gsid_i = cdr.gsid;
-			//				DSSTOXSIDi = cdr.dsstox_substance_id;
-			//			}
-//msg=
-
 			similarChemical.setDSSTOXCID(cid_i);
-			similarChemical.setDSSTOXSID(DSSTOXSIDi);
+			similarChemical.setDSSTOXSID(sid_i);
 			similarChemical.setCAS(CASi);
-
 			
 //			System.out.println("2022-05-09:"+cid_i+"\t"+WebTEST4.dashboardStructuresAvailable);
 			
@@ -1805,7 +1815,7 @@ public class PredictToxicityJSONCreator {
 
 		for (int i = 0; i < vecMOA.size(); i++) {
 			java.util.LinkedList<String> l_MOA = ToxPredictor.Utilities.Utilities.Parse(predArrayMOA[i], "\t");
-			java.util.LinkedList<String> l_LC50 = ToxPredictor.Utilities.Utilities.Parse(predArrayLC50[i], "\t");
+//			java.util.LinkedList<String> l_LC50 = ToxPredictor.Utilities.Utilities.Parse(predArrayLC50[i], "\t");
 
 			double MOAScore = Double.parseDouble(l_MOA.get(0));
 
@@ -1814,13 +1824,14 @@ public class PredictToxicityJSONCreator {
 			htMOA.put(MOAScore, vecMOA.get(i));
 		}
 
-		Vector v = new Vector(htMOA.keySet());
+		Vector<Double> v = new Vector<>(htMOA.keySet());
 		Collections.sort(v, new ToxPredictor.Utilities.MyComparator());
 
 		Vector<String> vecMOA2 = new Vector<String>();
-		Enumeration e = v.elements();
+		Enumeration<Double> e = v.elements();
+		
 		while (e.hasMoreElements()) {
-			double key = (Double) e.nextElement();
+			double key = e.nextElement();
 			vecMOA2.add(htMOA.get(key));
 			// System.out.println(key+"\t"+htMOA.get(key));
 		}

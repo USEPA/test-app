@@ -1,6 +1,5 @@
 package ToxPredictor.Application.Calculations;
 
-import java.awt.Color;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -10,25 +9,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.LinkedList;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 
-import QSAR.qsarOptimal.OptimalResults;
-import QSAR.validation2.NearestNeighborMethod;
-import QSAR.validation2.TestChemical;
-import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.model.*;
 import ToxPredictor.Application.model.IndividualPredictionsForConsensus.PredictionIndividualMethod;
-import ToxPredictor.Utilities.ReportUtils;
-import ToxPredictor.Utilities.Utilities;
 
 public class PredictToxicityWebPageCreatorFromJSON {
 
@@ -146,7 +136,7 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			File of=new File(htmlOutputFilePath);
 			
 			String ToxRunsFolderPath=of.getParentFile().getParentFile().getParentFile().getAbsolutePath();
-			String outputFolderPath=of.getParentFile().getAbsolutePath();
+//			String outputFolderPath=of.getParentFile().getAbsolutePath();
 			
 			//filewriter for web page:
 			FileWriter fw=new FileWriter(htmlOutputFilePath);
@@ -226,8 +216,6 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			fw.write("<th>LDA model score</th>\n");
 			fw.write("<th>LC50 predicted value<br>" + TESTConstants.getMolarLogUnits(pr.getEndpoint()) + "</th>\n");
 			fw.write("</tr>\n");
-
-			DecimalFormat df2 = new DecimalFormat("0.00");
 
 			// System.out.println(vecMOA2.size());
 
@@ -566,9 +554,6 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	
 	private static void writeDescriptorTable(FileWriter fw, ClusterModel clusterModel) {
 		try {
-
-			DecimalFormat df2 = new DecimalFormat("0.00");
-			DecimalFormat df4 = new DecimalFormat("0.0000");
 
 			fw.write("<table>\r\n"); // table to store descriptor table and
 										// structure image
@@ -1078,8 +1063,6 @@ public class PredictToxicityWebPageCreatorFromJSON {
 	
 	
 	private void writeCancerStats(CancerStats cs,Writer fw) throws Exception {
-
-		java.text.DecimalFormat df = new java.text.DecimalFormat("0.00");
 
 		fw.write("<table border=1 cellpadding=3 cellspacing=0>\n");
 		fw.write("<caption>Prediction statistics for similar chemicals</caption>\r\n");

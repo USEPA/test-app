@@ -7,7 +7,6 @@ import QSAR.validation2.TestChemical;
 import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.GUI.Miscellaneous.fraChart;
-import ToxPredictor.Application.GUI.Miscellaneous.fraChart.JLabelChart;
 import ToxPredictor.Application.GUI.TESTApplication;
 import ToxPredictor.Database.ChemistryDashboardRecord;
 import ToxPredictor.Utilities.ReportUtils;
@@ -16,7 +15,6 @@ import ToxPredictor.misc.Lookup;
 import ToxPredictor.misc.ParseChemidplus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 import wekalite.Instance;
@@ -31,11 +29,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
+import java.util.List;
 
 //
 
@@ -191,8 +189,8 @@ public class PredictToxicityWebPageCreator {
 		// System.out.println(message);
 
 		try {
-			this.isBinaryEndpoint = isBinaryEndpoint;
-			this.isLogMolarEndpoint = isLogMolarEndpoint;
+			PredictToxicityWebPageCreator.isBinaryEndpoint = isBinaryEndpoint;
+			PredictToxicityWebPageCreator.isLogMolarEndpoint = isLogMolarEndpoint;
 
 			for (int i = 0; i < resultsVector.size(); i++) {
 				OptimalResults or = (OptimalResults) resultsVector.get(i);
@@ -243,13 +241,17 @@ public class PredictToxicityWebPageCreator {
 	}
 
 	public String WriteConsensusResultsWebPages(double predToxVal, double predToxUnc, String method, String OutputFolder, String CAS, String endpoint, String abbrev, boolean isBinaryEndpoint,
-			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ArrayList <String>methods,
-			ArrayList<Double> predictions, ArrayList<Double> uncertainties, boolean createDetailedConsensusReport, String dtxcid, Hashtable<String, ChemistryDashboardRecord> htChemistryDashboardInfo,
+			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, 
+			Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, 
+			List<String>methods,List<Double> predictions, List<Double> uncertainties, 
+			boolean createDetailedConsensusReport, String dtxcid, 
+			Hashtable<String, ChemistryDashboardRecord> htChemistryDashboardInfo,
 			ReportOptions options) {
+		
 		try {
 
-			this.isBinaryEndpoint = isBinaryEndpoint;
-			this.isLogMolarEndpoint = isLogMolarEndpoint;
+			PredictToxicityWebPageCreator.isBinaryEndpoint = isBinaryEndpoint;
+			PredictToxicityWebPageCreator.isLogMolarEndpoint = isLogMolarEndpoint;
 
 			String outputfilename = "PredictionResults";
 
@@ -344,11 +346,17 @@ public class PredictToxicityWebPageCreator {
 		return null;
 	}
 
-	public String WriteConsensusResultsWebPages(double predToxVal, double predToxUnc, String method, String OutputFolder, String CAS, String endpoint, String abbrev, boolean isBinaryEndpoint,
-			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ArrayList methods,
-			ArrayList predictions, ArrayList uncertainties, ReportOptions options) {
+	public String WriteConsensusResultsWebPages(double predToxVal, double predToxUnc, String method, String OutputFolder,
+			String CAS, String endpoint, String abbrev, boolean isBinaryEndpoint,
+			boolean isLogMolarEndpoint, Lookup.ExpRecord er, double MW, String message, 
+			Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, 
+			List<String> methods,List<Double> predictions, List<Double> uncertainties, 
+			ReportOptions options) {
 
-		return this.WriteConsensusResultsWebPages(predToxVal, predToxUnc, method, OutputFolder, CAS, endpoint, abbrev, isBinaryEndpoint, isLogMolarEndpoint, er, MW, message, htTestMatch, htTrainMatch,
+		return this.WriteConsensusResultsWebPages(predToxVal, predToxUnc, method, OutputFolder, 
+				CAS, endpoint, abbrev, isBinaryEndpoint, 
+				isLogMolarEndpoint, er,	MW, message, 
+				htTestMatch, htTrainMatch,
 				methods, predictions, uncertainties, true, null, null, options);
 	}
 
@@ -709,14 +717,14 @@ public class PredictToxicityWebPageCreator {
 			if (ht == null)
 				return;
 
-			Vector v = new Vector(ht.keySet());
+			Vector<Double> v = new Vector<>(ht.keySet());
 			java.util.Collections.sort(v, new ToxPredictor.Utilities.MyComparator());
 
-			Enumeration e = v.elements();
+			Enumeration<Double> e = v.elements();
 
 			int count = 0;
 			while (e.hasMoreElements()) {
-				double key = (Double) e.nextElement();
+				double key = e.nextElement();
 				if (key < SCmin)
 					break;
 				count++;
@@ -777,7 +785,7 @@ public class PredictToxicityWebPageCreator {
 
 				// TaskCalculations.CreateStructureImage(CASi, strImageFolder);
 
-				String strKey = df.format(key);
+//				String strKey = df.format(key);
 				String expVali = df.format(i.classValue());
 				String predVali = lookup.LookUpValueInJarFile(predfilename, CASi, "CAS", method, "\t");
 
@@ -793,7 +801,7 @@ public class PredictToxicityWebPageCreator {
 				if (dpredVali != -9999) {
 					vecExp.add(i.classValue());
 					vecPred.add(dpredVali);
-					vecSC.add(new Double(key));
+					vecSC.add(key);
 				} else {
 					predVali = "N/A";
 				}
@@ -881,7 +889,7 @@ public class PredictToxicityWebPageCreator {
 
 		for (int i = 0; i < vecExp2.size(); i++) {
 			String CASi = vecCAS2.get(i);
-			String predVali = vecPred2.get(i);
+//			String predVali = vecPred2.get(i);
 
 			String gsid_i = null;
 			String DSSTOXSID = null;
@@ -1337,8 +1345,8 @@ public class PredictToxicityWebPageCreator {
 			boolean isLogMolarEndpoint, double[] calcToxCluster, Lookup.ExpRecord er, OptimalResults or, double MW, String message, Hashtable<Double, Instance> htTestMatch,
 			Hashtable<Double, Instance> htTrainMatch, int chemicalNameIndex, ReportOptions options) throws Exception {
 
-		this.isBinaryEndpoint = isBinaryEndpoint;
-		this.isLogMolarEndpoint = isLogMolarEndpoint;
+		PredictToxicityWebPageCreator.isBinaryEndpoint = isBinaryEndpoint;
+		PredictToxicityWebPageCreator.isLogMolarEndpoint = isLogMolarEndpoint;
 
 		String outputfilename = "PredictionResults";
 
@@ -1347,15 +1355,12 @@ public class PredictToxicityWebPageCreator {
 
 		FileWriter fw = new FileWriter(OutputFolder + File.separator + outputfilename);
 
-		this.WriteHeaderInfo(fw, CAS, endpoint, method);
+		WriteHeaderInfo(fw, CAS, endpoint, method);
 
 		fw.write("<h2>Predicted " + endpoint + " for <font color=\"blue\">" + CAS + "</font> from " + method + " method</h2>\n");
 
-		java.text.DecimalFormat d = new java.text.DecimalFormat("0.00");
-		java.text.DecimalFormat d2 = new java.text.DecimalFormat("0.00E00");
-
 		double predToxVal = chemical.getPredictedValue();
-		double predToxUncertainty = chemical.getPredictedUncertainty();
+//		double predToxUncertainty = chemical.getPredictedUncertainty();
 
 		this.WriteBinaryPredictionTable(fw, CAS, endpoint, method, er, predToxVal, MW, message);
 
@@ -1367,21 +1372,10 @@ public class PredictToxicityWebPageCreator {
 		// for (int i=0;i<testSetMatchSetTable.size();i++)
 		// fw.write(testSetMatchSetTable.get(i));
 
-		this.WriteSimilarChemicals("test", htTestMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, null, null, options);// TODO
-																																							// for
-																																							// now
-																																							// dont
-																																							// send
-																																							// gsid
-																																							// lookup
+		// TODO for now dont send gsid lookup
+		this.WriteSimilarChemicals("test", htTestMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, null, null, options);
 		fw.write("<br><hr>\n");
-		this.WriteSimilarChemicals("training", htTrainMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, null, null, options);// TODO
-																																								// for
-																																								// now
-																																								// dont
-																																								// send
-																																								// gsid
-																																								// lookup
+		this.WriteSimilarChemicals("training", htTrainMatch, fw, endpoint, abbrev, CAS, er.expToxValue, predToxVal, OutputFolder, method, null, null, options);
 
 		fw.write("</html>\n");
 
@@ -1393,10 +1387,10 @@ public class PredictToxicityWebPageCreator {
 			Lookup.ExpRecord er, OptimalResults or, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, int chemicalNameIndex,
 			ReportOptions options) throws Exception {
 
-		this.isBinaryEndpoint = isBinaryEndpoint;
-		this.isLogMolarEndpoint = isLogMolarEndpoint;
+		PredictToxicityWebPageCreator.isBinaryEndpoint = isBinaryEndpoint;
+		PredictToxicityWebPageCreator.isLogMolarEndpoint = isLogMolarEndpoint;
 
-		Vector resultsVector = new Vector();
+		Vector<OptimalResults> resultsVector = new Vector<>();
 
 		if (or != null) {
 			double predToxVal = chemical.getPredictedValue();
@@ -2547,7 +2541,7 @@ public class PredictToxicityWebPageCreator {
 	 * 
 	 * @param fw
 	 */
-	private void WriteClusterModelTable(FileWriter fw, String endpoint, String method, Vector resultsVector, TestChemical chemical) throws Exception {
+	private void WriteClusterModelTable(FileWriter fw, String endpoint, String method, Vector<OptimalResults> resultsVector, TestChemical chemical) throws Exception {
 
 		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
 		fw.write("<caption>Cluster model predictions and statistics</caption>\r\n");
@@ -2664,7 +2658,8 @@ public class PredictToxicityWebPageCreator {
 	 * 
 	 * @param fw
 	 */
-	private void WriteIndividualPredictionsForConsensus(FileWriter fw, String endpoint, ArrayList<String> methods, ArrayList<Double> predictions, ArrayList<Double> uncertainties,
+	private void WriteIndividualPredictionsForConsensus(FileWriter fw, String endpoint, 
+			List<String> methods, List<Double> predictions, List<Double> uncertainties,
 			boolean createDetailedConsensusReport) throws Exception {
 
 		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
@@ -2720,7 +2715,7 @@ public class PredictToxicityWebPageCreator {
 		fw.write("</table>\n");
 	}
 
-	private void WriteMainResultsTable(String CAS, String method, FileWriter fw, String endpoint, Lookup.ExpRecord er, TestChemical chemical, Vector resultsVector, double MW, String message,
+	private void WriteMainResultsTable(String CAS, String method, FileWriter fw, String endpoint, Lookup.ExpRecord er, TestChemical chemical, Vector<OptimalResults> resultsVector, double MW, String message,
 			ReportOptions options) throws Exception {
 
 		if (isBinaryEndpoint)
@@ -2786,8 +2781,8 @@ public class PredictToxicityWebPageCreator {
 
 	}
 
-	private void WriteMainPage(String method, TestChemical chemical, String OutputFolder, String CAS, String endpoint, String abbrev, Lookup.ExpRecord er, Vector resultsVector,
-			Vector invalidResultsVector, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ReportOptions options) throws Exception {
+	private void WriteMainPage(String method, TestChemical chemical, String OutputFolder, String CAS, String endpoint, String abbrev, Lookup.ExpRecord er, Vector<OptimalResults> resultsVector,
+			Vector<OptimalResults> invalidResultsVector, double MW, String message, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, ReportOptions options) throws Exception {
 		String outputfilename = "PredictionResults";
 
 		outputfilename += method.replaceAll(" ", "");
@@ -2795,7 +2790,7 @@ public class PredictToxicityWebPageCreator {
 
 		FileWriter fw = new FileWriter(OutputFolder + File.separator + outputfilename);
 
-		this.WriteHeaderInfo(fw, CAS, endpoint, method);
+		WriteHeaderInfo(fw, CAS, endpoint, method);
 
 		fw.write("<h2>Predicted " + endpoint + " for <font color=\"blue\">" + CAS + "</font> from " + method + " method</h2>\n");
 
@@ -2813,7 +2808,7 @@ public class PredictToxicityWebPageCreator {
 
 			if (!HaveStatisticallyValidModel) {
 
-				if (!message.equals(this.messageMissingFragments)) {
+				if (!message.equals(messageMissingFragments)) {
 					if (chemical.getPredictedValue() == -9999) {
 						fw.write(messageNoStatisticallyValidModels);
 					}
@@ -2849,8 +2844,13 @@ public class PredictToxicityWebPageCreator {
 
 	
 
-	private void WriteMainConsensus(String method, TestChemical chemical, String OutputFolder, String CAS, String endpoint, Lookup.ExpRecord er, Vector resultsVector, Vector invalidResultsVector,
-			double MW, String message, Vector<String> testSetMatchSetTable, Vector<String> trainSetMatchSetTable, ReportOptions options) throws Exception {
+	private void WriteMainConsensus(String method, TestChemical chemical, String OutputFolder, 
+			String CAS, String endpoint, Lookup.ExpRecord er, 
+			Vector<OptimalResults> resultsVector, Vector<OptimalResults> invalidResultsVector,
+			double MW, String message, 
+			Vector<String> testSetMatchSetTable, Vector<String> trainSetMatchSetTable,
+			ReportOptions options) throws Exception {
+		
 		String outputfilename = "PredictionResults";
 
 		outputfilename += method.replaceAll(" ", "");
@@ -2858,7 +2858,7 @@ public class PredictToxicityWebPageCreator {
 
 		FileWriter fw = new FileWriter(OutputFolder + File.separator + outputfilename);
 
-		this.WriteHeaderInfo(fw, CAS, endpoint, method);
+		WriteHeaderInfo(fw, CAS, endpoint, method);
 
 		fw.write("<h2>Predicted " + endpoint + " for <font color=\"blue\">" + CAS + "</font> from " + method + " method</h2>\n");
 
@@ -2884,8 +2884,8 @@ public class PredictToxicityWebPageCreator {
 
 		// if (chemical.getInvalidClusters()==null ||
 		// chemical.getInvalidClusters().size()==0) return;
-
-		boolean HaveStatisticallyValidModel = false;
+//
+//		boolean HaveStatisticallyValidModel = false;
 
 		if (invalidClusters == null)
 			return;
@@ -2999,11 +2999,9 @@ public class PredictToxicityWebPageCreator {
 
 	}
 
-	private OptimalResults GetResults(int num, Vector vResults) {
+	private OptimalResults GetResults(int num, Vector<OptimalResults> vResults) {
 
-		for (int i = 0; i < vResults.size(); i++) {
-			OptimalResults results = (OptimalResults) vResults.get(i);
-
+		for (OptimalResults results:vResults) {
 			if (results.getClusterNumber() == num) {
 				return results;
 			}
@@ -3672,8 +3670,8 @@ public class PredictToxicityWebPageCreator {
 		fw.write("</tr>\n");
 
 		for (int i = 0; i < or.getDescriptorNames().length; i++) {
-			double MinVal = bcoeff[i] - bcoeffSE[i];
-			double MaxVal = bcoeff[i] + bcoeffSE[i];
+//			double MinVal = bcoeff[i] - bcoeffSE[i];
+//			double MaxVal = bcoeff[i] + bcoeffSE[i];
 
 			fw.write("<tr>\n");
 			fw.write("<td>" + or.getDescriptorNames()[i] + "</td>\n");
@@ -4178,16 +4176,17 @@ public class PredictToxicityWebPageCreator {
 	}
 
 	public void WriteResultsWebPageNN(TestChemical chemical, String OutputFolder, String CAS, String endpoint, String abbrev, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String method,
-			Lookup.ExpRecord er, double predToxVal, double MW, String msg, Instances cc, Vector SimCoeffCluster, Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch,
-			ReportOptions options) {
+			Lookup.ExpRecord er, double predToxVal, double MW, String msg, Instances cc, 
+			Vector<Double> SimCoeffCluster, Hashtable<Double, Instance> htTestMatch, 
+			Hashtable<Double, Instance> htTrainMatch, ReportOptions options) {
 
 		try {
-			this.isBinaryEndpoint = isBinaryEndpoint;
-			this.isLogMolarEndpoint = isLogMolarEndpoint;
+			PredictToxicityWebPageCreator.isBinaryEndpoint = isBinaryEndpoint;
+			PredictToxicityWebPageCreator.isLogMolarEndpoint = isLogMolarEndpoint;
 
 			FileWriter fw = new FileWriter(OutputFolder + File.separator + "PredictionResultsNearestneighbor.html");
 
-			this.WriteHeaderInfo(fw, CAS, endpoint, method);
+			WriteHeaderInfo(fw, CAS, endpoint, method);
 
 			fw.write("<h2>Predicted " + endpoint + " for " + CAS + " for Nearest neighbor method</h2>\n");
 
@@ -4226,7 +4225,7 @@ public class PredictToxicityWebPageCreator {
 			// WriteMainTable(fw,CAS,predToxVal,-9999,endpoint,method,MW,er,"OK");
 
 			if (cc != null) {
-				String filepath = OutputFolder + File.separator + "NearestNeighborsFromTrainingSet.html";
+//				String filepath = OutputFolder + File.separator + "NearestNeighborsFromTrainingSet.html";
 				this.WriteClusterTableNN(fw, CAS, endpoint, er.expToxValue, cc, SimCoeffCluster, true, options);
 				// fw.write("<br><br><a
 				// href=\"NearestNeighborsFromTrainingSet.html\">Nearest
@@ -4379,7 +4378,9 @@ public class PredictToxicityWebPageCreator {
 	// fw.write("<br><br>\r\n");
 	// }
 
-	private void WriteClusterTableNN(FileWriter fw, String CAS, String endpoint, double ExpToxVal, Instances cc, Vector SimCoeffCluster, boolean writeEvalChemical, ReportOptions options)
+	private void WriteClusterTableNN(FileWriter fw, String CAS, String endpoint, double ExpToxVal, 
+			Instances cc, Vector<Double> SimCoeffCluster, boolean writeEvalChemical, 
+			ReportOptions options)
 			throws IOException {
 
 		// FileWriter fw=new FileWriter (filepath);
@@ -4466,13 +4467,13 @@ public class PredictToxicityWebPageCreator {
 
 			for (int i = 0; i < f.endPointsToxicity.size(); i++) {
 				String endpoint = f.endPointsToxicity.get(i);
-				String src = this.getSourceTag(endpoint);
+				String src = getSourceTag(endpoint);
 				fw.write(src + " " + endpoint + "\r\n");
 			}
 
 			for (int i = 0; i < f.endPointsPhysicalProperty.size(); i++) {
 				String endpoint = f.endPointsPhysicalProperty.get(i);
-				String src = this.getSourceTag(endpoint);
+				String src = getSourceTag(endpoint);
 				fw.write(src + " " + endpoint + "\r\n");
 			}
 

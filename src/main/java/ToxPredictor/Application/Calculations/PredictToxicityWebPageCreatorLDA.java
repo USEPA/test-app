@@ -21,7 +21,6 @@ import QSAR.validation2.TestChemical;
 import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.GUI.Miscellaneous.fraChart;
-import ToxPredictor.Application.GUI.Miscellaneous.fraChart.JLabelChart;
 import ToxPredictor.Utilities.ReportUtils;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
@@ -143,10 +142,10 @@ public class PredictToxicityWebPageCreatorLDA {
 			if (ht == null)
 				return;
 
-			Vector v = new Vector(ht.keySet());
+			Vector<Double> v = new Vector<>(ht.keySet());
 			java.util.Collections.sort(v, new ToxPredictor.Utilities.MyComparator());
 
-			Enumeration e = v.elements();
+			Enumeration<Double> e = v.elements();
 
 			int count = 0;
 			while (e.hasMoreElements()) {
@@ -207,7 +206,7 @@ public class PredictToxicityWebPageCreatorLDA {
 				c.CreateStructureImageLDA(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(endpoint));
 
 
-				String strKey = df.format(key);
+//				String strKey = df.format(key);
 				String expVali = df.format(i.classValue());
 
 				String predVali = lookup.LookUpValueInJarFile(predfilename, CASi, "ID", "Pred_Value:-Log10(mol/L)", "|");
@@ -226,7 +225,7 @@ public class PredictToxicityWebPageCreatorLDA {
 				if (dpredVali != -9999) {
 					vecExp.add(i.classValue());
 					vecPred.add(dpredVali);
-					vecSC.add(new Double(key));
+					vecSC.add(key);
 				} else {
 					predVali = "N/A";
 				}
@@ -234,7 +233,7 @@ public class PredictToxicityWebPageCreatorLDA {
 				vecExp2.add(expVali);
 				vecPred2.add(predVali);
 				vecCAS2.add(CASi);
-				vecSC2.add(new Double(key));
+				vecSC2.add(key);
 
 				if (counter == PredictToxicityWebPageCreator.maxSimilarCount)
 					break;
@@ -299,7 +298,7 @@ public class PredictToxicityWebPageCreatorLDA {
 
 			for (int i = 0; i < vecExp2.size(); i++) {
 				String CASi = vecCAS2.get(i);
-				String predVali = vecPred2.get(i);
+//				String predVali = vecPred2.get(i);
 
 				fw.write("<tr>\n");
 				fw.write("<td>" + CASi + "</td>\n");
@@ -453,7 +452,7 @@ public class PredictToxicityWebPageCreatorLDA {
 			java.util.LinkedList<String> l_LC50 = ToxPredictor.Utilities.Utilities.Parse(predArrayLC50[i], "\t");
 
 			double MOAScore = Double.parseDouble(l_MOA.get(0));
-			double MOAUnc = Double.parseDouble(l_MOA.get(1));
+//			double MOAUnc = Double.parseDouble(l_MOA.get(1));
 			String MOAError = l_MOA.get(2);
 
 			double LC50Score = Double.parseDouble(l_LC50.get(0));
@@ -533,8 +532,7 @@ public class PredictToxicityWebPageCreatorLDA {
 
 			File file = new File(filepath);
 			if (file.exists()) {
-				Path p = Paths.get(filepath);
-
+//				Path p = Paths.get(filepath);
 				// BasicFileAttributes view= Files.getFileAttributeView(p,
 				// BasicFileAttributeView.class)
 				// .readAttributes();
@@ -595,7 +593,7 @@ public class PredictToxicityWebPageCreatorLDA {
 			fw.write("<html>\n");
 			fw.write("<head>\n");
 
-			String clusterName = MOA;
+//			String clusterName = MOA;
 			String clusterNameDisplay = MOA + " LDA model";
 
 			fw.write("<title>" + clusterNameDisplay + "</title>");
@@ -717,7 +715,7 @@ public class PredictToxicityWebPageCreatorLDA {
 
 		filename = MOA + " LDA.html";
 
-		long t1 = System.currentTimeMillis();
+//		long t1 = System.currentTimeMillis();
 
 		File of1 = new File(OutputFolder);
 		String folder = of1.getParentFile().getParent();
@@ -784,9 +782,6 @@ public class PredictToxicityWebPageCreatorLDA {
 		// System.out.println((t3-t2)/1000.0);
 	}
 	
-	private void WriteMainPageLDA(String method, TestChemical chemical, String OutputFolder, String CAS, String endpoint, String abbrev, Lookup.ExpRecord er, double MW,
-			Hashtable<Double, Instance> htTestMatch, Hashtable<Double, Instance> htTrainMatch, int chemicalNameIndex, Vector<String> vecMOA) throws Exception {
-	}
 	
 	private void WriteSimilarChemicalsInExternalSetLDA(Hashtable<Double, Instance> ht, FileWriter fw, String endpoint, String abbrev, String CAS, int chemicalNameIndex, double expVal, double predVal,
 			String outputfolder, String method, String predfilename, ReportOptions options) {
@@ -795,14 +790,14 @@ public class PredictToxicityWebPageCreatorLDA {
 			if (ht == null)
 				return;
 
-			Vector v = new Vector(ht.keySet());
+			Vector<Double> v = new Vector<>(ht.keySet());
 			java.util.Collections.sort(v, new ToxPredictor.Utilities.MyComparator());
 
-			Enumeration e = v.elements();
+			Enumeration<Double> e = v.elements();
 
 			int count = 0;
 			while (e.hasMoreElements()) {
-				double key = (Double) e.nextElement();
+				double key = e.nextElement();
 				if (key < PredictToxicityWebPageCreator.SCmin)
 					continue;
 				count++;
@@ -865,7 +860,7 @@ public class PredictToxicityWebPageCreatorLDA {
 				c.CreateStructureImageLDA(CASi, strImageFolder,TESTConstants.getAbbrevEndpoint(endpoint));
 
 
-				String strKey = df.format(key);
+//				String strKey = df.format(key);
 				String expVali = df.format(i.classValue());
 
 				String predVali = lookup.LookUpValueInJarFile(predfilename, CASi, "ID", "Pred_Value:-Log10(mol/L)", "|");
@@ -884,7 +879,7 @@ public class PredictToxicityWebPageCreatorLDA {
 				if (dpredVali != -9999) {
 					vecExp.add(i.classValue());
 					vecPred.add(dpredVali);
-					vecSC.add(new Double(key));
+					vecSC.add(key);
 				} else {
 					predVali = "N/A";
 				}
@@ -892,7 +887,7 @@ public class PredictToxicityWebPageCreatorLDA {
 				vecExp2.add(expVali);
 				vecPred2.add(predVali);
 				vecCAS2.add(CASi);
-				vecSC2.add(new Double(key));
+				vecSC2.add(key);
 
 				if (counter == PredictToxicityWebPageCreator.maxSimilarCount)
 					break;
@@ -956,7 +951,7 @@ public class PredictToxicityWebPageCreatorLDA {
 
 			for (int i = 0; i < vecExp2.size(); i++) {
 				String CASi = vecCAS2.get(i);
-				String predVali = vecPred2.get(i);
+//				String predVali = vecPred2.get(i);
 
 				fw.write("<tr>\n");
 				fw.write("<td>" + CASi + "</td>\n");
@@ -1214,7 +1209,7 @@ public class PredictToxicityWebPageCreatorLDA {
 
 		for (int i = 0; i < vecMOA.size(); i++) {
 			java.util.LinkedList<String> l_MOA = ToxPredictor.Utilities.Utilities.Parse(predArrayMOA[i], "\t");
-			java.util.LinkedList<String> l_LC50 = ToxPredictor.Utilities.Utilities.Parse(predArrayLC50[i], "\t");
+//			java.util.LinkedList<String> l_LC50 = ToxPredictor.Utilities.Utilities.Parse(predArrayLC50[i], "\t");
 
 			double MOAScore = Double.parseDouble(l_MOA.get(0));
 
@@ -1223,13 +1218,13 @@ public class PredictToxicityWebPageCreatorLDA {
 			htMOA.put(MOAScore, vecMOA.get(i));
 		}
 
-		Vector v = new Vector(htMOA.keySet());
+		Vector<Double> v = new Vector<>(htMOA.keySet());
 		Collections.sort(v, new ToxPredictor.Utilities.MyComparator());
 
 		Vector<String> vecMOA2 = new Vector<String>();
-		Enumeration e = v.elements();
+		Enumeration<Double> e = v.elements();
 		while (e.hasMoreElements()) {
-			double key = (Double) e.nextElement();
+			double key = e.nextElement();
 			vecMOA2.add(htMOA.get(key));
 			// System.out.println(key+"\t"+htMOA.get(key));
 		}
@@ -1268,11 +1263,11 @@ public class PredictToxicityWebPageCreatorLDA {
 			LinkedList<String> l_LC50 = Utilities.Parse(predsLC50, "\t");
 
 			double MOAScore = Double.parseDouble(l_MOA.get(0));
-			double MOAUnc = Double.parseDouble(l_MOA.get(1));
+//			double MOAUnc = Double.parseDouble(l_MOA.get(1));
 			String MOAError = l_MOA.get(2);
 
 			double LC50Score = Double.parseDouble(l_LC50.get(0));
-			double LC50Unc = Double.parseDouble(l_LC50.get(1));
+//			double LC50Unc = Double.parseDouble(l_LC50.get(1));
 			String LC50Error = l_LC50.get(2);
 
 			// System.out.println(MOAi+"\t"+MOAScore+"\t"+MOAError+"\t"+LC50Score+"\t"+LC50Error);
