@@ -9,7 +9,7 @@ import ToxPredictor.misc.ParseChemidplus;
 //java imports:
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.LinkedList;
+import java.util.Enumeration;
 import java.util.List;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
@@ -18,10 +18,7 @@ import java.nio.file.Paths;
 
 import org.openscience.cdk.qsar.descriptors.molecular.MomentOfInertiaDescriptor;
 
-import ToxPredictor.Application.TESTConstants;
-import ToxPredictor.Application.WebTEST;
 //import org.openscience.cdk.qsar.descriptors.molecular.XLogPDescriptor;
-import ToxPredictor.MyDescriptors.XLogPDescriptor;
 import org.openscience.cdk.qsar.result.*;
 import org.openscience.cdk.qsar.*;
 import org.openscience.cdk.qsar.result.DoubleResult;
@@ -42,21 +39,18 @@ import org.openscience.cdk.Bond;
 import org.openscience.cdk.CDKConstants;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.aromaticity.Aromaticity;
-import org.openscience.cdk.aromaticity.ElectronDonation;
 import org.openscience.cdk.config.Isotopes;
 
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.formula.MolecularFormula;
 import org.openscience.cdk.graph.ConnectivityChecker;
-import org.openscience.cdk.graph.CycleFinder;
-import org.openscience.cdk.graph.Cycles;
 import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.io.MDLV2000Reader;
 
 import org.openscience.cdk.normalize.Normalizer;
+import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
-import org.openscience.cdk.tools.CDKHydrogenAdder;
 //import org.openscience.cdk.tools.HydrogenAdder;
 //import org.openscience.cdk.tools.Normalizer;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -66,7 +60,6 @@ import org.openscience.cdk.Ring;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 //TODO: add error propagation- i.e. make all methods throw exceptions 
@@ -177,7 +170,7 @@ public class DescriptorFactory {
 
 	double[] KHE = null; // kier hall
 
-	LinkedList[] paths; // path list - array of lists
+	List<List<Integer>>[] paths; // path list - array of lists
 
 	DecimalFormat df = new DecimalFormat("0.000");
 
@@ -257,7 +250,6 @@ public class DescriptorFactory {
 		this.errorMsg = "";
 		this.done = false;
 
-		IAtomContainer m3d = null;
 		
 //		System.out.println("Atom count="+m.getAtomCount());
 
@@ -271,16 +263,17 @@ public class DescriptorFactory {
 
 		// System.out.println("here");
 
-		double time1 = System.currentTimeMillis() / 1000.0;
+//		double time1 = System.currentTimeMillis() / 1000.0;
 
 
-		// clone it:
-		try {
-			m3d = m.clone();
-		} catch (Exception e) {
-			logger.catching(e);
-			errorMsg = "clone";
-		}
+//		IAtomContainer m3d = null;
+//		// clone it:
+//		try {
+//			m3d = m.clone();
+//		} catch (Exception e) {
+//			logger.catching(e);
+//			errorMsg = "clone";
+//		}
 
 		// remove hydrogens from molecule:
 		m = (IAtomContainer) AtomContainerManipulator.removeHydrogens(m);// remove
@@ -331,12 +324,12 @@ public class DescriptorFactory {
 
 		// System.out.print("Finding paths...");
 
-		double timeaa = System.currentTimeMillis() / 1000.0;
+//		double timeaa = System.currentTimeMillis() / 1000.0;
 		// find all paths in the molecule
 		FindPaths(m);
 		if (this.done || !errorMsg.equals(""))
 			return -1;
-		double timebb = System.currentTimeMillis() / 1000.0;
+//		double timebb = System.currentTimeMillis() / 1000.0;
 		// System.out.print("done\t"+(timebb-timeaa)+"\r\n");
 
 		// double timecc = System.currentTimeMillis() / 1000.0;
@@ -540,17 +533,15 @@ public class DescriptorFactory {
 	private boolean HasHydrogensInCa(IAtomContainer mol) {
 
 		for (int i = 0; i < mol.getAtomCount(); i++) {
-			List ca = mol.getConnectedAtomsList(mol.getAtom(i));
-			for (int j = 0; j < ca.size(); j++) {
-				IAtom caj = (IAtom) ca.get(j);
+			List<IAtom> ca = mol.getConnectedAtomsList(mol.getAtom(i));
+			
+			for (IAtom caj:ca) {
 				if (caj.getSymbol().equals("H")) {
 					System.out.println("--Found hydrogens in ca");
 					return true;
 				}
 			}
-
 		}
-
 		return false;
 
 	}
@@ -566,6 +557,7 @@ public class DescriptorFactory {
 			Document d = db.parse(ins);
 
 			Normalizer.normalize(m, d);
+			
 		} catch (Exception e) {
 			logger.catching(e);
 			this.errorMsg = "normalize";
@@ -638,7 +630,10 @@ public class DescriptorFactory {
 	}
 
 	private void CalculateKOWWIN_From_DLL(IAtomContainer m) {
-		SmilesGenerator sg = new SmilesGenerator();
+//		SmilesGenerator sg = new SmilesGenerator();
+		
+		SmilesGenerator sg = new SmilesGenerator(SmiFlavor.Canonical);
+		
 		Lookup lookup = new Lookup();
 
 		if (debug)
@@ -659,7 +654,12 @@ public class DescriptorFactory {
 		// smiles="missing";
 
 		if (smiles.equals("missing")) {
-			smiles = sg.createSMILES(m);
+			try {
+				smiles = sg.create(m);
+			} catch (CDKException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			// System.out.println("missing so created for "+dd.CAS);
 		}
 		// System.out.println(dd.CAS+"\t"+smiles);
@@ -1073,10 +1073,10 @@ public class DescriptorFactory {
 
 			AtomContainerManipulator.percieveAtomTypesAndConfigureAtoms(m);
 
-			ElectronDonation model = ElectronDonation.cdk();
+//			ElectronDonation model = ElectronDonation.cdk();
 			// ElectronDonation model = ElectronDonation.piBonds();
 
-			CycleFinder cycles = Cycles.cdkAromaticSet();
+//			CycleFinder cycles = Cycles.cdkAromaticSet();
 
 			// Aromaticity aromaticity = new Aromaticity(model, cycles);
 			// Aromaticity aromaticity=new Aromaticity(ElectronDonation.cdk(),
@@ -1317,8 +1317,6 @@ public class DescriptorFactory {
 			if (moleculefragmenter.AssignedFragment == null)
 				return;
 
-			DecimalFormat d4 = new DecimalFormat("0.0000");
-
 			FileWriter fw = new FileWriter(OutputFolder + File.separator + "AssignedFragments.html");
 			fw.write("<html>\n");
 
@@ -1334,7 +1332,7 @@ public class DescriptorFactory {
 			fw.write("\t<th>Assigned Fragment</th>\n");
 			fw.write("</tr>\n");
 
-			for (int i = 0; i <= m.getAtomCount() - 1; i++) {
+			for (int i = 0; i < m.getAtomCount(); i++) {
 				fw.write("<tr>\n");
 				fw.write("\t<td>" + (i + 1) + "</td>\n");
 				fw.write("\t<td>" + m.getAtom(i).getSymbol() + "</td>\n");
@@ -1378,7 +1376,7 @@ public class DescriptorFactory {
 		DF.Calculate3DDescriptors = false;
 
 		try {
-			DF.debug = false;
+			DescriptorFactory.debug = false;
 			HueckelAromaticityDetector.debug=false;
 			
 			if (mode == 1) { // read from smiles string
@@ -1526,16 +1524,17 @@ public class DescriptorFactory {
 						System.out.println(CAS + "\t" + ac.getAtomCount());
 
 						dd.ID = seekCAS;
-						int result = DF.CalculateDescriptors(ac, dd, true, true, true, folder);
+						DF.CalculateDescriptors(ac, dd, true, true, true, folder);
 
 						dd.WriteToFileTEXT(folder, "|");
 
 						File myFile = new File(folder + "/DescriptorData.html");
-						BrowserLauncher.openURL(myFile.toURL().toString());
+						BrowserLauncher.openURL(myFile.toURI().toURL().toString());
 
 						// System.out.println(dd.XLOGP);
 						System.out.println(dd.SdsCH);
 
+						mr.close();
 						return;
 					}
 				}
@@ -1600,11 +1599,11 @@ public class DescriptorFactory {
 		String Line = "";
 
 		try {
-			int count = 0;
+//			int count = 0;
 
-			for (int i = 0; i < dd.strFragments.length; i++) {
+			for (int i = 0; i < DescriptorData.strFragments.length; i++) {
 
-				String fragname = dd.strFragments[i];
+				String fragname = DescriptorData.strFragments[i];
 
 				if (Delimiter.equals(",") && fragname.indexOf(",") > -1) {
 					Line += "\"" + fragname + "\"";
@@ -1612,10 +1611,10 @@ public class DescriptorFactory {
 					Line += fragname;
 				}
 
-				if (i < dd.strFragments.length - 1)
+				if (i < DescriptorData.strFragments.length - 1)
 					Line += Delimiter;
 
-				count++;
+//				count++;
 			}
 		} catch (Exception e) {
 			logger.catching(e);
@@ -1625,11 +1624,11 @@ public class DescriptorFactory {
 
 	void WriteFragmentNames(String Delimiter, FileWriter fw, DescriptorData dd) {
 		try {
-			int count = 0;
+//			int count = 0;
 
-			for (int i = 0; i < dd.strFragments.length; i++) {
+			for (int i = 0; i < DescriptorData.strFragments.length; i++) {
 
-				String fragname = dd.strFragments[i];
+				String fragname = DescriptorData.strFragments[i];
 
 				if (Delimiter.equals(",") && fragname.indexOf(",") > -1) {
 					fw.write("\"" + fragname + "\"");
@@ -1637,10 +1636,10 @@ public class DescriptorFactory {
 					fw.write(fragname);
 				}
 
-				if (i < dd.strFragments.length - 1)
+				if (i < DescriptorData.strFragments.length - 1)
 					fw.write(Delimiter);
 
-				count++;
+//				count++;
 			}
 		} catch (Exception e) {
 			logger.catching(e);
@@ -1650,7 +1649,7 @@ public class DescriptorFactory {
 	void WriteDescriptorNames(DescriptorData dd, String[] varlist, FileWriter fw, String Delimiter) {
 		try {
 
-			int count = 0;
+//			int count = 0;
 
 			for (int i = 0; i <= varlist.length - 1; i++) {
 				// System.out.println(dd.varlist2d[i]);
@@ -1659,8 +1658,8 @@ public class DescriptorFactory {
 				String[] names = (String[]) myField.get(dd);
 
 				for (int j = 0; j <= names.length - 1; j++) {
-					count++;
-					Field myField2 = dd.getClass().getField(names[j]);
+//					count++;
+//					Field myField2 = dd.getClass().getField(names[j]);
 
 					String sname = names[j];
 
@@ -1690,7 +1689,7 @@ public class DescriptorFactory {
 		String Line = "";
 		try {
 
-			int count = 0;
+//			int count = 0;
 
 			for (int i = 0; i <= varlist.length - 1; i++) {
 				// System.out.println(dd.varlist2d[i]);
@@ -1699,8 +1698,8 @@ public class DescriptorFactory {
 				String[] names = (String[]) myField.get(dd);
 
 				for (int j = 0; j <= names.length - 1; j++) {
-					count++;
-					Field myField2 = dd.getClass().getField(names[j]);
+//					count++;
+//					Field myField2 = dd.getClass().getField(names[j]);
 
 					String sname = names[j];
 
@@ -1729,11 +1728,12 @@ public class DescriptorFactory {
 	void WriteDescriptorNames2(DescriptorData dd, String[] varlist, FileWriter fw, String Delimiter) {
 		try {
 
-			int count = 0;
+//			int count = 0;
 
 			for (int j = 0; j <= varlist.length - 1; j++) {
-				count++;
-				Field myField2 = dd.getClass().getField(varlist[j]);
+//				count++;
+				
+//				Field myField2 = dd.getClass().getField(varlist[j]);
 
 				String sname = varlist[j];
 
@@ -1759,8 +1759,6 @@ public class DescriptorFactory {
 	void WriteCSVLine(DescriptorData dd, FileWriter fw, String Dimension, String Delimiter) {
 
 		try {
-
-			double DepVal = -99;
 
 			// fw.write(dd.CAS + Delimiter);
 
@@ -1801,9 +1799,10 @@ public class DescriptorFactory {
 		DecimalFormat df = new DecimalFormat("0");
 
 		try {
-			int count = 0;
-			for (java.util.Enumeration e = dd.FragmentList.keys(); e.hasMoreElements();) {
-				String strVar = (String) e.nextElement();
+//			int count = 0;
+			
+			for (Enumeration<String> e = dd.FragmentList.keys(); e.hasMoreElements();) {
+				String strVar = e.nextElement();
 				double Val = (Double) dd.FragmentList.get(strVar);
 
 				Line += df.format(Val);
@@ -1811,7 +1810,7 @@ public class DescriptorFactory {
 				if (e.hasMoreElements())
 					Line += (Delimiter);
 
-				count++;
+//				count++;
 			}
 		} catch (Exception e) {
 			logger.catching(e);
@@ -1838,16 +1837,16 @@ public class DescriptorFactory {
 			// count++;
 			// }
 			// Use strFragments so that frags are in nice order:
-			for (int i = 0; i < dd.strFragments.length; i++) {
+			for (int i = 0; i < DescriptorData.strFragments.length; i++) {
 
-				String strVar = dd.strFragments[i];
+				String strVar = DescriptorData.strFragments[i];
 
 				double Val = (Double) dd.FragmentList.get(strVar);
 				fw.write(Val + "");
 
 				// System.out.println(i+"\t"+strVar);
 
-				if (i < dd.strFragments.length - 1)
+				if (i < DescriptorData.strFragments.length - 1)
 					fw.write(Delimiter);
 
 			}
@@ -1955,13 +1954,13 @@ public class DescriptorFactory {
 			// else fw.write("\r\n");
 			// }
 
-			for (int i = 0; i < dd.strFragments.length; i++) {
-				String strVar = dd.strFragments[i];
+			for (int i = 0; i < DescriptorData.strFragments.length; i++) {
+				String strVar = DescriptorData.strFragments[i];
 				double val = (Double) dd.FragmentList.get(strVar);
 
 				fw.write(myD.format(val));
 
-				if (i < dd.strFragments.length - 1)
+				if (i < DescriptorData.strFragments.length - 1)
 					fw.write(Delimiter);
 				else
 					fw.write("\r\n");
@@ -2035,8 +2034,8 @@ public class DescriptorFactory {
 				}
 			}
 
-			for (int i = 0; i < dd.strFragments.length; i++) {
-				String strVar = dd.strFragments[i];
+			for (int i = 0; i < DescriptorData.strFragments.length; i++) {
+				String strVar = DescriptorData.strFragments[i];
 
 				if (strVar.indexOf(",") > -1 && Delimiter.equals(",")) {
 					fw.write("\"" + strVar + "\"");
@@ -2044,7 +2043,7 @@ public class DescriptorFactory {
 					fw.write(strVar);
 				}
 
-				if (i < dd.strFragments.length - 1)
+				if (i < DescriptorData.strFragments.length - 1)
 					fw.write(Delimiter);
 			}
 			fw.write("\r\n");
@@ -2060,7 +2059,7 @@ public class DescriptorFactory {
 		DecimalFormat myD8 = new DecimalFormat("0.########");
 
 		try {
-			int countwritten = 0;
+//			int countwritten = 0;
 
 			for (int i = 0; i <= varlist.length - 1; i++) {
 				// System.out.println(dd.varlist2d[i]);
@@ -2072,7 +2071,7 @@ public class DescriptorFactory {
 
 					String val = myD8.format(myField2.getDouble(dd));
 
-					countwritten++;
+//					countwritten++;
 					// System.out.println(i+"\t"+j);
 					if (i != varlist.length - 1 || j != names.length - 1) {
 						fw.write(val + Delimiter);
@@ -2095,7 +2094,7 @@ public class DescriptorFactory {
 
 		try {
 
-			int countwritten = 0;
+//			int countwritten = 0;
 
 			for (int i = 0; i <= varlist.length - 1; i++) {
 				// System.out.println(dd.varlist2d[i]);
@@ -2107,7 +2106,7 @@ public class DescriptorFactory {
 
 					String val = myD8.format(myField2.getDouble(dd));
 
-					countwritten++;
+//					countwritten++;
 					// System.out.println(i+"\t"+j);
 					if (i != varlist.length - 1 || j != names.length - 1) {
 						Line += (val + Delimiter);
@@ -2130,14 +2129,14 @@ public class DescriptorFactory {
 		DecimalFormat myD8 = new DecimalFormat("0.########");
 
 		try {
-			int countwritten = 0;
+//			int countwritten = 0;
 
 			for (int j = 0; j <= names.length - 1; j++) {
 				Field myField2 = dd.getClass().getField(names[j]);
 
 				String val = myD8.format(myField2.getDouble(dd));
 
-				countwritten++;
+//				countwritten++;
 				// System.out.println(i+"\t"+j);
 				if (j != names.length - 1) {
 					fw.write(val + Delimiter);
@@ -2197,7 +2196,7 @@ public class DescriptorFactory {
 
 			String strHeader = br.readLine();
 
-			LinkedList header = Utilities.Parse3(strHeader, del);
+			List<String> header = Utilities.Parse3(strHeader, del);
 
 			for (int i = 1; i <= 10; i++) {
 				String Line1 = br.readLine();
@@ -2205,7 +2204,7 @@ public class DescriptorFactory {
 				if (!(Line1 instanceof String))
 					break;
 
-				LinkedList data = Utilities.Parse(Line1, del);
+				List<String> data = Utilities.Parse(Line1, del);
 
 				// System.out.println(i + "\t" + header.size() + "\t"
 				// + data.size());
@@ -2232,15 +2231,11 @@ public class DescriptorFactory {
 			String Delimiter) {
 		try {
 
-			DescriptorData md = new DescriptorData();
-			DescriptorData d = new DescriptorData();
 
-			BufferedReader br = new BufferedReader(new FileReader(SDFfilename));
 			FileWriter fw = new FileWriter(outputfileloc);
 
 			MDLV2000Reader mr = new MDLV2000Reader(new FileInputStream(SDFfilename));
 
-			String[] strData = new String[200];
 
 			int counter = -1;
 
@@ -2248,14 +2243,11 @@ public class DescriptorFactory {
 
 			dd = new DescriptorData();
 
-			boolean stop = false;
-
 			while (true) {
 
 				counter++;
 
-				IAtomContainer m = null;
-				mr.read(m);
+				IAtomContainer m = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
 
 				if (m == null)
 					break;
@@ -2287,7 +2279,7 @@ public class DescriptorFactory {
 
 			} // end while true;
 
-			br.close();
+			mr.close();
 			fw.close();
 
 		} catch (Exception e) {
@@ -2482,12 +2474,6 @@ public class DescriptorFactory {
 
 			MDLV2000Reader mr = new MDLV2000Reader(new FileInputStream(SDFfilename));
 
-			// String [] strMolFile=new String [200];
-			String[] strData = new String[200];
-
-			// String ChemicalName;
-			// String CAS;
-
 			int counter = -1;
 
 			while (true) {
@@ -2497,8 +2483,7 @@ public class DescriptorFactory {
 				// if (counter % 50 == 0)
 				// System.out.println(counter);
 
-				IAtomContainer m = null;
-				mr.read(m);
+				IAtomContainer m = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
 				// System.out.println(m.getAtomCount());
 
 				// int DataLineCount = 0;
@@ -2583,6 +2568,7 @@ public class DescriptorFactory {
 				fw2.write("<html>");
 				fw2.close();
 			}
+			mr.close();
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -2592,22 +2578,18 @@ public class DescriptorFactory {
 	public void LookAtDescriptorsInSDF(String SDFfilepath, String outputpath, int startvalue, int stopvalue) {
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(SDFfilepath));
+			
 			FileWriter fw = new FileWriter(outputpath);
 
 			MDLV2000Reader mr = new MDLV2000Reader(new FileInputStream(SDFfilepath));
 
 			int counter = -1;
 
-			ToxPredictor.misc.MolFileUtilities mfu = new ToxPredictor.misc.MolFileUtilities();
-
 			while (true) {
 
 				counter++;
 
-				AtomContainer m = new AtomContainer();
-
-				mr.read(m);
+				IAtomContainer m = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
 
 				// System.out.println(counter);
 
@@ -2634,7 +2616,7 @@ public class DescriptorFactory {
 
 				// System.out.println(mfu.HaveBadElement(m));
 
-				if (mfu.HaveBadElement(m)) {
+				if (MolFileUtilities.HaveBadElement(m)) {
 					System.out.println(counter + "\t" + CAS + "\tBadElement");
 					continue;
 				}
@@ -2652,13 +2634,7 @@ public class DescriptorFactory {
 					continue;
 				}
 
-				if (CAS == null)
-					break;
 
-				if (m == null) {
-					System.out.println("CAS=" + CAS + " has null molecule");
-					continue;
-				}
 				if (m.getAtomCount() == 0) {
 					System.out.println("CAS=" + CAS + " has no atoms");
 					continue;
@@ -2682,8 +2658,9 @@ public class DescriptorFactory {
 
 			} // end while true;
 
-			br.close();
+			
 			fw.close();
+			mr.close();
 
 		} catch (Exception e) {
 			logger.catching(e);
@@ -2704,20 +2681,15 @@ public class DescriptorFactory {
 			String outputfilefolder, String Delimiter) {
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(SDFfilepath));
 
 			FileWriter fw2d = new FileWriter(outputfilefolder + "/data2D.csv");
 			FileWriter fwFrag = new FileWriter(outputfilefolder + "/dataFrag.csv");
 
 			// System.out.println(outputfilefolder);
-
 			// this.WriteCSVHeader(d,fw);
 
 			MDLV2000Reader mr = new MDLV2000Reader(new FileInputStream(SDFfilepath));
-
 			int counter = -1;
-
-			ToxPredictor.misc.MolFileUtilities mfu = new ToxPredictor.misc.MolFileUtilities();
 
 			while (true) {
 
@@ -2727,7 +2699,7 @@ public class DescriptorFactory {
 
 				try {
 
-					mr.read(m);
+					m=mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
 
 				} catch (CDKException ex1) {
 					// System.out.println(ex1.getMessage());
@@ -2752,7 +2724,7 @@ public class DescriptorFactory {
 
 				dd.ID = CAS;
 
-				if (mfu.HaveBadElement(m)) {
+				if (MolFileUtilities.HaveBadElement(m)) {
 					System.out.println(counter + "\t" + CAS + "\tBadElement");
 					continue;
 				}
@@ -2779,10 +2751,6 @@ public class DescriptorFactory {
 				if (CAS == null)
 					break;
 
-				if (m == null) {
-					System.out.println("CAS=" + CAS + " has null molecule");
-					continue;
-				}
 				if (m.getAtomCount() == 0) {
 					System.out.println("CAS=" + CAS + " has no atoms");
 					continue;
@@ -2838,7 +2806,7 @@ public class DescriptorFactory {
 
 			} // end while true;
 
-			br.close();
+			mr.close();
 			fw2d.close();
 			fwFrag.close();
 
@@ -2861,7 +2829,6 @@ public class DescriptorFactory {
 			String outputfilefolder, String Delimiter, String outputfilename) {
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(SDFfilepath));
 
 			FileWriter fw = new FileWriter(outputfilefolder + "/" + outputfilename);
 
@@ -2871,27 +2838,27 @@ public class DescriptorFactory {
 
 			int counter = -1;
 
-			ToxPredictor.misc.MolFileUtilities mfu = new ToxPredictor.misc.MolFileUtilities();
 
 			while (true) {
 
 				counter++;
 
-				IAtomContainer m = null;
-				mr.read(m);
+				IAtomContainer m = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
 
 				String CASField = ToxPredictor.misc.MolFileUtilities.getCASField(m);
 
 				String CAS = (String) m.getProperty(CASField);
+				
 				if (CAS == null)
 					break;
+				
 				CAS = CAS.trim();
 
 				dd = new DescriptorData();
 
 				dd.ID = CAS;
 
-				if (mfu.HaveBadElement(m)) {
+				if (MolFileUtilities.HaveBadElement(m)) {
 					System.out.println(counter + "\t" + CAS + "\tBadElement");
 					continue;
 				}
@@ -2927,8 +2894,6 @@ public class DescriptorFactory {
 					this.WriteCSVHeader(fw, Delimiter);
 				}
 
-				if (m == null)
-					System.out.println("CAS=" + CAS + " has null molecule");
 
 				// ************************************************
 				// write out line of results
@@ -2948,7 +2913,7 @@ public class DescriptorFactory {
 
 			} // end while true;
 
-			br.close();
+			mr.close();
 			fw.close();
 
 		} catch (Exception e) {
@@ -2970,7 +2935,6 @@ public class DescriptorFactory {
 			String Delimiter, String outputfilename, String toxFieldName) {
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(SDFfilepath));
 
 			FileWriter fw = new FileWriter(outputfilefolder + "/" + outputfilename);
 
@@ -2978,14 +2942,12 @@ public class DescriptorFactory {
 
 			int counter = -1;
 
-			ToxPredictor.misc.MolFileUtilities mfu = new ToxPredictor.misc.MolFileUtilities();
 
 			while (true) {
 
 				counter++;
 
-				IAtomContainer m = null;
-				mr.read(m);
+				IAtomContainer m = mr.read(DefaultChemObjectBuilder.getInstance().newInstance(IAtomContainer.class));
 
 				String CASField = ToxPredictor.misc.MolFileUtilities.getCASField(m);
 
@@ -3000,7 +2962,7 @@ public class DescriptorFactory {
 
 				dd.ID = CAS;
 
-				if (mfu.HaveBadElement(m)) {
+				if (MolFileUtilities.HaveBadElement(m)) {
 					System.out.println(counter + "\t" + CAS + "\tBadElement");
 					continue;
 				}
@@ -3032,8 +2994,6 @@ public class DescriptorFactory {
 					fw.write("\r\n");
 				}
 
-				if (m == null)
-					System.out.println("CAS=" + CAS + " has null molecule");
 
 				// write out line of results
 				fw.write(CAS + Delimiter + Tox + Delimiter);
@@ -3047,7 +3007,7 @@ public class DescriptorFactory {
 
 			} // end while true;
 
-			br.close();
+			mr.close();
 			fw.close();
 
 		} catch (Exception e) {

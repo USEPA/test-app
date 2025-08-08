@@ -1,14 +1,11 @@
 package ToxPredictor.MyDescriptors;
 
-import org.openscience.cdk.*;
 import org.openscience.cdk.interfaces.*;
 import Jama.*;
-//import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.Utilities;
-
 import java.util.*;
 import java.lang.reflect.Field;
-import java.text.DecimalFormat;
+
 
 public class GetawayDescriptors {
 	IAtomContainer m;
@@ -399,7 +396,7 @@ public class GetawayDescriptors {
 		
 		
 		int A0=0;
-		ArrayList al=new ArrayList();
+		List<String> al=new ArrayList<>();
 		
 		double tol=0.0001;
 										
@@ -427,9 +424,9 @@ public class GetawayDescriptors {
 		
 		for (int i=0;i<=al.size()-1;i++) {
 			String strLine=(String)al.get(i);
-			List l=Utilities.Parse(strLine,"\t");
-			String strval=(String)l.get(0);
-			String strcount=(String)l.get(1);
+			List<String> l=Utilities.Parse(strLine,"\t");
+			String strval=l.get(0);
+			String strcount=l.get(1);
 			double count=Double.parseDouble(strcount);
 			
 //			System.out.println(count+"\t"+strval);
@@ -455,13 +452,13 @@ public class GetawayDescriptors {
 		
 	}
 	
-	private void CheckForMatches(ArrayList al,double val,double tol) {
+	private void CheckForMatches(List<String> al,double val,double tol) {
 		
 		for (int i=0;i<=al.size()-1;i++) {
 			String strLine=(String)al.get(i);
-			List l=Utilities.Parse(strLine,"\t");
-			String strval=(String)l.get(0);
-			String strcount=(String)l.get(1);
+			List<String> l=Utilities.Parse(strLine,"\t");
+			String strval=l.get(0);
+			String strcount=l.get(1);
 			
 			double value=Double.parseDouble(strval);
 			int count=Integer.parseInt(strcount);
@@ -746,8 +743,8 @@ private double [] CalculateHATSvalues(double [] w) {
 		
 		
 		for (int b=0;b<m.getBondCount();b++) {
-			int i=m.getAtomNumber(m.getBond(b).getAtom(0));
-			int j=m.getAtomNumber(m.getBond(b).getAtom(1));			
+			int i=m.indexOf(m.getBond(b).getAtom(0));
+			int j=m.indexOf(m.getBond(b).getAtom(1));			
 			
 			double RSi=0;
 			for (int jj=0;jj<=m.getAtomCount()-1;jj++) {

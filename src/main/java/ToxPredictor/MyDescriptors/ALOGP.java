@@ -2,12 +2,7 @@ package ToxPredictor.MyDescriptors;
 
 import org.openscience.cdk.*;
 import org.openscience.cdk.interfaces.*;
-
-//import ToxPredictor.Utilities.CDKUtilities;
-
-import java.lang.reflect.*;
 import java.util.List;
-import java.util.Vector;
 import java.io.*;
 
 //TODO: what should sub return if have missing fragment?
@@ -754,9 +749,9 @@ public class ALOGP {
 		}
 		
 		if (Fragment[i].equals("SsCH3")) {
-			List ca = m.getConnectedAtomsList(m.getAtom(i));
+			List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 			
-			if (((IAtom)ca.get(0)).getSymbol().equals("C")) {
+			if (ca.get(0).getSymbol().equals("C")) {
 				frags[1]++;
 				alogpfrag[i] = 1;
 			} else {
@@ -773,14 +768,14 @@ public class ALOGP {
 
 		if (Fragment[i].equals("SssCH2")) {
 
-			List ca = m.getConnectedAtomsList(m.getAtom(i));
+			List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 			int CarbonCount = 0;
 			int HeteroCount = 0;
 
 			// System.out.println("here");
-			for (int j = 0; j <= ca.size() - 1; j++) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C"))
+			for (IAtom caj:ca) {
+				if (caj.getSymbol().equals("C"))
 					CarbonCount++;
 				else
 					HeteroCount++;
@@ -805,14 +800,14 @@ public class ALOGP {
 
 		if (Fragment[i].equals("SsssCH")) {
 
-			List ca = m.getConnectedAtomsList(m.getAtom(i));
+			List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 			int CarbonCount = 0;
 			int HeteroCount = 0;
 
 			// System.out.println("here");
-			for (int j = 0; j <= ca.size() - 1; j++) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C"))
+			for (IAtom caj:ca) {
+				if (caj.getSymbol().equals("C"))
 					CarbonCount++;
 				else
 					HeteroCount++;
@@ -841,14 +836,14 @@ public class ALOGP {
 
 		if (Fragment[i].equals("SssssC")) {
 
-			List ca = m.getConnectedAtomsList(m.getAtom(i));
+			List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 			int CarbonCount = 0;
 			int HeteroCount = 0;
 
 			// System.out.println("here");
-			for (int j = 0; j <= ca.size() - 1; j++) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C"))
+			for (IAtom caj:ca) {
+				if (caj.getSymbol().equals("C"))
 					CarbonCount++;
 				else
 					HeteroCount++;
@@ -880,9 +875,9 @@ public class ALOGP {
 			return;
 
 		
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		if (!((IAtom)ca.get(0)).getSymbol().equals("C"))
+		if (!ca.get(0).getSymbol().equals("C"))
 			return; // dont assign 15 to formaldehyde
 
 		frags[15]++;
@@ -899,24 +894,24 @@ public class ALOGP {
 		if (!Fragment[i].equals("SdsCH") && !Fragment[i].equals("SdCH2"))
 			return;
 
-		List ca = m.getConnectedAtomsList(ai);
+		List<IAtom> ca = m.getConnectedAtomsList(ai);
 
 		boolean HaveCdX = false;
 		boolean HaveCsX = false;
 		boolean HaveCsAr = false;
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
-			if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)) {
-				if (!((IAtom)ca.get(j)).getSymbol().equals("C")) {
+		for (IAtom caj:ca) {
+			if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)) {
+				if (!caj.getSymbol().equals("C")) {
 					HaveCsX = true;
 				}
 
-				if (((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC)) {
+				if (caj.getFlag(CDKConstants.ISAROMATIC)) {
 					HaveCsAr = true;
 				}
 
-			} else if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.DOUBLE)) {
-				if (!((IAtom)ca.get(j)).getSymbol().equals("C")) {
+			} else if (m.getBond(ai, caj).getOrder().equals(IBond.Order.DOUBLE)) {
+				if (!caj.getSymbol().equals("C")) {
 					HaveCdX = true;
 				}
 
@@ -970,7 +965,7 @@ public class ALOGP {
 		if (!Fragment[i].equals("SdssC"))
 			return;
 
-		List ca = m.getConnectedAtomsList(ai);
+		List<IAtom> ca = m.getConnectedAtomsList(ai);
 
 		int RCount = 0;
 		int XCount = 0;
@@ -981,26 +976,26 @@ public class ALOGP {
 		int AliphaticCount = 0;
 		int AromaticCount = 0;
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
-			if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C")) {
+		for (IAtom caj:ca) {
+			if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)) {
+				if (caj.getSymbol().equals("C")) {
 					RCount++;
 				} else {
 					XCount++;
 
-					if (!((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC)) {
+					if (!caj.getFlag(CDKConstants.ISAROMATIC)) {
 						NonAromaticXCount++;
 					}
 				}
 
-				if (!((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC)) {
+				if (!caj.getFlag(CDKConstants.ISAROMATIC)) {
 					AliphaticCount++;
 				} else {
 					AromaticCount++;
 				}
 
-			} else if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.DOUBLE)) {
-				if (!((IAtom)ca.get(j)).getSymbol().equals("C")) {
+			} else if (m.getBond(ai, caj).getOrder().equals(IBond.Order.DOUBLE)) {
+				if (!caj.getSymbol().equals("C")) {
 					HaveCdX = true;
 				}
 			}
@@ -1108,15 +1103,15 @@ public class ALOGP {
 	//TMM 11/20/08: method redone
 	private void CalcGroup021_to_023_040(int i) {
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 		IAtom ai = m.getAtom(i);
 
 		if (Fragment[i].equals("SddC")) {
-			if (((IAtom)ca.get(0)).getSymbol().equals("C") && ((IAtom)ca.get(1)).getSymbol().equals("C")) {// R==C==R
+			if ((ca.get(0)).getSymbol().equals("C") && (ca.get(1)).getSymbol().equals("C")) {// R==C==R
 				frags[22]++;
 				alogpfrag[i] = 22;
-			} else if (!((IAtom)ca.get(0)).getSymbol().equals("C")
-					&& !((IAtom)ca.get(1)).getSymbol().equals("C")) {// X==C==X
+			} else if (!(ca.get(0)).getSymbol().equals("C")
+					&& !(ca.get(1)).getSymbol().equals("C")) {// X==C==X
 				frags[40]++;
 				alogpfrag[i] = 40;
 			}
@@ -1125,13 +1120,13 @@ public class ALOGP {
 			boolean HaveCtX = false;
 			boolean HaveCsX = false;
 
-			for (int j = 0; j <= ca.size() - 1; j++) {
-				if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)) {
-					if (!((IAtom)ca.get(j)).getSymbol().equals("C")) {
+			for (IAtom caj:ca) {
+				if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)) {
+					if (!caj.getSymbol().equals("C")) {
 						HaveCsX = true;
 					}
-				} else if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.TRIPLE)) {
-					if (!((IAtom)ca.get(j)).getSymbol().equals("C")) {
+				} else if (m.getBond(ai, caj).getOrder().equals(IBond.Order.TRIPLE)) {
+					if (!caj.getSymbol().equals("C")) {
 						HaveCtX = true;
 					}
 				}
@@ -1169,41 +1164,39 @@ public class ALOGP {
 			return;
 		// System.out.println("here");
 
-		IAtom ai = m.getAtom(i);
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		if (((IAtom)ca.get(0)).getSymbol().equals("C") && ((IAtom)ca.get(1)).getSymbol().equals("C")) {
+		if ((ca.get(0)).getSymbol().equals("C") && (ca.get(1)).getSymbol().equals("C")) {
 			frags[24]++;
 			alogpfrag[i] = 24;
 			return;
 		}
 
 		// check if both hetero atoms have at least one double bond
-		List bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
+		List<IBond> bonds = m.getConnectedBondsList(ca.get(0));
 
 		boolean HaveDouble1 = false;
 
-		for (int k = 0; k <= bonds.size() - 1; k++) {
-			if (((IBond)bonds.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+		for (IBond bondk:bonds) {
+			if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 				HaveDouble1 = true;
 				break;
 			}
-
 		}
 
-		bonds = m.getConnectedBondsList(((IAtom)ca.get(1)));
+		bonds = m.getConnectedBondsList(ca.get(1));
 
 		boolean HaveDouble2 = false;
 
-		for (int k = 0; k <= bonds.size() - 1; k++) {
-			if (((IBond)bonds.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+		for (IBond bondk:bonds) {
+			if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 				HaveDouble2 = true;
 				break;
 			}
 
 		}
 
-		if (!((IAtom)ca.get(0)).getSymbol().equals("C") && !((IAtom)ca.get(1)).getSymbol().equals("C")) {
+		if (!(ca.get(0)).getSymbol().equals("C") && !(ca.get(1)).getSymbol().equals("C")) {
 			if (HaveDouble1 && HaveDouble2) { // X--CH--X
 				frags[30]++;
 				alogpfrag[i] = 30;
@@ -1212,10 +1205,8 @@ public class ALOGP {
 				alogpfrag[i] = 42;
 			}
 
-		} else if ((((IAtom)ca.get(0)).getSymbol().equals("C") && !((IAtom)ca.get(1)).getSymbol().equals(
-				"C"))
-				|| (!((IAtom)ca.get(0)).getSymbol().equals("C") && ((IAtom)ca.get(1)).getSymbol().equals(
-						"C"))) {
+		} else if (((ca.get(0)).getSymbol().equals("C") && !(ca.get(1)).getSymbol().equals("C"))
+				|| (!(ca.get(0)).getSymbol().equals("C") && (ca.get(1)).getSymbol().equals("C"))) {
 
 			if (HaveDouble1 && HaveDouble2) { // R--CH--X
 				frags[27]++;
@@ -1249,28 +1240,23 @@ public class ALOGP {
 			return;
 
 		IAtom ai = m.getAtom(i);
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 		IAtom[] sameringatoms = new IAtom[2];
 		IAtom nonringatom = null;
 
 		int sameringatomscount = 0;
-		for (int j = 0; j <= ca.size() - 1; j++) {
-
-			IAtom caj=(IAtom) ca.get(j);
-
+		for (IAtom caj:ca) {
 			if (EStateFragmentDescriptor.InSameAromaticRing(m, ai,caj, rs)) {
 				sameringatomscount++;				
 			}
-
 		}
 
 		if (sameringatomscount == 3) {
 
 			int XCount = 0;
 
-			for (int j = 0; j < ca.size(); j++) {
-				IAtom caj = (IAtom) ca.get(j);
+			for (IAtom caj:ca) {
 				if (!caj.getSymbol().equals("C")) {
 					XCount++;
 				}
@@ -1282,20 +1268,19 @@ public class ALOGP {
 			} else if (XCount == 1) {
 
 				IAtom xatom = null;
-				for (int j = 0; j < ca.size(); j++) {
-					IAtom caj = (IAtom) ca.get(j);
+				for (IAtom caj:ca) {
 					if (!caj.getSymbol().equals("C")) {
 						xatom = caj;
 						break;
 					}
 				}
 
-				List bonds = m.getConnectedBondsList(xatom);
+				List<IBond> bonds = m.getConnectedBondsList(xatom);
 
 				boolean HaveDouble = false;
 
-				for (int k = 0; k <= bonds.size() - 1; k++) {
-					if (((IBond) bonds.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+				for (IBond bondk:bonds) {
+					if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 						HaveDouble = true;
 						break;
 					}
@@ -1314,13 +1299,11 @@ public class ALOGP {
 				
 				int HaveDoubleCount=0;
 				
-				for (int j = 0; j < ca.size(); j++) {
-					IAtom caj = (IAtom) ca.get(j);
+				for (IAtom caj:ca) {
 					if (!caj.getSymbol().equals("C")) {
-						List bonds = m.getConnectedBondsList(caj);
-						
-						for (int k = 0; k <= bonds.size() - 1; k++) {
-							if (((IBond) bonds.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+						List<IBond> bonds = m.getConnectedBondsList(caj);
+						for (IBond bondk:bonds) {
+							if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 								HaveDoubleCount++;
 								break;
 							}
@@ -1348,13 +1331,15 @@ public class ALOGP {
 
 				int HaveDoubleCount=0;
 				
-				for (int j = 0; j < ca.size(); j++) {
-					IAtom caj = (IAtom) ca.get(j);
+				for (IAtom caj:ca) {
+					
 					if (!caj.getSymbol().equals("C")) {
-						List bonds = m.getConnectedBondsList(caj);
 						
-						for (int k = 0; k <= bonds.size() - 1; k++) {
-							if (((IBond) bonds.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+						List<IBond> bonds = m.getConnectedBondsList(caj);
+						
+						for (IBond bondk:bonds) {
+							
+							if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 								HaveDoubleCount++;
 								break;
 							}
@@ -1382,9 +1367,8 @@ public class ALOGP {
 
 		} else if (sameringatomscount == 2) {
 			int count = 0;
-			for (int j = 0; j <= ca.size() - 1; j++) {
 
-				IAtom caj = (IAtom) ca.get(j);
+			for (IAtom caj:ca) {
 
 				if (EStateFragmentDescriptor.InSameAromaticRing(m, ai,caj, rs)) {
 					sameringatoms[count] = caj;
@@ -1396,12 +1380,12 @@ public class ALOGP {
 			}
 
 			// check if both hetero atoms have at least one double bond
-			List bonds = m.getConnectedBondsList(sameringatoms[0]);
+			List<IBond> bonds = m.getConnectedBondsList(sameringatoms[0]);
 
 			boolean HaveDouble1 = false;
 
-			for (int k = 0; k <= bonds.size() - 1; k++) {
-				if (((IBond) bonds.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+			for (IBond bondk:bonds) {
+				if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 					HaveDouble1 = true;
 					break;
 				}
@@ -1412,8 +1396,8 @@ public class ALOGP {
 
 			boolean HaveDouble2 = false;
 
-			for (int k = 0; k <= bonds.size() - 1; k++) {
-				if (((IBond) bonds.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+			for (IBond bondk:bonds) {
+				if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 					HaveDouble2 = true;
 					break;
 				}
@@ -1492,7 +1476,7 @@ public class ALOGP {
 		
 		IAtom ai = m.getAtom(i);
 		
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 		if (ai.getImplicitHydrogenCount() == 0)
 			return;
@@ -1505,19 +1489,19 @@ public class ALOGP {
 		}
 
 		
-		List bonds = m.getConnectedBondsList(ai);
+		List<IBond> bonds = m.getConnectedBondsList(ai);
 
 		int doublebondcount = 0;
 		int triplebondcount = 0;
 
 		String hybrid = "";
 
-		for (int j = 0; j <= bonds.size() - 1; j++) {
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.DOUBLE)) {
+		for (IBond bondk:bonds) {
+			if (bondk.getOrder().equals(IBond.Order.DOUBLE)) {
 				doublebondcount++;
 			}
 
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.TRIPLE)) {
+			if (bondk.getOrder().equals(IBond.Order.TRIPLE)) {
 				triplebondcount++;
 			}
 
@@ -1536,45 +1520,38 @@ public class ALOGP {
 		int OxNum = 0;
 		int XCount = 0;
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
+		for (IAtom caj:ca) {
 
-			String s = ((IAtom)ca.get(j)).getSymbol();
-
-			// if (s.equals("F") || s.equals("O") || s.equals("Cl")
-			// || s.equals("Br") || s.equals("N") || s.equals("S"))
-
-			// System.out.println(ap.GetNormalizedElectronegativity(((IAtom)ca.get(j)).getSymbol()));
-
-			if (this.IsElectronegative(((IAtom)ca.get(j)))) {
-				List bonds2 = m.getConnectedBondsList(((IAtom)ca.get(j)));
+			if (this.IsElectronegative(caj)) {
+				List<IBond> bonds2 = m.getConnectedBondsList(caj);
 
 				boolean HaveDouble = false;
 
-				for (int k = 0; k <= bonds2.size() - 1; k++) {
-					if (((IBond)bonds2.get(k)).getOrder().equals(IBond.Order.DOUBLE)) {
+				for (IBond bond2k:bonds2) {
+					if (bond2k.getOrder().equals(IBond.Order.DOUBLE)) {
 						HaveDouble = true;
 						break;
 					}
 
 				}
-				if (HaveDouble && ((IAtom)ca.get(j)).getSymbol().equals("N")
-						&& ((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC))
+				if (HaveDouble && caj.getSymbol().equals("N")
+						&& caj.getFlag(CDKConstants.ISAROMATIC))
 					OxNum += 2; // C-N bond order for pyridine type N's is
 				// considered to be 2
 				else
-					OxNum += m.getBond(ai, ((IAtom)ca.get(j))).getOrder().numeric();
+					OxNum += m.getBond(ai, caj).getOrder().numeric();
 			} else {
 				// if (!((IAtom)ca.get(j)).getSymbol().equals("C")) System.out.println("Found
 				// non electroneg:"+"\t"+((IAtom)ca.get(j)).getSymbol());
 
 			}
 
-			List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(j)));
+			List<IAtom> ca2 = m.getConnectedAtomsList(caj);
 
-			for (int k = 0; k <= ca2.size() - 1; k++) {
-				String s2 = ((IAtom)ca2.get(k)).getSymbol();
+			for (IAtom ca2k:ca2) {
+				String s2 = ca2k.getSymbol();
 
-				if (!s2.equals("C") && ((IAtom)ca.get(j)).getSymbol().equals("C")) {
+				if (!s2.equals("C") && caj.getSymbol().equals("C")) {
 					XCount++;
 				}
 			}
@@ -1593,28 +1570,26 @@ public class ALOGP {
 					// first check for alpha carbon:
 					if (ai.getSymbol().equals("C")
 							&& !ai.getFlag(CDKConstants.ISAROMATIC)) {
-						for (int j = 0; j <= ca.size() - 1; j++) {
+						
+						for (IAtom caj:ca) {
 
-							if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)
-									&& ((IAtom)ca.get(j)).getSymbol().equals("C")) { // single
+							if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)
+									&& caj.getSymbol().equals("C")) { // single
 																		// bonded
-								List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(j)));
+								List<IAtom> ca2 = m.getConnectedAtomsList(caj);
 
-								for (int k = 0; k <= ca2.size() - 1; k++) {
+								for (IAtom ca2k:ca2) {
 
-									if (!((IAtom)ca2.get(k)).getSymbol().equals("C")) {
-										if (m.getBond(((IAtom)ca.get(j)), ((IAtom)ca2.get(k))).getOrder().numeric() >= 2) {
+									if (!ca2k.getSymbol().equals("C")) {
+										if (m.getBond(caj, ca2k).getOrder().numeric() >= 2) {
 											frags[51] += ai.getImplicitHydrogenCount();
 											return;
 										}
 
-										if (((IAtom)ca.get(j))
-												.getFlag(CDKConstants.ISAROMATIC)
-												&& ((IAtom)ca2.get(k))
-														.getFlag(CDKConstants.ISAROMATIC)) {
+										if (caj.getFlag(CDKConstants.ISAROMATIC)
+												&& ca2k.getFlag(CDKConstants.ISAROMATIC)) {
 											if (EStateFragmentDescriptor
-													.InSameAromaticRing(m,
-															((IAtom)ca.get(j)), ((IAtom)ca2.get(k)), rs)) {
+													.InSameAromaticRing(m, caj, ca2k, rs)) {
 												frags[51] += ai
 														.getImplicitHydrogenCount();
 												return;
@@ -1675,25 +1650,25 @@ public class ALOGP {
 
 		// check for alpha carbon:
 		if (ai.getSymbol().equals("C") && !ai.getFlag(CDKConstants.ISAROMATIC)) {
-			for (int j = 0; j <= ca.size() - 1; j++) {
+			for (IAtom caj:ca) {
 
-				if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)
-						&& ((IAtom)ca.get(j)).getSymbol().equals("C")) { // single bonded
-					List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(j)));
+				if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)
+						&& caj.getSymbol().equals("C")) { // single bonded
+					
+					List<IAtom> ca2 = m.getConnectedAtomsList(caj);
 
-					for (int k = 0; k <= ca2.size() - 1; k++) {
+					for (IAtom ca2k:ca2) {
 
-						if (!((IAtom)ca2.get(k)).getSymbol().equals("C")) {
-							if (m.getBond(((IAtom)ca.get(j)), ((IAtom)ca2.get(k))).getOrder().numeric() >= 2) {
+						if (!ca2k.getSymbol().equals("C")) {
+							if (m.getBond(caj, ca2k).getOrder().numeric() >= 2) {
 								frags[51] += ai.getImplicitHydrogenCount();
 								return;
 							}
 
-							if (((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC)
-									&& ((IAtom)ca2.get(k)).getFlag(CDKConstants.ISAROMATIC)) {
+							if (caj.getFlag(CDKConstants.ISAROMATIC)
+									&& ca2k.getFlag(CDKConstants.ISAROMATIC)) {
 								if (EStateFragmentDescriptor
-										.InSameAromaticRing(m, ((IAtom)ca.get(j)), ((IAtom)ca2.get(k)),
-												rs)) {
+										.InSameAromaticRing(m, caj, ca2k, rs)) {
 									frags[51] += ai.getImplicitHydrogenCount();
 									return;
 								}
@@ -1719,23 +1694,23 @@ public class ALOGP {
 		if (!Fragment[i].equals("SsOH"))
 			return;
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		if (((IAtom)ca.get(0)).getFlag(CDKConstants.ISAROMATIC)) { // phenol
+		if ((ca.get(0)).getFlag(CDKConstants.ISAROMATIC)) { // phenol
 			frags[57]++;
 			alogpfrag[i] = 57;
 			return;
 		}
 
-		List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
+		List<IAtom> ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
 
-		for (int k = 0; k <= ca2.size() - 1; k++) {
+		for (IAtom ca2k:ca2) {
 
-			if (m.getBond(((IAtom)ca2.get(k)), ((IAtom)ca.get(0))).getOrder().equals(IBond.Order.DOUBLE)) {
+			if (m.getBond(ca2k, ca.get(0)).getOrder().equals(IBond.Order.DOUBLE)) {
 
 //				if ((((IAtom)ca.get(0)).getSymbol().equals("C") && ((IAtom)ca.get(0)).getHydrogenCount() == 0)) {
-				if (((IAtom)ca.get(0)).getSymbol().equals("C")) {//TMM 11/13/08: removed hydrogencount=0 constraint and added S as pseudo carboxyl 
-					if (((IAtom)ca2.get(k)).getSymbol().equals("O") || ((IAtom)ca2.get(k)).getSymbol().equals("S")	|| ((IAtom)ca2.get(k)).getSymbol().equals("C")) {
+				if ((ca.get(0)).getSymbol().equals("C")) {//TMM 11/13/08: removed hydrogencount=0 constraint and added S as pseudo carboxyl 
+					if (ca2k.getSymbol().equals("O") || ca2k.getSymbol().equals("S") || ca2k.getSymbol().equals("C")) {
 						frags[57]++;
 						alogpfrag[i] = 57;
 						return;
@@ -1752,7 +1727,7 @@ public class ALOGP {
 	}
 
 	private void CalcGroup058_61(int i) {
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 		// 58: O in =O
 		// 61: --O in nitro, N-oxides
@@ -1760,7 +1735,7 @@ public class ALOGP {
 
 		if (Fragment[i].equals("SsOm")) {
 
-			if (((IAtom)ca.get(0)).getSymbol().equals("N") && ((IAtom)ca.get(0)).getFormalCharge() == 1) {
+			if ((ca.get(0)).getSymbol().equals("N") && (ca.get(0)).getFormalCharge() == 1) {
 				frags[61]++;
 				alogpfrag[i] = 61;
 			} else {
@@ -1770,7 +1745,7 @@ public class ALOGP {
 
 		} else if (Fragment[i].equals("SdO")) {
 
-			if (((IAtom)ca.get(0)).getSymbol().equals("N") && ((IAtom)ca.get(0)).getFormalCharge() == 1) {
+			if ((ca.get(0)).getSymbol().equals("N") && (ca.get(0)).getFormalCharge() == 1) {
 				frags[61]++;
 				alogpfrag[i] = 61;
 			} else {
@@ -1790,15 +1765,15 @@ public class ALOGP {
 			return;
 
 		// Al-O-Ar, Ar2O
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 		IAtom ai = m.getAtom(i);
 
 				
 		
 		if (Fragment[i].equals("SssO")) {
-			if (((IAtom)ca.get(0)).getFlag(CDKConstants.ISAROMATIC)
-					|| ((IAtom)ca.get(1)).getFlag(CDKConstants.ISAROMATIC)) {
+			if ((ca.get(0)).getFlag(CDKConstants.ISAROMATIC)
+					|| (ca.get(1)).getFlag(CDKConstants.ISAROMATIC)) {
 
 				
 				frags[60]++;
@@ -1810,13 +1785,13 @@ public class ALOGP {
 				// check for ROC=X
 				
 				
-				for (int j = 0; j <= ca.size() - 1; j++) {
-					if (((IAtom)ca.get(j)).getSymbol().equals("C")) {
-						List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(j)));
+				for (IAtom caj:ca) {
+					if (caj.getSymbol().equals("C")) {
+						List<IAtom> ca2 = m.getConnectedAtomsList(caj);
 
-						for (int k = 0; k <= ca2.size() - 1; k++) {
-							if (!((IAtom)ca2.get(k)).getSymbol().equals("C")) {
-								if (m.getBond(((IAtom)ca.get(j)), ((IAtom)ca2.get(k))).getOrder().equals(IBond.Order.DOUBLE)) {
+						for (IAtom ca2k:ca2) {
+							if (!ca2k.getSymbol().equals("C")) {
+								if (m.getBond(caj, ca2k).getOrder().equals(IBond.Order.DOUBLE)) {
 									frags[60]++;
 									alogpfrag[i] = 60;
 									return;
@@ -1828,10 +1803,10 @@ public class ALOGP {
 				}
 
 				
-				if ((((IAtom)ca.get(0)).getSymbol().equals("O") && m.getBond(ai, ((IAtom)ca.get(0)))
+				if ((ca.get(0).getSymbol().equals("O") && m.getBond(ai, ca.get(0))
 						.getOrder().equals(IBond.Order.SINGLE))
-						|| (((IAtom)ca.get(1)).getSymbol().equals("O") && m.getBond(ai,
-								((IAtom)ca.get(1))).getOrder().equals(IBond.Order.SINGLE))) {
+						|| (ca.get(1).getSymbol().equals("O") && m.getBond(ai,
+								ca.get(1)).getOrder().equals(IBond.Order.SINGLE))) {
 					frags[63]++;
 					alogpfrag[i] = 63;
 				} else {
@@ -1865,10 +1840,10 @@ public class ALOGP {
 		if (!ai.getSymbol().equals("N"))
 			return;
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
-			if (((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC))
+		for (IAtom caj:ca) {
+			if (caj.getFlag(CDKConstants.ISAROMATIC))
 				NAr++;
 			else
 				NAl++;
@@ -1876,7 +1851,7 @@ public class ALOGP {
 
 		// first check if have RC(=O)N or NX=X
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
+		for (IAtom caj:ca) {
 
 			// if (Fragment[i].equals("SsNH2")) break;
 			if (Fragment[i].indexOf("d") > -1)
@@ -1884,27 +1859,27 @@ public class ALOGP {
 
 			// boolean HaveCsX=false;
 
-			if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().numeric() > 1)
+			if (m.getBond(ai, caj).getOrder().numeric() > 1)
 				continue;
 
-			List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(j)));
+			List <IAtom>ca2 = m.getConnectedAtomsList(caj);
 
-			if (((IAtom)ca.get(j)).getSymbol().equals("P"))
+			if (caj.getSymbol().equals("P"))
 				continue;
 
 			int CdXCount = 0;
 
-			for (int k = 0; k <= ca2.size() - 1; k++) {
+			for (IAtom ca2k:ca2) {
 
 				//TMM 11/13/08 - commented out following if:
 //				if (((IAtom) ca.get(j)).getSymbol().equals("N")
 //						&& ((IAtom) ca2.get(k)).getSymbol().equals("N"))
 //					continue;
 
-				if (((IAtom) ca.get(j)).getFormalCharge() != 0)
+				if (caj.getFormalCharge() != 0)
 					continue;
 
-				if (m.getAtomNumber(((IAtom) ca2.get(k))) == i)
+				if (m.indexOf(ca2k) == i)
 					continue;// 11/13/08
 
 				// if (((((IAtom)ca.get(j)).getSymbol().equals("C") &&
@@ -1916,23 +1891,17 @@ public class ALOGP {
 				// .getSymbol().equals("C"))) {
 
 				// TMM 11/13/08: removed hydrogenCount constraint
-				if ((((IAtom) ca.get(j)).getSymbol().equals("C") && (((IAtom) ca2
-						.get(k)).getSymbol().equals("O") || ((IAtom) ca2.get(k))
-						.getSymbol().equals("S")))
-						|| (!((IAtom) ca.get(j)).getSymbol().equals("C") && !((IAtom) ca2
-								.get(k)).getSymbol().equals("C"))) {
+				if ((caj.getSymbol().equals("C") && (ca2k.getSymbol().equals("O") || 
+						ca2k.getSymbol().equals("S")))
+						|| (!caj.getSymbol().equals("C") && !ca2k.getSymbol().equals("C"))) {
 
-					if (!((IAtom) ca2.get(k)).getFlag(CDKConstants.ISAROMATIC)
-							&& !((IAtom) ca.get(j))
-									.getFlag(CDKConstants.ISAROMATIC)
+					if (!ca2k.getFlag(CDKConstants.ISAROMATIC)
+							&& !caj.getFlag(CDKConstants.ISAROMATIC)
 							&& !ai.getFlag(CDKConstants.ISAROMATIC)) {
 
-						if (m.getBond(((IAtom) ca.get(j)),
-										((IAtom) ca2.get(k))).getOrder().equals(IBond.Order.DOUBLE)) {
-
+						if (m.getBond(caj,ca2k).getOrder().equals(IBond.Order.DOUBLE)) {
 							CdXCount++;
-						} else if (m.getBond(((IAtom) ca.get(j)),
-								((IAtom) ca2.get(k))).getOrder().equals(IBond.Order.SINGLE)) {
+						} else if (m.getBond(caj,ca2k).getOrder().equals(IBond.Order.SINGLE)) {
 							// HaveCsX = true;
 						}
 					}
@@ -1953,8 +1922,8 @@ public class ALOGP {
 
 		if (Fragment[i].equals("SsNH2")) {
 
-			if (((IAtom)ca.get(0)).getFlag(CDKConstants.ISAROMATIC)
-					|| !((IAtom)ca.get(0)).getSymbol().equals("C")) {
+			if ((ca.get(0)).getFlag(CDKConstants.ISAROMATIC)
+					|| !(ca.get(0)).getSymbol().equals("C")) {
 				frags[69]++;
 				alogpfrag[i] = 69;
 			} else {
@@ -2002,13 +1971,13 @@ public class ALOGP {
 			boolean HaveSdO = false;
 			boolean Ar = false;
 
-			for (int j = 0; j <= ca.size() - 1; j++) {
-				if (Fragment[m.getAtomNumber(((IAtom)ca.get(j)))].equals("SsOm")) {
+			for (IAtom caj:ca) {
+				if (Fragment[m.indexOf(caj)].equals("SsOm")) {
 					HaveSsOm = true;
-				} else if (Fragment[m.getAtomNumber(((IAtom)ca.get(j)))].equals("SdO")) {
+				} else if (Fragment[m.indexOf(caj)].equals("SdO")) {
 					HaveSdO = true;
 				} else {
-					if (((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC)) {
+					if (caj.getFlag(CDKConstants.ISAROMATIC)) {
 						Ar = true;
 					}
 				}
@@ -2046,10 +2015,10 @@ public class ALOGP {
 			boolean flag1 = false;
 			boolean flag2 = false;
 
-			for (int j = 0; j <= ca.size() - 1; j++) {
-				if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.DOUBLE)) {
-					if (((IAtom)ca.get(j)).getSymbol().equals("C")
-							|| (((IAtom)ca.get(j)).getSymbol().equals("N") && Fragment[i]
+			for (IAtom caj:ca) {
+				if (m.getBond(ai, caj).getOrder().equals(IBond.Order.DOUBLE)) {
+					if (caj.getSymbol().equals("C")
+							|| (caj.getSymbol().equals("N") && Fragment[i]
 									.equals("SdNH"))) {
 						frags[74]++;
 						alogpfrag[i] = 74;
@@ -2058,8 +2027,8 @@ public class ALOGP {
 						flag1 = true;
 					}
 				} else {
-					if (!((IAtom)ca.get(j)).getSymbol().equals("C")
-							|| ((IAtom)ca.get(j)).getFlag(CDKConstants.ISAROMATIC)) {
+					if (!caj.getSymbol().equals("C")
+							|| caj.getFlag(CDKConstants.ISAROMATIC)) {
 						flag2 = true;
 					}
 				}
@@ -2104,9 +2073,9 @@ public class ALOGP {
 		if (Fragment[i].equals("SdaaN")) {
 			
 //			System.out.println("here");
-			for (int j=0;j<=ca.size()-1;j++) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("O") && m.getBond(ai,((IAtom)ca.get(j))).getOrder().equals(IBond.Order.DOUBLE)) {
-					boolean InSameRing=EStateFragmentDescriptor.InSameAromaticRing(m, ai,(IAtom)ca.get(j), rs);
+			for (IAtom caj:ca) {
+				if (caj.getSymbol().equals("O") && m.getBond(ai,caj).getOrder().equals(IBond.Order.DOUBLE)) {
+					boolean InSameRing=EStateFragmentDescriptor.InSameAromaticRing(m, ai,caj, rs);
 					if (!InSameRing) {
 						frags[76]++;
 						alogpfrag[i] = 76;
@@ -2117,9 +2086,8 @@ public class ALOGP {
 		}
 //		TMM: 11/14/08: if have charged version of pyridine-N-oxide
 		if (Fragment[i].equals("SsaaNp")) {
-			for (int j=0;j<=ca.size()-1;j++) {
-				IAtom caj=(IAtom)ca.get(j);
-				int num=m.getAtomNumber(caj);
+			for (IAtom caj:ca) {
+				int num=m.indexOf(caj);
 				if (Fragment[num].equals("SsOm")) {
 						frags[76]++;
 						alogpfrag[i] = 76;
@@ -2139,21 +2107,21 @@ public class ALOGP {
 		IAtom ai = m.getAtom(i);
 		if (!ai.getSymbol().equals("F")) return;//added TMM-11/20/08
 		
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		List bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
+		List<IBond> bonds = m.getConnectedBondsList(ca.get(0));
 
 		int doublebondcount = 0;
 		int triplebondcount = 0;
 
 		String hybrid = "";
 
-		for (int j = 0; j <= bonds.size() - 1; j++) {
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.DOUBLE)) {
+		for (IBond bondj:bonds) {
+			if (bondj.getOrder().equals(IBond.Order.DOUBLE)) {
 				doublebondcount++;
 			}
 
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.TRIPLE)) {
+			if (bondj.getOrder().equals(IBond.Order.TRIPLE)) {
 				triplebondcount++;
 			}
 
@@ -2167,21 +2135,19 @@ public class ALOGP {
 			hybrid = "sp";
 		}
 
-		List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
+		List<IAtom> ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
 
 		int OxNum = 0;
 
-		for (int k = 0; k <= ca2.size() - 1; k++) {
+		for (IAtom ca2k:ca2) {
 
-			String s = ((IAtom)ca2.get(k)).getSymbol();
-
+//			String s = ca2k.getSymbol();
 			// // F,O,Cl,Br,N
-
 			// if (s.equals("F") || s.equals("O") || s.equals("Cl")
 			// || s.equals("Br") || s.equals("N") || s.equals("S"))
 
-			if (this.IsElectronegative(((IAtom)ca2.get(k)))) {
-				OxNum += m.getBond(((IAtom)ca.get(0)), ((IAtom)ca2.get(k))).getOrder().numeric();
+			if (this.IsElectronegative(ca2k)) {
+				OxNum += m.getBond((ca.get(0)), ca2k).getOrder().numeric();
 			}
 
 		}
@@ -2215,21 +2181,21 @@ public class ALOGP {
 		IAtom ai = m.getAtom(i);
 		if (!ai.getSymbol().equals("Cl")) return;//added TMM-11/20/08
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		List bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
+		List<IBond> bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
 
 		int doublebondcount = 0;
 		int triplebondcount = 0;
 
 		String hybrid = "";
 
-		for (int j = 0; j <= bonds.size() - 1; j++) {
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.DOUBLE)) {
+		for (IBond bondj:bonds) {
+			if (bondj.getOrder().equals(IBond.Order.DOUBLE)) {
 				doublebondcount++;
 			}
 
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.TRIPLE)) {
+			if (bondj.getOrder().equals(IBond.Order.TRIPLE)) {
 				triplebondcount++;
 			}
 
@@ -2243,20 +2209,19 @@ public class ALOGP {
 			hybrid = "sp";
 		}
 
-		List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
+		List<IAtom> ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
 
 		int OxNum = 0;
 
-		for (int k = 0; k <= ca2.size() - 1; k++) {
+		for (IAtom ca2k:ca2) {
 
-			String s = ((IAtom)ca2.get(k)).getSymbol();
-
+//			String s = ca2k.getSymbol();
 			// if (s.equals("F") || s.equals("O") || s.equals("Cl")
 			// || s.equals("Br") || s.equals("N") || s.equals("S"))
 
-			if (this.IsElectronegative(((IAtom)ca2.get(k)))) {
+			if (this.IsElectronegative(ca2k)) {
 				// // F,O,Cl,Br,N
-				OxNum += m.getBond(((IAtom)ca.get(0)), ((IAtom)ca2.get(k))).getOrder().numeric();
+				OxNum += m.getBond(ca.get(0), ca2k).getOrder().numeric();
 			}
 		}
 
@@ -2290,21 +2255,21 @@ public class ALOGP {
 		if (!ai.getSymbol().equals("Br")) return;//added TMM-11/20/08
 
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		List bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
+		List<IBond> bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
 
 		int doublebondcount = 0;
 		int triplebondcount = 0;
 
 		String hybrid = "";
 
-		for (int j = 0; j <= bonds.size() - 1; j++) {
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.DOUBLE)) {
+		for (IBond bondj:bonds) {
+			if (bondj.getOrder().equals(IBond.Order.DOUBLE)) {
 				doublebondcount++;
 			}
 
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.TRIPLE)) {
+			if (bondj.getOrder().equals(IBond.Order.TRIPLE)) {
 				triplebondcount++;
 			}
 
@@ -2318,21 +2283,19 @@ public class ALOGP {
 			hybrid = "sp";
 		}
 
-		List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
+		List<IAtom> ca2 = m.getConnectedAtomsList(ca.get(0));
 
 		int OxNum = 0;
 
-		for (int k = 0; k <= ca2.size() - 1; k++) {
+		for (IAtom ca2k:ca2) {
 
-			String s = ((IAtom)ca2.get(k)).getSymbol();
-
+//			String s = ca2k.getSymbol();
 			// // F,O,Cl,Br,N
-
 			// if (s.equals("F") || s.equals("O") || s.equals("Cl")
 			// || s.equals("Br") || s.equals("N") || s.equals("S"))
 
-			if (this.IsElectronegative(((IAtom)ca2.get(k)))) {
-				OxNum += m.getBond(((IAtom)ca.get(0)), ((IAtom)ca2.get(k))).getOrder().numeric();
+			if (this.IsElectronegative(ca2k)) {
+				OxNum += m.getBond(ca.get(0), ca2k).getOrder().numeric();
 			}
 
 		}
@@ -2367,21 +2330,21 @@ public class ALOGP {
 		IAtom ai = m.getAtom(i);
 		if (!ai.getSymbol().equals("I")) return;//added TMM-11/20/08
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
-		List bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
+		List<IBond> bonds = m.getConnectedBondsList(((IAtom)ca.get(0)));
 
 		int doublebondcount = 0;
 		int triplebondcount = 0;
 
 		String hybrid = "";
 
-		for (int j = 0; j <= bonds.size() - 1; j++) {
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.DOUBLE)) {
+		for (IBond bondj:bonds) {
+			if (bondj.getOrder().equals(IBond.Order.DOUBLE)) {
 				doublebondcount++;
 			}
 
-			if (((IBond)bonds.get(j)).getOrder().equals(IBond.Order.TRIPLE)) {
+			if (bondj.getOrder().equals(IBond.Order.TRIPLE)) {
 				triplebondcount++;
 			}
 
@@ -2395,21 +2358,19 @@ public class ALOGP {
 			hybrid = "sp";
 		}
 
-		List ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
+		List<IAtom> ca2 = m.getConnectedAtomsList(((IAtom)ca.get(0)));
 
 		int OxNum = 0;
 
-		for (int k = 0; k <= ca2.size() - 1; k++) {
+		for (IAtom ca2k:ca2) {
 
-			String s = ((IAtom)ca2.get(k)).getSymbol();
-
+//			String s = ca2k.getSymbol();
 			// // F,O,Cl,Br,N
-
 			// if (s.equals("F") || s.equals("O") || s.equals("Cl")
 			// || s.equals("Br") || s.equals("N") || s.equals("S"))
 
-			if (this.IsElectronegative(((IAtom)ca2.get(k)))) {
-				OxNum += m.getBond(((IAtom)ca.get(0)), ((IAtom)ca2.get(k))).getOrder().numeric();
+			if (this.IsElectronegative(ca2k)) {
+				OxNum += m.getBond(ca.get(0), ca2k).getOrder().numeric();
 			}
 
 		}
@@ -2518,18 +2479,18 @@ public class ALOGP {
 		if (!Fragment[i].equals("SdssS"))
 			return;
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 		IAtom ai = m.getAtom(i);
 		int SdOCount = 0;
 		int SsCCount = 0;
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
-			if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C")) {
+		for (IAtom caj:ca) {
+			if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)) {
+				if (caj.getSymbol().equals("C")) {
 					SsCCount++;
 				}
-			} else if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.DOUBLE)) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("O")) {
+			} else if (m.getBond(ai, caj).getOrder().equals(IBond.Order.DOUBLE)) {
+				if (caj.getSymbol().equals("O")) {
 					SdOCount++;
 				}
 			}
@@ -2544,18 +2505,18 @@ public class ALOGP {
 		if (!Fragment[i].equals("SddssS"))
 			return;
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 		IAtom ai = m.getAtom(i);
 		int SdOCount = 0;
 		int SsCCount = 0;
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
-			if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C")) {
+		for (IAtom caj:ca) {
+			if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)) {
+				if (caj.getSymbol().equals("C")) {
 					SsCCount++;
 				}
-			} else if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.DOUBLE)) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("O")) {
+			} else if (m.getBond(ai, caj).getOrder().equals(IBond.Order.DOUBLE)) {
+				if (caj.getSymbol().equals("O")) {
 					SdOCount++;
 				}
 			}
@@ -2588,7 +2549,7 @@ public class ALOGP {
 
 		// S in R=S
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 		IAtom ai = m.getAtom(i);
 
 		int XCount = 0;
@@ -2599,15 +2560,15 @@ public class ALOGP {
 		if (!Fragment[i].equals("SdsssP") && !Fragment[i].equals("SdssPH"))
 			return;
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
-			if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C")) {
+		for (IAtom caj:ca) {
+			if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)) {
+				if (caj.getSymbol().equals("C")) {
 					RCount++;
 				} else {
 					XCount++;
 				}
-			} else if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.DOUBLE)) {
-				if (!((IAtom)ca.get(j)).getSymbol().equals("C")) {
+			} else if (m.getBond(ai, caj).getOrder().equals(IBond.Order.DOUBLE)) {
+				if (!caj.getSymbol().equals("C")) {
 					PdX = true;
 				}
 			}
@@ -2634,14 +2595,14 @@ public class ALOGP {
 		if (!Fragment[i].equals("SsssP"))
 			return;
 
-		List ca = m.getConnectedAtomsList(m.getAtom(i));
+		List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 		IAtom ai = m.getAtom(i);
 		int XCount = 0;
 		int RCount = 0;
 
-		for (int j = 0; j <= ca.size() - 1; j++) {
-			if (m.getBond(ai, ((IAtom)ca.get(j))).getOrder().equals(IBond.Order.SINGLE)) {
-				if (((IAtom)ca.get(j)).getSymbol().equals("C")) {
+		for (IAtom caj:ca) {
+			if (m.getBond(ai, caj).getOrder().equals(IBond.Order.SINGLE)) {
+				if (caj.getSymbol().equals("C")) {
 					RCount++;
 				} else {
 					XCount++;

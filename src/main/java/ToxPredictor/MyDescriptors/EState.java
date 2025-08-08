@@ -226,116 +226,110 @@ public class EState {
 		// determines D, DV2 for each specific atom
 
 		// .....MODifY DV2 BASED ON ATOM TYPE
-		
-		//TODO: possibly redo this by using estate fragment strings to determine number of hydrogens
-		
-		ILoop: 
-			for (int I = 0; I <= m.getAtomCount() - 1; I++) {
 
-				DV2[I]=m.getBondOrderSum(m.getAtom(I));
-				D[I]=m.getConnectedBondsCount(m.getAtom(I));
-							
-				String symbol = m.getAtom(I).getSymbol();
-				int charge = m.getAtom(I).getFormalCharge();
-				
-				if (symbol.equals("C") || symbol.equals("Si")
-					|| symbol.equals("Pb") || symbol.equals("Sn")) 
-				{
-					
-					// TODO: I am not sure if following block is needed:
-					if ((int) (D[I]) != (int) (0.5 + DV2[I])) {
-						
-						//used for carbons with fractional aromatic bond order
-						int ID = (int) D[I];
-						
-						switch (ID) {
-						case 1: { // 41
-							
-							if ((int) (DV2[I] + 0.5) != 2) {							
-								DV2[I] = 3.0;
-							}
-							break;
-						}
-						
-						case 2: { // 42
-							if ((int) (DV2[I] + 0.5) != 3) {							
-								DV2[I] = 4.0;
-							}
-							break;
-						}
-						
-						case 3: { // 43
-							if (DV2[I] >= 4) {							
-								DV2[I] = 4.0;
-							}
-							break;
-						}
-						
-						} // end switch ID
-					}
-					
-				} else if (symbol.equals("O")) { // 50 (oxygen)
-					
-					if (DV2[I] > 1) {
-						DV2[I] = 6.0;
-					} else {
-						DV2[I] = 5.0;
-					}
-															
-				} else if (symbol.equals("N")) { // 60 (nitrogen)
-					
+		// TODO: possibly redo this by using estate fragment strings to determine number
+		// of hydrogens
+
+		ILoop: for (int I = 0; I < m.getAtomCount(); I++) {
+
+			DV2[I] = m.getBondOrderSum(m.getAtom(I));
+			D[I] = m.getConnectedBondsCount(m.getAtom(I));
+
+			String symbol = m.getAtom(I).getSymbol();
+			int charge = m.getAtom(I).getFormalCharge();
+
+			if (symbol.equals("C") || symbol.equals("Si") || symbol.equals("Pb") || symbol.equals("Sn")) {
+
+				// TODO: I am not sure if following block is needed:
+				if ((int) (D[I]) != (int) (0.5 + DV2[I])) {
+
+					// used for carbons with fractional aromatic bond order
 					int ID = (int) D[I];
-					// System.out.println("DV[3]="+DV[I]);
-					
+
 					switch (ID) {
-					case 1: // 61-sp3
-					{
-						DV2[I] = DV2[I] + 2.;
+					case 1: { // 41
+
+						if ((int) (DV2[I] + 0.5) != 2) {
+							DV2[I] = 3.0;
+						}
 						break;
 					}
-					
-					case 2: // 62-sp2
-					{
-						if ((int) (DV2[I] + 0.5) == 2)
-							DV2[I] = 4.;
-						else
-							DV2[I] = 5.;
+
+					case 2: { // 42
+						if ((int) (DV2[I] + 0.5) != 3) {
+							DV2[I] = 4.0;
+						}
 						break;
 					}
-					
-					case 3: // 63-sp
-					{
-						
-						if ((int) (DV2[I] + 0.5) == 3 || (int) (DV2[I] + 0.5) == 4)
-							DV2[I] = DV2[I] + 2.;
-						else
-							DV2[I] = 5.;
-						
+
+					case 3: { // 43
+						if (DV2[I] >= 4) {
+							DV2[I] = 4.0;
+						}
 						break;
 					}
-					
+
 					} // end switch ID
-					
-					
-					
-				} else if (symbol.equals("S")) { // 70 (sulfur)
-					// ......SULFUR
-					
-					//DV2[I] = this.GetDVSulfur(DV2[I], I, D[I]);
-										
-					double h,Zv;
-					
-					Zv=6;
-					
-					if (DV2[I]==1) {
-						h=1;
-					} else {	
-						h=0;
-					}
-					DV2[I]=Zv-h;
-					
-					
-					
+				}
+
+			} else if (symbol.equals("O")) { // 50 (oxygen)
+
+				if (DV2[I] > 1) {
+					DV2[I] = 6.0;
+				} else {
+					DV2[I] = 5.0;
+				}
+
+			} else if (symbol.equals("N")) { // 60 (nitrogen)
+
+				int ID = (int) D[I];
+				// System.out.println("DV[3]="+DV[I]);
+
+				switch (ID) {
+				case 1: // 61-sp3
+				{
+					DV2[I] = DV2[I] + 2.;
+					break;
+				}
+
+				case 2: // 62-sp2
+				{
+					if ((int) (DV2[I] + 0.5) == 2)
+						DV2[I] = 4.;
+					else
+						DV2[I] = 5.;
+					break;
+				}
+
+				case 3: // 63-sp
+				{
+
+					if ((int) (DV2[I] + 0.5) == 3 || (int) (DV2[I] + 0.5) == 4)
+						DV2[I] = DV2[I] + 2.;
+					else
+						DV2[I] = 5.;
+
+					break;
+				}
+
+				} // end switch ID
+
+			} else if (symbol.equals("S")) { // 70 (sulfur)
+				// ......SULFUR
+
+				// DV2[I] = this.GetDVSulfur(DV2[I], I, D[I]);
+
+				double h, Zv;
+
+				Zv = 6;
+
+				if (DV2[I] == 1) {
+					h = 1;
+				} else {
+					h = 0;
+				}
+				DV2[I] = Zv - h;
+
 //				} else if (symbol.equals("Hg")) {
 //					//TODO- can Hg have hydrogens attached?
 //					
@@ -344,61 +338,49 @@ public class EState {
 //					
 //					
 //					DV2[I] = (Zv - h);
-					
-				
-				} else if (symbol.equals("P") || symbol.equals("As")) {
-					double h,Zv;
-					
-					Zv=5;
-					
-					if (DV2[I]==1) { 
-						h=2;
-					} else if (DV2[I]==2) {	
-						h=1;
-					} else if (DV2[I]==4) {	
-						h=1;
-					} else {
-						h=0;						
-					}
-					
-					DV2[I]=Zv-h;
-					
-					
-				} else { // F,Cl,Br,I, Hg
-					
+
+			} else if (symbol.equals("P") || symbol.equals("As")) {
+				double h, Zv;
+
+				Zv = 5;
+
+				if (DV2[I] == 1) {
+					h = 2;
+				} else if (DV2[I] == 2) {
+					h = 1;
+				} else if (DV2[I] == 4) {
+					h = 1;
+				} else {
+					h = 0;
+				}
+
+				DV2[I] = Zv - h;
+
+			} else { // F,Cl,Br,I, Hg
+
 //					IElement element = null;
-					
-					try {
+
+				try {
 //						element = elfac.getElement(symbol);
-										
+
 					double h = 0; // assume number of hydrogens = 0
 					double Zv = ((Integer) valences.get(symbol)).doubleValue(); // valence
-										
+
 					DV2[I] = (Zv - h);
 
-					
-					} catch (Exception exc) {
-						System.out.println("Error trying to get Zv for "+symbol);
+				} catch (Exception exc) {
+					System.out.println("Error trying to get Zv for " + symbol);
 //						exc.printStackTrace();
-					}
-
-					
 				}
-				
-				// modify based on charge				
-				DV2[I] += -charge; // alternatively could use the charge to modify the number of hydrogens
-				
-						
-			} // end I for loop - 130
-	
-	
-	
+
+			}
+
+			// modify based on charge
+			DV2[I] += -charge; // alternatively could use the charge to modify the number of hydrogens
+
+		} // end I for loop - 130
+
 	} // end calculate delta values
-	
-	
-	private void misccode() {
-	
-	}
 	
 	
 	private void CalculateDV() {
@@ -504,7 +486,7 @@ public class EState {
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
-		double Z, Zv;
+//		double Z, Zv;
 
 		for (int i = 0; i <= m.getAtomCount() - 1; i++) {
 			IAtom a = m.getAtom(i);
@@ -556,12 +538,6 @@ public class EState {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-	}
-	
-	public static void main(String[] args) {
-		EState e =new EState();
-		
 
 	}
 	

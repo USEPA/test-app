@@ -3,6 +3,7 @@ package ToxPredictor.MyDescriptors;
 import org.openscience.cdk.*;
 import org.openscience.cdk.interfaces.*;
 import java.util.ArrayList;
+import java.util.List;
 public class TopologicalDescriptors {
 
 	IAtomContainer m;
@@ -183,8 +184,8 @@ public class TopologicalDescriptors {
 		dd.ZM2=0;
 		for (int b=0;b<m.getBondCount();b++) {
 //			IAtom [] atoms=bonds[b].getAtoms();
-			int i=m.getAtomNumber(m.getBond(b).getAtom(0));
-			int j=m.getAtomNumber(m.getBond(b).getAtom(1));
+			int i=m.indexOf(m.getBond(b).getAtom(0));
+			int j=m.indexOf(m.getBond(b).getAtom(1));
 			dd.ZM2+=D[i]*D[j];
 			
 		}
@@ -197,8 +198,8 @@ public class TopologicalDescriptors {
 		dd.ZM2V=0;
 		for (int b=0;b<m.getBondCount();b++) {
 //			IAtom [] atoms=bonds[b].getAtoms();
-			int i=m.getAtomNumber(m.getBond(b).getAtom(0));
-			int j=m.getAtomNumber(m.getBond(b).getAtom(1));
+			int i=m.indexOf(m.getBond(b).getAtom(0));
+			int j=m.indexOf(m.getBond(b).getAtom(1));
 			dd.ZM2V+=DV[i]*DV[j];
 			
 		}
@@ -215,8 +216,8 @@ public class TopologicalDescriptors {
 		
 		double sum=0;
 		for (int b=0;b<m.getBondCount();b++) {
-			int i=m.getAtomNumber(m.getBond(b).getAtom(0));
-			int j=m.getAtomNumber(m.getBond(b).getAtom(1));
+			int i=m.indexOf(m.getBond(b).getAtom(0));
+			int j=m.indexOf(m.getBond(b).getAtom(1));
 			//sum+=Math.pow(EState[i]*EState[j],-0.5);
 			// to match dragon:
 			sum+=Math.pow(1+Math.exp(EState[i])*Math.exp(EState[j]),-0.5); // need different function since cant take sqrt of negative
@@ -233,8 +234,8 @@ public class TopologicalDescriptors {
 		
 		dd.J=0;
 		for (int b=0;b<m.getBondCount();b++) {
-			int i=m.getAtomNumber(m.getBond(b).getAtom(0));
-			int j=m.getAtomNumber(m.getBond(b).getAtom(1));
+			int i=m.indexOf(m.getBond(b).getAtom(0));
+			int j=m.indexOf(m.getBond(b).getAtom(1));
 			dd.J+=Math.pow(vdd[i]*vdd[j],-0.5);
 			
 		}
@@ -247,8 +248,8 @@ public class TopologicalDescriptors {
 		
 		dd.Jt=0;
 		for (int b=0;b<m.getBondCount();b++) {
-			int i=m.getAtomNumber(m.getBond(b).getAtom(0));
-			int j=m.getAtomNumber(m.getBond(b).getAtom(1));
+			int i=m.indexOf(m.getBond(b).getAtom(0));
+			int j=m.indexOf(m.getBond(b).getAtom(1));
 			dd.Jt+=Math.pow(vdd[i]/D[i]*vdd[j]/D[j],-0.5);
 			
 		}
@@ -262,15 +263,19 @@ public class TopologicalDescriptors {
 		dd.Lop=0;
 		
 		
-		java.util.ArrayList al=new java.util.ArrayList();
+		List<List<Integer>> al=new ArrayList<>();
+		
 		// compile list connected atoms for each atom
-		for (int i=0;i<=m.getAtomCount()-1;i++) {
-			ArrayList al2=new ArrayList();
-			al.add(al2);
-			java.util.List ca=m.getConnectedAtomsList(m.getAtom(i));
+		
+		for (int i=0;i<m.getAtomCount();i++) {
 			
-			for (int j=0;j<ca.size();j++) {
-				al2.add(new Integer(m.getAtomNumber(((IAtom)ca.get(j)))));
+			ArrayList<Integer> al2=new ArrayList<>();
+			al.add(al2);
+			
+			List<IAtom> ca=m.getConnectedAtomsList(m.getAtom(i));
+			
+			for (IAtom caj:ca) {
+				al2.add(m.indexOf((caj)));
 			}
 			
 		}
@@ -291,15 +296,15 @@ public class TopologicalDescriptors {
 		while (true) {
 			// figure out which atoms need to be removed:
 			counter++;
-			ArrayList removelist=new ArrayList();	
+			List<Integer> removelist=new ArrayList<>();	
 			
 			int atomsremaining=0;
 			
 			for (int i=0;i<=al.size()-1;i++) {
-				ArrayList al2=(ArrayList)al.get(i);
+				List<Integer> al2=al.get(i);
 				
 				if (al2.size()==1) {												
-					removelist.add(new Integer(i));	
+					removelist.add(i);	
 					al2.remove(0);
 				}
 				if (al2.size()>0) {
@@ -343,16 +348,17 @@ public class TopologicalDescriptors {
 			// now remove atoms on remove list:
 			
 			int removecount=0;
-			for (int i=0;i<=al.size()-1;i++) {
-				ArrayList al2=(ArrayList)al.get(i);
+			
+			for (List<Integer>al2:al) {
 				
 				for (int j=0;j<=al2.size()-1;j++) {
-					int val=(Integer)al2.get(j);
+					int val=al2.get(j);
 					
 					for (int k=0;k<=removelist.size()-1;k++) {
-						int removeval=(Integer)removelist.get(k);
+						int removeval=removelist.get(k);
 						if (removeval==val){						
 							al2.remove(j);
+							removecount++;
 							j=-1;
 						}
 					}
@@ -372,9 +378,7 @@ public class TopologicalDescriptors {
 //			}
 			
 			int sum=0;
-			for (int i=0;i<=al.size()-1;i++) {
-						
-				ArrayList al2=(ArrayList)al.get(i);
+			for (List<Integer>al2:al) {
 				sum+=al2.size();
 			}
 			

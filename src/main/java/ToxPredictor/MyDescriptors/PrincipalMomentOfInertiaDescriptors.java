@@ -168,7 +168,7 @@ private void SortEID(EigenvalueDecomposition eid) {
 		double [] eigenvalues=(double [])eid.getRealEigenvalues().clone();
 		Matrix ev=(Matrix)eid.getV().clone();
 	
-		double max=-1,min=99999999,middle=0;
+		double max=-1,min=99999999;
 		int imax=-1,imin=-1,imid=-1;
 		
 		for (int i=0;i<=2;i++) {

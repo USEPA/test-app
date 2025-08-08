@@ -1,9 +1,8 @@
 package ToxPredictor.MyDescriptors;
 
-import org.openscience.cdk.*;
 import org.openscience.cdk.interfaces.*;
 //import org.openscience.cdk.Molecule;
-import org.openscience.cdk.RingSet;
+
 
 public class MolecularPropertyDescriptors {
 
@@ -42,7 +41,6 @@ public class MolecularPropertyDescriptors {
 		}
 		
 		//System.out.println(NHy+"\t"+NC+"\t"+A);
-		double Hy=0;
 		
 		double term1=(1+NHy)*Log(2,(1.0+NHy));
 		double term2=NC*(1.0/A*Log(2,1.0/A));

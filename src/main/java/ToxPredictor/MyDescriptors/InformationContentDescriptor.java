@@ -29,7 +29,7 @@ public class InformationContentDescriptor {
 	DescriptorData d;
 	
 	double A,B;
-	LinkedList[] paths;
+	List<List<Integer>>[] paths;
 	int [] fg;	
 	int G=0;// maximum distance value (i.e. the topological diameter)
 	
@@ -54,7 +54,7 @@ public class InformationContentDescriptor {
 	
 	
 	
-	public  void Calculate(IAtomContainer m,DescriptorData d,int [][] Distance,IRingSet rs,LinkedList[] paths,double [] D,double []DV,double []S,double []SV,int [] vdd) {
+	public  void Calculate(IAtomContainer m,DescriptorData d,int [][] Distance,IRingSet rs,List<List<Integer>>[] paths,double [] D,double []DV,double []S,double []SV,int [] vdd) {
 		this.Distance=Distance;
 		this.m=m;
 		this.d=d;
@@ -111,7 +111,7 @@ public class InformationContentDescriptor {
 		d.tti=Calculate_tti2(1,1,D,S); // Calculate_tti could be modified to calculate tti and ttvi simultaneously to save time		
 		d.ttvi=Calculate_tti2(1,1,DV,SV);
 		
-		ArrayList MasterList=FindSymmetryClasses();
+		List<List<String>> MasterList=FindSymmetryClasses();
 		Calculate_ic(MasterList);
 		this.Calculate_si(MasterList);
 //		this.Calculate_k0(MasterList);
@@ -144,12 +144,12 @@ public class InformationContentDescriptor {
 				
 	}
 	
-	private void Calculate_ic(ArrayList MasterList) {
+	private void Calculate_ic(List<List<String>> MasterList) {
 		d.ic=0;
 		for (int j = 0; j <= MasterList.size() - 1; j++) {
-			ArrayList al = (ArrayList) MasterList.get(j);
+			List<String> al = MasterList.get(j);
 
-			double count = Double.parseDouble((String) al.get(1));
+			double count = Double.parseDouble(al.get(1));
 //			System.out.println(count);
 			d.ic += count * Log(2,count);
 
@@ -228,8 +228,8 @@ public class InformationContentDescriptor {
 			IAtom a1=m.getBond(i).getAtom(0);
 			IAtom a2=m.getBond(i).getAtom(1);
 						
-			double d1=D[m.getAtomNumber(a1)];
-			double d2=D[m.getAtomNumber(a2)];
+			double d1=D[m.indexOf(a1)];
+			double d2=D[m.indexOf(a2)];
 			
 			double term=Math.pow(d1*d2,-0.5)/d.x1;
 			sum+=term*Log(2,term);
@@ -239,16 +239,16 @@ public class InformationContentDescriptor {
 	}
 	
 	
-	private void Calculate_si(ArrayList MasterList) {
+	private void Calculate_si(List<List<String>> MasterList) {
 		// note si=k0/A
 		
 		d.si=0;
 		double n=0;
 		
 		for (int j = 0; j <= MasterList.size() - 1; j++) {
-			ArrayList al = (ArrayList) MasterList.get(j);
+			List<String> al = MasterList.get(j);
 
-			double count = Double.parseDouble((String) al.get(1));
+			double count = Double.parseDouble(al.get(1));
 			//System.out.println(count);
 			n+= count;
 
@@ -259,9 +259,9 @@ public class InformationContentDescriptor {
 		
 		
 		for (int j = 0; j <= MasterList.size() - 1; j++) {
-			ArrayList al = (ArrayList) MasterList.get(j);
+			List<String> al = MasterList.get(j);
 
-			double ng = Double.parseDouble((String) al.get(1));
+			double ng = Double.parseDouble(al.get(1));
 //			System.out.println(ng);
 			d.si += ng/n * Log(2,ng/n);
 //			d.si += ng/n * Log(10,ng/n);
@@ -296,15 +296,15 @@ public class InformationContentDescriptor {
 //	}
 	
 	
-	private ArrayList FindSymmetryClasses() {
+	private List<List<String>> FindSymmetryClasses() {
 		double tol=1e-6;
 		
-		ArrayList MasterList = new ArrayList();
+		List<List<String>> MasterList = new ArrayList<>();
 				
 		double [] SYM=SV;
 				
 //		 get things started:
-		ArrayList a = new ArrayList();		
+		List<String> a = new ArrayList<>();		
 		a.add(SYM[0] + "");		
 		a.add(1 + "");
 		
@@ -319,12 +319,12 @@ public class InformationContentDescriptor {
 		for (int i=1;i<=m.getAtomCount()-1;i++) {
 			for (int j = 0; j <= MasterList.size() - 1; j++) {
 
-				ArrayList al = (ArrayList) MasterList.get(j);
-				double sv = Double.parseDouble((String) al.get(0));
+				List<String> al = MasterList.get(j);
+				double sv = Double.parseDouble(al.get(0));
 				
 				if (Math.abs(SYM[i] - sv) < tol) {
 					
-					int count = Integer.parseInt((String) al.get(1));
+					int count = Integer.parseInt(al.get(1));
 					count++;
 					al.set(1, count + "");
 					continue iloop;					
@@ -332,7 +332,7 @@ public class InformationContentDescriptor {
 			} // end j for loop
 
 			// no match:
-			ArrayList a2 = new ArrayList();			
+			List<String> a2 = new ArrayList<>();			
 			a2.add(SYM[i] + "");			
 			a2.add(1 + "");
 			MasterList.add(a2);
@@ -371,7 +371,7 @@ public class InformationContentDescriptor {
 		double sum=0;
 		 
 		for (int i=0;i<=A-1;i++) {
-			sum+=vdd[i]/(2*d.W)*this.Log(2,vdd[i]/(2*d.W));
+			sum+=vdd[i]/(2*d.W)*InformationContentDescriptor.Log(2,vdd[i]/(2*d.W));
 		}
 		// alternate way:
 		//for (int g=1;g<=Gvdd;g++) {
@@ -514,13 +514,14 @@ public class InformationContentDescriptor {
 	
 	private void CalculateEdgeDistanceMatrix()  {
 		
-		LinkedList ll=new LinkedList();
+		List<List<String>> ll=new LinkedList<>();
 		
 		for (int i=0;i<=m.getAtomCount()-1;i++) {
 			for (int j=0;j<=i;j++) {				
+				
 				if (Distance[i][j]==1) {
-					LinkedList ll2=new LinkedList();
-					ll2.add(i+"");
+					List<String> ll2=new LinkedList<>();
+					ll2.add(i+"");//TODO why a string?
 					ll2.add(j+"");
 					ll.add(ll2);
 					//System.out.println(ll.size()+"\t"+i+"\t"+j);
@@ -533,18 +534,20 @@ public class InformationContentDescriptor {
 		
 		for (int i=0;i<=ll.size()-1;i++) { // loop over edges
 			
-			LinkedList ll2=(LinkedList)ll.get(i);
+			List<String> ll2=ll.get(i);
 			
-			String strone=(String)ll2.get(0);
-			String strtwo=(String)ll2.get(1);
+			String strone=ll2.get(0);
+			String strtwo=ll2.get(1);
 			
 			int one=Integer.parseInt(strone);
 			int two=Integer.parseInt(strtwo);
 			
 			for (int j=0;j<=ll.size()-1;j++) {
-				LinkedList ll3=(LinkedList)ll.get(j);
-				String strthree=(String)ll3.get(0);
-				String strfour=(String)ll3.get(1);
+				
+				List<String> ll3=ll.get(j);
+				
+				String strthree=ll3.get(0);
+				String strfour=ll3.get(1);
 												
 				int three=Integer.parseInt(strthree);
 				int four=Integer.parseInt(strfour);
@@ -980,75 +983,75 @@ public class InformationContentDescriptor {
 	 }
 	
 	 
-	 private int [][][] convertPaths() {
-		 
-		 int maxj=0;
-		 int maxk=0;
-		 
-		 for (int i=1;i<=paths.length-1;i++) {
-			 LinkedList al=(LinkedList)paths[i];
-			 										 
-			 ListIterator li=al.listIterator();
-			
-			 int j=0;
-			 
-			 while (li.hasNext()) {
-
-				 LinkedList <Integer>al2=(LinkedList)li.next();
-				 
-				 ListIterator li2=al2.listIterator();
-				 
-				 int k=0;
-				 while (li2.hasNext()) {
-//					 System.out.println(i+"\t"+j+"\t"+k);
-					 
-					 int num=(Integer)(li2.next());
-					 
-					 k++;
-					 if (k>maxk) maxk=k;
-					 
-				 }
-				 j++;
-				 
-				 if (j>maxj) maxj=j;
-				 
-			 }
-		 }
-		 
-		 int [][][] bob=new int[paths.length][maxj][maxk];
-		 
-		 
-		 for (int i=1;i<=paths.length-1;i++) {
-			 LinkedList al=(LinkedList)paths[i];
-			 										 
-			 ListIterator li=al.listIterator();
-			
-			 int j=0;
-			 
-			 while (li.hasNext()) {
-
-				 LinkedList <Integer>al2=(LinkedList)li.next();
-				 
-				 ListIterator li2=al2.listIterator();
-				 
-				 int k=0;
-				 while (li2.hasNext()) {
-//					 System.out.println(i+"\t"+j+"\t"+k);
-					 int num=(Integer)(li2.next());
-					 
-					 bob[i][j][k]=num;
-					 k++;
-				 }
-				 j++;
-			 }
-		 }
-		 
-//		 System.out.println("maxj="+maxj);
-//		 System.out.println("maxk="+maxk);
-//		 System.out.println("atomCount="+m.getAtomCount());
-		 
-		 return bob;
-	 }
+//	 private int [][][] convertPaths() {
+//		 
+//		 int maxj=0;
+//		 int maxk=0;
+//		 
+//		 for (int i=1;i<=paths.length-1;i++) {
+//			 LinkedList al=(LinkedList)paths[i];
+//			 										 
+//			 ListIterator li=al.listIterator();
+//			
+//			 int j=0;
+//			 
+//			 while (li.hasNext()) {
+//
+//				 LinkedList <Integer>al2=(LinkedList)li.next();
+//				 
+//				 ListIterator li2=al2.listIterator();
+//				 
+//				 int k=0;
+//				 while (li2.hasNext()) {
+////					 System.out.println(i+"\t"+j+"\t"+k);
+//					 
+//					 int num=(Integer)(li2.next());
+//					 
+//					 k++;
+//					 if (k>maxk) maxk=k;
+//					 
+//				 }
+//				 j++;
+//				 
+//				 if (j>maxj) maxj=j;
+//				 
+//			 }
+//		 }
+//		 
+//		 int [][][] bob=new int[paths.length][maxj][maxk];
+//		 
+//		 
+//		 for (int i=1;i<=paths.length-1;i++) {
+//			 LinkedList al=(LinkedList)paths[i];
+//			 										 
+//			 ListIterator li=al.listIterator();
+//			
+//			 int j=0;
+//			 
+//			 while (li.hasNext()) {
+//
+//				 LinkedList <Integer>al2=(LinkedList)li.next();
+//				 
+//				 ListIterator li2=al2.listIterator();
+//				 
+//				 int k=0;
+//				 while (li2.hasNext()) {
+////					 System.out.println(i+"\t"+j+"\t"+k);
+//					 int num=(Integer)(li2.next());
+//					 
+//					 bob[i][j][k]=num;
+//					 k++;
+//				 }
+//				 j++;
+//			 }
+//		 }
+//		 
+////		 System.out.println("maxj="+maxj);
+////		 System.out.println("maxk="+maxk);
+////		 System.out.println("atomCount="+m.getAtomCount());
+//		 
+//		 return bob;
+//	 }
 	 
 //	 private double calctti2(int b,int c,double [] Delta,double []S) {
 //		 
@@ -1226,14 +1229,13 @@ public class InformationContentDescriptor {
 				 t[i][j]=0;
 				 
 				 for (int k=1;k<=paths.length-1;k++) {
-					 LinkedList al=(LinkedList)paths[k];
-					 										 
-					 ListIterator li=al.listIterator();
+					 List<List<Integer>> al=paths[k];
 					 
-					 while (li.hasNext()) {
+					 for(List<Integer>al2:al) {
+//					 while (li.hasNext()) {
 					 //for (int l=0;l<=al.size()-1;l++) {
 						 
-						 LinkedList <Integer>al2=(LinkedList)li.next();
+//						 LinkedList <Integer>al2=(LinkedList)li.next();
 						 				
 //						 String strfirst=(String)al2.get(0);
 //						 int first=Integer.parseInt(strfirst);
@@ -1249,17 +1251,11 @@ public class InformationContentDescriptor {
 							 
 							 totalnumpaths++;
 							 
-							 							 
 							 double product=1;
 							 
 							 int nij=al2.size();
 							 
-							 ListIterator li2=al2.listIterator();
-							 
-							 while (li2.hasNext()) {							 
-//								 String strnum=(String)li2.next();
-//								 int num=Integer.parseInt(strnum);
-								 int num=(Integer)(li2.next());								 
+							 for (int num:al2) {
 								 product*=Delta[num];								 								 
 							 }
 							 
@@ -1342,10 +1338,10 @@ public class InformationContentDescriptor {
         final int ac = m.getAtomCount();
         double[][] t = new double[ac][ac];
         try {
-            for (LinkedList<LinkedList<Integer>> path : paths) {
+            for (List<List<Integer>> path : paths) {
                 if (path == null) continue;
                 
-                for (LinkedList<Integer> al2 : path) {
+                for (List<Integer> al2 : path) {
                     int first = Math.min(al2.get(0), al2.get(al2.size() - 1));
                     int last = Math.max(al2.get(0), al2.get(al2.size() - 1));
                     int nij = al2.size();

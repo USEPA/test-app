@@ -87,7 +87,7 @@ public class TwoDMolecularDescriptors {
 		
 		// TODO: add reference for equations in this method
 		
-		int N=2; // for Carbon
+//		int N=2; // for Carbon
 		
 		double sumIalk=0;
 		double sumI=0;

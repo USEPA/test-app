@@ -1,11 +1,8 @@
 package ToxPredictor.MyDescriptors;
+
 import java.util.Hashtable;
 import java.io.*;
-
-import org.openscience.cdk.config.IsotopeFactory;
-
 import ToxPredictor.Utilities.Utilities;
-
 import java.util.LinkedList;
 
 
@@ -13,10 +10,10 @@ public class AtomicProperties {
 
 	private static AtomicProperties ap=null;
 	
-	private Hashtable htMass=new Hashtable();
-	private Hashtable htVdWVolume=new Hashtable();
-	private Hashtable htElectronegativity=new Hashtable();
-	private Hashtable htPolarizability=new Hashtable();
+	private Hashtable<String,Double> htMass=new Hashtable<>();
+	private Hashtable<String,Double> htVdWVolume=new Hashtable<>();
+	private Hashtable<String,Double> htElectronegativity=new Hashtable<>();
+	private Hashtable<String,Double> htPolarizability=new Hashtable<>();
 	
 	
 	private AtomicProperties() throws IOException {
@@ -41,13 +38,13 @@ public class AtomicProperties {
 				break;
 			}
 			
-			LinkedList l=Utilities.Parse(Line,"\t");
+			LinkedList<String> l=Utilities.Parse(Line,"\t");
 			
 			String symbol=(String)l.get(0);
-			htMass.put(symbol,l.get(1));
-			htVdWVolume.put(symbol,l.get(2));
-			htElectronegativity.put(symbol,l.get(3));
-			htPolarizability.put(symbol,l.get(4));
+			htMass.put(symbol,Double.parseDouble(l.get(1)));
+			htVdWVolume.put(symbol,Double.parseDouble(l.get(2)));
+			htElectronegativity.put(symbol,Double.parseDouble(l.get(3)));
+			htPolarizability.put(symbol,Double.parseDouble(l.get(4)));
 			
 		}
 						
@@ -55,106 +52,49 @@ public class AtomicProperties {
 		
 	}
 
-	public double GetVdWVolume(String symbol) {
-		double VdWVolume=-99;
-		
-		String strVdWVolume=(String)htVdWVolume.get(symbol);
-		
-		try {
-			VdWVolume=Double.parseDouble(strVdWVolume);
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		
-		
-		return VdWVolume;
-		
+	public Double GetVdWVolume(String symbol) {
+		if(htVdWVolume.containsKey(symbol)) return htVdWVolume.get(symbol);
+		else return null;
 	}
 	
-	public double GetNormalizedVdWVolume(String symbol) {
-		double VdWVolume=-99;
-		
-		VdWVolume=this.GetVdWVolume(symbol)/this.GetVdWVolume("C");
-				
-		return VdWVolume;
-		
+	public Double GetNormalizedVdWVolume(String symbol) {
+		if(htVdWVolume.containsKey(symbol)) {
+			return GetVdWVolume(symbol)/GetVdWVolume("C");
+		} else return null;
 	}
 	
-	public double GetElectronegativity(String symbol) {
-		double Electronegativity=-99;
-		
-		String strElectronegativity=(String)htElectronegativity.get(symbol);
-		
-		try {
-		Electronegativity=Double.parseDouble(strElectronegativity);
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		
-		
-		return Electronegativity;
-		
+	public Double GetElectronegativity(String symbol) {
+		if(htElectronegativity.containsKey(symbol)) return htElectronegativity.get(symbol);
+		else return null;
 	}
 	
-	public double GetNormalizedElectronegativity(String symbol) {
-		double Electronegativity=-99;
-		
-		Electronegativity=this.GetElectronegativity(symbol)/this.GetElectronegativity("C");
-				
-		return Electronegativity;
-		
+	public Double GetNormalizedElectronegativity(String symbol) {
+		if(htElectronegativity.containsKey(symbol)) 
+			return GetElectronegativity(symbol)/GetElectronegativity("C");
+		else return null;
 	}
-	public double GetPolarizability(String symbol) {
-		double Polarizability=-99;
-		
-		String strPolarizability=(String)htPolarizability.get(symbol);
-		
-		try {
-		Polarizability=Double.parseDouble(strPolarizability);
-		} catch (Exception e) {
-			System.out.println(e);
-		}
-		
-		
-		return Polarizability;
-		
+	public Double GetPolarizability(String symbol) {
+		if(htPolarizability.containsKey(symbol)) return htPolarizability.get(symbol);
+		else return null;
 	}
 	
-	public double GetNormalizedPolarizability(String symbol) {
-		double Polarizability=-99;
-		
-		Polarizability=this.GetPolarizability(symbol)/this.GetPolarizability("C");
-				
-		return Polarizability;
-		
-	}
-	public double GetMass(String symbol) {
-		double mass=-99;
-		
-		String strMass=(String)htMass.get(symbol);
-		
-		try {
-		mass=Double.parseDouble(strMass);
-		
-		} catch (Exception e) {
-			System.out.println("AtomicProperties--GetMass:"+symbol);
-		}
-		
-		
-		return mass;
-		
+	public Double GetNormalizedPolarizability(String symbol) {
+		if(htPolarizability.containsKey(symbol)) 
+			return GetPolarizability(symbol)/GetPolarizability("C");
+		else return null;
 	}
 	
-	public double GetNormalizedMass(String symbol) {
-		double mass=-99;
-		
-		mass=this.GetMass(symbol)/this.GetMass("C");
-				
-		return mass;
-		
+	public Double GetMass(String symbol) {
+		if(htMass.containsKey(symbol)) return htMass.get(symbol);
+		else return null;
 	}
 	
-	
+	public Double GetNormalizedMass(String symbol) {
+		
+		if(htMass.containsKey(symbol)) 
+			return GetMass(symbol)/this.GetMass("C");
+		else return null;		
+	}
 	
 	public static AtomicProperties getInstance() throws IOException
 	{

@@ -1,7 +1,6 @@
 package ToxPredictor.MyDescriptors;
 
 import java.lang.reflect.Field;
-import org.openscience.cdk.*;
 import org.openscience.cdk.interfaces.*;
 import org.openscience.cdk.ringsearch.AllRingsFinder;
 
@@ -203,22 +202,4 @@ public class BurdenEigenValueDescriptors {
 			ex.printStackTrace();
 		}
 	}
-
-
-
-	private IRingSet FindRings(IAtomContainer m) {
-		IRingSet rs = null;
-
-		try {
-			AllRingsFinder arf = new AllRingsFinder();
-			arf.setTimeout(100000);
-			rs = arf.findAllRings(m);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return rs;
-	}
-
 }

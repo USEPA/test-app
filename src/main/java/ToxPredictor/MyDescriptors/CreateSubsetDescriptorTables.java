@@ -210,7 +210,7 @@ public class CreateSubsetDescriptorTables {
 
 					for (int j=0;j<names.length;j++) {
 //						System.out.println(names[j]);
-						int fieldnum=this.FindFieldNumber(hl, names[j]);
+						int fieldnum=FindFieldNumber(hl, names[j]);
 						String val=l.get(fieldnum);
 						fw.write(val);
 						

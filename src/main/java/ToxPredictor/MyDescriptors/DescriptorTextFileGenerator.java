@@ -1,23 +1,13 @@
 package ToxPredictor.MyDescriptors;
 
-
-
-
-
 import java.io.File;
 import java.io.FileWriter;
-import java.io.IOException;
 import java.util.LinkedHashMap;
-
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
-
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
-import ToxPredictor.Database.ResolverDb2;
-import ToxPredictor.MyDescriptors.DescriptorData;
 import ToxPredictor.Utilities.HueckelAromaticityDetector;
-import org.apache.commons.io.FileUtils;
 
 
 public class DescriptorTextFileGenerator {

@@ -292,11 +292,10 @@ public class EStateFragmentDescriptor {
 
 //				IBond[] bonds = m.getConnectedBonds(a);
 
-				List ca = m.getConnectedAtomsList(a);
+				List<IAtom> ca = m.getConnectedAtomsList(a);
 
-				for (int j = 0; j < ca.size() ; j++) {
+				for (IAtom caj:ca) {
 
-					IAtom caj=(IAtom)ca.get(j);
 					IBond b = m.getBond(a, caj);
 
 					if (a.getFlag(CDKConstants.ISAROMATIC)
@@ -387,7 +386,7 @@ public class EStateFragmentDescriptor {
 				if (match) {
 					double value = myField.getDouble(dd);
 					myField.setDouble(dd, value + EState[i]);
-					Fragment[m.getAtomNumber(a)] = strFragment;
+					Fragment[m.indexOf(a)] = strFragment;
 
 					// need to do this because CDK doesnt do num H's right:
 					m.getAtom(i).setImplicitHydrogenCount(NumH);
@@ -423,7 +422,6 @@ public class EStateFragmentDescriptor {
 				int NumTripleBonds2 = 0;
 				int NumAromaticBonds2 = 0;
 				int NumAromaticBondsTotal2 = 0;
-				int HydrogenCount = 0;
 
 				IAtom a = m.getAtom(i);
 
@@ -434,13 +432,10 @@ public class EStateFragmentDescriptor {
 				// if (strFragment.equals("SaaNH"))
 				// System.out.println((i+1)+"\t"+a.getSymbol());
 
-//				IBond[] bonds = m.getConnectedBonds(a);
+				List<IAtom> ca = m.getConnectedAtomsList(a);
 
-				List ca = m.getConnectedAtomsList(a);
+				for (IAtom caj:ca) {
 
-				for (int j = 0; j <ca.size(); j++) {
-
-					IAtom caj=(IAtom)ca.get(j);
 					IBond b = m.getBond(a, caj);
 
 					if (a.getFlag(CDKConstants.ISAROMATIC)
@@ -532,19 +527,11 @@ public class EStateFragmentDescriptor {
 		
 	public static boolean InSameAromaticRing(IAtomContainer m, IAtom atom1,
 			IAtom atom2, IRingSet rs) {
-		boolean SameRing = false;
 
 		for (int i = 0; i <= rs.getAtomContainerCount() - 1; i++) {
 			Ring r = (Ring) rs.getAtomContainer(i);
-			
-			if (!r.getFlag(CDKConstants.ISAROMATIC))
-				continue;
-
-			if (r.contains(atom1) && r.contains(atom2)) {
-				return true;
-			}
-			
-
+			if (!r.getFlag(CDKConstants.ISAROMATIC)) continue;
+			if (r.contains(atom1) && r.contains(atom2)) return true;
 		} // end ring for loop
 
 		return false;
@@ -584,12 +571,11 @@ public class EStateFragmentDescriptor {
 					|| Fragment[i].equals("SsssCH")
 					|| Fragment[i].equals("SdsCH")) {
 
-				List ca = m.getConnectedAtomsList(m.getAtom(i));
+				List<IAtom> ca = m.getConnectedAtomsList(m.getAtom(i));
 
 				boolean b = false;
-				for (int j = 0; j <ca.size(); j++) {
-					IAtom a = (IAtom)ca.get(j);
-					String symbol = a.getSymbol();
+				for (IAtom caj:ca) {
+					String symbol = caj.getSymbol();
 					if (symbol.equals("F") || symbol.equals("Cl")) {
 						b = true;
 						break;

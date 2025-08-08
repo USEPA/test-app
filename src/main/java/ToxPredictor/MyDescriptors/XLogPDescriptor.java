@@ -893,7 +893,7 @@ public class XLogPDescriptor extends AbstractMolecularDescriptor implements IMol
             QueryAtomContainer aminoAcid = QueryAtomContainerCreator.createBasicQueryContainer(createAminoAcid(ac
                     .getBuilder()));
 
-            Iterator bonds = aminoAcid.bonds().iterator();
+            Iterator<IBond> bonds = aminoAcid.bonds().iterator();
             IAtom bondAtom0 = null;
             IAtom bondAtom1 = null;
             while (bonds.hasNext()) {
@@ -919,11 +919,11 @@ public class XLogPDescriptor extends AbstractMolecularDescriptor implements IMol
             //AtomContainer aminoacid = sp.parseSmiles("NCC(=O)O");
             try {
                 if (universalIsomorphismTester.isSubgraph(ac, aminoAcid)) {
-                    List list = universalIsomorphismTester.getSubgraphAtomsMap(ac, aminoAcid);
-                    RMap map = null;
+                    List<RMap> list = universalIsomorphismTester.getSubgraphAtomsMap(ac, aminoAcid);
+                    
                     IAtom atom1 = null;
-                    for (int j = 0; j < list.size(); j++) {
-                        map = (RMap) list.get(j);
+                    for (RMap map:list) {
+                        
                         atom1 = ac.getAtom(map.getId1());
                         if (atom1.getSymbol().equals("O") && ac.getMaximumBondOrder(atom1) == IBond.Order.SINGLE) {
                             if (ac.getConnectedBondsCount(atom1) == 2 && getHydrogenCount(ac, atom1) == 0) {
@@ -1309,11 +1309,12 @@ public class XLogPDescriptor extends AbstractMolecularDescriptor implements IMol
      *@return       The piSystemsCount value
      */
     private int getPiSystemsCount(IAtomContainer ac, IAtom atom) {
-        List neighbours = ac.getConnectedAtomsList(atom);
+        List<IAtom> neighbours = ac.getConnectedAtomsList(atom);
         int picounter = 0;
-        List bonds = null;
-        for (int i = 0; i < neighbours.size(); i++) {
-            IAtom neighbour = (IAtom) neighbours.get(i);
+        List<IBond> bonds = null;
+        
+        for (IAtom neighbour:neighbours) {
+            
             bonds = ac.getConnectedBondsList(neighbour);
             for (int j = 0; j < bonds.size(); j++) {
                 IBond bond = (IBond) bonds.get(j);
@@ -1342,11 +1343,13 @@ public class XLogPDescriptor extends AbstractMolecularDescriptor implements IMol
      */
     private boolean getPresenceOfHydroxy(IAtomContainer ac, IAtom atom) {
         IAtom neighbour0 = (IAtom) ac.getConnectedAtomsList(atom).get(0);
-        List first = null;
+        
         if (neighbour0.getSymbol().equals("C")) {
-            first = ac.getConnectedAtomsList(neighbour0);
-            for (int i = 0; i < first.size(); i++) {
-                IAtom conAtom = (IAtom) first.get(i);
+            
+        	List<IAtom>first = ac.getConnectedAtomsList(neighbour0);
+
+        	for (IAtom conAtom:first) {
+                
                 if (conAtom.getSymbol().equals("O")) {
                     if (ac.getBond(neighbour0, conAtom).getOrder() == IBond.Order.SINGLE) {
                         if (ac.getConnectedBondsCount(conAtom) > 1 && getHydrogenCount(ac, conAtom) == 0) {
@@ -1369,18 +1372,16 @@ public class XLogPDescriptor extends AbstractMolecularDescriptor implements IMol
      *@return       The presenceOfNitor [boolean]
      */
     private boolean getPresenceOfNitro(IAtomContainer ac, IAtom atom) {
-        List neighbours = ac.getConnectedAtomsList(atom);
-        List second = null;
-        IBond bond = null;
-        //int counter = 0;
-        for (int i = 0; i < neighbours.size(); i++) {
-            IAtom neighbour = (IAtom) neighbours.get(i);
+        List<IAtom> neighbours = ac.getConnectedAtomsList(atom);
+        
+        for (IAtom neighbour:neighbours) {
+            
             if (neighbour.getSymbol().equals("N")) {
-                second = ac.getConnectedAtomsList(neighbour);
-                for (int b = 0; b < second.size(); b++) {
-                    IAtom conAtom = (IAtom) second.get(b);
+            	List<IAtom>second = ac.getConnectedAtomsList(neighbour);
+            
+                for (IAtom conAtom:second) {
                     if (conAtom.getSymbol().equals("O")) {
-                        bond = ac.getBond(neighbour, conAtom);
+                        IBond bond = ac.getBond(neighbour, conAtom);
                         if (bond.getOrder() == IBond.Order.DOUBLE) {
                             return true;
                         }
@@ -1420,18 +1421,18 @@ public class XLogPDescriptor extends AbstractMolecularDescriptor implements IMol
      *@return       The presenceOfCarbonil value
      */
     private int getPresenceOfCarbonil(IAtomContainer ac, IAtom atom) {
-        List neighbours = ac.getConnectedAtomsList(atom);
-        List second = null;
-        IBond bond = null;
+        List<IAtom> neighbours = ac.getConnectedAtomsList(atom);
+        
         int counter = 0;
-        for (int i = 0; i < neighbours.size(); i++) {
-            IAtom neighbour = (IAtom) neighbours.get(i);
-            if (neighbour.getSymbol().equals("C")) {
-                second = ac.getConnectedAtomsList(neighbour);
-                for (int b = 0; b < second.size(); b++) {
-                    IAtom conAtom = (IAtom) second.get(b);
+        for (IAtom neighbour:neighbours) {
+
+        	if (neighbour.getSymbol().equals("C")) {
+            
+        		List<IAtom>second = ac.getConnectedAtomsList(neighbour);
+                
+                for (IAtom conAtom:second) {
                     if (conAtom.getSymbol().equals("O")) {
-                        bond = ac.getBond(neighbour, conAtom);
+                    	IBond bond = ac.getBond(neighbour, conAtom);
                         if (bond.getOrder() == IBond.Order.DOUBLE) {
                             counter += 1;
                         }
@@ -1451,57 +1452,54 @@ public class XLogPDescriptor extends AbstractMolecularDescriptor implements IMol
      *@return       The ifCarbonIsHydrophobic value
      */
     private boolean getIfCarbonIsHydrophobic(IAtomContainer ac, IAtom atom) {
-        List first = ac.getConnectedAtomsList(atom);
-        List second = null;
-        List third = null;
-        //org.openscience.cdk.interfaces.IAtom[] fourth = null;
-        if (first.size() > 0) {
-            for (int i = 0; i < first.size(); i++) {
-                IAtom firstAtom = (IAtom) first.get(i);
-                if (firstAtom.getSymbol().equals("C") || firstAtom.getSymbol().equals("H")) {
-                } else {
-                    return false;
-                }
-                second = ac.getConnectedAtomsList(firstAtom);
-                if (second.size() > 0) {
-                    for (int b = 0; b < second.size(); b++) {
-                        IAtom secondAtom = (IAtom) second.get(b);
-                        if (secondAtom.getSymbol().equals("C") || secondAtom.getSymbol().equals("H")) {
-                        } else {
-                            return false;
-                        }
-                        third = ac.getConnectedAtomsList(secondAtom);
-                        if (third.size() > 0) {
-                            for (int c = 0; c < third.size(); c++) {
-                                IAtom thirdAtom = (IAtom) third.get(c);
-                                if (thirdAtom.getSymbol().equals("C") || thirdAtom.getSymbol().equals("H")) {
-                                } else {
-                                    return false;
-                                }
-                                //fourth = ac.getConnectedAtoms(third[c]);
-                                //if (fourth.length > 0) {
-                                //	for (int d = 0; d < fourth.length; d++) {
-                                //		if (fourth[d].getSymbol().equals("C") || fourth[d].getSymbol().equals("H")) {
-                                //		} else {
-                                //			return false;
-                                //		}
-                                //	}
-                                //} else {
-                                //	return false;
-                                //}
-                            }
-                        } else {
-                            return false;
-                        }
-                    }
-                } else {
-                    return false;
-                }
-            }
-        } else {
-            return false;
-        }
-        return true;
+    	List<IAtom> first = ac.getConnectedAtomsList(atom);
+
+
+    	//org.openscience.cdk.interfaces.IAtom[] fourth = null;
+    	if (first.size() > 0) {
+    		for (IAtom firstAtom:first) {
+
+    			if (firstAtom.getSymbol().equals("C") || firstAtom.getSymbol().equals("H")) {
+    			} else {
+    				return false;
+    			}
+
+    			List<IAtom>second = ac.getConnectedAtomsList(firstAtom);
+    			if(second.size()==0) return false;
+
+    			for (IAtom secondAtom:second) {
+    				if (secondAtom.getSymbol().equals("C") || secondAtom.getSymbol().equals("H")) {
+    				} else {
+    					return false;
+    				}
+    				List<IAtom>third = ac.getConnectedAtomsList(secondAtom);
+    				if (third.size() == 0) return false;
+
+    				for (IAtom thirdAtom:third) {
+    					if (thirdAtom.getSymbol().equals("C") || thirdAtom.getSymbol().equals("H")) {
+    					} else {
+    						return false;
+    					}
+    					//fourth = ac.getConnectedAtoms(third[c]);
+    					//if (fourth.length > 0) {
+    					//	for (int d = 0; d < fourth.length; d++) {
+    					//		if (fourth[d].getSymbol().equals("C") || fourth[d].getSymbol().equals("H")) {
+    					//		} else {
+    					//			return false;
+    					//		}
+    					//	}
+    					//} else {
+    					//	return false;
+    					//}
+    				}
+
+    			}
+
+    		}
+    	} else {
+    		return false;
+    	}
+    	return true;
     }
 
     /**

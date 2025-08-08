@@ -898,8 +898,8 @@ public class MoleculeFragmenter4 {
 			if (count == 0)
 				return;
 
-			if (fragdesc.equals(checkdesc))
-				System.out.println("here4");
+//			if (fragdesc.equals(checkdesc))
+//				System.out.println("here4");
 
 //			System.out.println("Count="+count);
 

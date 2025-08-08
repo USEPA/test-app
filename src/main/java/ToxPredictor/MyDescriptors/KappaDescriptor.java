@@ -1,6 +1,8 @@
 package ToxPredictor.MyDescriptors;
 
 import java.util.LinkedList;
+import java.util.List;
+
 import org.openscience.cdk.interfaces.*;
 
 public class KappaDescriptor {
@@ -10,7 +12,7 @@ public class KappaDescriptor {
 	 * @param paths - paths in hydrogen suppressed molecule
 	 * @param dd - descriptor object to store results
 	 */
-	static void Calculate(IAtomContainer m,LinkedList[] paths,DescriptorData dd) {
+	static void Calculate(IAtomContainer m,List<List<Integer>>[] paths,DescriptorData dd) {
 
 		
 		double A = m.getAtomCount();

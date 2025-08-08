@@ -51,16 +51,16 @@ public class CalculateMWFrags {
 		
 		TreeMap<String,Double>map=getMap();
 		
-	    Vector v=new Vector(dd.FragmentList.keySet());
+	    Vector<String> v=new Vector<>(dd.FragmentList.keySet());
 	    Collections.sort(v);
 	    
 	    double MW_Frag=0;
 
-	    for ( Enumeration e = v.elements(); e.hasMoreElements();) {
+	    for (String fragName:v) {
 			// 	retrieve the object_key
-			String fragName = (String) e.nextElement();
+			
 			// 	retrieve the object associated with the key
-			double fragCount = (Double) dd.FragmentList.get ( fragName );
+			double fragCount = dd.FragmentList.get (fragName);
 			
 			if (map.get(fragName)==null) {
 				System.out.println(fragName+"\tmissing");

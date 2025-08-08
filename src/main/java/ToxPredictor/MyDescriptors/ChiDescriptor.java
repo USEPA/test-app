@@ -1,9 +1,10 @@
 package ToxPredictor.MyDescriptors;
 
 import java.lang.reflect.Field;
-import org.openscience.cdk.*;
+
 import org.openscience.cdk.interfaces.*;
 import java.util.LinkedList;
+import java.util.List;
 
 public class ChiDescriptor {
 
@@ -12,11 +13,11 @@ public class ChiDescriptor {
 	private IAtomContainer m;
 	private double[] DV;
 	private double[] D;
-	private LinkedList[] paths;
+	private List<List<Integer>>[] paths;
 	private IRingSet rs;
 
 	public void Calculate(IAtomContainer m, DescriptorData dd, double[] D,
-			double[] DV, LinkedList[] paths, IRingSet rs) {
+			double[] DV, List<List<Integer>>[] paths, IRingSet rs) {
 
 		this.dd = dd;
 		this.m = m;
@@ -119,22 +120,16 @@ public class ChiDescriptor {
 
 	}
 
-	private double CalcChi(LinkedList MasterList, double[] D) {
+	private double CalcChi(List<List<Integer>> MasterList, double[] D) {
 		// in this method Chi is calculated for an LinkedList
 		// which contains one or more array lists with the atom numbers
 
-		double CHI = 0;
-
 		//System.out.println(MasterList.size());
-		
-		for (int i = 0; i <= MasterList.size() - 1; i++) {
 
-			LinkedList <Integer>al = (LinkedList) MasterList.get(i);
-
+		double CHI = 0;
+		for (List<Integer>al:MasterList) {
 			double product = 1;
-			
-			for (int j = 0; j <= al.size() - 1; j++) {			
-				int J = al.get(j);
+			for (int J:al) {			
 				product *= D[J];
 			}
 			CHI += Math.pow(product, -0.5);
@@ -147,12 +142,9 @@ public class ChiDescriptor {
 		// in this method chi is calculated for an LinkedList containing the atom
 		// numbers
 		double CHI = 0;
-
 		double product = 1;
 
-		for (int j = 0; j <= al.size() - 1; j++) {
-//			int J = Integer.parseInt((String) al.get(j));
-			int J = al.get(j);
+		for (int J:al) {
 			product *= D[J];
 		}
 		CHI += Math.pow(product, -0.5);
@@ -164,8 +156,8 @@ public class ChiDescriptor {
 
 		for (int M = 3; M <= 4; M++) {
 
-			LinkedList clusters = PathFinder.FindClusters(m, M);
-
+			List<List<Integer>> clusters = PathFinder.FindClusters(m, M);
+			
 			try {
 				Field myField = dd.getClass().getField("xc" + M);
 				myField.setDouble(dd, CalcChi(clusters, D));
@@ -180,7 +172,7 @@ public class ChiDescriptor {
 	}
 
 	private void CalculatePathClusterDescriptors() {
-		LinkedList clusters = PathFinder.FindPathClusters(m);
+		List<List<Integer>> clusters = PathFinder.FindPathClusters(m);
 		dd.xpc4 = this.CalcChi(clusters, D);
 		dd.xvpc4 = this.CalcChi(clusters, DV);
 
@@ -191,11 +183,11 @@ public class ChiDescriptor {
 		for (int i = 0; i <= rs.getAtomContainerCount() - 1; i++) {
 			IRing r = (IRing) rs.getAtomContainer(i);
 
-			LinkedList al = new LinkedList();
+			LinkedList<Integer> al = new LinkedList<>();
 
 			for (int j = 0; j <= r.getAtomCount() - 1; j++) {
 				IAtom a = r.getAtom(j);				
-				al.add(new Integer(m.getAtomNumber(a)));
+				al.add(m.indexOf(a));
 			}
 
 			try {

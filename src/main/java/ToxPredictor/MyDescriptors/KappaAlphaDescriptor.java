@@ -6,11 +6,12 @@ import org.openscience.cdk.config.AtomTypeFactory;
 import org.openscience.cdk.exception.CDKException;
 import org.openscience.cdk.interfaces.*;
 import java.util.LinkedList;
+import java.util.List;
 
 
 public class KappaAlphaDescriptor {
 	
-	static void Calculate(IAtomContainer m,LinkedList [] paths,DescriptorData dd) {
+	static void Calculate(IAtomContainer m,List<List<Integer>>[] paths,DescriptorData dd) {
 		
 		
 		double [] Radius=CalculateRadii(m);

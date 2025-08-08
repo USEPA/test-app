@@ -246,7 +246,7 @@ public class WHIMDescriptors {
 		double [] eigenvalues=(double [])eid.getRealEigenvalues().clone();
 		Matrix ev=(Matrix)eid.getV().clone();
 	
-		double max=-1,min=99999999,middle=0;
+		double max=-1,min=99999999;
 		int imax=-1,imin=-1,imid=-1;
 		
 		for (int i=0;i<=2;i++) {
@@ -286,7 +286,7 @@ public class WHIMDescriptors {
 	private void Symmetry(Matrix T,String strw) {
 		// for atoms to be symmetric wrt to an axis the atoms must have 
 		// opposite coordinates along the considered axis or must lie on the axis
-		double xi,yi,zi,xj,yj,zj;
+//		double xi,yi,zi,xj,yj,zj;
 		
 		double tol=0.005;//FIXME maybe can reduce tol if our coordinates are more accurate
 		
@@ -295,10 +295,10 @@ public class WHIMDescriptors {
 		double [] ns=new double [3];
 		Field myField;
 		
-		ArrayList [] al=new ArrayList[3];
+		List<Integer> [] al=new ArrayList[3];
 		
 		for (int i=0;i<=2;i++) {
-			al[i]=new ArrayList();
+			al[i]=new ArrayList<>();
 			ns[i]=0;
 		}
 		
@@ -317,7 +317,7 @@ public class WHIMDescriptors {
 				coordi=T.get(i,k);
 				
 				if (Math.abs(coordi)<tol) {
-					al[k].add(new Integer(i));
+					al[k].add(i);
 				}
 			
 				for (int j=i+1;j<=T.getRowDimension()-1;j++) {
@@ -334,8 +334,8 @@ public class WHIMDescriptors {
 					
 					
 					if (Math.abs(coordi+coordj)<tol) {
-						al[k].add(new Integer(i));
-						al[k].add(new Integer(j));
+						al[k].add(i);
+						al[k].add(j);
 					}
 																	
 				}//end j for loop

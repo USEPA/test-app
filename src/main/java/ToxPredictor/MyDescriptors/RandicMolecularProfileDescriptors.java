@@ -32,7 +32,7 @@ public class RandicMolecularProfileDescriptors {
 			e.printStackTrace();
 		}
 		
-		Matrix Gm=this.CalculateGeometryMatrix(m2);		
+		Matrix Gm=RandicMolecularProfileDescriptors.CalculateGeometryMatrix(m2);		
 		//Gm.print(6,4);
 		
 //		for (int i=0;i<=m2.getAtomCount()-1;i++) {

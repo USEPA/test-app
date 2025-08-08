@@ -1,6 +1,7 @@
 package ToxPredictor.MyDescriptors;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Iterator;
 import java.util.ListIterator;
 
@@ -19,12 +20,12 @@ public class WalkandPathCountDescriptors {
 	
 	IAtomContainer m;
 	DescriptorData dd;
-	LinkedList[] paths;
+	List<List<Integer>>[] paths;
 	double [] D;
 	int []vdd;
 	IRingSet rs;
 	
-	public void Calculate(IAtomContainer m,DescriptorData dd,LinkedList[] paths,double [] D,int [] vdd,IRingSet rs) {
+	public void Calculate(IAtomContainer m,DescriptorData dd,List<List<Integer>>[] paths,double [] D,int [] vdd,IRingSet rs) {
 		this.m=m;
 		this.dd=dd;
 		this.paths=paths;
@@ -46,10 +47,9 @@ public class WalkandPathCountDescriptors {
 				
 		double sum=0;
 		for (int k=1;k<=paths.length-1;k++){
-			LinkedList ll=paths[k];
+			List<List<Integer>> ll=paths[k];
 			
-			for (int i=0;i<=ll.size()-1;i++) {
-				LinkedList <Integer>ll2=(LinkedList)ll.get(i);
+			for (List<Integer>ll2:ll) {
 		
 				double wij=1;
 				for (int j=0;j<=ll2.size()-2;j++) {
@@ -78,12 +78,12 @@ public class WalkandPathCountDescriptors {
 		
 		double sum=0;
 		for (int k=1;k<=paths.length-1;k++){
-			LinkedList ll=paths[k];
+			List<List<Integer>> ll=paths[k];
 			
-			for (int i=0;i<=ll.size()-1;i++) {
-				LinkedList <Integer>ll2=(LinkedList)ll.get(i);
-		
+			for (List<Integer>ll2:ll) {
+				
 				double wij=1;
+				
 				for (int j=0;j<=ll2.size()-2;j++) {
 //					String strOne=(String)ll2.get(j);
 //					String strTwo=(String)ll2.get(j+1);
@@ -151,7 +151,7 @@ public class WalkandPathCountDescriptors {
 
 		try {
 		// calculate adjacency matrix:
-		double [][] am = this.getAdjacencyMatrix(m);
+		double [][] am = WalkandPathCountDescriptors.getAdjacencyMatrix(m);
 		
 		Matrix matrix=new Matrix(am);
 		Matrix newmatrix=new Matrix(am);
@@ -161,7 +161,7 @@ public class WalkandPathCountDescriptors {
 		dd.TWC=0;
 		
 		double TWCnew=0;////in version 6.0 of dragon MWC1 is calc using ln(1+x) transformation at the very end
-		double MWC1new=0;//in version 6.0 of dragon MWC1 is calc using ln(1+x) transformation
+		double MWC1new=0;//in version 6.0 of dragon MWC1 is calc using ln(1+x) transformation, TODO needed?
 		
 		
 		Field myField=null;
@@ -189,7 +189,7 @@ public class WalkandPathCountDescriptors {
 											
 
 			double MWCk; 
-			double MWCk2;
+			double MWCk2;//TODO is this needed?
 			
 			if (k==1) {
 				MWCk=m.getBondCount();
@@ -256,7 +256,7 @@ private void CalculateSelfReturningWalkCounts() {
 		
 		try {
 		// calculate adjacency matrix:
-		double [][] am = this.getAdjacencyMatrix(m);
+		double [][] am = WalkandPathCountDescriptors.getAdjacencyMatrix(m);
 		
 		Matrix matrix=new Matrix(am);
 		
@@ -327,19 +327,15 @@ private void CalculateSelfReturningWalkCounts() {
 				}
 			}
 		
-			
-			
-			LinkedList al=(LinkedList)paths[k];
+			List<List<Integer>> al=paths[k];
 			 //System.out.println(k);
 			 
-			 ListIterator li=al.listIterator();
+//			 ListIterator li=al.listIterator();
 			 
 			 double piPCk=0;
 			 
-			 while (li.hasNext()) {
+			 for(List<Integer>al2:al) {
 			 //for (int l=0;l<=al.size()-1;l++) {
-				 
-				 LinkedList <Integer>al2=(LinkedList)li.next();
 				 
 				 double wij=1;
 				 for (int i=0;i<=al2.size()-2;i++) {
@@ -355,8 +351,6 @@ private void CalculateSelfReturningWalkCounts() {
 
 					 IAtom a1=m.getAtom(first);
 					 IAtom a2=m.getAtom(second);
-					 
-					 
 					 
 					 double bondorder;
 
@@ -377,23 +371,15 @@ private void CalculateSelfReturningWalkCounts() {
 					 } else {
 						 IBond b=m.getBond(a1,a2);
 						 bondorder=(double)b.getOrder().numeric();
-					
 					 }
 					
 					 
 					 //System.out.println(first+"\t"+second+"\t"+bondorder);
-					 
 //					 int d1=m.getBondCount(m.getAtom(i));
 //					 int d2=m.getBondCount(m.getAtom(i+1));
-//					 
 //					 wij*=Math.pow((double)(d1*d2),-0.5);
-					 
-					 
-					
-					 
 					 //wij*=Math.pow(bondorder,-1); // use fractional bond order
 					 wij*=bondorder;					 
-					 
 					 //System.out.println(first+"\t"+second+"\t"+wij);
 					 
 				 }
