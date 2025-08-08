@@ -473,7 +473,7 @@ public class RunFromSmiles {
 				
 				String strStructure=getStringStructure(br);
 				
-				if(strStructure.contains("M END")) return null;
+				if(strStructure==null) return null;
 				
 		
 				InputStream stream = new ByteArrayInputStream(strStructure.getBytes());
