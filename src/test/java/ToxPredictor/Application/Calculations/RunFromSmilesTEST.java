@@ -20,7 +20,9 @@ import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
 import ToxPredictor.Application.TESTConstants;
+import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSDF;
 import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles;
+import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles.MoleculeCreator;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Database.DSSToxRecord;
 
@@ -68,9 +70,9 @@ public class RunFromSmilesTEST {
 		boolean createReports=true;//whether to store report
 		boolean createDetailedReports=false;//detailed reports have lots more info and creates more html files
 		AtomContainerSet acs=new AtomContainerSet();
-		IAtomContainer ac=RunFromSmiles.createMolecule("c1ccccc1", "DTXSID3039242","71-43-2");
+		IAtomContainer ac=MoleculeCreator.createMolecule("c1ccccc1", "DTXSID3039242","71-43-2");
 		acs.addAtomContainer(ac);//valid simple molecule
-		Hashtable<String,PredictionResults>htResults=RunFromSmiles.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
+		Hashtable<String,PredictionResults>htResults=RunFromSDF.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
 		String pred=htResults.get(ac.getProperty(DSSToxRecord.strSID)).getPredictionResultsPrimaryTable().getPredToxValue();
 		assertTrue(pred.equals("3.28"));
 	}
@@ -82,9 +84,9 @@ public class RunFromSmilesTEST {
 		boolean createReports=true;//whether to store report
 		boolean createDetailedReports=false;//detailed reports have lots more info and creates more html files
 		AtomContainerSet acs=new AtomContainerSet();
-		IAtomContainer ac=RunFromSmiles.createMolecule("[S]", "DTXSID9034941","7704-34-9");//has no carbon
+		IAtomContainer ac=MoleculeCreator.createMolecule("[S]", "DTXSID9034941","7704-34-9");//has no carbon
 		acs.addAtomContainer(ac);//valid simple molecule
-		Hashtable<String,PredictionResults>htResults=RunFromSmiles.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
+		Hashtable<String,PredictionResults>htResults=RunFromSDF.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
 		String error=htResults.get(ac.getProperty(DSSToxRecord.strSID)).getError();
 		assertTrue(error.equals("Only one nonhydrogen atom"));		
 //		System.out.println(error);
@@ -100,9 +102,9 @@ public class RunFromSmilesTEST {
 		boolean createReports=true;//whether to store report
 		boolean createDetailedReports=false;//detailed reports have lots more info and creates more html files
 		AtomContainerSet acs=new AtomContainerSet();
-		IAtomContainer ac=RunFromSmiles.createMolecule("XXXX", "DTXSID2","123-45-6");
+		IAtomContainer ac=MoleculeCreator.createMolecule("XXXX", "DTXSID2","123-45-6");
 		acs.addAtomContainer(ac);//valid simple molecule
-		Hashtable<String,PredictionResults>htResults=RunFromSmiles.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
+		Hashtable<String,PredictionResults>htResults=RunFromSDF.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
 		String error=htResults.get(ac.getProperty(DSSToxRecord.strSID)).getError();
 
 //		System.out.println("*"+error+"*");
@@ -117,10 +119,10 @@ public class RunFromSmilesTEST {
 		boolean createReports=true;//whether to store report
 		boolean createDetailedReports=false;//detailed reports have lots more info and creates more html files
 		AtomContainerSet acs=new AtomContainerSet();
-		IAtomContainer ac=RunFromSmiles.createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2");
+		IAtomContainer ac=MoleculeCreator.createMolecule("Cl.CCC(=O)OC1(CCN(CC#CC2=CC=CC=C2)CC1)C1=CC=CC=C1", "DTXSID20211176","62119-86-2");
 
 		acs.addAtomContainer(ac);//valid simple molecule
-		Hashtable<String,PredictionResults>htResults=RunFromSmiles.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
+		Hashtable<String,PredictionResults>htResults=RunFromSDF.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
 		String error=htResults.get(ac.getProperty(DSSToxRecord.strSID)).getError();
 
 //		System.out.println("*"+error+"*");
@@ -151,7 +153,7 @@ public class RunFromSmilesTEST {
 			AtomContainerSet acs = getDSSToxRecords(excelFileName); 
 	        
 			//Generate new predictions using RunFromSmiles class:
-			Hashtable<String,PredictionResults>htResults=RunFromSmiles.runEndpoint(acs, endpoint, method,false,false,DSSToxRecord.strCAS);		
+			Hashtable<String,PredictionResults>htResults=RunFromSDF.runEndpoint(acs, endpoint, method,false,false,DSSToxRecord.strCAS);		
 
 	        Enumeration<String> e = htResults.keys();
 	        
@@ -215,7 +217,7 @@ public class RunFromSmilesTEST {
 			String DTXSID=row.getCell(htCols.get("DTXSID")).getStringCellValue();
 			String CAS=row.getCell(htCols.get("CASRN")).getStringCellValue();
 			String Smiles=row.getCell(htCols.get("SMILES")).getStringCellValue();
-			acs.addAtomContainer(RunFromSmiles.createMolecule(Smiles,DTXSID,CAS));
+			acs.addAtomContainer(MoleculeCreator.createMolecule(Smiles,DTXSID,CAS));
 //	        	System.out.println(DTXSID+"\t"+CAS+"\t"+Smiles);
 		}		
 		workbook.close();		

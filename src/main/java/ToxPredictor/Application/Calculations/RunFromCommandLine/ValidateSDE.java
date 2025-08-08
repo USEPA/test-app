@@ -20,6 +20,7 @@ import com.google.gson.GsonBuilder;
 
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
+import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles.ReportCreator;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Database.DSSToxRecord;
 
@@ -164,7 +165,7 @@ public class ValidateSDE {
 			String dtxsid = mapValery.keySet().iterator().next();
 
 			PredictionResults prValery = mapValery.get(dtxsid).get(0);
-			String htmlReportValery = RunFromSmiles.getReportAsHTMLString(prValery);
+			String htmlReportValery = ReportCreator.getReportAsHTMLString(prValery);
 
 			List<PredictionResults> listTodd = mapTodd.get(dtxsid);
 			
@@ -184,7 +185,7 @@ public class ValidateSDE {
 				}
 			}
 
-			String htmlReportTodd = RunFromSmiles.getReportAsHTMLString(prTodd);
+			String htmlReportTodd = ReportCreator.getReportAsHTMLString(prTodd);
 
 			// System.out.println(htmlReport);
 

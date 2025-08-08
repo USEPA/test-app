@@ -28,9 +28,9 @@ public class RunFromSmilesTest {
 		boolean createReports = true;// whether to store report
 		boolean createDetailedReports = false;// detailed reports have lots more info and creates more html files
 
-		AtomContainerSet acs= RunFromSmiles.readSDFV3000(SDFFilePath);
+		AtomContainerSet acs= RunFromSDF.readSDF(SDFFilePath,-1,false);
 		if (debug) System.out.println("atom container count="+acs.getAtomContainerCount());
-		AtomContainerSet acs2 = RunFromSmiles.filterAtomContainerSet(acs, skipMissingSID,maxCount);
+		AtomContainerSet acs2 = RunFromSDF.filterAtomContainerSet(acs, skipMissingSID,maxCount);
 		if (debug) System.out.println("atom container count="+acs2.getAtomContainerCount());
 
 		try {
@@ -53,7 +53,7 @@ public class RunFromSmilesTest {
 				acs3.addAtomContainer(ac);
 
 
-				List<PredictionResults>results=RunFromSmiles.runEndpointsAsList(acs3, RunFromSmiles.allEndpoints, method,createReports,createDetailedReports);
+				List<PredictionResults>results=RunFromSDF.runEndpointsAsList(acs3, RunFromSmiles.allEndpoints, method,createReports,createDetailedReports);
 				
 				for (PredictionResults pr:results) {
 					fw.write(RunFromSmiles.gsonNotPretty.toJson(pr)+"\r\n");
@@ -71,7 +71,8 @@ public class RunFromSmilesTest {
 		
 	}
 	
-public static void runSDF_all_endpoints_write_continuously_single(String SDFFilePath, String destJsonPath,boolean skipMissingSID,boolean debug) {
+
+	public static void runSDF_all_endpoints_write_continuously_single(String SDFFilePath, String destJsonPath,boolean skipMissingSID,boolean debug) {
 
 //		String [] endpoints=RunFromSmiles.allEndpoints;
 		List<String> endpoints= Arrays.asList(TESTConstants.ChoiceFHM_LC50);
@@ -80,9 +81,9 @@ public static void runSDF_all_endpoints_write_continuously_single(String SDFFile
 		boolean createReports = true;// whether to store report
 		boolean createDetailedReports = false;// detailed reports have lots more info and creates more html files
 
-		AtomContainerSet acs= RunFromSmiles.readSDFV3000(SDFFilePath);
+		AtomContainerSet acs= RunFromSDF.readSDFV3000(SDFFilePath);
 		if (debug) System.out.println("atom container count="+acs.getAtomContainerCount());
-		AtomContainerSet acs2 = RunFromSmiles.filterAtomContainerSet(acs, skipMissingSID,1);
+		AtomContainerSet acs2 = RunFromSDF.filterAtomContainerSet(acs, skipMissingSID,1);
 		if (debug) System.out.println("atom container count="+acs2.getAtomContainerCount());
 
 		try {
@@ -105,7 +106,7 @@ public static void runSDF_all_endpoints_write_continuously_single(String SDFFile
 			acs3.addAtomContainer(ac);
 
 
-			List<PredictionResults>results=RunFromSmiles.runEndpointsAsList(acs3, endpoints, method,createReports,createDetailedReports);
+			List<PredictionResults>results=RunFromSDF.runEndpointsAsList(acs3, endpoints, method,createReports,createDetailedReports);
 
 			for (PredictionResults pr:results) {
 				fw.write(RunFromSmiles.gson.toJson(pr)+"\r\n");

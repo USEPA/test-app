@@ -1,14 +1,8 @@
 package ToxPredictor.Application.Calculations.RunFromCommandLine;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 
-import javax.swing.JFrame;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -79,7 +73,7 @@ public class RunFromCommandLine {
 
 		for (int i=0;i<acs.getAtomContainerCount();i++) {
 			AtomContainer ac=(AtomContainer)acs.getAtomContainer(i);
-			ac.setProperty("Index", new Integer(i+1));
+			ac.setProperty("Index", i+1);
 //			System.out.println(ac.getProperty("Index")+"");
 		}
 		
@@ -131,7 +125,7 @@ public class RunFromCommandLine {
 			f.panelResults.initTableModelDescriptors();
 		}
 
-		tc2.commandLineOutputFile=new File(outputFilePath);
+		TaskCalculations2.commandLineOutputFile=new File(outputFilePath);
 		tc2.go();
 		
 	}

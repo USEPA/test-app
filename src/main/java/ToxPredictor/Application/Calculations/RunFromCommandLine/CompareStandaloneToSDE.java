@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import ToxPredictor.Application.TESTConstants;
+import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles.ReportCreator;
 import ToxPredictor.Application.model.IndividualPredictionsForConsensus.PredictionIndividualMethod;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
@@ -192,7 +193,7 @@ public class CompareStandaloneToSDE {
 //		PredictionResults pr=c.getPredictionResultsFromSDEresults(1383);
 //		PredictionResults pr=c.getPredictionResultsFromSDEresults(1384);
 		c.fixPredictionResultsSDE(pr);
-		String htmlReport=RunFromSmiles.getReportAsHTMLString(pr);
+		String htmlReport=ReportCreator.getReportAsHTMLString(pr);
 		c.writeResultsHtml(htmlReport, "resultsHTML_SDE.html");
 		
 //		c.getPredictionResultsFromSDEresultsSalt();
