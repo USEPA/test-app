@@ -22,34 +22,61 @@ public class AtomicProperties {
 		String DataFile="whim weights.txt";
 //		String DataFile="SystemData/whim weights v3.0.txt";//use file in src/main/resources instead of jar file
 				
-		InputStream ins=this.getClass().getClassLoader().getResourceAsStream(DataFile);
-		InputStreamReader isr=new InputStreamReader(ins);
-		BufferedReader br=new BufferedReader(isr);
+		initHashtables(DataFile);
 		
-		String Header=br.readLine(); // header
-		
-		String Line="";
-		while (true) {
-			Line=br.readLine();
-			
+	}
+	
+	/**
+	 * For testing to see impact of changed weights file
+	 * 
+	 * @param dataFilePath
+	 */
+	public static void reloadHashtables(String dataFilePath) {
+		ap.initHashtables(dataFilePath);
+	}
+	
+
+	private void initHashtables(String DataFile) {
+
+		htMass = new Hashtable<>();
+		htVdWVolume = new Hashtable<>();
+		htElectronegativity = new Hashtable<>();
+		htPolarizability = new Hashtable<>();
+
+		InputStream ins = this.getClass().getClassLoader().getResourceAsStream(DataFile);
+		InputStreamReader isr = new InputStreamReader(ins);
+		BufferedReader br = new BufferedReader(isr);
+
+		try {
+			String Header = br.readLine();
+
+			String Line = "";
+			while (true) {
+				Line = br.readLine();
+
 //			System.out.println(Line);
-			
-			if (!(Line instanceof String)) {
-				break;
+
+				if (!(Line instanceof String)) {
+					break;
+				}
+
+				LinkedList<String> l = Utilities.Parse(Line, "\t");
+
+				String symbol = (String) l.get(0);
+				htMass.put(symbol, Double.parseDouble(l.get(1)));
+				htVdWVolume.put(symbol, Double.parseDouble(l.get(2)));
+				htElectronegativity.put(symbol, Double.parseDouble(l.get(3)));
+				htPolarizability.put(symbol, Double.parseDouble(l.get(4)));
+
 			}
-			
-			LinkedList<String> l=Utilities.Parse(Line,"\t");
-			
-			String symbol=(String)l.get(0);
-			htMass.put(symbol,Double.parseDouble(l.get(1)));
-			htVdWVolume.put(symbol,Double.parseDouble(l.get(2)));
-			htElectronegativity.put(symbol,Double.parseDouble(l.get(3)));
-			htPolarizability.put(symbol,Double.parseDouble(l.get(4)));
-			
-		}
-						
-		br.close();
-		
+
+			br.close();
+
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} // header
+
 	}
 
 	public Double GetVdWVolume(String symbol) {
