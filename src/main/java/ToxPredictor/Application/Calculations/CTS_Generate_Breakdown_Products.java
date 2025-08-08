@@ -1,23 +1,6 @@
 package ToxPredictor.Application.Calculations;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Set;
-
-import org.apache.http.HttpEntity;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.slf4j.LoggerFactory;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -25,11 +8,8 @@ import com.google.gson.JsonObject;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 
 import ToxPredictor.Application.Calculations.ResultsCTS.Data.Tree.Child;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 
 
 public class CTS_Generate_Breakdown_Products {
@@ -54,14 +34,14 @@ public class CTS_Generate_Breakdown_Products {
 //		public String likelihood;
 //	}
 	
-	void turnOffLogging() {
-		Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
-		for(String log:loggers) { 
-			Logger logger = (Logger)LoggerFactory.getLogger(log);
-			logger.setLevel(Level.INFO);
-			logger.setAdditive(false);
-		} //end
-	}
+//	void turnOffLogging() {
+//		Set<String> loggers = new HashSet<>(Arrays.asList("org.apache.http", "groovyx.net.http"));
+//		for(String log:loggers) { 
+//			Logger logger = (Logger)LoggerFactory.getLogger(log);
+//			logger.setLevel(Level.INFO);
+//			logger.setAdditive(false);
+//		} //end
+//	}
 	
 	
 //	/***
@@ -304,7 +284,7 @@ public class CTS_Generate_Breakdown_Products {
 		
 		try {
 			
-			this.turnOffLogging();
+//			this.turnOffLogging();
 									
 			JsonObject jo=new JsonObject();
 			
@@ -578,8 +558,8 @@ public class CTS_Generate_Breakdown_Products {
 	void testRunCTS() {
 		int numGens=4;
 		String smilesTPP="O=P(OC1=CC=CC=C1)(OC2=CC=CC=C2)OC3=CC=CC=C3";
-		String smilesHCE="C(Cl)(Cl)(Cl)C(Cl)(Cl)(Cl)";
-		String smilesC8Cl="C(C(C(C(C(C(C(C(Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)(Cl)Cl";
+//		String smilesHCE="C(Cl)(Cl)(Cl)C(Cl)(Cl)(Cl)";
+//		String smilesC8Cl="C(C(C(C(C(C(C(C(Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)Cl)(Cl)(Cl)Cl";
 		
 		String strJSON=runCTS(urlCTS,smilesTPP,numGens,strLibraryHydrolysis);
 		

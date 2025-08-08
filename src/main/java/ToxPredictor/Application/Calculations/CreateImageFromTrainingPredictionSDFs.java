@@ -4,8 +4,6 @@ package ToxPredictor.Application.Calculations;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
-import org.openscience.cdk.smiles.SmiFlavor;
-import org.openscience.cdk.smiles.SmilesGenerator;
 
 import ToxPredictor.Utilities.SaveStructureToFile;
 import ToxPredictor.Utilities.StructureImageUtil;
@@ -69,20 +67,23 @@ public class CreateImageFromTrainingPredictionSDFs {
 
 			ins = CreateImageFromTrainingPredictionSDFs.class.getClassLoader().getResourceAsStream(filepath); 
 
-			IteratingSDFReader mr = new IteratingSDFReader(ins,DefaultChemObjectBuilder.getInstance());
-			
-			while (mr.hasNext()) {
-				IAtomContainer ac=mr.next();
-				
-				if (ac==null) return null;
-				
-				String CASi=ac.getProperty("CAS");
-								
-				if (CASi.contentEquals(CAS)) {
+			try (IteratingSDFReader mr = new IteratingSDFReader(ins,DefaultChemObjectBuilder.getInstance())) {
+				while (mr.hasNext()) {
+					IAtomContainer ac=mr.next();
+					
+					if (ac==null) {
+						return null;
+					}
+					
+					String CASi=ac.getProperty("CAS");
+									
+					if (CASi.contentEquals(CAS)) {
 //					System.out.println("CAS Match!"+CASi);
-					return ac;
+						return ac;
+					}
 				}
 			}
+			
 			return null;			
 			
 		} catch (Exception ex) {

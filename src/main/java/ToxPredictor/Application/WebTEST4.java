@@ -11,8 +11,6 @@ import ToxPredictor.Application.Calculations.PredictToxicityNearestNeighbor;
 import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJSON;
 import ToxPredictor.Application.Calculations.TaskCalculations;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
-import ToxPredictor.Application.GUI.TESTApplication;
-import ToxPredictor.Application.GUI.Miscellaneous.DangerousPathChecker;
 import ToxPredictor.Database.DSSToxRecord;
 //import ToxPredictor.Database.ResolverDb;
 import ToxPredictor.Database.ResolverDb2;
@@ -21,7 +19,6 @@ import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.FormatUtils;
 import ToxPredictor.Utilities.HueckelAromaticityDetector;
-import ToxPredictor.Utilities.Inchi;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.misc.Lookup;
 import ToxPredictor.misc.MolFileUtilities;
@@ -51,7 +48,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
@@ -65,11 +61,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.JOptionPane;
 
 public class WebTEST4 {
-	public static boolean dashboardStructuresAvailable = true;
+	
+	public static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
 
+	public static boolean dashboardStructuresAvailable = true;
+	public static boolean printEachPrediction = true;
+
+	
 	private static final Logger logger = LogManager.getLogger(WebTEST4.class);
 
 	public static final String ERROR_CODE_STRUCTURE_ERROR = "SE";// TODO
@@ -108,6 +108,9 @@ public class WebTEST4 {
 //	private int classIndex = 1;
 //	private int chemicalNameIndex = 0;
 	private static final String descriptorSet = "2d";
+
+
+
 	public static int minPredCount = 2;// minimum number of predictions needed
 										// for consensus pred
 //	private static String del = "\t";
@@ -385,7 +388,7 @@ public class WebTEST4 {
 				htAllResultsMOA.put(MOAi, allResultsMOA);
 
 				String trainingFilePathLC50 = "LC50/" + MOAi + ".csv";
-				File tfpl = new File(trainingFilePathLC50);
+//				File tfpl = new File(trainingFilePathLC50);
 
 				// System.out.println(trainingFilePathLC50);
 
@@ -692,16 +695,10 @@ public class WebTEST4 {
 
 		long timeFinishPredictions = System.currentTimeMillis();
 
-		long t1 = System.currentTimeMillis();
-		
-		
-
+//		long t1 = System.currentTimeMillis();
 		tpv.predictionResults = jsonCreator.generatePredictionResultsConsensus(d, tpv, predictedToxicities,
 				predictedUncertainties, predToxVal, options, createReports);
-		long t2 = System.currentTimeMillis();
-
-
-		
+//		long t2 = System.currentTimeMillis();
 //		System.out.println((t2-t1)+" millsecs");
 
 		if (generateWebpages) writeResultsFiles(d, tpv, method);			
@@ -709,11 +706,10 @@ public class WebTEST4 {
 //		long reportGenerationTime = System.currentTimeMillis() - timeFinishPredictions;
 		long predictionGenerationTime = timeFinishPredictions - timeStartPredictions;
 
-		logger.info("{}\t{}\t{}\t\t{}\t{}\t{}", d.CAS, FormatUtils.toD3(d.er.expToxValue), FormatUtils.toD3(predToxVal),
+		
+		if(printEachPrediction)
+			logger.info("{}\t{}\t{}\t\t{}\t{}\t{}", d.CAS, FormatUtils.toD3(d.er.expToxValue), FormatUtils.toD3(predToxVal),
 				descriptorCalculationTime, predictionGenerationTime, d.endpoint);
-		
-		
-		
 		
 		return predToxVal;
 	}
@@ -740,7 +736,7 @@ public class WebTEST4 {
 			Instances instancesTrain, Instances instancesEval, AllResults allResults, ReportOptions options,
 			boolean createReports) {
 
-		int result = ptH.CalculateToxicity2(method, d.useFragmentsConstraint, d.isBinaryEndpoint, d.MW, d.MW_Frag,
+		ptH.CalculateToxicity2(method, d.useFragmentsConstraint, d.isBinaryEndpoint, d.MW, d.MW_Frag,
 				instancesEval, instancesTrain, allResults);
 
 		TESTPredictedValue tpv = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, d.er.expToxValue,
@@ -818,7 +814,7 @@ public class WebTEST4 {
 	private static void runNN(DataForPredictionRun d, List<TESTPredictedValue> res, String descriptorSet,
 			Instances instancesTrain, Instances instancesEval, ReportOptions options, boolean createReports) {
 		
-		int result = ptNN.CalculateToxicity2(descriptorSet, instancesTrain, instancesEval);
+		ptNN.CalculateToxicity2(descriptorSet, instancesTrain, instancesEval);
 		
 		double predToxVal = ptNN.predToxVal;
 //		double predToxUnc=ptNN.predToxUnc;//TODO		
@@ -874,8 +870,9 @@ public class WebTEST4 {
 
 		DescriptorFactory df = new DescriptorFactory(false);
 
-		logger.info("Calculating '{}' using '{}' methods...", params.endpoints,
-				params.methods);
+		if(printEachPrediction)
+			logger.info("Calculating '{}' using '{}' methods...", params.endpoints,params.methods);
+		
 		long start = System.currentTimeMillis();
 		totalDescriptorCalculationTime = 0;
 		totalPredictionGenerationTime = 0;

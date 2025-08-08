@@ -1,42 +1,29 @@
 package ToxPredictor.Application.Calculations;
 
-import java.beans.XMLDecoder;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.JOptionPane;
 
 import org.openscience.cdk.AtomContainer;
-import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.interfaces.IAtomContainerSet;
-import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import QSAR.qsarOptimal.AllResults;
 import QSAR.validation2.AllResultsXMLReader;
 import QSAR.validation2.InstanceUtilities;
 import wekalite.*;
 //import ToxPredictor.My3Ddescriptors.descriptorfactory3D_2;
-import edu.stanford.ejalbert.BrowserLauncher;//new one
-import ToxPredictor.Utilities.TESTPredictedValue;
 //import weka.core.Instance;
 //import weka.core.Instances;
 import ToxPredictor.Utilities.Utilities;
 //import ToxPredictor.generate3Dcoordinates.*;
 import ToxPredictor.misc.Lookup;
-import ToxPredictor.misc.Lookup.ExpRecord;
-import ToxPredictor.misc.ParseChemidplus;
 import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.GUI.Miscellaneous.SwingWorker;
@@ -146,7 +133,7 @@ public class TaskCalculations {
 	}
 
 	public static String[] CreateVarListFromTrainingSet(Instances trainingSet) {
-		ArrayList varList = new ArrayList();
+		List<String> varList = new ArrayList<>();
 
 		for (int i = 0; i < trainingSet.numAttributes(); i++) {
 			varList.add(trainingSet.attribute(i));
@@ -160,8 +147,8 @@ public class TaskCalculations {
 
 	}
 
-	public static ArrayList<String> getMethods(String endpoint) {
-		ArrayList<String> methods = new ArrayList<String>();
+	public static List<String> getMethods(String endpoint) {
+		List<String> methods = new ArrayList<String>();
 		methods.add(TESTConstants.ChoiceHierarchicalMethod);
 
 		if (TESTConstants.haveSingleModelMethod(endpoint)) {
@@ -334,7 +321,7 @@ public class TaskCalculations {
 
 	}
 
-	private void WriteOverallTextHeaderAllMethods(FileWriter fw, String d, ArrayList<String> methods) throws Exception {
+	private void WriteOverallTextHeaderAllMethods(FileWriter fw, String d, List<String> methods) throws Exception {
 		String massunits = TESTConstants.getMassUnits(endpoint);
 		String molarlogunits = TESTConstants.getMolarLogUnits(endpoint);
 
@@ -474,7 +461,7 @@ public class TaskCalculations {
 
 	}
 
-	private void WriteToxicityResultsForChemicalAllMethods(FileWriter fw3, int index, String CAS, double ExpToxVal, ArrayList<String> methods, ArrayList<Double> preds, double MW, String d,
+	private void WriteToxicityResultsForChemicalAllMethods(FileWriter fw3, int index, String CAS, double ExpToxVal, List<String> methods, List<Double> preds, double MW, String d,
 			String error) {
 		try {
 
@@ -490,7 +477,7 @@ public class TaskCalculations {
 					double PredToxVal = preds.get(i);
 
 					if (PredToxVal == -9999) {
-						predsMass.add(new Double(-9999));
+						predsMass.add(-9999.0);
 					}
 
 					if (isLogMolarEndpoint) {
@@ -727,7 +714,7 @@ public class TaskCalculations {
 		}
 	}
 
-	private double calculateConsensusToxicity(ArrayList<Double> preds) {
+	private double calculateConsensusToxicity(List<Double> preds) {
 
 		double pred = 0;
 
@@ -1021,8 +1008,8 @@ public class TaskCalculations {
 		if (done)
 			return;
 
-		Instances trainingDataSet2d = ht_ccTraining.get(endpoint);
-		Instances trainingDataSetFrag = ht_ccTrainingFrag.get(endpoint);
+//		Instances trainingDataSet2d = ht_ccTraining.get(endpoint);
+//		Instances trainingDataSetFrag = ht_ccTrainingFrag.get(endpoint);
 
 	}
 
@@ -1275,7 +1262,7 @@ public class TaskCalculations {
 		statMessage = message;
 	}
 
-	private void calculate(int molNum, int molCount, IAtomContainer m, FileWriter fw, FileWriter fw2, FileWriter fw3, int index, ArrayList<String> methods) {
+	private void calculate(int molNum, int molCount, IAtomContainer m, FileWriter fw, FileWriter fw2, FileWriter fw3, int index, List<String> methods) {
 
 		DescriptorData dd = new DescriptorData();
 		dd.ID = (String) m.getProperty("CAS");
@@ -1326,7 +1313,7 @@ public class TaskCalculations {
 			statMessage = "Calculating 2D descriptors...";
 		}
 
-		Integer Index = (Integer) m.getProperty("Index");
+//		Integer Index = (Integer) m.getProperty("Index");
 		// statMessage += "Molecule #" + Index;
 		statMessage += "Molecule ID = " + dd.ID + " (" + (molNum + 1) + " of " + molCount + ")";
 
@@ -1401,8 +1388,8 @@ public class TaskCalculations {
 		if (!endpoint.equals(TESTConstants.ChoiceDescriptors)) {
 
 			// array to store predictions for all methods for consensus method:
-			ArrayList predictedToxicities = new ArrayList();
-			ArrayList predictedUncertainties = new ArrayList();
+			List<Double> predictedToxicities = new ArrayList<>();
+			List<Double> predictedUncertainties = new ArrayList<>();
 
 			AllResults allResults = ht_allResults.get(endpoint);// shortcut to
 																// results
@@ -1425,7 +1412,7 @@ public class TaskCalculations {
 
 			String ToxFieldName = "Tox";
 
-			java.util.Hashtable ht = dd.CreateDataHashtable(ToxFieldName, true, true, false, false, false);
+			Hashtable<String,Object> ht = dd.CreateDataHashtable(ToxFieldName, true, true, false, false, false);
 
 			String[] varArrayFrag = null;
 			Instances evalInstancesFrag = null;
@@ -1556,7 +1543,7 @@ public class TaskCalculations {
 				double[] Mean = trainingDataSet2d.getMeans();
 				double[] StdDev = trainingDataSet2d.getStdDevs();
 
-				Hashtable<Double, Instance> htTestMatch = this.FindClosestChemicals(evalInstance2d, testDataSet2d, true, false, true, Mean, StdDev);
+				Hashtable<Double, Instance> htTestMatch = FindClosestChemicals(evalInstance2d, testDataSet2d, true, false, true, Mean, StdDev);
 
 				Hashtable<Double, Instance> htTrainMatch = FindClosestChemicals(evalInstance2d, trainingDataSet2d, true, false, true, Mean, StdDev);
 
@@ -1604,7 +1591,7 @@ public class TaskCalculations {
 	public static Hashtable<Double, Instance> FindClosestChemicals(Instance evalInstance2d, Instances dataSet2d, boolean ExcludeTestChemicalCASFromTrainingSet,
 			boolean ExcludeTestChemical2dIsomerFromTrainingSet, boolean MustExceedSCmin, double[] Mean, double[] StdDev) {
 
-		Lookup lookup = new Lookup();
+//		Lookup lookup = new Lookup();
 		// TODO make sure structure images for matches are there!
 
 		// ChemicalCluster ccTest = new ChemicalCluster(dataSet2d);
@@ -1612,7 +1599,7 @@ public class TaskCalculations {
 		// double[] Mean = ccTest.CalculateMeans();
 		// double[] StdDev = ccTest.CalculateStdDevs();
 
-		Hashtable ht = new Hashtable();
+		Hashtable<Double,Instance> ht = new Hashtable<>();
 
 //		System.out.println("here a\t"+evalInstance2d.toString());
 //	    Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -1643,7 +1630,7 @@ public class TaskCalculations {
 			}
 
 			if (!MustExceedSCmin || SimCoeff > SCmin)
-				ht.put(new Double(SimCoeff), chemicali);
+				ht.put(SimCoeff, chemicali);
 
 		}
 
@@ -1828,7 +1815,6 @@ public class TaskCalculations {
 			df.done = false;
 
 			// ************************************************
-			int result = -9999;
 
 			loadTrainingData();
 			if (done)
@@ -1836,7 +1822,7 @@ public class TaskCalculations {
 
 			// ************************************************
 			// Figure out methods:
-			ArrayList methods = getMethods(endpoint); // shortcut to results
+			List<String> methods = getMethods(endpoint); // shortcut to results
 														// object
 			// *******************************************************
 
@@ -2132,7 +2118,7 @@ public class TaskCalculations {
 		// transport inhibitors");
 		vecMOA.add("Uncoupler");
 
-		String endpointInFile = "mace_moa";
+//		String endpointInFile = "mace_moa";
 		CSVLoader atf = new CSVLoader();
 
 		for (int i = 0; i < vecMOA.size(); i++) {
@@ -2157,7 +2143,7 @@ public class TaskCalculations {
 				htAllResultsMOA.put(MOAi, allResultsMOA);
 
 				String trainingFilePathLC50 = "LC50/" + MOAi + ".csv";
-				File tfpl = new File(trainingFilePathLC50);
+//				File tfpl = new File(trainingFilePathLC50);
 
 				// System.out.println(trainingFilePathLC50);
 

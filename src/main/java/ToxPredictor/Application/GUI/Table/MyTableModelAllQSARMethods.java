@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JLabel;
@@ -136,7 +137,7 @@ public class MyTableModelAllQSARMethods extends AbstractTableModel {
 //			System.out.println("Note: All values in " + units + "\r\n");//TODO add note below table
 //		}
 				
-		ArrayList<String> methods = TaskCalculations2.getMethods(endpoint);	
+		List<String> methods = TaskCalculations2.getMethods(endpoint);	
 		
 		for (int i = 0; i < methods.size(); i++) {
 			colNames.add("Pred_" + methods.get(i)+"\n"+units);

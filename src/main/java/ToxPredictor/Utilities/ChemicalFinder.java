@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import ToxPredictor.MyDescriptors.DescriptorFactory;
 import ToxPredictor.misc.MolFileUtilities;
 import ToxPredictor.misc.ParseChemidplus;
 
@@ -126,20 +125,19 @@ public class ChemicalFinder {
 
 			String header=br.readLine();
 			
-			int CASCol=ToxPredictor.Utilities.Utilities.FindFieldNumber(header, "CAS Number");
-			
+//			int CASCol=ToxPredictor.Utilities.Utilities.FindFieldNumber(header, "CAS Number");
 
 			while (true) {
 				String Line=br.readLine();
 				if (Line==null) break;
 				
-				java.util.LinkedList list=ToxPredictor.Utilities.Utilities.Parse3(Line, "\t");
+				List<String>list=ToxPredictor.Utilities.Utilities.Parse3(Line, "\t");
 				
-				String currentCAS=(String)list.get(ColCAS);
+				String currentCAS=list.get(ColCAS);
 					
 				if (CAS.equals(currentCAS)) {
-					String SMILES=(String)list.get(ColSMILES);
-					String Name=(String)list.get(ColName);	
+					String SMILES=list.get(ColSMILES);
+					String Name=list.get(ColName);	
 					
 					AtomContainer molecule=(AtomContainer) sp.parseSmiles(SMILES);
 					
@@ -189,7 +187,8 @@ public class ChemicalFinder {
 				MDLV2000Reader mr=new MDLV2000Reader(ins);
 				
 				mr.read(mol);
-				ins.close();
+//				ins.close();
+				mr.close();
 
 		}//try
 		catch (Exception e) {
@@ -206,7 +205,7 @@ public class ChemicalFinder {
 	 * @return List of IMolecules
 	 */
 	public AtomContainerSet FindChemicalFromMolecule(AtomContainer mol) {
-		String form;
+		
 		AtomContainerSet mols = new AtomContainerSet();
 //		ArrayList<String> casnums = new ArrayList<String>();
 
@@ -236,7 +235,7 @@ public class ChemicalFinder {
 	 * @param mol
 	 * @return List of CAS numbers in the NCI database that match the chemical
 	 */
-	public List FindCASFromMolecule(IAtomContainer mol,String compareMethod) {
+	public List<String> FindCASFromMolecule(IAtomContainer mol,String compareMethod) {
 		
 //		ArrayList<Molecule> mols = new ArrayList<Molecule>();
 		ArrayList<String> casnums = new ArrayList<String>();
@@ -256,13 +255,13 @@ public class ChemicalFinder {
 			
 			// Get the list of CAS numbers of IMolecules that have the same
 			// formula
-			List ims = FindCASFromFormula(form);
+			List<String> ims = FindCASFromFormula(form);
 			
 //			System.out.println(ims.size());
 
 			// Compare the IMolecule with molecules from the list
 			for (int i = 0; i < ims.size(); i++) {
-				String cas = (String) ims.get(i);
+				String cas = ims.get(i);
 				String file = coordfolder+"/" + cas + ".mol";
 //				 System.out.println(file);
 				InputStream ins = this.getClass().getClassLoader()
@@ -321,7 +320,7 @@ public class ChemicalFinder {
 	 * @param mol
 	 * @return List of CAS numbers in the NCI database that match the chemical
 	 */
-	public List FindCASFromMolecule(AtomContainer mol,String compareMethod,String structureFolder,String manifestFileName) {
+	public List<String> FindCASFromMolecule(AtomContainer mol,String compareMethod,String structureFolder,String manifestFileName) {
 		
 //		ArrayList<Molecule> mols = new ArrayList<Molecule>();
 		ArrayList<String> casnums = new ArrayList<String>();
@@ -336,7 +335,7 @@ public class ChemicalFinder {
 
 			// Get the list of CAS numbers of IMolecules that have the same
 			// formula
-			List ims = FindCASFromFormula(strFormula,structureFolder+"/"+manifestFileName);
+			List<String> ims = FindCASFromFormula(strFormula,structureFolder+"/"+manifestFileName);
 
 //			for (int i=0;i<ims.size();i++) {
 //				System.out.println(i+"\t"+ims.get(i));	
@@ -347,14 +346,13 @@ public class ChemicalFinder {
 			// Compare the IMolecule with molecules from the list
 			for (int i = 0; i < ims.size(); i++) {
 				
-				
-				String cas = (String) ims.get(i);
+				String cas = ims.get(i);
 				String file = structureFolder+"/" + cas + ".mol";
-				
 				
 				AtomContainer mol1=new AtomContainer();
 				MDLV2000Reader mr=new MDLV2000Reader(new FileInputStream(file));
 				mr.read(mol1);
+				mr.close();
 
 				boolean present=false;
 				
@@ -395,11 +393,6 @@ public class ChemicalFinder {
 	 * @return List of CAS numbers in the NCI database that match the chemical
 	 */
 	public String FindCASFromMoleculeUsingFromAllDatabases(AtomContainer mol,String compareMethod) {
-		String form;
-//		ArrayList<Molecule> mols = new ArrayList<Molecule>();
-		ArrayList<String> casnums = new ArrayList<String>();
-
-		
 
 		try {
 			
@@ -420,18 +413,18 @@ public class ChemicalFinder {
 			structureFolderList.add(p.SmilesFolder);
 			
 			ArrayList<String> overallList=new ArrayList<String>();
-			java.util.Hashtable ht=new java.util.Hashtable();
+			java.util.Hashtable<String,Integer> ht=new java.util.Hashtable<>();
 			
 			int maxCount=0;
 			String maxCAS="";
 			
 			for (int i=0;i<structureFolderList.size();i++) {
-				List list=this.FindCASFromMolecule(mol, compareMethod,structureFolderList.get(i), manifestFileName);
+				List<String> list=this.FindCASFromMolecule(mol, compareMethod,structureFolderList.get(i), manifestFileName);
 
 //				System.out.println(structureFolderList.get(i));
 				for (int j=0;j<list.size();j++) {
 //					System.out.print(list.get(j)+"\t");
-					String casij=(String)list.get(j);
+					String casij=list.get(j);
 					
 					int count=0;
 					if (ht.get(casij)!=null) {
@@ -476,7 +469,7 @@ public class ChemicalFinder {
 	 * @return List of data rows (each row is a tab delimited string with CAS,
 	 *         SMILES, Formula, MW, and Name
 	 */
-	public List FindCASFromMolecule2(AtomContainer mol) {
+	public List<String> FindCASFromMolecule2(AtomContainer mol) {
 		
 //		ArrayList<Molecule> mols = new ArrayList<Molecule>();
 		ArrayList<String> datalist = new ArrayList<String>();
@@ -523,7 +516,7 @@ public class ChemicalFinder {
 	 * @param form
 	 * @return List of CAS numbers
 	 */
-	public List FindCASFromFormula(String formula) {
+	public List<String> FindCASFromFormula(String formula) {
 		
 		ArrayList<String> casnums = new ArrayList<String>();
 
@@ -580,7 +573,7 @@ public class ChemicalFinder {
 	 * @param form
 	 * @return List of CAS numbers
 	 */
-	public List FindCASFromFormula(String formula,String manifestFilePath) {
+	public List<String> FindCASFromFormula(String formula,String manifestFilePath) {
 		String form = formula;
 		ArrayList<String> casnums = new ArrayList<String>();
 
@@ -627,7 +620,7 @@ public class ChemicalFinder {
 	 * @return List of data rows (each row is a tab delimited string with CAS,
 	 *         SMILES, Formula, MW, and Name
 	 */
-	public List FindCASFromFormula2(String formula) {
+	public List<String> FindCASFromFormula2(String formula) {
 		String form = formula;
 		ArrayList<String> datarows = new ArrayList<String>();
 
@@ -648,7 +641,7 @@ public class ChemicalFinder {
 				String Line=br.readLine();
 				if (Line==null) break;
 				
-				java.util.LinkedList list=ToxPredictor.Utilities.Utilities.Parse3(Line, "\t");
+				List<String> list=ToxPredictor.Utilities.Utilities.Parse3(Line, "\t");
 				String currentFormula=(String)list.get(ColFormula);
 				
 				if (formula.equals(currentFormula)) {
@@ -707,7 +700,7 @@ public class ChemicalFinder {
 	 * @return List of data rows (each row is a tab delimited string with CAS,
 	 *         SMILES, Formula, MW, and Name
 	 */
-	public List FindCASFromMolecularWeight2(double MW) {
+	public List<String> FindCASFromMolecularWeight2(double MW) {
 		
 		ArrayList<String> datarows = new ArrayList<String>();
 
@@ -726,7 +719,7 @@ public class ChemicalFinder {
 				String Line=br.readLine();
 				if (Line==null) break;
 				
-				java.util.LinkedList list=ToxPredictor.Utilities.Utilities.Parse3(Line, "\t");
+				List<String> list=ToxPredictor.Utilities.Utilities.Parse3(Line, "\t");
 				String strweight=(String)list.get(ColMW);
 				
 				double currentMW = Double.parseDouble(strweight); //fourth token
@@ -831,7 +824,7 @@ public class ChemicalFinder {
 					mol.setProperty("CAS", cas);
 					molecules.addAtomContainer(mol);
 					
-					ins.close();
+					mr.close();
 				}//for int i=0
 			}//if the number of cas numbers in the list is greater than zero
 
@@ -849,7 +842,7 @@ public class ChemicalFinder {
 	 * @param form
 	 * @return List of CAS numbers
 	 */
-	public List FindCASFromMolecularWeight(double mw) {
+	public List<String> FindCASFromMolecularWeight(double mw) {
 		ArrayList<String> casnums = new ArrayList<String>();
 
 		try {
@@ -932,7 +925,7 @@ public class ChemicalFinder {
 				junk = token.nextToken();//SMILES
 				junk = token.nextToken();//Formula
 //				System.out.println(junk);
-				weight = (new Double(token.nextToken()).doubleValue()); //MW
+				weight = Double.parseDouble(token.nextToken()); //MW
 				if (Math.abs(mw - weight) < tol)//if value is less than the tolerance value
 					casnums.add(cas);
 				line = in.readLine();
@@ -963,7 +956,9 @@ public class ChemicalFinder {
 //					System.out.println(s);
 					molecules.addAtomContainer(mol);
 //					mols.add(new Molecule(mol));//Adds the IMolecule to the List
-					ins.close();
+//					ins.close();
+					mr.close();
+					
 				}//for int i=0
 			}//if the number of cas numbers in the list is greater than zero
 		}//try
@@ -996,7 +991,7 @@ public class ChemicalFinder {
 //		String compareMethod=chemicalcompare.method2dDescriptors;
 //		String compareMethod=chemicalcompare.methodFingerPrinter;
 		
-		ParseChemidplus p=new ParseChemidplus();
+//		ParseChemidplus p=new ParseChemidplus();
 //		String structureFolder=p.Chemidplus3dMolFolder;
 		
 //		for (int i=2;i<=2;i++) {
@@ -1064,7 +1059,7 @@ public class ChemicalFinder {
 		String compareMethod=chemicalcompare.method2dDescriptors;
 //		String compareMethod=chemicalcompare.methodFingerPrinter;
 		
-		ParseChemidplus p=new ParseChemidplus();
+//		ParseChemidplus p=new ParseChemidplus();
 //		String structureFolder=p.Chemidplus3dMolFolder;
 		
 		
@@ -1128,7 +1123,7 @@ public class ChemicalFinder {
 //		cf.FindStructuresForRiddickViscosityChemicals();
 //		cf.FindStructuresForSurfaceTensionChemicals();
 		
-		System.out.println(cf.CorrectFormula("H6C6"));
+		System.out.println(ChemicalFinder.CorrectFormula("H6C6"));
 		
 
 //		try {

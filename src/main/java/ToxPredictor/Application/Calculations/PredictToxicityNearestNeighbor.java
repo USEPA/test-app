@@ -154,7 +154,7 @@ public class PredictToxicityNearestNeighbor {
 		nn.UseWeights = false;
 		nn.fragweight = 1.0;
 		nn.HydrocarbonWeight = nn.fragweight;
-		nn.MustExceedSCmin = true;
+		NearestNeighborMethod.MustExceedSCmin = true;
 
 		if (DescriptorSet.equals("2d")) {
 			nn.SCmin = 0.5;
@@ -164,11 +164,11 @@ public class PredictToxicityNearestNeighbor {
 
 		// nn.MustHaveTestChemicalFragments = false;
 
-		nn.ExcludeTestChemicalCASFromTrainingSet = true; // if the CAS matches
+		NearestNeighborMethod.ExcludeTestChemicalCASFromTrainingSet = true; // if the CAS matches
 															// exclude chemical
 															// from training
 															// cluster
-		nn.ExcludeTestChemical2dIsomerFromTrainingSet = false; // need to be
+		NearestNeighborMethod.ExcludeTestChemical2dIsomerFromTrainingSet = false; // need to be
 																// true because
 																// TEST user
 																// might run a
@@ -186,7 +186,7 @@ public class PredictToxicityNearestNeighbor {
 	private void CreateStructureImages(String endpoint,String OutputFolder) {
 
 		// ParseChemidplus p=new ParseChemidplus();
-		ToxPredictor.Utilities.GetStructureImagesFromJar g = new ToxPredictor.Utilities.GetStructureImagesFromJar();
+//		ToxPredictor.Utilities.GetStructureImagesFromJar g = new ToxPredictor.Utilities.GetStructureImagesFromJar();
 
 		if (nn.cc == null)
 			return;

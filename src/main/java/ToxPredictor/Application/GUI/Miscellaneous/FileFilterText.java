@@ -56,7 +56,7 @@ public class FileFilterText extends javax.swing.filechooser.FileFilter
 	/**
 	 *  Description of the Field
 	 */
-	protected List types;
+	protected List<String> types;
 
 
 	/**
@@ -67,7 +67,7 @@ public class FileFilterText extends javax.swing.filechooser.FileFilter
 	public FileFilterText(String type)
 	{
 		super();
-		types = new ArrayList();
+		types = new ArrayList<>();
 		types.add(type);
 	}
 

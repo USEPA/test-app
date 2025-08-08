@@ -30,10 +30,7 @@ static String url = "https://qed.epacdx.net/cts/rest/metabolizer/run";
 	
 //  private List<String> cookies;
 //  private HttpsURLConnection conn;
-
-  private final String USER_AGENT = "Mozilla/5.0";
-
-  
+//  private final String USER_AGENT = "Mozilla/5.0";
   
   void go() {
 

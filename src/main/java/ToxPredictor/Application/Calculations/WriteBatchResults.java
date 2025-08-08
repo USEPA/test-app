@@ -675,8 +675,6 @@ public class WriteBatchResults {
 	
 			try {
 	
-				java.text.DecimalFormat d2 = new java.text.DecimalFormat("0.00");
-	
 				String f = "ToxRun_" + CAS;
 				String f2 = f + "/" + endpoint;
 				String f3 = f + "/StructureData";
@@ -808,7 +806,7 @@ public class WriteBatchResults {
 			
 			
 			if (!Strings.isEmpty(error)) {
-				ArrayList<String>methods=TaskCalculations2.getMethods(endpoint);
+				List<String>methods=TaskCalculations2.getMethods(endpoint);
 				for (int i=0;i<methods.size();i++) {
 					fw3.write("N/A");
 					fw3.write(del);

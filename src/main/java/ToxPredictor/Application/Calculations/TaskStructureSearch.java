@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+
 import javax.swing.JOptionPane;
 
 import org.apache.commons.lang3.StringUtils;
@@ -503,12 +505,6 @@ public class TaskStructureSearch {
 		
 	
 		
-	}
-	
-	public static void main(String[] args) {
-		TaskStructureSearch s=new TaskStructureSearch();
-		s.filepath="L:/Priv/Cin/NRMRL/CompTox/TDS/DIPPR Update 2013/WARDATA have dippr sort.sdf";
-		s.LoadFromSDF(s.filepath);
 	}
 	
 	
@@ -1075,7 +1071,7 @@ public class TaskStructureSearch {
 
 			
 			
-			rec.assignFromDSSToxRecord(molecule, rec);
+			DSSToxRecord.assignFromDSSToxRecord(molecule, rec);
 													
 		} else {
 //			System.out.println("Molecule not in dsstox");
@@ -1551,14 +1547,13 @@ private static String trimQuotes(String identifier) {
 		SmilesParser   sp  = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 //		sp.kekulise(false);
 				
-		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
+//		StructureDiagramGenerator sdg = new StructureDiagramGenerator();
 
 		 
 		int count=this.GetSmilesCount();
 		
-    	try {
+    	try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
     		
-    		BufferedReader br=new BufferedReader(new FileReader(filepath));
     		int counter=0;
     		while (true) {
 
@@ -1592,8 +1587,8 @@ private static String trimQuotes(String identifier) {
 				
 				if (!delimiter.equals("")) {
 					haveID=true;
-					ArrayList l = (ArrayList) ToxPredictor.Utilities.Utilities
-					.Parse2(Line, delimiter);
+					
+					List<String> l = Utilities.Parse2(Line, delimiter);
 					
 					if (l.size()>=2) {
 						Smiles = (String) l.get(0);
@@ -1678,14 +1673,14 @@ private static String trimQuotes(String identifier) {
 					
 					m.setProperty("Error", "");
 					
-					if (mfu.HaveBadElement(m)) {
+					if (MolFileUtilities.HaveBadElement(m)) {
 						m.setProperty("Error",
 						"Molecule contains unsupported element");
 					} else if (m.getAtomCount() == 1) {
 						m.setProperty("Error", "Only one nonhydrogen atom");
 					} else if (m.getAtomCount() == 0) {
 						m.setProperty("Error", "Number of atoms equals zero");
-					} else if (!mfu.HaveCarbon(m)) {
+					} else if (!MolFileUtilities.HaveCarbon(m)) {
 						m.setProperty("Error", "Molecule does not contain carbon");
 					}
 
@@ -1713,10 +1708,6 @@ private static String trimQuotes(String identifier) {
 				moleculeSet.addAtomContainer(m);
 
 			}
-    		
-    		br.close();
-    		
-   		
     		
     	} catch (Exception e) {
     		e.printStackTrace();

@@ -3,8 +3,6 @@ package ToxPredictor.Application.Calculations;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +31,6 @@ import gov.epa.api.Chemical;
 import gov.epa.api.Chemicals;
 import gov.epa.api.RecordLink;
 import gov.epa.api.Score;
-//import gov.epa.ghs_data_gathering.Parse.ToxVal.ParseToxValDB;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
@@ -130,9 +127,9 @@ public class TaskCalculations2 {
 //	String reportType;
 	
 	
-	public static ArrayList<String> getMethods(String endpoint) {
+	public static List<String> getMethods(String endpoint) {
 		
-		ArrayList<String> methods = new ArrayList<String>();
+		List<String> methods = new ArrayList<String>();
 		methods.add(TESTConstants.ChoiceHierarchicalMethod);
 
 		if (TESTConstants.haveSingleModelMethod(endpoint)) {
@@ -491,7 +488,7 @@ public class TaskCalculations2 {
 			TESTPredictedValue tpv=listTPV.get(0);
 			
 			tpv.smiles=dd.SmilesRan;
-			tpv.index=new Integer(index);
+			tpv.index=index;
 			tpv.query=query;			
 			
 //			long t1=System.currentTimeMillis();
@@ -619,9 +616,9 @@ public class TaskCalculations2 {
 		
 		private void runAA() {
 			
-			Connection conn=null;
-			Statement statToxVal=null;
-
+//			Connection conn=null;
+//			Statement statToxVal=null;
+//
 //			try {
 //				if (TESTApplication.versionToxVal.equals(ParseToxValDB.v8)) {
 //					conn=MySQL_DB.getConnection(ParseToxValDB.DB_Path_AA_Dashboard_Records_v8);
@@ -867,7 +864,8 @@ public class TaskCalculations2 {
 					SmilesGenerator sg =SmilesGenerator.unique();
 					String smiles = sg.create(ac);
 
-					String strJSON=c.runCTS(c.urlCTS, smiles, c.numGenerations, libraryCTS);
+					String strJSON=c.runCTS(CTS_Generate_Breakdown_Products.urlCTS, smiles, 
+							CTS_Generate_Breakdown_Products.numGenerations, libraryCTS);
 					//TODO account for no children or it times out
 					
 //					System.out.println(strJSON);
@@ -973,7 +971,7 @@ public class TaskCalculations2 {
 			
 			// ************************************************
 			// Figure out methods:
-			ArrayList<String> methods = getMethods(endpoint);
+//			List<String> methods = getMethods(endpoint);
 			
 			// *******************************************************
 

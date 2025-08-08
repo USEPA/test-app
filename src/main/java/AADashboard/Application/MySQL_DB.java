@@ -159,6 +159,43 @@ public class MySQL_DB {
 			}
 	}
 	
+	
+	
+	public static final String dbDSSTOX="DSSTOX";
+	
+	public static Connection getConnectionDSSTOX() {
+
+		try {
+			if (connPool.containsKey(dbDSSTOX) && connPool.get(dbDSSTOX) != null && !connPool.get(dbDSSTOX).isClosed()) {
+				return connPool.get(dbDSSTOX);
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+
+		String host = System.getenv().get("DSSTOX_HOST");
+		String port = System.getenv().get("DSSTOX_PORT");
+		String db = System.getenv().get("DSSTOX_DATABASE");
+
+
+		String url = "jdbc:mysql://" + host + ":" + port + "/" + db;
+//		System.out.println(url);
+		String user = System.getenv().get("DSSTOX_USER");
+		String password = System.getenv().get("DSSTOX_PASS");
+//		System.out.println(user+"\t"+password);
+
+		try {
+			Connection conn = DriverManager.getConnection(url, user, password);
+			connPool.put(dbDSSTOX, conn);
+			return conn;
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+
+	
 	public static Connection getConnectionMySQL(String mySQL_DB_URL,String USER,String PASS)  {
 		try {
 			//TODO- Note: using a connection pool is actually slightly slower than just making a new connection- the first connection is always slow but second time is fast even if not using a map to get the connection
@@ -586,7 +623,7 @@ private String[] getFieldsSimple(String endpoint) {
 //	"GroupContribution", "NearestNeighbor", "Consensus" };
 
 	
-	String endpointFull=TESTConstants.getFullEndpoint(endpoint);
+//	String endpointFull=TESTConstants.getFullEndpoint(endpoint);
 	Vector<String>vFields=new Vector<String>();
 	vFields.add("CAS");
 	
@@ -633,7 +670,7 @@ private String[] getFieldsSimple(String endpoint) {
 			Hashtable <String,Integer>htColNum=new Hashtable<String,Integer>();
 			
 			for (int i=0;i<hlist.size();i++) {
-				htColNum.put(hlist.get(i), new Integer(i));
+				htColNum.put(hlist.get(i), i);
 			}
 			
 
@@ -727,7 +764,7 @@ private String[] getFieldsSimple(String endpoint) {
 			Hashtable <String,Integer>htColNum=new Hashtable<String,Integer>();
 			
 			for (int i=0;i<hlist.size();i++) {
-				htColNum.put(hlist.get(i), new Integer(i));
+				htColNum.put(hlist.get(i), i);
 			}
 			
 			int counter=0;

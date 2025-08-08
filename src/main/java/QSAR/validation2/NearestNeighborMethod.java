@@ -1,7 +1,6 @@
 package QSAR.validation2;
 import java.io.*;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -9,11 +8,8 @@ import java.util.LinkedList;
 //import java.util.ListIterator;
 import java.util.Vector;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import wekalite.*;
-import ToxPredictor.Application.Calculations.TaskCalculations;
 import ToxPredictor.Utilities.Utilities;
 
 
@@ -97,7 +93,7 @@ public class NearestNeighborMethod{
 //   public OptimalResults optimalresults; // need to be able to retrieve external if predicting from fraMain
    public Instances cc; // need to be able to retrieve external if predicting from fraMain
    
-   public Vector SimCoeffCluster=new Vector();
+   public Vector<Double> SimCoeffCluster=new Vector<>();
    
    
  //determines folder which has maximum final folder number
@@ -157,7 +153,7 @@ public class NearestNeighborMethod{
 		    this.NormalizeDuringSCCalc=!Standardize;
 		    
 		    String endpoint="LC50";		    
-		    String desc="_Final"+this.FindFinalNumber(endpoint);
+		    String desc="_Final"+NearestNeighborMethod.FindFinalNumber(endpoint);
 		    
 		    String f1Path="QSAR2";
 		    mkdir(f1Path);
@@ -198,7 +194,7 @@ public class NearestNeighborMethod{
 		    	run(outputFolderPath,runfolder);
 		    }
 		    
-		    this.GetResultsFromRunFiles3(1,NSets,outputFolderPath);
+		    GetResultsFromRunFiles3(1,NSets,outputFolderPath);
 
 		    long t2=System.currentTimeMillis();
 		    System.out.println("Total runtime="+(t2-t1)/1000+" seconds");
@@ -227,9 +223,9 @@ public class NearestNeighborMethod{
 				if (Line == null)
 					break;
 
-				LinkedList l = Utilities.Parse3(Line, ",");
-				String var = (String) l.get(0);
-				String val = (String) l.get(1);
+				LinkedList<String> l = Utilities.Parse3(Line, ",");
+//				String var = (String) l.get(0);
+				String val = l.get(1);
 				double weight = Double.parseDouble(val);
 
 				weights[counter + 2] = weight;
@@ -318,7 +314,7 @@ public class NearestNeighborMethod{
 				BufferedReader br = new BufferedReader(new FileReader(filename));
 
 				String header=br.readLine();
-				java.util.LinkedList hl=Utilities.Parse(header, "\t");
+				java.util.LinkedList<String> hl=Utilities.Parse(header, "\t");
 				
 				int colQ2ext=Utilities.GetColumnNumber("CurrentQ2ext", hl);
 				int colR2abs=Utilities.GetColumnNumber("CurrentR2abs", hl);
@@ -343,13 +339,13 @@ public class NearestNeighborMethod{
 				}
 				// System.out.println(LastLine);
 
-				LinkedList ll = Utilities.Parse(LastLine, "\t");
+				LinkedList<String> ll = Utilities.Parse(LastLine, "\t");
 
-				double Q2ext=Double.parseDouble((String)ll.get(colQ2ext));
-				double R2abs=Double.parseDouble((String)ll.get(colR2abs));
-				double R2=Double.parseDouble((String)ll.get(colR2));
-				double MAE=Double.parseDouble((String)ll.get(colMAE));
-				double Coverage=Double.parseDouble((String)ll.get(colCoverage));
+				double Q2ext=Double.parseDouble(ll.get(colQ2ext));
+				double R2abs=Double.parseDouble(ll.get(colR2abs));
+				double R2=Double.parseDouble(ll.get(colR2));
+				double MAE=Double.parseDouble(ll.get(colMAE));
+				double Coverage=Double.parseDouble(ll.get(colCoverage));
 				
 				
 				AvgQ2ext+=Q2ext;
@@ -430,9 +426,9 @@ public class NearestNeighborMethod{
 			fw.write("PredictionMethod="+this.PredictionMethod+"\n");
 
 			fw.write("ExcludeTestChemicalCASFromTrainingSet="
-					+ this.ExcludeTestChemicalCASFromTrainingSet + "\n");
+					+ ExcludeTestChemicalCASFromTrainingSet + "\n");
 			fw.write("ExcludeTestChemical2dIsomerFromTrainingSet="
-					+ this.ExcludeTestChemical2dIsomerFromTrainingSet + "\n");
+					+ ExcludeTestChemical2dIsomerFromTrainingSet + "\n");
 			
 			fw.write("note="+note+"\n");
 			
@@ -457,7 +453,7 @@ public class NearestNeighborMethod{
 		File RunFolder=new File(outputFolderPath+"/"+runFolderName);
 		if(!RunFolder.exists()) RunFolder.mkdir();
 
-		double time1 = System.currentTimeMillis() / 1000.0;	
+//		double time1 = System.currentTimeMillis() / 1000.0;	
 		double Yexpbar=trainingSet.calculateAverageToxicity();
 		
 		System.out.println("runfolder="+runFolderName);
@@ -562,7 +558,7 @@ public class NearestNeighborMethod{
     		   fw.flush();
 
     		   // System.out.println(chemical.value(descriptorNums[0]));
-    		   double time2 = System.currentTimeMillis() / 1000.0;
+//    		   double time2 = System.currentTimeMillis() / 1000.0;
     		   //				System.out.println("current run time = "+(time2-time1)+" secs");
 
 //    		   ii++;
@@ -571,7 +567,7 @@ public class NearestNeighborMethod{
     	   fw.close();
     	   fw2.close();
     	   
-    	   double time2 = System.currentTimeMillis() / 1000.0;
+//    	   double time2 = System.currentTimeMillis() / 1000.0;
 //    	   System.out.println("overall run time = "+(time2-time1)/60.0+" mins");
     	   
     	   
@@ -594,7 +590,7 @@ public class NearestNeighborMethod{
 			 chemical.Standardize(means,stddevs);
 		 }
 
-		this.SimCoeffCluster = new Vector();
+		this.SimCoeffCluster = new Vector<>();
 		this.cc = null;
 
 		this.expToxicValue = chemical.getToxicity();
@@ -617,7 +613,7 @@ public class NearestNeighborMethod{
 		}
 
 
-		if (this.MustExceedSCmin) {
+		if (NearestNeighborMethod.MustExceedSCmin) {
 			if (cc == null
 					|| cc.numInstances() < this.absoluteMinimumClusterSize) {
 				String msg = "Insufficient chemicals exceeding the minimum similarity coefficient were found";
@@ -682,7 +678,7 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 //		}
 
 
-		if (this.ExcludeTestChemicalCASFromTrainingSet) {
+		if (NearestNeighborMethod.ExcludeTestChemicalCASFromTrainingSet) {
 			String TestCAS=chemical.getName();
 			if (CAS.equals(TestCAS)) {
 //				if (debug) {
@@ -692,7 +688,7 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 			}
 		}
 
-		if (this.ExcludeTestChemical2dIsomerFromTrainingSet) {
+		if (NearestNeighborMethod.ExcludeTestChemical2dIsomerFromTrainingSet) {
 			if (SimCoeff > 0.999) {
 //				if (debug) {
 //					System.out.println("Same chemical detected & was excluded from training cluster");
@@ -701,16 +697,16 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 			}
 		}
 
-		if (this.MustExceedSCmin) {
+		if (NearestNeighborMethod.MustExceedSCmin) {
 			if (SimCoeff >= SCmin) {
-				ht.put(new Double(SimCoeff), chemicali);
+				ht.put(SimCoeff, chemicali);
 			}
 		} else {
-			ht.put(new Double(SimCoeff), chemicali);
+			ht.put(SimCoeff, chemicali);
 		}
 	}
 
-	Vector<Double> v = new Vector(ht.keySet());
+	Vector<Double> v = new Vector<>(ht.keySet());
 
 	//Sort in descending order (highest similarity first)
 	java.util.Collections.sort(v, Collections.reverseOrder());
@@ -731,7 +727,7 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 		} else
 			cc.addInstance(instance);
 		
-		this.SimCoeffCluster.add(new Double (key));
+		this.SimCoeffCluster.add(key);
 
 		if (counter == MaxCount)
 			break;
@@ -810,7 +806,7 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 //		ListIterator<Double> li1=c1.getDescriptorsIterator();
 //		ListIterator<Double> li2=c2.getDescriptorsIterator();
 
-		long t1=System.currentTimeMillis();
+//		long t1=System.currentTimeMillis();
 		
 		double [] Mean=trainingSet.getMeans();
 		double [] StdDev=trainingSet.getStdDevs();
@@ -853,7 +849,7 @@ private Instances BuildClusterFromTrainingSet(int MaxCount,Instance chemical,dou
 		
 		TC=SumXY/Math.sqrt(SumX2*SumY2);
 		
-    	long t2=System.currentTimeMillis();
+//    	long t2=System.currentTimeMillis();
 //		System.out.println("here, "+(t2-t1));
 		
 		return TC;

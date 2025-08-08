@@ -140,7 +140,7 @@ public class WebTEST {
 
 	// ****************************************************************************************************
 	// Variables for progress update in fraMain8:
-//	private static boolean done;//tells fraMain8 if it's done; TODO can we get rid of this???
+//	private static boolean done;//tells fraMain8 if it's done; 
 //	private static boolean stop=false;
 //	private static int current;//current % completed for fraMain8 status bar
 //	private static String statMessage;//current message to display in fraMain8 progress bar
@@ -244,7 +244,7 @@ public class WebTEST {
 			m = (AtomContainer) sp.parseSmiles(Smiles);
 			m.setProperty("Error", "");
 
-			if (mfu.HaveBadElement(m)) {
+			if (MolFileUtilities.HaveBadElement(m)) {
 				m.setProperty("Error", "Molecule contains unsupported element");
 				m.setProperty("ErrorCode", ERROR_CODE_APPLICABILITY_DOMAIN_ERROR);
 			} else if (m.getAtomCount() == 1) {
@@ -253,7 +253,7 @@ public class WebTEST {
 			} else if (m.getAtomCount() == 0) {
 				m.setProperty("Error", "Number of atoms equals zero");
 				m.setProperty("ErrorCode", ERROR_CODE_APPLICABILITY_DOMAIN_ERROR);
-			} else if (!mfu.HaveCarbon(m)) {
+			} else if (!MolFileUtilities.HaveCarbon(m)) {
 				m.setProperty("Error", "Molecule does not contain carbon");
 				m.setProperty("ErrorCode", ERROR_CODE_APPLICABILITY_DOMAIN_ERROR);
 			}
@@ -380,7 +380,6 @@ public class WebTEST {
 	}
 
 	private static AtomContainer prepareMolecule(int i, AtomContainer m) {
-		ToxPredictor.misc.MolFileUtilities mfu = new ToxPredictor.misc.MolFileUtilities();
 		String CASfield = MolFileUtilities.getCASField(m);
 
 		String CAS = null;
@@ -427,7 +426,7 @@ public class WebTEST {
 
 			m.setProperty("Error", "");
 
-			if (mfu.HaveBadElement(m)) {
+			if (MolFileUtilities.HaveBadElement(m)) {
 				m.setProperty("Error", "Molecule contains unsupported element");
 				m.setProperty("ErrorCode", ERROR_CODE_APPLICABILITY_DOMAIN_ERROR);
 			} else if (m.getAtomCount() == 1) {
@@ -436,7 +435,7 @@ public class WebTEST {
 			} else if (m.getAtomCount() == 0) {
 				m.setProperty("Error", "Number of atoms equals zero");
 				m.setProperty("ErrorCode", ERROR_CODE_APPLICABILITY_DOMAIN_ERROR);
-			} else if (!mfu.HaveCarbon(m)) {
+			} else if (!MolFileUtilities.HaveCarbon(m)) {
 				m.setProperty("Error", "Molecule does not contain carbon");
 				m.setProperty("ErrorCode", ERROR_CODE_APPLICABILITY_DOMAIN_ERROR);
 			}
@@ -1038,8 +1037,8 @@ public class WebTEST {
 		}
 
 		// array to store predictions for all methods for consensus method:
-		ArrayList predictedToxicities = new ArrayList();
-		ArrayList predictedUncertainties = new ArrayList();
+		List<Double> predictedToxicities = new ArrayList<>();
+		List<Double> predictedUncertainties = new ArrayList<>();
 
 		AllResults allResults = ht_allResults.get(endpoint);// shortcut to
 		// results
@@ -1058,7 +1057,7 @@ public class WebTEST {
 
 		String ToxFieldName = "Tox";
 
-		java.util.Hashtable ht = dd.CreateDataHashtable(ToxFieldName, true, true, false, false, false);
+		Hashtable<String,Object> ht = dd.CreateDataHashtable(ToxFieldName, true, true, false, false, false);
 
 		// Create instances for test chemical (for GCM it will only contain
 		// fragment descriptors):
@@ -1249,11 +1248,11 @@ public class WebTEST {
 				Hashtable<Double, Instance> htTrainMatch = TaskCalculations.FindClosestChemicals(evalInstance2d,
 						trainingDataSet2d, true, true, true, Mean, StdDev);
 
-				PredictToxicityWebPageCreator ptwc = new PredictToxicityWebPageCreator();
+//				PredictToxicityWebPageCreator ptwc = new PredictToxicityWebPageCreator();
 				PredictToxicityJSONCreator jsonCreator = new PredictToxicityJSONCreator();
 				PredictToxicityWebPageCreatorFromJSON htmlCreator = new PredictToxicityWebPageCreatorFromJSON();
 
-				ArrayList<String> methods = TaskCalculations.getMethods(endpoint);
+				List<String> methods = TaskCalculations.getMethods(endpoint);
 
 				PredictionResults predictionResults = null;
 				if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
@@ -1488,8 +1487,8 @@ public class WebTEST {
 		if (!endpoint.equals(TESTConstants.ChoiceDescriptors)) {
 
 			// array to store predictions for all methods for consensus method:
-			ArrayList predictedToxicities = new ArrayList();
-			ArrayList predictedUncertainties = new ArrayList();
+			List<Double> predictedToxicities = new ArrayList<>();
+			List<Double> predictedUncertainties = new ArrayList<>();
 
 			AllResults allResults = ht_allResults.get(endpoint);// shortcut to
 																// results
@@ -1508,7 +1507,7 @@ public class WebTEST {
 
 			String ToxFieldName = "Tox";
 
-			java.util.Hashtable ht = dd.CreateDataHashtable(ToxFieldName, true, true, false, false, false);
+			Hashtable<String,Object> ht = dd.CreateDataHashtable(ToxFieldName, true, true, false, false, false);
 
 			// Create instances for test chemical (for GCM it will only contain
 			// fragment descriptors):
@@ -1718,7 +1717,7 @@ public class WebTEST {
 					PredictToxicityJSONCreator jsonCreator = new PredictToxicityJSONCreator();
 					PredictToxicityWebPageCreatorFromJSON htmlCreator = new PredictToxicityWebPageCreatorFromJSON();
 
-					ArrayList<String> methods = TaskCalculations.getMethods(endpoint);
+					List<String> methods = TaskCalculations.getMethods(endpoint);
 
 					PredictionResults predictionResults = null;
 					if (reportTypes.contains(WebReportType.JSON) || reportTypes.contains(WebReportType.HTML)
@@ -1819,7 +1818,7 @@ public class WebTEST {
 
 	}
 
-	static double calculateConsensusToxicity(ArrayList<Double> preds) {
+	static double calculateConsensusToxicity(List<Double> preds) {
 		double pred = 0;
 		int predcount = 0;
 
@@ -2072,7 +2071,6 @@ public class WebTEST {
 
 	public static void addSmiles(AtomContainer m, TESTPredictedValue tpv) {
 
-		String smiles = null;
 		try {
 			tpv.smiles = CDKUtilities.generateSmiles(m);
 

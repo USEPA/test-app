@@ -4,8 +4,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.InputStreamReader;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Vector;
+
+import org.openscience.cdk.DefaultChemObjectBuilder;
+import org.openscience.cdk.interfaces.IAtomContainer;
+import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
 //import weka.core.Instance;
 //import weka.core.Instances;
@@ -70,8 +75,7 @@ public class Lookup {
 		for (int i = 0; i < trainingDataSet.numInstances(); i++) {
 
 			Instance chemicali = trainingDataSet.instance(i);
-			double SimCoeff = this.CalculateCosineCoefficient(chemical,
-					chemicali, Mean, StdDev);
+			double SimCoeff = CalculateCosineCoefficient(chemical, chemicali, Mean, StdDev);
 
 			System.out.println(chemicali.getName() + "\t" + SimCoeff);
 
@@ -195,7 +199,7 @@ public class Lookup {
 			BufferedReader br = new BufferedReader(new FileReader(myFile));
 			String Header = br.readLine();
 
-			java.util.List headerlist = Utilities.Parse3(Header, delimiter);
+			List<String> headerlist = Utilities.Parse3(Header, delimiter);
 
 			// determine field number:
 			// int fieldnumber=-1;
@@ -222,7 +226,7 @@ public class Lookup {
 					return -99;
 				}
 
-				java.util.List list = Utilities.Parse3(Line, delimiter);
+				List<String> list = Utilities.Parse3(Line, delimiter);
 				String currentCAS = (String) list.get(0); // for now assume
 															// CAS is first
 															// field
@@ -261,11 +265,11 @@ public class Lookup {
 			File myFile = new File(filename);
 
 			BufferedReader br = new BufferedReader(new FileReader(myFile));
-			String Header = br.readLine();
+			br.readLine();//Header
 			
 //			System.out.println(Header);
 			
-			java.util.List headerlist = Utilities.Parse3(Header, delimiter);
+//			List<String> headerlist = Utilities.Parse3(Header, delimiter);
 
 			while (true) {
 				Line = br.readLine();
@@ -277,7 +281,7 @@ public class Lookup {
 				
 
 //				System.out.println(Line);
-				java.util.List list = Utilities.Parse3(Line, delimiter);
+				List<String> list = Utilities.Parse3(Line, delimiter);
 				
 //				if (list.size()==0)  {
 //					System.out.println(srchCAS+" not found in "+filename);
@@ -288,7 +292,7 @@ public class Lookup {
 //					System.out.println(Line);
 //				}
 
-				String currentCAS = (String) list.get(0); // for now assume
+				String currentCAS = list.get(0); // for now assume
 				currentCAS = currentCAS.trim();
 				
 				
@@ -329,15 +333,15 @@ public class Lookup {
 
 			srchCAS = srchCAS.trim();
 
-			File myFile = new File(filename);
+//			File myFile = new File(filename);
 
 			java.io.InputStream ins = this.getClass().getClassLoader()
 					.getResourceAsStream(filename);
 
 			BufferedReader br = new BufferedReader(new InputStreamReader(ins));
-			String Header = br.readLine();
+			br.readLine();//header
 
-			java.util.List headerlist = Utilities.Parse(Header, delimiter);
+//			List<String> headerlist = Utilities.Parse(Header, delimiter);//header
 
 			while (true) {
 				String Line = br.readLine();
@@ -347,14 +351,14 @@ public class Lookup {
 					return -9999;
 				}
 
-				java.util.List list = Utilities.Parse(Line, delimiter);
-				String currentCAS = (String) list.get(0); // for now assume
+				List<String> list = Utilities.Parse(Line, delimiter);
+				String currentCAS = list.get(0); // for now assume
 															// CAS is first
 															// field
 				currentCAS = currentCAS.trim();
 
 				if (currentCAS.equals(srchCAS)) {
-					String strval = (String) list.get(ToxColumn);
+					String strval = list.get(ToxColumn);
 					double val = Double.parseDouble(strval);
 
 					br.close();
@@ -372,11 +376,10 @@ public class Lookup {
 	}
 
 	public static double LookUpExpKow(String CAS) {
-		try {
-			File myFile = new File("ToxPredictor/system/EXPKOW.txt");
 
-			BufferedReader br = new BufferedReader(new FileReader(myFile));
+		File myFile = new File("ToxPredictor/system/EXPKOW.txt");
 
+		try (BufferedReader br = new BufferedReader(new FileReader(myFile))) {
 			while (CAS.length() < 11) {
 				CAS = "0" + CAS;
 			}
@@ -389,12 +392,9 @@ public class Lookup {
 					break;
 
 				if (Line.indexOf(CAS) == 0) {
-
-					List l = Utilities.Parse(Line, "|");
-
-					String strKow = (String) l.get(2);
+					List<String> l = Utilities.Parse(Line, "|");
+					String strKow = l.get(2);
 					double Kow = Double.parseDouble(strKow);
-
 					return Kow;
 				}
 
@@ -402,7 +402,7 @@ public class Lookup {
 
 			br.close();
 			return -999;
-
+			
 		} catch (Exception e) {
 			return -999;
 		}
@@ -433,10 +433,8 @@ public class Lookup {
 
 				if (Line.indexOf(CAS) == 0) {
 
-					List l = Utilities.Parse(Line, "|");
-
-					String smiles = (String) l.get(2);
-
+					List<String> l = Utilities.Parse(Line, "|");
+					String smiles = l.get(2);
 					return smiles;
 				}
 
@@ -504,6 +502,81 @@ public class Lookup {
 			return "N/A";
 		}
 
+	}
+	
+	/**
+	 * Useful for getting list of cas numbers in prediction file
+	 * 
+	 * @param filename
+	 * @param keyColumnName
+	 * @param delimiter
+	 * @return
+	 */
+	public HashSet<String> lookUpValsInJar(String filename, String keyColumnName, String delimiter) {
+		
+		HashSet<String>vals=new HashSet<>();
+		
+		try {
+
+			java.io.InputStream ins = this.getClass().getClassLoader()
+					.getResourceAsStream(filename);
+
+			InputStreamReader isr = new InputStreamReader(ins);
+			BufferedReader br = new BufferedReader(isr);
+
+			String header = br.readLine();
+			
+//			System.out.println(valueColumnName);
+
+			int keyColumnNumber = ToxPredictor.Utilities.Utilities
+					.FindFieldNumber(header, keyColumnName, delimiter);
+
+			while (true) {
+				String Line = br.readLine();
+				if (!(Line instanceof String))
+					break;
+
+				java.util.List<String> l = ToxPredictor.Utilities.Utilities
+						.Parse3(Line, delimiter);
+				String currentKey = l.get(keyColumnNumber);
+				vals.add(currentKey);
+			}
+
+			br.close();
+			return vals;
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	
+	public HashSet<String> lookUpValsInSDF(String filename, String keyColumnName) {
+
+		try {
+
+			java.io.InputStream ins = this.getClass().getClassLoader().getResourceAsStream(filename);
+
+			HashSet<String> values = new HashSet<>();
+
+			IteratingSDFReader reader = new IteratingSDFReader(ins, DefaultChemObjectBuilder.getInstance());
+
+			while (reader.hasNext()) {
+				IAtomContainer molecule = reader.next();
+
+				// Extract the CAS number property
+				String casNumber = (String) molecule.getProperty(keyColumnName);
+
+				if (casNumber != null) {
+					values.add(casNumber);
+				}
+			}
+
+			reader.close();
+			return values;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	
 	

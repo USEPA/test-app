@@ -40,7 +40,7 @@ public class FileFilterText2 extends javax.swing.filechooser.FileFilter
 	/**
 	 *  Description of the Field
 	 */
-	protected List types;
+	protected List<String> types;
 	
 	
 
@@ -52,7 +52,7 @@ public class FileFilterText2 extends javax.swing.filechooser.FileFilter
 	public FileFilterText2()
 	{
 		super();
-		types = new ArrayList();
+		types = new ArrayList<>();
 		types.add("txt");
 		types.add("smi");
 		types.add("csv");

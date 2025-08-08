@@ -8,8 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
@@ -677,7 +675,7 @@ public class ScoreRecord {
 	
 	public static Vector <ScoreRecord> loadRecordsFromFile(String filepath,String ID,String del) {
 		
-		Vector <ScoreRecord>records=new Vector();
+		Vector <ScoreRecord>records=new Vector<>();
 		
 		String Line="";
 		
@@ -998,7 +996,7 @@ public class ScoreRecord {
 
 		ArrayList<String>lines=Utilities.readFileToArray(filePath);
 
-		String header=lines.remove(0);
+		lines.remove(0);//header
 
 		Chemical chemical=new Chemical();
 
@@ -1052,7 +1050,7 @@ public class ScoreRecord {
 	}
 	
 	public static void createFlatFileFromAllSources(String outputPath) {
-		AADashboard a=new AADashboard();
+//		AADashboard a=new AADashboard();
 		String d="|";
 		
 		try {
@@ -1062,7 +1060,7 @@ public class ScoreRecord {
 			
 			Hashtable<String,String>htCASName=new Hashtable<>();
 			
-			for (String source:a.sources) {
+			for (String source:AADashboard.sources) {
 				
 				String filePathFlatChemicalRecords = AADashboard.dataFolder+File.separator+source+File.separator+source +" Chemical Records.txt";
 
@@ -1077,7 +1075,7 @@ public class ScoreRecord {
 				
 				ArrayList<String>lines=Utilities.readFileToArray(filePathFlatChemicalRecords);
 				
-				String header=lines.remove(0);
+				lines.remove(0);//header
 
 				for (String line:lines) {
 					
@@ -1157,7 +1155,7 @@ public class ScoreRecord {
 
 	
 	public static void createFlatFileFromAllSourcesSortedByCAS(String outputPath) {
-		AADashboard a=new AADashboard();
+		
 		String d="|";
 		
 		try {
@@ -1166,7 +1164,7 @@ public class ScoreRecord {
 			
 			ArrayList<String>overallLines=new ArrayList<>();
 			
-			for (String source:a.sources) {
+			for (String source:AADashboard.sources) {
 				
 				String filePathFlatChemicalRecords = AADashboard.dataFolder+File.separator+source+File.separator+source +" Chemical Records.txt";
 

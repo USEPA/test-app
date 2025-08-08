@@ -266,9 +266,4 @@ public class PredictToxicityLDA {
 		return -1;
 	}
 
-
-	public static void main(String[] args) {
-		PredictToxicityLDA p = new PredictToxicityLDA();
-
-	}
 }

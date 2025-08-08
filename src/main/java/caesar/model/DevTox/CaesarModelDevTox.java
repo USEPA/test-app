@@ -142,7 +142,7 @@ public class CaesarModelDevTox  {
     }
     
     
-    public void calculateDevTox(Hashtable htDescriptors) throws Exception {
+    public void calculateDevTox(Hashtable<String,Object> htDescriptors) throws Exception {
 
 //        Results = new boolean[1];
 //        ResultsObj = new ModelResults();

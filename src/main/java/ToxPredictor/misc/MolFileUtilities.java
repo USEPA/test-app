@@ -14,9 +14,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashMap;
+
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import org.openscience.cdk.Atom;
@@ -30,6 +31,7 @@ import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.MDLV2000Writer;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 import org.openscience.cdk.layout.StructureDiagramGenerator;
+import org.openscience.cdk.smiles.SmiFlavor;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 import org.openscience.cdk.tools.manipulator.AtomContainerManipulator;
@@ -50,14 +52,9 @@ import ToxPredictor.Utilities.Utilities;
 public class MolFileUtilities {
 
 	String NIHMolFolder = "N:/NRMRL-PRIV/CompTox/3Dcoordinates/database/coords";
-
 	String DougMolFolder = "N:/NRMRL-PRIV/CompTox/3Dcoordinates/mol";
-
 	String ChemidplusMolFolder = "N:/NRMRL-PRIV/CompTox/3Dcoordinates/mol-chemidplus-3d";
 
-
-	
-	
 	public AtomContainer LoadChemicalFromMolFileInJar(String filePath) {
 		
 		try {
@@ -68,6 +65,8 @@ public class MolFileUtilities {
 			AtomContainer ac=new AtomContainer();
 			mr.read(ac);
 
+			mr.close();
+			
 			return ac;
 
 		} catch (Exception e) {
@@ -142,7 +141,9 @@ public class MolFileUtilities {
 			
 			mw.setWriteAromaticBondTypes(false);
 			mw.write(ac);
-			fw.close();
+			mw.close();
+			
+			mr.close();
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -153,35 +154,26 @@ public class MolFileUtilities {
 	
 	public static String getCASField(IAtomContainer m) {
 		
-		Vector v=new Vector(m.getProperties().keySet());
-		
 		if (m.getProperty("CAS")!=null) return "CAS";
-		
-		for ( Enumeration e = v.elements(); e.hasMoreElements();) {
-			// 	retrieve the object_key
-			String prop = (String) e.nextElement();			
-//			if (prop.indexOf("CAS")>-1) return prop;
-			if (prop.toUpperCase().indexOf("CAS")>-1) return prop;//return first property with CAS in it
 
+		for (Map.Entry<Object, Object> entry : m.getProperties().entrySet()) {
+			String prop=entry.getKey().toString();
+			if (prop.toUpperCase().contains("CAS")) return prop;//return first property with CAS in it
 		}
 		return "";
 	}
 	
 	public static String getNameField(IAtomContainer m) {
 		
-		Vector v=new Vector(m.getProperties().keySet());
-		
 		if (m.getProperty("Name")!=null) return "Name";
 		if (m.getProperty("name")!=null) return "name";
 		if (m.getProperty("NAME")!=null) return "NAME";
 		
-		for ( Enumeration e = v.elements(); e.hasMoreElements();) {
-			// 	retrieve the object_key
-			String prop = (String) e.nextElement();			
-//			if (prop.indexOf("CAS")>-1) return prop;
-			if (prop.toUpperCase().indexOf("NAME")>-1) return prop;//return first property with CAS in it
-
-		}
+		for (Map.Entry<Object, Object> entry : m.getProperties().entrySet()) {
+			String prop=entry.getKey().toString();
+			if (prop.toUpperCase().contains("NAME")) return prop;
+        }
+		
 		return "";
 	}
 	
@@ -197,6 +189,7 @@ public class MolFileUtilities {
 			   IAtomContainer molecule = (IAtomContainer)reader.next();
 			   atomContainerSet.addAtomContainer(molecule);
 			 }
+			reader.close();
 			
 			return atomContainerSet;
 			
@@ -211,93 +204,81 @@ public class MolFileUtilities {
 	
 	
 	public static AtomContainerSet LoadFromSDF(String SDFfilepath) {
-    	ToxPredictor.misc.MolFileUtilities mfu=new ToxPredictor.misc.MolFileUtilities();
-		AtomContainerSet atomContainerSet=new AtomContainerSet();
+		AtomContainerSet atomContainerSet = new AtomContainerSet();
 
 //		AtomContainerSet AtomContainerSet=new AtomContainerSet();
-		
+
 		try {
 
-			int counter = -1;
-			
-			
-			 IteratingSDFReader reader = new IteratingSDFReader(
-			   new FileInputStream(SDFfilepath), DefaultChemObjectBuilder.getInstance());
-			 
-			 while (reader.hasNext()) {
-			   IAtomContainer m = (IAtomContainer)reader.next();
+			IteratingSDFReader reader = new IteratingSDFReader(new FileInputStream(SDFfilepath),
+					DefaultChemObjectBuilder.getInstance());
 
-				String CASfield=getCASField(m);
+			while (reader.hasNext()) {
+				IAtomContainer m = (IAtomContainer) reader.next();
+
+				String CASfield = getCASField(m);
 //				System.out.println(CASfield);
-				
-				String CAS=null;
-				
+
+				String CAS = null;
+
 				if (!CASfield.equals("")) {
-					CAS=(String)m.getProperty(CASfield);
+					CAS = (String) m.getProperty(CASfield);
 					if (CAS != null) {
-						CAS=CAS.trim();
-						CAS=CAS.replace("/", "_");
+						CAS = CAS.trim();
+						CAS = CAS.replace("/", "_");
 						m.setProperty("CAS", CAS);
 					}
 				}
-				
+
 //				System.out.println(CAS);
-				
-				
-				if (CAS==null) {
-					
-					String name=(String)m.getProperty("Name");
-					
-					if (name==null) {
-						name=(String)m.getProperty("name");
+
+				if (CAS == null) {
+
+					String name = (String) m.getProperty("Name");
+
+					if (name == null) {
+						name = (String) m.getProperty("name");
 					}
-					if (name==null) {
+					if (name == null) {
 //						m.setProperty("Error", "<html>CAS and Name fields are both empty</html>");
-						m.setProperty("CAS", "Unknown");											
+						m.setProperty("CAS", "Unknown");
 					} else {
 						m.setProperty("CAS", name);
 					}
 				}
 
-				
-
 				m.setProperty("Error", "");
-				 
-				 
-				if (mfu.HaveBadElement(m)) {
-					m.setProperty("Error",
-							"AtomContainer contains unsupported element");
+
+				if (MolFileUtilities.HaveBadElement(m)) {
+					m.setProperty("Error", "AtomContainer contains unsupported element");
 				} else if (m.getAtomCount() == 1) {
 					m.setProperty("Error", "Only one nonhydrogen atom");
 				} else if (m.getAtomCount() == 0) {
 					m.setProperty("Error", "Number of atoms equals zero");
 				}
 
-				 AtomContainerSet  AtomContainerSet2 = (AtomContainerSet)ConnectivityChecker.partitionIntoMolecules(m);
+				AtomContainerSet AtomContainerSet2 = (AtomContainerSet) ConnectivityChecker.partitionIntoMolecules(m);
 
-				 
-				 if (AtomContainerSet2.getAtomContainerCount() > 1) {
+				if (AtomContainerSet2.getAtomContainerCount() > 1) {
 
 //					m.setProperty("Error","Multiple AtomContainers, largest fragment retained");
-					m.setProperty("Error","Multiple AtomContainers");
-					
+					m.setProperty("Error", "Multiple AtomContainers");
+
 				}
 
-				 
-			   atomContainerSet.addAtomContainer(m);
-			   
-			 } // end loop over molecules in SDF
-			
-			
-			 
-			 
+				atomContainerSet.addAtomContainer(m);
+
+			} // end loop over molecules in SDF
+
 			FixDuplicateCASNumbersInSDF(atomContainerSet);
-			
+
+			reader.close();
+
 		} catch (Exception e) {
 			e.printStackTrace();
 
 		}
-		
+
 		return atomContainerSet;
 
 	}
@@ -333,6 +314,8 @@ public class MolFileUtilities {
 					moleculeSet.addAtomContainer(ac);
 				}
 			}
+			
+			isr.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -401,7 +384,7 @@ public class MolFileUtilities {
 				m.setProperty("Error", "");
 				 
 				 
-				if (mfu.HaveBadElement(m)) {
+				if (MolFileUtilities.HaveBadElement(m)) {
 					m.setProperty("Error",
 							"AtomContainer contains unsupported element");
 				} else if (m.getAtomCount() == 1) {
@@ -443,7 +426,7 @@ public class MolFileUtilities {
 				
 			}// end while true;
 
-			ins.close();
+			mr.close();
 			
 			FixDuplicateCASNumbersInSDF(AtomContainerSet);
 			
@@ -551,9 +534,8 @@ public class MolFileUtilities {
 				
 //		System.out.println("here");
 		
-    	try {
+    	try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
     		
-    		BufferedReader br=new BufferedReader(new FileReader(filepath));
     		int counter=0;
     		while (true) {
     			String Line=br.readLine();
@@ -569,7 +551,7 @@ public class MolFileUtilities {
     				else return null;
 //    			}
     			
-    			ArrayList l=(ArrayList)ToxPredictor.Utilities.Utilities.Parse2(Line, delimiter);
+    			List<String> l=ToxPredictor.Utilities.Utilities.Parse2(Line, delimiter);
     			if (l.size()!=2) return null;
     			
     			String Smiles=(String)l.get(0);
@@ -614,7 +596,6 @@ public class MolFileUtilities {
 
     		}
     		
-    		br.close();
     		FixDuplicateCASNumbersInSDF(AtomContainerSet);//added TMM, 9/15/2010
     		
     	} catch (Exception e) {
@@ -664,8 +645,6 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
     	
     	AtomContainerSet AtomContainerSet=new AtomContainerSet();
     
-    	ToxPredictor.misc.MolFileUtilities mfu=new ToxPredictor.misc.MolFileUtilities();
-    	
     	try {
     		
     		BufferedReader br=new BufferedReader(new FileReader(filepath));
@@ -708,7 +687,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					 continue;
 				 }
 
-				if (mfu.HaveBadElement(m)) {
+				if (MolFileUtilities.HaveBadElement(m)) {
 					m.setProperty("Error", "AtomContainer contains unsupported element");
 					continue;
 				}
@@ -719,8 +698,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				} 
 
     		}
-    		
-    		
+    		br.close();
     		
     	} catch (Exception e) {
     		e.printStackTrace();
@@ -757,7 +735,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 		String folderpath3="C:/Documents and Settings/tmarti02/My Documents/javax/cdk from jar-1.0/ToxPredictor/DescriptorTextTables/Cancer data files/differences between DSSTOX and v5a";
 		
 		File Folder1=new File(folderpath1);
-		File Folder2=new File(folderpath2);
+//		File Folder2=new File(folderpath2);
 		
 		File [] files1=Folder1.listFiles();
 		
@@ -897,9 +875,9 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					
 					if (Line==null) break;
 					
-					LinkedList l=Utilities.Parse(Line,"\t");
-					String CAS=(String)l.get(0);
-					String Smiles=(String)l.get(1);
+					LinkedList<String> l=Utilities.Parse(Line,"\t");
+					String CAS=l.get(0);
+					String Smiles=l.get(1);
 					Smiles=CDKUtilities.FixSmiles(Smiles);
 					
 					System.out.println(CAS+"\t"+Smiles);
@@ -980,7 +958,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				
 				if (Line==null) break;
 				
-				LinkedList l=Utilities.Parse(Line,"\t");
+				LinkedList<String> l=Utilities.Parse(Line,"\t");
 				String CAS=(String)l.get(0);
 				String Smiles=(String)l.get(1);
 				Smiles=CDKUtilities.FixSmiles(Smiles);
@@ -1280,7 +1258,8 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			
 			mw.write(m2);
 			fw.write("> <CAS>\r\n"+CAS+"\r\n\r\n$$$$\r\n");			
-			fw.close();
+			
+			mw.close();
 		
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1425,15 +1404,14 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			String filename = folder + File.separator + CAS + ".mol";
 			File f = new File(filename);
 
-			FileReader reader = new FileReader(f);
-
-			BufferedReader br = new BufferedReader(reader);
+			BufferedReader br = new BufferedReader(new FileReader(f));
 			while (true) {
 				String Line = br.readLine();
 				if (Line == null)
 					break;
 				System.out.println(Line);
 			}
+			br.close();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1531,6 +1509,8 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					System.out.println(files[i].getName());
 					count++;
 				}
+				
+				mr.close();
 
 			} catch (Exception e) {
 				System.out.println("Error for " + files[i].getName());
@@ -1591,10 +1571,10 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 		// ToxPredictor.Utilities.MDLReader mr = new
 		// ToxPredictor.Utilities.MDLReader();
 
-		File f = new File(folder);
+//		File f = new File(folder);
 		File f2 = new File(folder + "/No Atoms");
 
-		File[] files = f.listFiles();
+//		File[] files = f.listFiles();
 		File[] files2 = f2.listFiles();
 		try {
 			for (int i = 0; i < files2.length; i++) {
@@ -1623,21 +1603,14 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 	 */
 	void CreateSDFFileFromCASandSource3() {
 		
-		String CAS="",Source="";
+		String CAS="", Source="";
 		
 		
 		String folder="ToxPredictor/temp/doug";
     	String filename="cas list war data w revised source.txt";
     	String sdfFileName="wardata2008.sdf";
     	
-    	
         String d="\t";
-        String d2="\t";
-
-        java.text.DecimalFormat df=new java.text.DecimalFormat("0.00");
-        
-		SmilesGenerator sg=new SmilesGenerator(); 
-		
 		ParseChemidplus p=new ParseChemidplus();
 		
 		try {
@@ -1652,7 +1625,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			
 			String header=br.readLine();
 			System.out.println(header);
-			java.util.List headerlist=Utilities.Parse(header,d);			
+//			List<String> headerlist=Utilities.Parse(header,d);			
 			int Col_CAS=0;
 			int Col_Source=1;
 			
@@ -1661,8 +1634,8 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				String Line=br.readLine();
 				if (Line==null) break;
 				
-				java.util.List list=Utilities.Parse(Line,d);
-				CAS=(String)list.get(Col_CAS);
+				List<String> list=Utilities.Parse(Line,d);
+				CAS=list.get(Col_CAS);
 				
 				FileData fd=new FileData();
 				fd.CAS=CAS;
@@ -1685,7 +1658,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				if (ac==null) {
 					//try to load it from chemiplus folder for extra chemicals:
 					String f="ToxPredictor/structures/chemidplus";
-					ac=p.LoadChemicalFromMolFile(CAS,f );
+					ac=ParseChemidplus.LoadChemicalFromMolFile(CAS,f );
 				}
 				
 				
@@ -1712,7 +1685,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			
 			
 			br.close();
-			fw.close();
+			mw.close();
 		} catch (Exception e) {
 			System.out.println("Error for "+CAS+", Source="+Source);
 			e.printStackTrace();
@@ -1792,7 +1765,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 
         java.text.DecimalFormat df=new java.text.DecimalFormat("0.00");
         
-		org.openscience.cdk.smiles.SmilesGenerator sg=new org.openscience.cdk.smiles.SmilesGenerator(); 
+		SmilesGenerator sg=new SmilesGenerator(SmiFlavor.Canonical); 
 		
 		ParseChemidplus p=new ParseChemidplus();
 		
@@ -1811,7 +1784,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			
 			String header=br.readLine();
 			System.out.println(header);
-			java.util.List headerlist=Utilities.Parse(header,d);			
+//			List<String> headerlist=Utilities.Parse(header,d);			
 			int Col_CAS=0;
 			int Col_Source=1;
 			int Col_Name=2;
@@ -1820,8 +1793,8 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				String Line=br.readLine();
 				if (Line==null) break;
 				
-				java.util.List list=Utilities.Parse(Line,d);
-				CAS=(String)list.get(Col_CAS);
+				List<String> list=Utilities.Parse(Line,d);
+				CAS=list.get(Col_CAS);
 				Source=(String)list.get(Col_Source);
 				Name="";
 				
@@ -1868,9 +1841,9 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				
 			}
 			
-			
+			fw2.close();
 			br.close();
-			fw.close();
+			mw.close();
 		} catch (Exception e) {
 			System.out.println("Error for "+CAS+", Source="+Source);
 			e.printStackTrace();
@@ -1916,7 +1889,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 
 			}// end while true;
 
-			br.close();
+			mr.close();
 			fw.close();
 
 		} catch (Exception e) {
@@ -1961,7 +1934,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					fw.flush();
 				}
 				
-				
+				mr.close();
 				
 			} 
 			
@@ -2029,20 +2002,12 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					continue;
 				}
 
-				if (originalAtomContainer==null) {
-					continue;
-				}
-
 				int OriginalHydrogenCount=this.GetHydrogenCount(originalAtomContainer);
 				int NewHydrogenCount=0;
-
 				
 				IAtomContainer AtomContainer2=null;
-				
 				IAtomContainer AtomContainer=(IAtomContainer)originalAtomContainer.clone();
 								
-				
-				
 				FileWriter fw=new FileWriter(newmolfile);				
 				MDLV2000Writer mw=new MDLV2000Writer(fw);
 				mw.setWriteAromaticBondTypes(false);
@@ -2078,7 +2043,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				
 				mw.close();
 				fw.close();				
-
+				mr.close();
 				
 				
 			}
@@ -2226,8 +2191,8 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 
 			}
 			
-			br.close();
-
+			mr.close();
+			
 			
 
 		}catch (Exception e) {
@@ -2256,50 +2221,50 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			BufferedReader br = new BufferedReader(new FileReader(SDFfilename));
 	
 	
-			IteratingSDFReader mr = new IteratingSDFReader(br,DefaultChemObjectBuilder.getInstance());
-			MDLV2000Writer mw;
-	
-			IAtomContainer m;
-	
-			int NoCASCount = 0;
-			int counter = 0;
-			while (mr.hasNext()) {
-	
-				try {
-	
-					m = mr.next();
-					counter++;
-	
-					if (counter % 1000 == 0)
-						System.out.println(counter);
-	
-				} catch (Exception e) {
-					e.printStackTrace();
-					break;
-				}
-	
-	
-				String CAS = m.getProperty("CAS");
-	
-				if (CAS.equals("-9999")) {
-					NoCASCount++;
-					CAS = "NoCAS-" + NoCASCount;
-				}
-	
-				if (counter < Start)
-					continue;
-	
-				FileWriter fw = new FileWriter(outputfileloc + "/" + CAS
-						+ ".mol");
-				mw = new MDLV2000Writer(fw);
-				mw.write(m);
-	
-				fw.flush();
-				fw.close();
-	
-			}// end while true;
-	
-			br.close();
+			try (IteratingSDFReader mr = new IteratingSDFReader(br,DefaultChemObjectBuilder.getInstance())) {
+				MDLV2000Writer mw;
+
+				IAtomContainer m;
+
+				int NoCASCount = 0;
+				int counter = 0;
+				while (mr.hasNext()) {
+
+					try {
+
+						m = mr.next();
+						counter++;
+
+						if (counter % 1000 == 0)
+							System.out.println(counter);
+
+					} catch (Exception e) {
+						e.printStackTrace();
+						break;
+					}
+
+
+					String CAS = m.getProperty("CAS");
+
+					if (CAS.equals("-9999")) {
+						NoCASCount++;
+						CAS = "NoCAS-" + NoCASCount;
+					}
+
+					if (counter < Start)
+						continue;
+
+					FileWriter fw = new FileWriter(outputfileloc + "/" + CAS
+							+ ".mol");
+					mw = new MDLV2000Writer(fw);
+					mw.write(m);
+
+					fw.flush();
+					fw.close();
+
+				}// end while true;
+
+			}
 	
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2328,17 +2293,16 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			// System.setProperty("cdk.debug.stdout", "true");
 			// System.setProperty("cdk.debugging", "true");
 
-			String[] strData = new String[200];
-
-			IAtomContainer m;
+//			String[] strData = new String[200];
+//			IAtomContainer m;
 
 			int NoCASCount = 0;
-			int counter = 0;
+//			int counter = 0;
 
 			boolean Stop=false;
 			while (true){
 			
-				ArrayList al = new ArrayList();
+				List<String> al = new ArrayList<>();
 
 				while (true) {
 
@@ -2438,19 +2402,15 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 
 			br2.readLine();
 			
-			
-
-			String[] strData = new String[200];
-
-			IAtomContainer m;
-
-			int NoCASCount = 0;
-			int counter = 0;
+//			String[] strData = new String[200];
+//			IAtomContainer m;
+//			int NoCASCount = 0;
+//			int counter = 0;
 
 			boolean Stop=false;
 			while (true){
 			
-				ArrayList al = new ArrayList();
+				List<String> al = new ArrayList<>();
 
 				while (true) {
 
@@ -2542,7 +2502,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			String fileTrainingSet="tox LD50 training set.txt";
 			String filePredictionSet="tox LD50 prediction set.txt";
 			
-			ParseChemidplus p=new ParseChemidplus();
+//			ParseChemidplus p=new ParseChemidplus();
 			
 			try {
 				
@@ -2552,7 +2512,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				
 				String header=br.readLine();
 				System.out.println(header);
-				java.util.List headerlist=Utilities.Parse(header,"\t");			
+//				List<String> headerlist=Utilities.Parse(header,"\t");			
 
 				fwTraining.write(header+"\r\n");
 				fwPrediction.write(header+"\r\n");
@@ -2646,7 +2606,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 
 	void CreateSDFFileFromCASandSource2() {//appends tox field to fields in sdf
 			
-			String CAS="",Source="",SMILES="",Tox="",Name="";
+			String CAS="",Source="",Tox="",Name="";
 			
 
 			String folder="ToxPredictor/DescriptorTextTables/LD50 Data Files";						                
@@ -2673,7 +2633,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 	
 	        java.text.DecimalFormat df=new java.text.DecimalFormat("0.000");
 	        
-			org.openscience.cdk.smiles.SmilesGenerator sg=new org.openscience.cdk.smiles.SmilesGenerator(); 
+//			org.openscience.cdk.smiles.SmilesGenerator sg=new org.openscience.cdk.smiles.SmilesGenerator(); 
 			
 			ParseChemidplus p=new ParseChemidplus();
 			
@@ -2696,7 +2656,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				System.out.println(header);
 				fw2.write("CAS,RevisedSource,NegLogLC50_mol_L,Name\r\n");
 				
-				java.util.List headerlist=Utilities.Parse(header,d);			
+//				List<String> headerlist=Utilities.Parse(header,d);			
 				int Col_CAS=0;
 				int Col_Source=1;				
 				int Col_Tox=2;
@@ -2706,7 +2666,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					String Line=br.readLine();
 					if (Line==null) break;
 					
-					java.util.List list=Utilities.Parse3(Line,d);
+					List<String> list=Utilities.Parse3(Line,d);
 					CAS=(String)list.get(Col_CAS);
 					
 //					if (CAS.equals("50-76-0")) continue;//takes forever
@@ -2749,8 +2709,6 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 //					ToxPredictor.Utilities.CDKUtilities.RemoveHydrogens(AtomContainer);
 					ac=(AtomContainer) AtomContainerManipulator.removeHydrogens(ac);
 
-					HashMap map=new HashMap();
-					
 					ac.setProperty("CAS", CAS);
 					ac.setProperty("Source", Source);
 					ac.setProperty("Tox", Tox);
@@ -2773,9 +2731,9 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 					
 				}
 				
-				
+				mw.close();
 				br.close();
-				fw.close();
+				
 				fw2.close();
 			} catch (Exception e) {
 				System.out.println("Error for "+CAS+", Source="+Source);
@@ -2836,7 +2794,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 		
 		File [] files=OF.listFiles();
 		
-		ArrayList CASNumbers=new ArrayList();
+		List<String> CASNumbers=new ArrayList<>();
 		
 		for (int i=0;i<files.length;i++) {
 			File file=files[i];
@@ -2905,7 +2863,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 		
 		File [] files=OF.listFiles();
 		
-		ArrayList CASNumbers=new ArrayList();
+		List<String> CASNumbers=new ArrayList<>();
 		
 		for (int i=0;i<files.length;i++) {
 			File file=files[i];
@@ -2975,7 +2933,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				
 			}
 			
-			fw.close();
+			mw.close();
 			
 			for (int i=0;i<files.length;i++) {
 				files[i].delete();
@@ -3000,18 +2958,17 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			for (int i = 0; i < files.length; i++) {
 				File file = files[i];
 
-				
-
 				AtomContainer m=new AtomContainer();
 				MDLV2000Reader mr=new MDLV2000Reader(new FileInputStream(file));
 				mr.read(m);
-
 
 				String filename = file.getName();
 				String CAS = filename.substring(0, filename.indexOf("."));
 				String property = (String) m.getProperty(fieldname);
 				fw.write(CAS + "\t" + property+"\r\n");
 				fw.flush();
+				
+				mr.close();
 
 			}
 
@@ -3443,7 +3400,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				
 			}
 			
-			
+			fw.close();
 			
 		} catch (Exception ex) { 
 			ex.printStackTrace();
@@ -3472,7 +3429,8 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			while (isr.hasNext()) {
 				acs.addAtomContainer(isr.next());
 			}
-			
+
+			isr.close();
 			
 			return acs;
 			
@@ -3509,9 +3467,11 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 			}
 			
 			System.out.println(data);
-			AtomContainerSet acs=this.LoadFromSdfString(data);
+			AtomContainerSet acs=LoadFromSdfString(data);
 			AtomContainer ac=(AtomContainer) acs.getAtomContainer(0);
 			System.out.println(ac.getAtomCount());
+			
+			br.close();
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -3592,6 +3552,7 @@ public static AtomContainerSet LoadFromCASList(String filepath,ChemicalFinder cf
 				acs.addAtomContainer(isr.next());
 			}
 
+			isr.close();
 			return acs;
 
 		} catch ( Exception ex ) {

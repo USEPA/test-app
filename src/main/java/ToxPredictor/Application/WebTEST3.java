@@ -3,17 +3,14 @@ package ToxPredictor.Application;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -24,9 +21,6 @@ import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.graph.ConnectivityChecker;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import AADashboard.Application.GenerateRecordsFromTEST;
 import AADashboard.Application.MySQL_DB;
@@ -50,7 +44,6 @@ import ToxPredictor.Utilities.FileUtils;
 import ToxPredictor.Utilities.FormatUtils;
 import ToxPredictor.Utilities.HtmlUtils;
 import ToxPredictor.Utilities.Inchi;
-import ToxPredictor.Utilities.StringCompression;
 import ToxPredictor.Utilities.TESTPredictedValue;
 import ToxPredictor.misc.Lookup;
 import ToxPredictor.misc.MolFileUtilities;
@@ -669,19 +662,19 @@ public class WebTEST3 {
 					} else if (colName.equals("method")) {
 						tpv.method = colVal;
 					} else if (colName.equals("expValMass")) {
-						tpv.expValMass = new Double(colVal);
+						tpv.expValMass = Double.parseDouble(colVal);
 					} else if (colName.equals("predValMass")) {
-						tpv.predValMass = new Double(colVal);
+						tpv.predValMass = Double.parseDouble(colVal);
 					} else if (colName.equals("expValLogMolar")) {						
 						if (!colVal.equals("N/A"))						
-							tpv.expValLogMolar = new Double(colVal);
+							tpv.expValLogMolar = Double.parseDouble(colVal);
 					} else if (colName.equals("predValLogMolar")) {
-						tpv.predValLogMolar = new Double(colVal);
+						tpv.predValLogMolar = Double.parseDouble(colVal);
 					} else if (colName.equals("expActive")) {
 						if (!colVal.equals("N/A"))						
-							tpv.expActive = new Boolean(colVal);
+							tpv.expActive = Boolean.parseBoolean(colVal);
 					} else if (colName.equals("predActive")) {
-						tpv.predActive = new Boolean(colVal);
+						tpv.predActive = Boolean.parseBoolean(colVal);
 					}
 
 
@@ -753,7 +746,7 @@ public class WebTEST3 {
 		PredictToxicityJSONCreator jsonCreator = new PredictToxicityJSONCreator();
 		PredictToxicityWebPageCreatorFromJSON htmlCreator = new PredictToxicityWebPageCreatorFromJSON();
 
-		ArrayList<String> methods = TaskCalculations.getMethods(endpoint);
+		List<String> methods = TaskCalculations.getMethods(endpoint);
 
 		PredictionResults predictionResults = null;
 
@@ -823,7 +816,7 @@ public class WebTEST3 {
 //		System.out.println(result[0]+"\t"+result[1]+"\t"+result[2]);
 		
 		String MolecularWeight=FormatUtils.toD3(dd.MW);
-		String InChi=dd.InChi;
+//		String InChi=dd.InChi;
 		String InChiKey=dd.InChiKey;
 		String SMILES=dd.SmilesRan;
 		
@@ -863,7 +856,7 @@ public class WebTEST3 {
 			tr=new TESTRecord(CAS,gsid,DSSTOXSID,DSSTOXCID,null,null,null);
 		} else {
 			Inchi result=CDKUtilities.generateInChiKey(m);
-			String InChi=result.inchi;
+//			String InChi=result.inchi;
 			String InChiKey=result.inchiKey;
 //			String warning=result[2];
 			
@@ -929,12 +922,11 @@ public class WebTEST3 {
 //				conn = WebTESTDBs.createPredictionsDB(WebTEST2.DB_Path_TEST_Predictions,params,searchKey);
 //			}
 
-			long t1=System.currentTimeMillis();
+//			long t1=System.currentTimeMillis();
 			Connection conn=createConnectionToTEST_Predictions_DB(mySQL_DB_URL,USER,PASS);
 			WebTESTDBs.createDescriptorsTableMySQL(conn,searchKey);
 			WebTESTDBs.createPredictionsTables(conn, params.endpoints, searchKey);
-			long t2=System.currentTimeMillis();
-			
+//			long t2=System.currentTimeMillis();
 //			System.out.println((t2-t1)/1000.0+" seconds to get connection/create tables");
 			
 			
@@ -1165,7 +1157,7 @@ public class WebTEST3 {
 		   try{
 			   
 				conn=MySQL_DB.getConnectionMySQL(mySQL_DB_URL,USER,PASS);
-				Statement stat=conn.createStatement();
+//				Statement stat=conn.createStatement();
 			   
 			   //STEP 2: Register JDBC driver
 			   Class.forName("com.mysql.cj.jdbc.Driver");
@@ -1404,7 +1396,7 @@ public class WebTEST3 {
 
 //			if (usePreviousDescriptors && InChiKey!=null) {
 			if (InChiKey!=null) {	
-				long t1=System.currentTimeMillis();
+//				long t1=System.currentTimeMillis();
 				
 				String searchString="";
 				if (searchKey.equals(strInChi)) searchString=InChi;
@@ -1415,7 +1407,7 @@ public class WebTEST3 {
 				Statement statDescriptors=conn.createStatement();
 				DescriptorData dd=WebTESTDBs.getDescriptors(statDescriptors, searchKey,searchString,compressDescriptorsInDB);
 
-				long t2=System.currentTimeMillis();
+//				long t2=System.currentTimeMillis();
 				
 				if (dd!=null) {
 //					logger.info("Time to load descriptors from db:"+(t2-t1));
@@ -1432,9 +1424,9 @@ public class WebTEST3 {
 					df.CalculateDescriptors(ac, dd, true, overwriteFiles, true, strOutputFolderStructureData);
 					df.WriteJSON(dd, strOutputFolderStructureData+"/descriptorValues.json", true);
 				} else {
-					long t1=System.currentTimeMillis();
+//					long t1=System.currentTimeMillis();
 					df.CalculateDescriptors(ac, dd, true);
-					long t2=System.currentTimeMillis();
+//					long t2=System.currentTimeMillis();
 //					logger.info("Time to calculate descriptors:"+(t2-t1));
 				}
 			} 
@@ -1494,7 +1486,6 @@ public class WebTEST3 {
 	}
 	
 	public static AtomContainer prepareMolecule(int i, AtomContainer m) {
-		ToxPredictor.misc.MolFileUtilities mfu = new ToxPredictor.misc.MolFileUtilities();
 		String CASfield = MolFileUtilities.getCASField(m);
 
 		String CAS = null;
@@ -1541,13 +1532,13 @@ public class WebTEST3 {
 
 			m.setProperty("Error", "");
 
-			if (mfu.HaveBadElement(m)) {
+			if (MolFileUtilities.HaveBadElement(m)) {
 				m.setProperty("Error", "Molecule contains unsupported element");
 			} else if (m.getAtomCount() == 1) {
 				m.setProperty("Error", "Only one nonhydrogen atom");
 			} else if (m.getAtomCount() == 0) {
 				m.setProperty("Error", "Number of atoms equals zero");
-			} else if (!mfu.HaveCarbon(m)) {
+			} else if (!MolFileUtilities.HaveCarbon(m)) {
 				m.setProperty("Error", "Molecule does not contain carbon");
 			}
 

@@ -2,7 +2,6 @@ package ToxPredictor.Application.Calculations;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.util.ArrayList;
 import java.util.Vector;
 
 import org.openscience.cdk.AtomContainer;
@@ -10,9 +9,6 @@ import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
-import ToxPredictor.Application.WebTEST4;
-import ToxPredictor.Database.DSSToxRecord;
-import ToxPredictor.Database.ResolverDb2;
 
 public class DetermineTestChemicalsNotInChemReg {
 
@@ -24,10 +20,8 @@ public class DetermineTestChemicalsNotInChemReg {
 		File [] files=Folder.listFiles();
 		
 		Vector<String>casList=new Vector<>();
-		Vector<String>casList2=new Vector<>();
 		
 		Vector<String>nameList=new Vector<>();
-		
 		Vector<String>namecas=new Vector<>();
 		
 		for (int i=0;i<files.length;i++) {
@@ -60,8 +54,8 @@ public class DetermineTestChemicalsNotInChemReg {
 			
 		}
 		
-		int count=0;
-		
+//		int count=0;
+//		
 //		for (int i=0;i<casList.size();i++) {
 //			String CAS=casList.get(i);
 //			String Name=nameList.get(i);
@@ -119,6 +113,8 @@ public class DetermineTestChemicalsNotInChemReg {
 				
 				
 			}// end while true;
+			
+			mr.close();
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();

@@ -201,22 +201,22 @@ public class OptimalResults implements Serializable, Cloneable {
         Statistics s= new Statistics();
         
         //get the hatmatrix leverage 
-        DecimalFormat df = new DecimalFormat("0.000"); 
-        int clusterNum, csize,ndiscriptors ;   
+ 
+           
         double sigma2 = ( this.getSigma2()); 
-        clusterNum = this.getClusterNumber(); 
         //System.out.println("\n clusterNumber = "+clusterNum); 
 //      findClusterNumberIndex(clusterNum); 
         
         // nparm = number of descriptors +1 = p 
         int nparm = this.getBcoeff().length; 
-        csize = (this.getNumChemicals()) ; 
+        int csize = (this.getNumChemicals()) ; 
         double levarageMax = (2.0* nparm)/csize ;// critical leverage value for outlier test 
+        
         double cooksMax = 4.0/(csize - 2.0);// Check this 
         double dffitsMax = 2.0* Math.sqrt(nparm *1.0/csize); 
-        double covRatioMax,covRatioMin; 
-        covRatioMax = 1.0 + (3.0*nparm) /csize; 
-        covRatioMin = 1.0 - (3.0*nparm) /csize; 
+         
+        double covRatioMax = 1.0 + (3.0*nparm) /csize; 
+        double covRatioMin = 1.0 - (3.0*nparm) /csize; 
         if (csize < 21)dffitsMax = 1.0; 
         //System.out.println("\n csize ="+csize +" nparm ="+nparm+" maximum leverage = "+ df.format(levarageMax) +" Cooks Critical Value "+ df.format(cooksMax)+ " dffits Critical Value "+ df.format(dffitsMax));         
         //System.out.println("\n Covariant Ratio Max = "+covRatioMax+" "+" Covariant Ratio Min = "+covRatioMin); 
@@ -294,7 +294,7 @@ public class OptimalResults implements Serializable, Cloneable {
     } 
     
     private double[] calculateHii() throws Exception {
-        DecimalFormat df = new DecimalFormat("0.000");
+        
         int numChemicals = this.getNumChemicals();
  
         Matrix matX = new Matrix(this.getX());
@@ -363,7 +363,6 @@ public class OptimalResults implements Serializable, Cloneable {
     private double[] calculateResidual() throws Exception {
         //DecimalFormat df = new DecimalFormat("0.000");
         int numChem =  this.getNumChemicals();
-        int clusterNum = this.getClusterNumber();
 //      ChemicalCluster cluster = (ChemicalCluster)allClusters.get(clusterNum -1);
 //      int numChemicalFC = cluster.numInstances();
 //      int clusterNumFC = cluster.getClusterNumber();
@@ -511,7 +510,7 @@ public class OptimalResults implements Serializable, Cloneable {
     /**
      * Added by TMM to make old xml files work:
      * @param endTime The endTime to set.
-     * @deprecated
+     * @Deprecated
      */
     public void setEndTime(double endTime) {
         this.endTime = (long)endTime;
@@ -576,7 +575,7 @@ public class OptimalResults implements Serializable, Cloneable {
     /**
      * Added by TMM to make old xml files work:
      * @param startTime The startTime to set.
-     * @deprecated
+     * @Deprecated
      */
     public void setStartTime(double startTime) {
         this.startTime = (long)startTime;

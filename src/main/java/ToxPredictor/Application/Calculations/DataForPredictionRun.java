@@ -1,17 +1,13 @@
 package ToxPredictor.Application.Calculations;
 
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Set;
 
-import QSAR.qsarOptimal.AllResults;
 import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.WebReportType;
 import ToxPredictor.misc.Lookup;
 import ToxPredictor.misc.Lookup.ExpRecord;
 import wekalite.Instance;
-import wekalite.Instances;
 
 public class DataForPredictionRun {	
 	public String DescriptorSet;

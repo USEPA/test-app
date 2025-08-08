@@ -139,7 +139,7 @@ public class PredictToxicityHierarchical {
 
 			v2.initialize(evalInstances, allResults, trainingDataSet);
 
-			double time3 = System.currentTimeMillis() / 1000.0;
+//			double time3 = System.currentTimeMillis() / 1000.0;
 
 			TestChemical chemical = v2.runTestChemical();
 
@@ -158,19 +158,19 @@ public class PredictToxicityHierarchical {
 			this.predToxVal = chemical.getPredictedValue();
 			this.predToxUnc = chemical.getPredictedUncertainty();
 
-			Vector resultsVector = new Vector();
-			Vector cu = chemical.getClustersUsed();
+			Vector<OptimalResults> resultsVector = new Vector<>();
+			Vector<Integer> cu = chemical.getClustersUsed();
 			for (int i = 0; i < cu.size(); i++) {
 				int num = (Integer) cu.get(i);
 				resultsVector.add(v2.GetResults(num));
 			}
 
-			Vector invalidResultsVector = new Vector(); // vector of
+			Vector<OptimalResults> invalidResultsVector = new Vector<>(); // vector of
 														// OptimalResults for
 														// clusters which cant
 														// be used to make a
 														// prediction
-			Vector cun = chemical.getInvalidClusters(); // clusters which
+			Vector<Integer> cun = chemical.getInvalidClusters(); // clusters which
 														// couldnt be used to
 														// make a prediction
 			for (int i = 0; i < cun.size(); i++) {
@@ -181,7 +181,7 @@ public class PredictToxicityHierarchical {
 				invalidResultsVector.add(or);
 			}
 
-			double time4 = System.currentTimeMillis() / 1000.0;
+//			double time4 = System.currentTimeMillis() / 1000.0;
 
 			// *******************************************************************
 			// Write web pages:
@@ -228,7 +228,7 @@ public class PredictToxicityHierarchical {
 			this.setOptions(method, useFragmentConstraint, isBinaryEndpoint);
 			v2.initialize(instancesEval, allResults, instancesTrain);
 
-			double time3 = System.currentTimeMillis() / 1000.0;
+//			double time3 = System.currentTimeMillis() / 1000.0;
 
 			chemical = v2.runTestChemical();
 
@@ -283,7 +283,7 @@ public class PredictToxicityHierarchical {
 			this.predictions=chemical.getPredictions();
 			this.uncertainties=chemical.getUncertainties();
 			
-			double time4 = System.currentTimeMillis() / 1000.0;
+//			double time4 = System.currentTimeMillis() / 1000.0;
 			
 			return 0;
 

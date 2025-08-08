@@ -2,7 +2,9 @@ package ToxPredictor.Utilities;
 
 import java.util.*;
 import java.util.List;
-import java.nio.channels.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.io.*;
 import javax.swing.*;
 import java.awt.*;
@@ -61,7 +63,7 @@ public class Utilities {
   public static LinkedList<String> Parse(String Line, String Delimiter) {
     // parses a delimited string into a list
 
-    LinkedList<String> myList = new LinkedList<String>();
+    LinkedList<String> myList = new LinkedList<>();
 
     int tabpos = 1;
 
@@ -104,7 +106,7 @@ public class Utilities {
 		StringTokenizer st = new StringTokenizer(Line, delimiter);
 		while (st.hasMoreTokens()) {
 			String strVal=st.nextToken();
-			list.add(new Double(strVal));
+			list.add(Double.parseDouble(strVal));
 		}
 		return list;
 	}
@@ -115,7 +117,7 @@ public class Utilities {
 		StringTokenizer st = new StringTokenizer(Line, delimiter);
 		while (st.hasMoreTokens()) {
 			String strVal=st.nextToken();
-			list.add(new Double(strVal));
+			list.add(Double.parseDouble(strVal));
 		}
 		return list;
 	}
@@ -281,23 +283,16 @@ public class Utilities {
    * @param s
    * @return
    */
-  static java.util.ArrayList<Integer>GetIndices(String Line,String s) {
+  static ArrayList<Integer>GetIndices(String Line,String s) {
 	  
-	  java.util.ArrayList<Integer>l=new java.util.ArrayList<Integer>();
+	  ArrayList<Integer>l=new java.util.ArrayList<Integer>();
 	  
 	  for (int i=0;i<Line.length();i++) {
 		  String c=Line.substring(i,i+1);
-		  
 //		  System.out.println(c);
-		  if (c.equals(s)) 
-			  l.add(new Integer(i));
-		  
+		  if (c.equals(s)) l.add(i);
 	  }
-	  
-	  
 	  return l;
-	  
-	  
   }
   
 
@@ -336,26 +331,39 @@ public class Utilities {
 		return -1;
 	}
   
-  public static int CopyFile(File SrcFile, File DestFile) {
+	public static int CopyFile(File SrcFile, File DestFile) {
 
-    try {
+		try {
+			Path sourcePath = Path.of(SrcFile.getAbsolutePath()); // Replace with your source file path
+			Path destinationPath = Path.of(DestFile.getAbsolutePath()); // Replace with your destination file path
 
-      FileChannel in = new FileInputStream(SrcFile).getChannel();
+			// Copy the file
+			Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+//			System.out.println("File copied successfully!");
+			return 0;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return -1;
+		}
 
-      FileChannel out = new FileOutputStream(DestFile).getChannel();
+	}
+	
+	public static int CopyFile(String srcFilePath, String destFilePath) {
 
-      in.transferTo(0, (int) in.size(), out);
-      in.close();
-      out.close();
+		try {
+			Path sourcePath = Path.of(srcFilePath); // Replace with your source file path
+			Path destinationPath = Path.of(destFilePath); // Replace with your destination file path
 
-      return 0;
+			// Copy the file
+			Files.copy(sourcePath, destinationPath, StandardCopyOption.REPLACE_EXISTING);
+//			System.out.println("File copied successfully!");
+			return 0;
+		} catch (IOException e) {
+			e.printStackTrace();
+			return -1;
+		}
 
-    } catch (Exception e) {
-    	e.printStackTrace();
-    	return -1;
-    }
-
-  }
+	}
 
   public static int FindFieldNumber(String Line, String field) {
     java.util.List<String> myList = Utilities.Parse(Line, "\t");
@@ -409,7 +417,7 @@ public class Utilities {
 
       for (i = 0; i <= myComponents.length - 1; i++) {
 
-        String Name = myComponents[i].getClass().getName();
+//        String Name = myComponents[i].getClass().getName();
 //          System.out.println(Name);
 
         if (myComponents[i] instanceof JPanel) {

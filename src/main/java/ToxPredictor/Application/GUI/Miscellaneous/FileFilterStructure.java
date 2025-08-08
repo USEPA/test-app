@@ -40,7 +40,7 @@ public class FileFilterStructure extends javax.swing.filechooser.FileFilter
 	/**
 	 *  Description of the Field
 	 */
-	protected List types;
+	protected List<String> types;
 	
 	
 
@@ -52,7 +52,7 @@ public class FileFilterStructure extends javax.swing.filechooser.FileFilter
 	public FileFilterStructure()
 	{
 		super();
-		types = new ArrayList();
+		types = new ArrayList<>();
 		types.add("mol");
 		types.add("sdf");
 	}

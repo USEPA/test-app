@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
 
-import gov.epa.ghs_data_gathering.Parse.ToxVal.MySQL_DB;
+import AADashboard.Application.MySQL_DB;
 
 public class RecordLink{
 	public String CAS;
@@ -24,7 +24,7 @@ public class RecordLink{
 	}
 	
 	public Vector<String> toStringArray() {
-		Vector<String>vals=new Vector();
+		Vector<String>vals=new Vector<>();
 		vals.add(CAS);
 		vals.add(Name);
 		vals.add(SourceName);

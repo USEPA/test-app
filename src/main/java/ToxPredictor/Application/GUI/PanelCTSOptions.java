@@ -1,13 +1,13 @@
 package ToxPredictor.Application.GUI;
 
 
-import java.awt.Color;
+
 import java.awt.Insets;
 import java.awt.event.*;
 import java.util.Vector;
 
 import javax.swing.*;
-import javax.swing.border.TitledBorder;
+
 import ToxPredictor.Utilities.*;
 
 
@@ -20,7 +20,12 @@ public class PanelCTSOptions extends JPanel {
 //	public JRadioButton jrbAbioticReduction = new JRadioButton();
 //	public JRadioButton jrbHumanMetabolism = new JRadioButton();
 	
-	public JComboBox jcbRoute=null;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5339837204647126348L;
+
+	public JComboBox<String> jcbRoute=null;
 	
 	public JCheckBox jcbRunCTS=new JCheckBox();
 	
@@ -61,7 +66,7 @@ public class PanelCTSOptions extends JPanel {
 		routes.add("Abiotic Reduction");
 		routes.add("Human Metabolism");
 		
-		jcbRoute=new JComboBox(routes);		
+		jcbRoute=new JComboBox<>(routes);		
 		jcbRoute.setSize(radialwidth, textHeight);
 		jcbRoute.setLocation(jcbRunCTS.getX()+jcbRunCTS.getWidth()+20, (int)jcbRunCTS.getY());
 		jcbRoute.setEnabled(false);
@@ -116,9 +121,7 @@ public class PanelCTSOptions extends JPanel {
 //	    border.setTitlePosition(TitledBorder.TOP);
 //	    this.setBorder(border);
 
-		
 		if (gui instanceof TESTApplication) {
-			TESTApplication f=(TESTApplication)gui;
 			this.setSize(width, height);	
 		}
 		

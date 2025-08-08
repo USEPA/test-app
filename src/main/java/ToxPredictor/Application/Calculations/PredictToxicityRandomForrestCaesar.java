@@ -26,7 +26,7 @@ public class PredictToxicityRandomForrestCaesar {
 	/**
 	 * @param args
 	 */
-	private String relationName = "testchemical";
+//	private String relationName = "testchemical";
 
 	int chemicalNameIndex = 0;
 
@@ -84,7 +84,10 @@ public class PredictToxicityRandomForrestCaesar {
 	 * @return
 	 */
 	public int CalculateToxicity(String CAS, String method, String endpoint, boolean isBinaryEndpoint, boolean isLogMolarEndpoint, String abbrev, String OutputFolder, String DescriptorSet,
-			Instances evalInstances2d, Instances trainingDataSet2d, Instances testDataSet2d, double MW, Object task, Lookup.ExpRecord er, Hashtable htDescriptors, ReportOptions options) {
+			Instances evalInstances2d, Instances trainingDataSet2d, Instances testDataSet2d, 
+			double MW, Object task, Lookup.ExpRecord er, 
+			Hashtable<String,Object> htDescriptors, ReportOptions options) {
+		
 		try {
 
 			PredictToxicityWebPageCreator p = new PredictToxicityWebPageCreator();

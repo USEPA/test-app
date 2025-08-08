@@ -888,7 +888,7 @@ public class ParseChemidplus {
 	private void GetSystematicName(BufferedReader br, FileData fd) {
 		String Line = null;
 
-		fd.SystematicName = new ArrayList();
+		fd.SystematicName = new ArrayList<>();
 
 		try {
 
@@ -922,7 +922,7 @@ public class ParseChemidplus {
 	private void GetSynonyms(BufferedReader br, FileData fd) {
 		String Line = null;
 
-		fd.Synonyms = new ArrayList();
+		fd.Synonyms = new ArrayList<>();
 
 		try {
 
@@ -6921,10 +6921,10 @@ public class ParseChemidplus {
 
 class FileData {
 
-	ArrayList SystematicName = new ArrayList();
-	ArrayList Synonyms = new ArrayList();
-	ArrayList ToxicityRecords=new ArrayList();
-	ArrayList Formulas=new ArrayList();
+	List <String>SystematicName = new ArrayList<>();
+	List <String>Synonyms = new ArrayList<>();
+	List<CarcinogenicityRecord> ToxicityRecords=new ArrayList<>();
+	List<String> Formulas=new ArrayList<>();
 	
 	
 	public String FileName="";

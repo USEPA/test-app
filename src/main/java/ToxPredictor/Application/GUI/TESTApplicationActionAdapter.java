@@ -2,9 +2,7 @@ package ToxPredictor.Application.GUI;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -12,13 +10,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.vecmath.Point2d;
 
@@ -33,13 +28,11 @@ import org.openscience.cdk.interfaces.IAtomContainerSet;
 import org.openscience.cdk.interfaces.IChemModel;
 import org.openscience.cdk.io.IChemObjectReader;
 import org.openscience.cdk.io.MDLV2000Writer;
-import org.openscience.cdk.layout.StructureDiagramGenerator;
 import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import AADashboard.Application.TableGeneratorExcel;
 import ToxPredictor.Application.TESTConstants;
-import ToxPredictor.Application.WebTEST;
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.Calculations.CTS_Generate_Breakdown_Products;
 import ToxPredictor.Application.Calculations.TaskCalculations2;
@@ -50,8 +43,6 @@ import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb2;
 import ToxPredictor.Utilities.CDKUtilities;
 import ToxPredictor.Utilities.Utilities;
-import ToxPredictor.misc.MolFileUtilities;
-import edu.stanford.ejalbert.BrowserLauncher;
 import edu.stanford.ejalbert.exception.BrowserLaunchingInitializingException;
 import edu.stanford.ejalbert.exception.UnsupportedOperatingSystemException;
 
@@ -1234,7 +1225,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			return false;
 		}
 
-		AtomContainer ac=(AtomContainer)som.getAtomContainer(0);
+		IAtomContainer ac=som.getAtomContainer(0);
 		
 		if (ac==null) {
 			JOptionPane.showMessageDialog(f, "Enter a structure first");
@@ -1305,7 +1296,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 		
 		if (!isMoleculeOK(som)) return;
 
-		AtomContainer myMolecule = (AtomContainer)som.getAtomContainer(0);
+		IAtomContainer myMolecule = som.getAtomContainer(0);
 				
 		//TODO ask user when we dont have a match and not blank
 		
