@@ -5,6 +5,7 @@ import org.openscience.cdk.DefaultChemObjectBuilder;
 import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.iterator.IteratingSDFReader;
 
+import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Utilities.SaveStructureToFile;
 import ToxPredictor.Utilities.StructureImageUtil;
 
@@ -62,7 +63,9 @@ public class CreateImageFromTrainingPredictionSDFs {
 			java.io.InputStream ins = null;
 
 //			String filepath="LC50DM/LC50DM_training.sdf";
-			String filepath=endpointAbbrev+"/"+endpointAbbrev+"_"+set+".sdf";
+			
+			String filepath=WebTEST4.dataFolder +"/"+ endpointAbbrev+"/"+endpointAbbrev+"_"+set+".sdf";
+
 //			System.out.println(filepath);
 
 			ins = CreateImageFromTrainingPredictionSDFs.class.getClassLoader().getResourceAsStream(filepath); 
