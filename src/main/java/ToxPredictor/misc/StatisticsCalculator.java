@@ -559,8 +559,8 @@ public class StatisticsCalculator {
 //		}
 		
 
-		List<ModelPrediction>mpsTest=getModelPredictions(endpointAbbrev,methodAbbrev, "prediction",minPredCount,htPredByCAS);
 		List<ModelPrediction>mpsTraining=getModelPredictions(endpointAbbrev,methodAbbrev, "training",minPredCount,htPredByCAS);
+		List<ModelPrediction>mpsTest=getModelPredictions(endpointAbbrev,methodAbbrev, "prediction",minPredCount,htPredByCAS);
 		return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
 
 		

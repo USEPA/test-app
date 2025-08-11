@@ -777,7 +777,7 @@ public class RunFromSDF {
 		boolean removeAlreadyRan = true;
 		boolean useServer=true;
 		
-		int num = 2;
+		int num = 1;
 		int port = 8081 + num - 1;		
 		
 		String server="http://v2626umcth882.rtord.epa.gov";
@@ -1113,12 +1113,12 @@ public class RunFromSDF {
 		return Results;
 	}
 
-	void displayWebpages() {
+	void displayWebpages(String dtxsid) {
 		String folderMain = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\";
 		String snapshot = "snapshot-2025-07-30";
 		String folderDest = folderMain + "data\\TEST5.1.3\\reports\\" + snapshot + "\\";
 		String filePathJson=folderDest+"50k_chunk_from_1.json";
-		ReportCreator.createWebPagesForDTXSID(filePathJson, "DTXSID5039224");
+		ReportCreator.createWebPagesForDTXSID(filePathJson, dtxsid);
 	}
  	
 	/*
@@ -1132,7 +1132,7 @@ public class RunFromSDF {
 	public static void main(String[] args) {
 		RunFromSDF r=new RunFromSDF();
 		r.runSDF();
-//		r.displayWebpages();
+//		r.displayWebpages("DTXSID5039224");
 		
 	}
 

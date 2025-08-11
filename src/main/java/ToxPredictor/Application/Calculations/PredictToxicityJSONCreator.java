@@ -874,19 +874,13 @@ public class PredictToxicityJSONCreator {
 			else {
 				//Need to fix it so that consensus value in text file does not include FDA method in TEST5.1+:
 				
-				
-				if(!htDatasetPredictions.get(abbrev).containsKey(CASi)) {
-					logger.info("Missing prediction for "+pr.getCAS()+" for endpoint="+pr.getEndpoint());
-					predVali="N/A";
-				} else {
-					String methodAbbrev=TESTConstants.getAbbrevMethod(pr.getMethod());
+				String methodAbbrev=TESTConstants.getAbbrevMethod(pr.getMethod());
+				try {
 					predVali=this.htDatasetPredictions.get(abbrev).get(CASi).get(methodAbbrev);
-					
-					if(predVali.equals("N/A")) {
-						System.out.println(abbrev+"\t"+CASi+"\t"+methodAbbrev+"\tmissing neighbor prediction");
-					}
-				}		
-
+				} catch (Exception ex) {
+					logger.info("Missing prediction for "+pr.getCAS()+" for endpoint="+pr.getEndpoint()+" for method="+pr.getMethod());
+					predVali="N/A";
+				}
 			}
 
 			//				System.out.println(CASi+"\t"+predVali);
