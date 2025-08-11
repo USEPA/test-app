@@ -548,7 +548,8 @@ public class RunFromSDF {
 				br = new BufferedReader(isr);
 			} else {
 				FileInputStream fis = new FileInputStream(sdfFilePath);
-				br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+//				br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
+				br = new BufferedReader(new InputStreamReader(fis));
 			}
 
 			while (true) {
@@ -619,6 +620,7 @@ public class RunFromSDF {
 			br.close();
 			mr.close();
 		} catch (Exception ex) {
+			System.out.println(sdfFilePath+" missing");
 			ex.printStackTrace();
 		}
 		return acs;
@@ -778,8 +780,8 @@ public class RunFromSDF {
 		int num = 2;
 		int port = 8081 + num - 1;		
 		
-//		String server="http://v2626umcth882.rtord.epa.gov";
-		String server="http://localhost";
+		String server="http://v2626umcth882.rtord.epa.gov";
+//		String server="http://localhost";
 
 		String snapshot = "snapshot-2025-07-30";
 
@@ -1115,13 +1117,13 @@ public class RunFromSDF {
 		String folderMain = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\";
 		String snapshot = "snapshot-2025-07-30";
 		String folderDest = folderMain + "data\\TEST5.1.3\\reports\\" + snapshot + "\\";
-		String filePathJson=folderDest+"50k_chunk_from_50001.json";
-		ReportCreator.createWebPagesForDTXSID(filePathJson, "DTXSID90160243");
+		String filePathJson=folderDest+"50k_chunk_from_1.json";
+		ReportCreator.createWebPagesForDTXSID(filePathJson, "DTXSID5039224");
 	}
  	
 	/*
 	 * TODO:
-	 * - Check if descriptors match previous release of TEST
+	 * - Check if descriptors match previous release of TEST- they match for FHM LC50 training set for installed version of TEST 5.1.3
 	 * - Check if predictions match previous release check if html reports look good
 	 * - Why does Neighbors display CAS instead of DTXSID in NN report?
 	 * - Update the snapshot db using charlies snapshot- take from materialized view when complete

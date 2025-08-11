@@ -10,10 +10,16 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.openscience.cdk.AtomContainerSet;
+import org.openscience.cdk.interfaces.IAtomContainer;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import ToxPredictor.Application.TESTConstants;
+import ToxPredictor.Application.WebTEST4;
+import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSDF;
+import ToxPredictor.Database.DSSToxRecord;
 
 
 /**
@@ -334,7 +340,7 @@ public class StatisticsCalculator {
 			
 	}
 	
-	
+	@Deprecated
 	private List<ModelPrediction>getModelPredictionsConsensus(String  endpointAbbrev, String  set, int minPredCount) {
 		
 		List<ModelPrediction>mps=new ArrayList<>();
@@ -407,6 +413,65 @@ public class StatisticsCalculator {
 	}
 	
 
+	private List<ModelPrediction>getModelPredictions(String  endpointAbbrev, String methodAbbrev, String  set, int minPredCount,Hashtable<String,Hashtable<String,String>>htPredByCAS) {
+		
+		List<ModelPrediction>mps=new ArrayList<>();
+		
+//		String filepath=endpointAbbrev+"/"+endpointAbbrev+" "+set+" set predictions.txt";
+
+		try {
+			
+			
+			String	sdfFilePath = WebTEST4.dataFolder+"/"+endpointAbbrev+"/" + endpointAbbrev + "_"+set+".sdf";
+
+			
+			//Following assumes that the structures in the sdf in the jar file are correct, they need updating
+			AtomContainerSet acs=RunFromSDF.readSDF(sdfFilePath, -1,true);
+			
+			
+			for (IAtomContainer ac:acs.atomContainers()) {
+				
+				String cas=ac.getProperty(DSSToxRecord.strCAS);
+												
+				int splitNum=-1;
+				if(set.equals("test")) splitNum=1;
+				if(set.equals("training")) splitNum=0;
+								
+				double dexpval=Double.parseDouble(ac.getProperty("Tox"));
+				
+				Hashtable<String,String>htPreds=htPredByCAS.get(cas);
+								
+				Double dpredval=null;
+				
+				if (!htPreds.containsKey(methodAbbrev)) {
+					System.out.println(cas+"\t"+endpointAbbrev+"\t"+methodAbbrev+"\tmissing prediction");
+					continue;
+				}
+				
+				
+				String strPred=htPreds.get(methodAbbrev);
+				
+				if(!strPred.equals("N/A")) {
+					dpredval=Double.parseDouble(strPred);
+				}
+				
+				ModelPrediction mp=new ModelPrediction(cas,dexpval,dpredval,splitNum);
+				mps.add(mp);
+//				System.out.println(strVals[0]+"\t"+consensusVals);
+			}
+			
+//			System.out.println(Utilities.gson.toJson(mps));
+			
+		} catch (Exception ex) {
+			System.out.println("Error getting predictions for "+endpointAbbrev);
+			ex.printStackTrace();
+		}
+		
+		return mps;
+		
+	}
+	
+	@Deprecated
 	private List<ModelPrediction>getModelPredictions(String  endpointAbbrev, String method, String  set, int minPredCount) {
 		
 		List<ModelPrediction>mps=new ArrayList<>();
@@ -473,25 +538,31 @@ public class StatisticsCalculator {
 		}
 	}
 	
-	public HashMap<String, Double> getStatistics(String endpoint,String method) {
+	public HashMap<String, Double> getStatistics(String endpoint,String method,Hashtable<String,Hashtable<String,String>>htPredByCAS) {
 
 		String endpointAbbrev=TESTConstants.getAbbrevEndpoint(endpoint);
+		String methodAbbrev=TESTConstants.getAbbrevMethod(method);
 		
 		if(endpointAbbrev.equals("?")) {
 			System.out.println("getStatistics(), Failed to get abbrev:\t"+endpoint);
 			return null;
 		}
 		
-		if(method.equals("Consensus")) {
-			List<ModelPrediction>mpsTest=getModelPredictionsConsensus(endpointAbbrev, "test",minPredCount);
-			List<ModelPrediction>mpsTraining=getModelPredictionsConsensus(endpointAbbrev, "training",minPredCount);
-			return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
-		} else {
-			List<ModelPrediction>mpsTest=getModelPredictions(endpointAbbrev,method, "test",minPredCount);
-			List<ModelPrediction>mpsTraining=getModelPredictions(endpointAbbrev, method, "training",minPredCount);
-			return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
-		}
+//		if(method.equals("Consensus")) {
+//			List<ModelPrediction>mpsTest=getModelPredictionsConsensus(endpointAbbrev, "test",minPredCount);
+//			List<ModelPrediction>mpsTraining=getModelPredictionsConsensus(endpointAbbrev, "training",minPredCount);
+//			return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
+//		} else {
+//			List<ModelPrediction>mpsTest=getModelPredictions(endpointAbbrev,method, "test",minPredCount);
+//			List<ModelPrediction>mpsTraining=getModelPredictions(endpointAbbrev, method, "training",minPredCount);
+//			return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
+//		}
 		
+
+		List<ModelPrediction>mpsTest=getModelPredictions(endpointAbbrev,methodAbbrev, "prediction",minPredCount,htPredByCAS);
+		List<ModelPrediction>mpsTraining=getModelPredictions(endpointAbbrev,methodAbbrev, "training",minPredCount,htPredByCAS);
+		return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
+
 		
 //		System.out.println(mpsTest.size()+"\t"+mpsTraining.size());
 		
@@ -499,14 +570,14 @@ public class StatisticsCalculator {
 	}
 	
 	
-	public static void main(String[] args) {
-		StatisticsCalculator sc=new StatisticsCalculator();
-		HashMap<String, Double>mapStats=sc.getStatistics(TESTConstants.ChoiceFHM_LC50,"Consensus");
-		
-		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
-		System.out.println(gson.toJson(mapStats));
-		
-	}
+//	public static void main(String[] args) {
+//		StatisticsCalculator sc=new StatisticsCalculator();
+//		HashMap<String, Double>mapStats=sc.getStatistics(TESTConstants.ChoiceFHM_LC50,"Consensus");
+//		
+//		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
+//		System.out.println(gson.toJson(mapStats));
+//		
+//	}
 
 
 }

@@ -64,6 +64,9 @@ import java.util.Vector;
 
 public class WebTEST4 {
 	
+	
+	public static String dataFolder="gov/epa/webtest";
+	
 	public static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
 
 	public static boolean dashboardStructuresAvailable = true;
@@ -271,15 +274,20 @@ public class WebTEST4 {
 		String pred2d = "_prediction_set-2d.csv";
 
 		String abbrev = TESTConstants.getAbbrevEndpoint(endpoint);
-		csvTraining_2d = abbrev + "/" + abbrev + train2d;
-		csvPrediction_2d = abbrev + "/" + abbrev + pred2d;
-		csvTrainingFrag = abbrev + "/" + abbrev + trainfrag;
+		
+		
+		String folder=dataFolder+"/"+abbrev+"/";
+				
+		csvTraining_2d = folder + abbrev + train2d;
+		csvPrediction_2d = folder + abbrev + pred2d;
+		csvTrainingFrag = folder + abbrev + trainfrag;
 
 		try {
 			CSVLoader atf = new CSVLoader();
 
 			if (ht_ccTraining.get(endpoint) == null) {
 				ht_ccTraining.put(endpoint, atf.getDataSetFromJarFile(csvTraining_2d));
+//				System.out.println(ht_ccTraining.get(endpoint).numInstances());
 			}
 
 			if (ht_ccPrediction.get(endpoint) == null) {// always load so that
@@ -314,8 +322,8 @@ public class WebTEST4 {
 		if (method.equals(TESTConstants.ChoiceHierarchicalMethod)
 				|| method.equals(TESTConstants.ChoiceSingleModelMethod)
 				|| method.equals(TESTConstants.ChoiceConsensus)) {
-			LoadHierarchicalXMLFile(endpoint);
 		}
+		LoadHierarchicalXMLFile(endpoint);
 
 		if (method.equals(TESTConstants.ChoiceGroupContributionMethod)
 				|| method.equals(TESTConstants.ChoiceConsensus)) {
@@ -411,16 +419,22 @@ public class WebTEST4 {
 		try {
 			if (ht_allResultsFrag.get(endpoint) == null) {
 				String abbrev = TESTConstants.getAbbrevEndpoint(endpoint);
-				String xmlFileName = abbrev + "/" + abbrev + "_training_set-frag.xml";
-				if (!WebTEST.HaveFileInJar(xmlFileName)) {
+				String xmlFileName = abbrev + "_training_set-frag.xml";
+				
+				String folder=dataFolder+"/"+abbrev+"/";
+				String xmlFilePath=folder+xmlFileName;
+
+				
+				if (!WebTEST.HaveFileInJar(xmlFilePath)) {
 					ht_allResultsFrag.put(endpoint, new AllResults());
+					System.out.println("Missing in jar:\t"+xmlFilePath);
 					return;
 				}
 
 				logger.debug("Loading fragments XML...");
 
 				ht_allResultsFrag.put(endpoint,
-						WebTEST.readAllResultsFormat2_2(xmlFileName, ht_ccTrainingFrag.get(endpoint), true));
+						WebTEST.readAllResultsFormat2_2(xmlFilePath, ht_ccTrainingFrag.get(endpoint), true));
 			}
 		} catch (Exception e) {
 			logger.catching(e);
@@ -429,15 +443,23 @@ public class WebTEST4 {
 
 	private static void LoadHierarchicalXMLFile(String endpoint) {
 		try {
+			
+			
 			if (ht_allResults.get(endpoint) == null) {
 				String abbrev = TESTConstants.getAbbrevEndpoint(endpoint);
-				String xmlFileName = abbrev + "/" + abbrev + "_training_set-2d.xml";
-				if (!WebTEST.HaveFileInJar(xmlFileName))
+				String xmlFileName = abbrev + "_training_set-2d.xml";
+				
+				String folder=dataFolder+"/"+abbrev+"/";
+				String xmlFilePath=folder+xmlFileName;
+				
+				if (!WebTEST.HaveFileInJar(xmlFilePath)) {
+					System.out.println("Missing in jar:\t"+xmlFilePath);
 					return;
+				}
 
 				logger.debug("Loading cluster data file...");
 				ht_allResults.put(endpoint,
-						WebTEST.readAllResultsFormat2_2(xmlFileName, ht_ccTraining.get(endpoint), true));
+						WebTEST.readAllResultsFormat2_2(xmlFilePath, ht_ccTraining.get(endpoint), true));
 			}
 		} catch (Exception e) {
 			logger.catching(e);

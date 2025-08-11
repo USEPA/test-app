@@ -28,10 +28,10 @@ public class GetDTXSIDLookup {
 	
 	public static Hashtable<String, String> getDtxsidLookupByCAS() {
 		
-		String jsonFilePath = "/Datasets/dtxsid_lookup_from_cas.json"; // Adjust the path based on your JAR structure
+		String jsonFilePath = "gov/epa/webtest/dtxsid_lookup_from_cas.json"; // Adjust the path based on your JAR structure
 
         // Read the JSON file from the JAR
-        try (InputStream inputStream = GetDTXSIDLookup.class.getResourceAsStream(jsonFilePath);
+        try (InputStream inputStream = GetDTXSIDLookup.class.getClassLoader().getResourceAsStream(jsonFilePath);
              InputStreamReader reader = new InputStreamReader(inputStream)) {
 
             // Define the type of the hashtable
@@ -48,6 +48,7 @@ public class GetDTXSIDLookup {
             
             
         } catch (Exception e) {
+        	System.out.println("Failed to load "+jsonFilePath);
             e.printStackTrace();
             return null;
         }
@@ -183,7 +184,7 @@ public class GetDTXSIDLookup {
 //		long t2=System.currentTimeMillis();
 		 
 		try {
-			String folder="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\TEST_2020_03_18_EPA_Github\\src\\main\\resources\\Datasets\\";
+			String folder="jar\\Datasets-1.1.1\\gov\\epa\\webtest\\";
 			FileWriter fw= new FileWriter (folder+"dtxsid_lookup_from_cas.json");
 			fw.write(WebTEST4.gson.toJson(htCAS_to_SID));
 			fw.flush();

@@ -102,7 +102,7 @@ public class RunFromSmiles {
 			
 			File file=new File(filePath);
 			
-			String reportBase=file.getParentFile().getAbsolutePath();
+			String reportBase=file.getParentFile().getAbsolutePath()+File.separator+targetDTXSID;
 			
 			
 			int count=0;

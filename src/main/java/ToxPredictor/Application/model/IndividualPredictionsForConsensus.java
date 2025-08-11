@@ -55,6 +55,15 @@ public class IndividualPredictionsForConsensus {
     public void setConsensusPredictions(Vector<PredictionIndividualMethod> consensusPredictions) {
         this.consensusPredictions = consensusPredictions;
     }
+    
+    public String getPrediction(String method) {
+    	for(PredictionIndividualMethod pim:consensusPredictions) {
+    		if(pim.getPrediction().equals(method)) return pim.prediction;
+    	}
+    	return null;
+    }
+     
+    
 
 //    public String getImageUrl() {
 //        return imageUrl;
