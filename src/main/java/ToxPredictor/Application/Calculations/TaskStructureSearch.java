@@ -1023,7 +1023,7 @@ public class TaskStructureSearch {
 		}
 	}
 	
-	public static IAtomContainer getMoleculeFromDSSToxRecords(ArrayList<DSSToxRecord> recs) {
+	public static IAtomContainer getMoleculeFromDSSToxRecords(List<DSSToxRecord> recs) {
 		IAtomContainer molecule=null;
 
 		if (recs.size()>0) {
@@ -1351,7 +1351,7 @@ private static String trimQuotes(String identifier) {
 
 		//
 //		System.out.println("Line="+Line);
-		ArrayList<DSSToxRecord> records=ResolverDb2.lookup(Line);
+		List<DSSToxRecord> records=ResolverDb2.lookup(Line);
 
 		if (records.size()>0) {
 			m=getMoleculeFromDSSToxRecords(records);

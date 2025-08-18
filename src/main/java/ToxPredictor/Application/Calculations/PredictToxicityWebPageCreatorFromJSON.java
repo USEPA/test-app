@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DecimalFormat;
+import java.util.List;
 import java.util.Vector;
 
 import org.apache.logging.log4j.LogManager;
@@ -730,6 +732,59 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		}
 	}
 	
+	
+
+	public String writeEndpointSummaryTable(List<PredictionResults> listPredictionResults)  {
+
+		StringWriter fw=new StringWriter();
+		
+		fw.write("<p><p>");
+		
+		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
+		fw.write("<caption>Predictions</caption>\r\n");
+
+		fw.write("<tr bgcolor=\"#D3D3D3\">\n");
+		fw.write("<th>Property</th>\n");
+
+//		fw.write("<th>Experimental value<br>" + units + "</th>\n");
+//		fw.write("<th>Predicted value<br>" + units + "</th>\n");
+		
+		fw.write("<th>Experimental value</th>\n");
+		fw.write("<th>Predicted value</th>\n");
+
+		fw.write("</tr>\n");
+		
+		for (PredictionResults pr:listPredictionResults) {
+
+			fw.write("<tr>\n");
+			
+			fw.write("<td>" + pr.getEndpoint()+", "+pr.getModelUnits() + "</td>\n");
+			
+			Double exp=pr.getExpValueInModelUnits();
+			String strExp=exp+"";
+			if(exp==null) strExp="N/A";
+			
+			Double pred=pr.getPredValueInModelUnits();
+			String strPred=pred+"";
+			if(pred==null) strPred="N/A";
+			
+			fw.write("<td>" + strExp + "</td>\n");
+			fw.write("<td>" + strPred + "</td>\n");
+			fw.write("</tr>\n");
+		}
+		fw.write("</table>\n");
+		
+		return fw.toString();
+		
+	}
+
+	
+	/**
+	 * TODO take the html output and fix the tables to use div tags to make 508 compliant using JSoup
+	 * 
+	 * @param pr
+	 * @param fw
+	 */
 	public void writeConsensusResultsWebPages(PredictionResults pr,Writer fw) {
 
 		try {

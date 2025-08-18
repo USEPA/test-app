@@ -10,6 +10,8 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.interfaces.IAtomContainer;
 
@@ -19,6 +21,7 @@ import com.google.gson.GsonBuilder;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSDF;
+import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles;
 import ToxPredictor.Database.DSSToxRecord;
 
 
@@ -82,6 +85,7 @@ public class StatisticsCalculator {
 	public static final String  SP_TEST=SPECIFICITY+TAG_TEST;
 
 	
+	private static final Logger logger = LogManager.getLogger(StatisticsCalculator.class);
 
 	private Double calcMeanExpTraining(List<ModelPrediction>trainMP) {
 		
@@ -413,7 +417,14 @@ public class StatisticsCalculator {
 	}
 	
 
+	@Deprecated
 	private List<ModelPrediction>getModelPredictions(String  endpointAbbrev, String methodAbbrev, String  set, int minPredCount,Hashtable<String,Hashtable<String,String>>htPredByCAS) {
+		
+		if(htPredByCAS==null) {
+			logger.warn("htPredByCAS==null");
+			return null;
+		}
+		
 		
 		List<ModelPrediction>mps=new ArrayList<>();
 		
@@ -438,6 +449,12 @@ public class StatisticsCalculator {
 				if(set.equals("training")) splitNum=0;
 								
 				double dexpval=Double.parseDouble(ac.getProperty("Tox"));
+				
+				
+				if(!htPredByCAS.containsKey(cas)) {
+					logger.warn(cas+" not present in htPredByCAS");
+					continue;
+				}
 				
 				Hashtable<String,String>htPreds=htPredByCAS.get(cas);
 								
@@ -529,6 +546,7 @@ public class StatisticsCalculator {
 		public Double pred;
 		public Double weight;
 		public Integer split;
+		public String methodAbbrev;
 
 		public ModelPrediction(String  id, Double exp, Double pred, Integer split) {
 			this.id = id;
@@ -536,36 +554,48 @@ public class StatisticsCalculator {
 			this.pred = pred;
 			this.split=split;
 		}
+		
+		
+		public ModelPrediction(String  id, Double exp, Double pred, Integer split,String methodAbbrev) {
+			this.id = id;
+			this.exp=exp;
+			this.pred = pred;
+			this.split=split;
+			this.methodAbbrev=methodAbbrev;
+		}
+
 	}
 	
-	public HashMap<String, Double> getStatistics(String endpoint,String method,Hashtable<String,Hashtable<String,String>>htPredByCAS) {
+	public HashMap<String, Double> getStatistics(String endpoint,String method,List<ModelPrediction> mps) {
 
 		String endpointAbbrev=TESTConstants.getAbbrevEndpoint(endpoint);
 		String methodAbbrev=TESTConstants.getAbbrevMethod(method);
 		
 		if(endpointAbbrev.equals("?")) {
-			System.out.println("getStatistics(), Failed to get abbrev:\t"+endpoint);
+			logger.error("getStatistics(), Failed to get abbrev:\t"+endpoint);
 			return null;
 		}
 		
-//		if(method.equals("Consensus")) {
-//			List<ModelPrediction>mpsTest=getModelPredictionsConsensus(endpointAbbrev, "test",minPredCount);
-//			List<ModelPrediction>mpsTraining=getModelPredictionsConsensus(endpointAbbrev, "training",minPredCount);
-//			return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
-//		} else {
-//			List<ModelPrediction>mpsTest=getModelPredictions(endpointAbbrev,method, "test",minPredCount);
-//			List<ModelPrediction>mpsTraining=getModelPredictions(endpointAbbrev, method, "training",minPredCount);
-//			return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
-//		}
+		List<ModelPrediction>mpsTrain=new ArrayList<>();
+		List<ModelPrediction>mpsTest=new ArrayList<>();
 		
-
-		List<ModelPrediction>mpsTraining=getModelPredictions(endpointAbbrev,methodAbbrev, "training",minPredCount,htPredByCAS);
-		List<ModelPrediction>mpsTest=getModelPredictions(endpointAbbrev,methodAbbrev, "prediction",minPredCount,htPredByCAS);
-		return calculateStatistics(mpsTraining, mpsTest, endpointAbbrev);
-
+		for(ModelPrediction mp:mps) {
+			
+//			System.out.println(methodAbbrev+"\t"+mp.methodAbbrev+"\t"+mp.split);
+			
+			if(!mp.methodAbbrev.equals(methodAbbrev)) continue;
+			
+			if(mp.split==0)mpsTrain.add(mp);
+			else if(mp.split==1)mpsTest.add(mp);
+			else {
+				logger.error("Invalid split for "+endpointAbbrev+" for "+methodAbbrev+" for "+mp.id);
+			}
+		}
 		
+//		Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
+//		System.out.println(gson.toJson(mps));
+		return calculateStatistics(mpsTrain, mpsTest, endpoint);
 //		System.out.println(mpsTest.size()+"\t"+mpsTraining.size());
-		
 		
 	}
 	

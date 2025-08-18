@@ -31,6 +31,7 @@ import ToxPredictor.Utilities.Utilities;
 import ToxPredictor.misc.Lookup;
 //import gov.epa.webtest.calc.TaskCalculations;
 import ToxPredictor.misc.StatisticsCalculator;
+import ToxPredictor.misc.StatisticsCalculator.ModelPrediction;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -88,29 +89,38 @@ public class PredictToxicityJSONCreator {
 	Hashtable<String, String>htCAS_to_DTXSID=null;
 	
 	//endpointAbbrev...cas...methodAbbrev => prediction as string :
-	Hashtable<String,Hashtable<String,Hashtable<String,String>>> htDatasetPredictions=null;
+	Hashtable<String, List<ModelPrediction>> htDatasetPredictions=null;
 	
+	
+	public static boolean useJsonLookups=true; 
+
 	public PredictToxicityJSONCreator() {
 		htVarDefs=LoadDefinitions();
 		
-		if(useJsonCAS_Lookup) {
-			System.out.println("Loading DTXSID lookup for similar chemicals from datasets from json file");
+		if(useJsonLookups) {
+			logger.info("Loading DTXSID lookup for similar chemicals from datasets from json file");
 			htCAS_to_DTXSID=GetDTXSIDLookup.getDtxsidLookupByCAS();
 
-			System.out.println("Loading training/test set predictions from json file");
+			logger.info("Loading training/test set predictions from json file");
 			htDatasetPredictions=GetTrainingTestSetPredictions.getPredictionHashtable();
 //			
 		}
 		
-		
+		 List<ModelPrediction>mps=htDatasetPredictions.get(TESTConstants.abbrevChoiceMutagenicity);
+		 
+//		 for(ModelPrediction mp:mps) {
+//			 if(mp.id.equals("287-92-3")) {
+//				 System.out.println(mp.id+"\t"+mp.exp+"\t"+mp.pred+"\t"+mp.split+"\t"+mp.methodAbbrev);
+//			 }
+//		 }
+//		neighbor CAS=287-92-3 for endpoint=Mutagenicity for set=test for method=Hierarchical clustering
+
 	}
 
+	
 	public Map<String, HashMap<String, Double>>allStatsByEndpointMethod=new HashMap<>();
 	StatisticsCalculator sc=new StatisticsCalculator();
 	
-	
-	public static boolean useJsonCAS_Lookup=true; 
-
 
 	/**
 	 * This old method is used by classes than WebTEST4
@@ -810,10 +820,9 @@ public class PredictToxicityJSONCreator {
 
 		String predfilename=null;
 
+		//TODO fix LDA predictions to use a JSON file instead
 		if (pr.getMethod().contentEquals(TESTConstants.ChoiceLDA))
 			predfilename = abbrev + " " + set + " set predictions.txt";
-		else
-			predfilename = abbrev + "/" + abbrev + " " + set + " set predictions.txt";
 
 		similarChemicals.setSimilarChemicalsCount(count);
 		similarChemicals.setSimilarChemicalsSet(set);
@@ -848,6 +857,8 @@ public class PredictToxicityJSONCreator {
 		Vector<Double> vecSC2 = new Vector<Double>();// includes non
 		// predicted ones
 
+		DecimalFormat df=new DecimalFormat("0.00");
+		
 		int counter = 0;
 		while (e.hasMoreElements()) {
 
@@ -861,50 +872,18 @@ public class PredictToxicityJSONCreator {
 			String CASi = i.getName();
 
 			// System.out.println("Here1"+method+"\t"+CASi);
-
 			// TaskCalculations.CreateStructureImage(CASi, strImageFolder);
 
-//			String strKey = d2.format(key);
+			
 			String expVali = d2.format(i.classValue());
 
-			String predVali=null;
-
-			if (pr.getMethod().contentEquals(TESTConstants.ChoiceLDA))
-				predVali = lookup.LookUpValueInJarFile(predfilename, CASi, "ID", "Pred_Value:-Log10(mol/L)", "|");
-			else {
-				//Need to fix it so that consensus value in text file does not include FDA method in TEST5.1+:
-				
-				String methodAbbrev=TESTConstants.getAbbrevMethod(pr.getMethod());
-				try {
-					predVali=this.htDatasetPredictions.get(abbrev).get(CASi).get(methodAbbrev);
-				} catch (Exception ex) {
-					logger.info("Missing prediction for "+pr.getCAS()+" for endpoint="+pr.getEndpoint()+" for method="+pr.getMethod());
-					predVali="N/A";
-				}
-			}
-
-			//				System.out.println(CASi+"\t"+predVali);
-
-
-			double dpredVali;
-
-			if (predVali.equals("N/A")) {
-				dpredVali = -9999;
+			if (pr.getMethod().contentEquals(TESTConstants.ChoiceLDA)) {
+				updateVectorsLDA(predfilename, vecExp, vecPred, vecSC, vecPred2, df, key, i, CASi);
 			} else {
-				dpredVali = Double.parseDouble(predVali);
-				predVali = d2.format(dpredVali);
+				updateVectors(pr, set, abbrev, vecExp, vecPred, vecSC, vecPred2, df, key, i, CASi);
 			}
-
-			if (dpredVali != -9999) {
-				vecExp.add(i.classValue());
-				vecPred.add(dpredVali);
-				vecSC.add(key);
-			} else {
-				predVali = "N/A";
-			}
-
+			
 			vecExp2.add(expVali);
-			vecPred2.add(predVali);
 			vecCAS2.add(CASi);
 			vecSC2.add(key);
 
@@ -918,10 +897,7 @@ public class PredictToxicityJSONCreator {
 		if (!pr.isBinaryEndpoint() && vecPred.size() > 0) {
 
 			String set2 = set.substring(0, 1).toUpperCase() + set.substring(1);// capitalize
-			// first
-			// letter
 			String chartname = "PredictionResults" + pr.getMethod() + "-Similar" + set2 + "SetChemicals.png";
-			
 			
 			this.writeExternalPredChart(set,pr, vecExp, vecPred, vecSC,  predfilename, chartname, options, similarChemicals);
 		
@@ -929,13 +905,73 @@ public class PredictToxicityJSONCreator {
 			this.calcCancerStats(set,0.5, vecExp, vecPred, similarChemicals);
 		}
 
-
-		
-		//			logger.debug(expVal+"\t"+predVal);
-
 		writeSimilarChemicalsTable(pr, expVal, predVal, d2, strImageFolder, vecCAS2, vecExp2, vecPred2, vecSC2, options, similarChemicals);
 
+	}
 
+	private void updateVectorsLDA(String predfilename, Vector<Double> vecExp, Vector<Double> vecPred,
+			Vector<Double> vecSC, Vector<String> vecPred2, DecimalFormat df, double key, Instance i, String CASi) {
+		String strPredVali = lookup.LookUpValueInJarFile(predfilename, CASi, "ID", "Pred_Value:-Log10(mol/L)", "|");
+		Double predVali=null;
+		
+		if (!strPredVali.equals("N/A")) {
+			predVali =Double.parseDouble(strPredVali);
+		}
+		
+		if (predVali != null) {
+			vecExp.add(i.classValue());
+			vecPred.add(predVali);
+			vecSC.add(key);
+			vecPred2.add(df.format(predVali));
+		} else {
+			vecPred2.add("N/A");
+		}
+	}
+
+	private void updateVectors(PredictionResults pr, String set, String abbrev, Vector<Double> vecExp,
+			Vector<Double> vecPred, Vector<Double> vecSC, Vector<String> vecPred2, DecimalFormat df, double key,
+			Instance i, String CASi) {
+
+		String methodAbbrev=TESTConstants.getAbbrevMethod(pr.getMethod());
+		
+		List<ModelPrediction>mps=htDatasetPredictions.get(abbrev);
+		
+			
+//				long t1=System.currentTimeMillis();
+//				if(methodAbbrev.equals(TESTConstants.abbrevChoiceConsensus) && set.equals("test")) {
+//					
+//					System.out.println(gson.toJson(mps));
+//				}
+		
+		ModelPrediction mpi=null;
+		
+		for(ModelPrediction mp:mps) {
+			
+			if(!mp.id.equals(CASi)) continue;
+			
+			//Just in case make sure split is correct:
+			if (set.equals("training") && mp.split == 1)
+				continue;
+			else if (set.equals("test") && mp.split == 0)
+				continue;
+			
+			if(mp.methodAbbrev.equals(methodAbbrev))
+				mpi=mp;
+		}
+		
+		if(mpi==null) {
+			logger.info("For target CAS="+pr.getCAS()+", Missing prediction for neighbor CAS="+CASi+
+					" for endpoint="+pr.getEndpoint()+" for set="+set+" for method="+pr.getMethod());
+		} else {
+			if (mpi.pred != null) {
+				vecExp.add(i.classValue());
+				vecPred.add(mpi.pred);
+				vecSC.add(key);
+				vecPred2.add(df.format(mpi.pred));
+			} else {
+				vecPred2.add("N/A");
+			}
+		}
 	}
 
 	private String calcCancerStats(String set, double cutoff, Vector<Double> vecExp, Vector<Double> vecPred, SimilarChemicals similarChemicals) {
@@ -1092,7 +1128,7 @@ public class PredictToxicityJSONCreator {
 			//				DSSTOXSID = htChemistryDashboardInfo.get(CASi).dsstox_substance_id;
 			//			}
 
-			if(useJsonCAS_Lookup) {
+			if(useJsonLookups) {
 				if(htCAS_to_DTXSID.containsKey(CASi)) {
 					sid_i=this.htCAS_to_DTXSID.get(CASi);
 //					System.out.println(CASi+"\t"+sid_i);

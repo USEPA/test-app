@@ -89,6 +89,14 @@ public class Instances {
 		nameToIndex = new HashMap<>();
 	}
 	
+	
+	public void deleteInstance(String name) {
+		int index=nameToIndex.get(name);
+		instances.remove(index);
+		nameToIndex.remove(name);
+	}
+	
+	
 	public ArrayList<Instance> getInstances() {
 		return instances;
 	}

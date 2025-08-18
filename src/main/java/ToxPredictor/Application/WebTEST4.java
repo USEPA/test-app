@@ -327,7 +327,10 @@ public class WebTEST4 {
 
 		if (method.equals(TESTConstants.ChoiceGroupContributionMethod)
 				|| method.equals(TESTConstants.ChoiceConsensus)) {
-			LoadFragmentXMLFile(endpoint);
+			
+			if(TESTConstants.haveGroupContributionMethod(endpoint)) {			
+				LoadFragmentXMLFile(endpoint);
+			}
 		}
 
 	}

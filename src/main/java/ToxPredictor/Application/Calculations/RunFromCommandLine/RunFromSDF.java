@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -525,20 +526,29 @@ public class RunFromSDF {
 	}
 	
 	
+	
+	public static List<APIMolecule> readSDF_to_API_Molecules(String sdfFilePath, int count, boolean insideJar) {
+		return readSDF_to_API_Molecules(sdfFilePath, count, insideJar,null);
+	}
+	
 	/**
 	 * Make it so that it doesnt convert to IAtomContainer object, just parse sdf into a better formatted mol string
 	 * 
 	 * @param sdfFilePath
 	 * @param count
 	 * @param insideJar
+	 * @param encoding "UTF-8", "Windows-1252", etc
+
+	 * 
 	 * @return
 	 */
-	public static List<APIMolecule> readSDF_to_API_Molecules(String sdfFilePath, int count, boolean insideJar) {
+	public static List<APIMolecule> readSDF_to_API_Molecules(String sdfFilePath, int count, boolean insideJar,String encoding) {
 		
 		List<APIMolecule>molecules=new ArrayList<>();
 		
 		try {
 
+			
 			BufferedReader br = null;
 
 			if (insideJar) {
@@ -548,8 +558,13 @@ public class RunFromSDF {
 				br = new BufferedReader(isr);
 			} else {
 				FileInputStream fis = new FileInputStream(sdfFilePath);
-//				br = new BufferedReader(new InputStreamReader(fis, "UTF-8"));
-				br = new BufferedReader(new InputStreamReader(fis));
+				
+				if(encoding!=null) {
+					br = new BufferedReader(new InputStreamReader(fis, encoding));
+				} else {
+					br = new BufferedReader(new InputStreamReader(fis));	
+				}
+//				
 			}
 
 			while (true) {
@@ -579,6 +594,11 @@ public class RunFromSDF {
 			if (insideJar) {
 				// System.out.println(sdfFilePath);
 				java.io.InputStream ins = RunFromSmiles.class.getClassLoader().getResourceAsStream(sdfFilePath);
+				
+				if(ins==null) {
+					System.out.println(sdfFilePath+" is missing");
+					return null;
+				}
 				InputStreamReader isr = new InputStreamReader(ins);
 				br = new BufferedReader(isr);
 			} else {
@@ -1127,12 +1147,14 @@ public class RunFromSDF {
 	 * - Check if predictions match previous release check if html reports look good
 	 * - Why does Neighbors display CAS instead of DTXSID in NN report?
 	 * - Update the snapshot db using charlies snapshot- take from materialized view when complete
+	 * - Recalculate statistics using latest jsons
+	 * - See if csvs have chemicals that sdfs dont
 	 */
 	
 	public static void main(String[] args) {
 		RunFromSDF r=new RunFromSDF();
-		r.runSDF();
-//		r.displayWebpages("DTXSID5039224");
+//		r.runSDF();
+		r.displayWebpages("DTXSID5039224");
 		
 	}
 

@@ -90,6 +90,7 @@ public class CreateImageFromTrainingPredictionSDFs {
 			return null;			
 			
 		} catch (Exception ex) {
+			System.out.println("CreateImageFromTrainingPredictionSDFs: Error getting AtomContainer for CAS="+CAS+" for "+endpointAbbrev+" for "+set+"set");
 			ex.printStackTrace();
 			return null;
 		}

@@ -34,6 +34,7 @@ import org.openscience.cdk.io.MDLV2000Reader;
 import org.openscience.cdk.io.MDLV3000Reader;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.smiles.SmiFlavor;
+import org.openscience.cdk.smiles.SmilesGenerator;
 import org.openscience.cdk.smiles.SmilesParser;
 
 import com.google.gson.Gson;
@@ -598,7 +599,7 @@ public class RunFromSmiles {
 					
 					if(Line==null)return null;
 					
-		//			System.out.println(Line);
+//					System.out.println(Line);
 		
 					if (Line.contains(">  <") || Line.contains("><") || Line.contains("> <")) {
 						if (field != null && value != null) {
@@ -734,6 +735,8 @@ public class RunFromSmiles {
 		PredictToxicityJSONCreator.forGUI=true;
 
 		List<PredictionResults>Results=new ArrayList<>();
+		
+		SmilesGenerator sg=new SmilesGenerator(SmiFlavor.Canonical);
 
 		// *******************************************************
 
@@ -757,7 +760,18 @@ public class RunFromSmiles {
 		String SMILES=null;
 		if (ac.getProperty(strSmiles)!=null)	SMILES=ac.getProperty(strSmiles);
 		else if (ac.getProperty(DSSToxRecord.strSmiles)!=null)	SMILES=ac.getProperty(DSSToxRecord.strSmiles);
+
+		if(SMILES==null) {
+			try {
+				SMILES=sg.create(ac);
+			} catch (CDKException e) {
+			}
+		}
+
+		
 		ac.setProperty(DSSToxRecord.strSmiles, SMILES);
+		
+		
 
 		
 		DSSToxRecord rec = ac.getProperty("DSSToxRecord");

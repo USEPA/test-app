@@ -1,19 +1,87 @@
 package wekalite;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 
 import ToxPredictor.Utilities.Utilities;
+
 import QSAR.validation2.ArrayConverter;
-import wekalite.*;
+
 
 public class CSVLoader {
 
 	
+	
+	public void omitCASRNs(boolean srcInJar, String srcFilePath,String destFilePath,HashSet<String>deleteCASRNs) {
+		
+		List<String>linesSrc=getLinesFromCSV(srcFilePath,srcInJar);
+		
+		try (FileWriter fw = new FileWriter(destFilePath)) {
+			for(String lineSrc:linesSrc) {
+				String cas=lineSrc.substring(0,lineSrc.indexOf(","));
+				if(deleteCASRNs.contains(cas)) continue;//should not omit header line
+				fw.write(lineSrc+"\r\n");
+			}
+			fw.flush();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	
+	public List<String> getLinesFromCSV(String filePath, boolean inJar) {
+
+		List<String> lines = new ArrayList<>();
+
+		// Use getResourceAsStream to access the file in the JAR
+
+		if (inJar) {
+			try (InputStream inputStream = CSVLoader.class.getClassLoader().getResourceAsStream(filePath);
+					BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+				return getLines(filePath, lines, inputStream, reader);
+			} catch (IOException e) {
+				// Handle the exception
+				e.printStackTrace();
+				return null;
+			}
+		} else {
+			try (InputStream inputStream = new FileInputStream(filePath);
+					BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+				return getLines(filePath, lines, inputStream, reader);
+			} catch (IOException e) {
+				// Handle the exception
+				e.printStackTrace();
+				return null;
+			}
+		}
+
+	}
+
+
+	private List<String> getLines(String filepath, List<String> lines, InputStream inputStream, BufferedReader reader)
+			throws IOException {
+		
+		if (inputStream == null) {
+			System.out.println(filepath+" not found!");
+			return null;
+		}
+
+		String line;
+		while ((line = reader.readLine()) != null) {
+			lines.add(line);
+		}
+		return lines;
+	}
 	
 	/**
 	 * Load Instances from input stream
@@ -126,6 +194,17 @@ public class CSVLoader {
 		
 	}
 
+	
+	public Instances getDataSetFromString(String strInstances) {
+		try {
+			InputStream inputStream = new ByteArrayInputStream(strInstances.getBytes(StandardCharsets.UTF_8));
+			return getDatasetFromInputStream(inputStream,"\t");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
+	
 	public Instances getDataSetFromFile(String filePath) throws IOException {
 		FileInputStream fis=new FileInputStream(filePath);
 		return getDatasetFromInputStream(fis,",");

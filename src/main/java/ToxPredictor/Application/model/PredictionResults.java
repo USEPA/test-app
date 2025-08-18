@@ -2,6 +2,8 @@ package ToxPredictor.Application.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import ToxPredictor.Application.TESTConstants;
+
 import java.util.Vector;
 
 public class PredictionResults {
@@ -155,6 +157,61 @@ public class PredictionResults {
 
     public PredictionResultsPrimaryTable getPredictionResultsPrimaryTable() {
         return predictionResultsPrimaryTable;
+    }
+    
+    public String getModelUnits () {
+    	
+    	String units=null;
+
+    	if(TESTConstants.isBinary(endpoint)) {
+    		units="binary";
+    	} else if(TESTConstants.isLogMolar(endpoint)) {
+			units=predictionResultsPrimaryTable.getMolarLogUnits();
+    	} else {
+			units=predictionResultsPrimaryTable.getMassUnits();
+		}
+    	
+    	return units;
+    }
+    
+    public Double getExpValueInModelUnits() {
+    	
+    	Double exp=null;
+    	
+    	String strExp=null;
+    	if(TESTConstants.isLogMolar(endpoint)) {
+    		strExp=getPredictionResultsPrimaryTable().getExpToxValue();
+    	} else if(TESTConstants.isBinary(endpoint)) {
+    		strExp=getPredictionResultsPrimaryTable().getExpToxValueEndpoint();
+    	} else {
+    		strExp=getPredictionResultsPrimaryTable().getExpToxValMass();
+    	}
+
+    	try {
+    		exp=Double.parseDouble(strExp);
+    	} catch (Exception ex) {}
+    	return exp;
+    }
+    
+    
+
+    public Double getPredValueInModelUnits() {
+    	
+    	Double pred=null;
+    	
+    	String strPred=null;
+    	if(TESTConstants.isLogMolar(endpoint)) {
+    		strPred=getPredictionResultsPrimaryTable().getPredToxValue();
+    	} else if(TESTConstants.isBinary(endpoint)) {
+    		strPred=getPredictionResultsPrimaryTable().getPredValueEndpoint();
+    	} else {
+    		strPred=getPredictionResultsPrimaryTable().getPredToxValMass();
+    	}
+
+    	try {
+    		pred=Double.parseDouble(strPred);
+    	} catch (Exception ex) {}
+    	return pred;
     }
 
     public void setPredictionResultsPrimaryTable(PredictionResultsPrimaryTable predictionResultsPrimaryTable) {

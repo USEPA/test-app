@@ -644,7 +644,7 @@ public class TESTConstants {
 				endpoint.equalsIgnoreCase(TESTConstants.ChoiceThermalConductivity)) {
 			return false;
 		} else {
-			return true;
+			return !TESTConstants.isBinary(endpoint);
 		}
 	}
 	

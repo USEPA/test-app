@@ -18,6 +18,7 @@ import com.google.gson.reflect.TypeToken;
 import AADashboard.Application.MySQL_DB;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
+import ToxPredictor.Application.Calculations.PredictToxicityJSONCreator;
 import ToxPredictor.misc.Lookup;
 
 /**
@@ -122,7 +123,7 @@ public class GetDTXSIDLookup {
 	
 
 	
-	void getCASRNS() {
+	void createDTXSIDLookupFromCAS() {
 		
 		List<String>endpoints=TESTConstants.getFullEndpoints(null);
 		
@@ -130,12 +131,19 @@ public class GetDTXSIDLookup {
 		
 		HashSet<String>casrns=new HashSet<>();
 		
+		
+		PredictToxicityJSONCreator.useJsonLookups=false;
+		
 		for(String endpoint:endpoints) {
 			String abbrev=TESTConstants.getAbbrevEndpoint(endpoint);
-			String	fileTrain = abbrev + "/" + abbrev + "_training.sdf";
+			
+			String folder=WebTEST4.dataFolder+"/"+abbrev+"/";
+			
+			
+			String	fileTrain = folder + abbrev + "_training.sdf";
 			HashSet<String>casrnsT=lookup.lookUpValsInSDF(fileTrain, "CAS");
 			casrns.addAll(casrnsT);
-			String	filePred = abbrev + "/" + abbrev + "_prediction.sdf";
+			String	filePred = folder + abbrev+ "_prediction.sdf";
 			HashSet<String>casrnsP=lookup.lookUpValsInSDF(filePred, "CAS");
 			casrns.addAll(casrnsP);
 		}
@@ -184,7 +192,7 @@ public class GetDTXSIDLookup {
 //		long t2=System.currentTimeMillis();
 		 
 		try {
-			String folder="jar\\Datasets-1.1.1\\gov\\epa\\webtest\\";
+			String folder="jar\\add dependencies\\Datasets-1.1.1\\gov\\epa\\webtest\\";
 			FileWriter fw= new FileWriter (folder+"dtxsid_lookup_from_cas.json");
 			fw.write(WebTEST4.gson.toJson(htCAS_to_SID));
 			fw.flush();
@@ -202,12 +210,11 @@ public class GetDTXSIDLookup {
 	
 	public static void main(String[] args) throws Exception {
 		
-//		GetDTXSIDLookup g=new GetDTXSIDLookup();
-//		g.getCASRNS();
+		GetDTXSIDLookup g=new GetDTXSIDLookup();
+		g.createDTXSIDLookupFromCAS();
 
-		Hashtable<String, String>ht=GetDTXSIDLookup.getDtxsidLookupByCAS();
-		
-		System.out.println(ht);
+//		Hashtable<String, String>ht=GetDTXSIDLookup.getDtxsidLookupByCAS();
+//		System.out.println(ht);
 		
 	}
 	
