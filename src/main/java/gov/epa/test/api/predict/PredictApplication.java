@@ -1,5 +1,7 @@
 package gov.epa.test.api.predict;
 
+import java.io.File;
+
 /**
  * @author Todd Martin
  * This class creates API for running large batch calculations of TEST reports with plots
@@ -28,7 +30,7 @@ public class PredictApplication {
 //		List<String>endpoints= Arrays.asList(TESTConstants.ChoiceFHM_LC50);
 		List<String>endpoints=RunFromSmiles.allEndpoints;
 		
-		ResolverDb2.sqlitePath="databases\\snapshot.db";
+		ResolverDb2.sqlitePath="databases"+File.separator+"snapshot.db";
 		SpringApplication.run(PredictApplication.class, args);
 		WebTEST4.printEachPrediction=false;//so that doesnt out separate line for each endpoint and slow down server calcs
 		

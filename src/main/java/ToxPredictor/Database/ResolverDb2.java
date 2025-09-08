@@ -34,7 +34,7 @@ public class ResolverDb2 {
 
 	private static final int BATCH_SIZE = 10000;
 	private static final String TABLE_NAME = "substances";
-	public static String sqlitePath = "databases/snapshot.db";
+	public static String sqlitePath = "databases"+File.separator+"snapshot.db";
 //	public static String sqlitePath = "databases/snapshot-2025-07-30.db";
 	
 	NameToStructureOpsin nameToStructureOpsin=new NameToStructureOpsin(); 
