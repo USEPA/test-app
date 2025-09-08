@@ -586,8 +586,8 @@ public class Validation2 {
 			chemical.getClustersUsed().add(smallestUncertaintyIndex);
 
 		} else {
-			chemical.setPredictedValue(-9999);
-			chemical.setPredictedUncertainty(-9999);
+			chemical.setPredictedValue(null);
+			chemical.setPredictedUncertainty(null);
 		}
 
 	}
@@ -630,8 +630,8 @@ public class Validation2 {
 			chemical.getClustersUsed().add(closestCluster);
 
 		} else {
-			chemical.setPredictedValue(-9999);
-			chemical.setPredictedUncertainty(-9999);
+			chemical.setPredictedValue(null);
+			chemical.setPredictedUncertainty(null);
 		}
 	}
 	
@@ -795,8 +795,8 @@ public class Validation2 {
 //		System.out.println(avgtv+"\t"+avgerr);
 
 		if (rv.size() == 0 || weightTotal==0) {
-			chemical.setPredictedValue(-9999);
-			chemical.setPredictedUncertainty(-9999);
+			chemical.setPredictedValue(null);
+			chemical.setPredictedUncertainty(null);
 			message = "A prediction cannot be made";
 		} else {
 			chemical.setPredictedValue(avgtv);

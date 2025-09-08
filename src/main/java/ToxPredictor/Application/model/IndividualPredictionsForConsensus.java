@@ -12,7 +12,7 @@ public class IndividualPredictionsForConsensus {
 
     public class PredictionIndividualMethod {
         String method;
-        String prediction;
+        Double prediction;
         String fileName;
 
         public String getMethod() {
@@ -23,11 +23,11 @@ public class IndividualPredictionsForConsensus {
             this.method = method;
         }
 
-        public String getPrediction() {
+        public Double getPrediction() {
             return prediction;
         }
 
-        public void setPrediction(String prediction) {
+        public void setPrediction(Double prediction) {
             this.prediction = prediction;
         }
 
@@ -56,7 +56,7 @@ public class IndividualPredictionsForConsensus {
         this.consensusPredictions = consensusPredictions;
     }
     
-    public String getPrediction(String method) {
+    public Double getPrediction(String method) {
     	for(PredictionIndividualMethod pim:consensusPredictions) {
     		if(pim.getPrediction().equals(method)) return pim.prediction;
     	}

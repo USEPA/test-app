@@ -129,8 +129,8 @@ public class WriteBatchResults {
 				fwBatchHTML.write("<td>N/A</td>\n");
 			}
 		
-			String strExpValMass=PredictToxicityJSONCreator.getToxValMass(TESTConstants.isLogMolar(endpoint), tpv.expValMass);
-			fwBatchHTML.write("<td>"+strExpValMass+"</td>\n");
+			
+			fwBatchHTML.write("<td>"+tpv.expValMass+"</td>\n");
 			fwBatchHTML.write("<td>N/A</td>\n");
 			
 			if (method.equals(TESTConstants.ChoiceLDA)) {
@@ -654,8 +654,8 @@ public class WriteBatchResults {
 				}
 			}
 
-			String strExpValMass=PredictToxicityJSONCreator.getToxValMass(TESTConstants.isLogMolar(endpoint), tpv.expValMass);
-			fwBatchTXT.write(strExpValMass+ del);
+			
+			fwBatchTXT.write(tpv.expValMass+ del);
 			fwBatchTXT.write("N/A"+ del);
 
 			if (method.equals(TESTConstants.ChoiceLDA)) {
@@ -784,7 +784,7 @@ public class WriteBatchResults {
 				else fw3.write(d2.format(tpvConsensus.expValLogMolar)+del);
 			} else {
 				if (tpvConsensus.expValMass.isNaN()) fw3.write("N/A"+del);
-				else fw3.write(PredictToxicityJSONCreator.getToxValMass(TESTConstants.isLogMolar(endpoint), tpvConsensus.expValMass)+del);
+				else fw3.write(tpvConsensus.expValMass+del);
 			}
 	
 			for (int i=1;i<listTPV.size();i++) {
@@ -800,7 +800,7 @@ public class WriteBatchResults {
 					}
 				} else {
 					if (tpv.predValMass.isNaN()) fw3.write("N/A"+del);
-					else fw3.write(PredictToxicityJSONCreator.getToxValMass(TESTConstants.isLogMolar(endpoint), tpv.predValMass)+del);
+					else fw3.write(tpv.predValMass+del);
 				}
 			}
 			
@@ -820,7 +820,7 @@ public class WriteBatchResults {
 				} else {
 					if (tpvConsensus.predValMass.isNaN()) {
 						fw3.write("N/A"+del);
-					}	else fw3.write(PredictToxicityJSONCreator.getToxValMass(TESTConstants.isLogMolar(endpoint), tpvConsensus.predValMass)+del);
+					}	else fw3.write(tpvConsensus.predValMass+del);
 				}
 			}
 			fw3.write(error);

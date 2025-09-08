@@ -7,8 +7,8 @@ public class SimilarChemicals {
     private String similarChemicalsSet;
     private int similarChemicalsCount;
     private String units;
-    private String expVal;
-    private String predVal;
+    private Double expVal;
+    private Double predVal;
 //    private String imageUrl;
     
     private Vector<SimilarChemical> similarChemicalsList = new Vector<>();
@@ -39,19 +39,19 @@ public class SimilarChemicals {
         this.units = units;
     }
 
-    public String getExpVal() {
+    public Double getExpVal() {
         return expVal;
     }
 
-    public void setExpVal(String expVal) {
+    public void setExpVal(Double expVal) {
         this.expVal = expVal;
     }
 
-    public String getPredVal() {
+    public Double getPredVal() {
         return predVal;
     }
 
-    public void setPredVal(String predVal) {
+    public void setPredVal(Double predVal) {
         this.predVal = predVal;
     }
 

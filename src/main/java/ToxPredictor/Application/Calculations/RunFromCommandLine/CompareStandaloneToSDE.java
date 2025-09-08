@@ -173,11 +173,9 @@ public class CompareStandaloneToSDE {
 				
 		if (pt.getExpToxValue()!=null) sc0.setExpVal(pt.getExpToxValue());
 		else if(pt.getExpToxValMass()!=null) sc0.setExpVal(pt.getExpToxValMass());
-		else if (pt.getExpToxValueEndpoint()!=null) sc0.setExpVal(pt.getExpToxValueEndpoint());
 
 		if (pt.getPredToxValue()!=null)  sc0.setPredVal(pt.getPredToxValue());
 		else if(pt.getPredToxValMass()!=null) sc0.setPredVal(pt.getPredToxValMass());
-		else if (pt.getPredValueEndpoint()!=null) sc0.setPredVal(pt.getPredValueEndpoint());
 		
 		sc0.setBackgroundColor("lightgray");
 		scs.add(0,sc0);

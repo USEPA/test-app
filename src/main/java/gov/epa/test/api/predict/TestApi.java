@@ -21,6 +21,8 @@ import org.openscience.cdk.interfaces.IAtomContainer;
 import org.openscience.cdk.io.MDLV3000Reader;
 import org.openscience.cdk.io.SDFWriter;
 import org.openscience.cdk.smiles.SmilesParser;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -129,6 +131,31 @@ public class TestApi {
 		
 	}
 	
+	
+//@RequestParam(value = "format", required = false, defaultValue = "json") String format) \
+		 
+	public static List<PredictionResults> runPredictionFromIdentifier(String identifier,String server, int port) {
+
+		String url=server+":"+port+"/predictDB";
+		
+		HttpResponse<String> responseGet = Unirest.get(url)
+				.header("Content-Type", "application/json")
+				.queryString("identifier",identifier)
+				.queryString("format","json")
+				.asString();
+				
+		
+		String json=responseGet.getBody().toString();
+		
+//		System.out.println(json);
+		
+		List<PredictionResults>listResults=getResultsFromJson(json);
+		return listResults;
+		
+	}
+	
+	 
+	
 	public static List<PredictionResults> runPrediction(IAtomContainer ac,String server, int port) {
 		
 		try {
@@ -175,7 +202,7 @@ public class TestApi {
 	
 	
 
-	public static List<PredictionResults> runPrediction(String molFile,String server, int port) {
+	public static List<PredictionResults> runPredictionFromMolFileString(String molFile,String server, int port) {
 		
 		try {
 			
@@ -327,7 +354,10 @@ public class TestApi {
 	
 	public static void main(String[] args) {
 		TestApi r = new TestApi();
-		r.run();
+//		r.run();
+		
+		r.runPredictionFromIdentifier("benzene","http://localhost",8082);
+		
 //		r.testSpeedup();
 		
 		//To run api in linux: java -jar WebTEST.jar --server.port=8081 &

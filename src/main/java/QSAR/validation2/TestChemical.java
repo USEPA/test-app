@@ -35,8 +35,8 @@ public class TestChemical extends Instance {
     private Vector <Integer>fragments;
     private long seed = 123456789L;
     
-    private double predictedValue; // TMM: averaged predicted value
-    private double predictedUncertainty; // TMM: averaged prediction uncertainty
+    private Double predictedValue; // TMM: averaged predicted value
+    private Double predictedUncertainty; // TMM: averaged prediction uncertainty
     private Statistics statistics = new Statistics();  
     
     private Random rand = new Random(seed);
@@ -339,7 +339,7 @@ public class TestChemical extends Instance {
  * Sets predicted value for the chemical
  * @param predVal
  */    
-    public void setPredictedValue(double predVal) {
+    public void setPredictedValue(Double predVal) {
     	this.predictedValue=predVal;
     }
     
@@ -347,7 +347,7 @@ public class TestChemical extends Instance {
      * Sets predicted uncertainty for the chemical
      * @param predUncertainty
      */
-    public void setPredictedUncertainty(double predUncertainty) {
+    public void setPredictedUncertainty(Double predUncertainty) {
     	this.predictedUncertainty=predUncertainty;
     }
 
@@ -355,7 +355,7 @@ public class TestChemical extends Instance {
      * Gets prediction value
      * @return
      */
-    public double getPredictedValue() {
+    public Double getPredictedValue() {
     	return this.predictedValue;
     }
     
@@ -363,7 +363,7 @@ public class TestChemical extends Instance {
      * Gets prediction uncertainty
      * @return
      */
-    public double getPredictedUncertainty() {
+    public Double getPredictedUncertainty() {
     	return this.predictedUncertainty;
     }
 

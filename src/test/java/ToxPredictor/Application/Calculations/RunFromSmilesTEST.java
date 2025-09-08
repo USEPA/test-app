@@ -73,8 +73,8 @@ public class RunFromSmilesTEST {
 		IAtomContainer ac=MoleculeCreator.createMolecule("c1ccccc1", "DTXSID3039242","71-43-2");
 		acs.addAtomContainer(ac);//valid simple molecule
 		Hashtable<String,PredictionResults>htResults=RunFromSDF.runEndpoint(acs, endpoint, method,createReports,createDetailedReports,DSSToxRecord.strSID);		
-		String pred=htResults.get(ac.getProperty(DSSToxRecord.strSID)).getPredictionResultsPrimaryTable().getPredToxValue();
-		assertTrue(pred.equals("3.28"));
+		Double pred=htResults.get(ac.getProperty(DSSToxRecord.strSID)).getPredictionResultsPrimaryTable().getPredToxValue();
+		assertTrue(Math.abs(3.28-pred)<0.01);
 	}
 	
 	@Test 
@@ -163,14 +163,8 @@ public class RunFromSmilesTEST {
 	        	String CAS=e.nextElement();
 	        	
 	        	Double oldTESTprediction=htPreds.get(CAS);
-	        	String strNewPrediction=htResults.get(CAS).getPredictionResultsPrimaryTable().getPredToxValue();
+	        	Double newPrediction=htResults.get(CAS).getPredictionResultsPrimaryTable().getPredToxValue();
 
-	        	Double newPrediction=null;
-	        		        	
-	        	if (!strNewPrediction.equals("N/A")) 
-	        		newPrediction=Double.parseDouble(strNewPrediction);
-	        	else
-	        		newPrediction=Double.NaN;
 
 	        	double diff=Math.abs(oldTESTprediction-newPrediction);
 	        	

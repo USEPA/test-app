@@ -1,20 +1,13 @@
 package ToxPredictor.Application.model;
 
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Base64;
 import java.util.LinkedHashMap;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.JTable;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import ToxPredictor.Utilities.FormatUtils;
 import ToxPredictor.Utilities.StructureImageUtil;
 
 public class SimilarChemical {
@@ -22,19 +15,12 @@ public class SimilarChemical {
     
     private String DSSTOXSID;
     private String DSSTOXCID;
-    public String getDSSTOXCID() {
-		return DSSTOXCID;
-	}
-
-	public void setDSSTOXCID(String dSSTOXCID) {
-		DSSTOXCID = dSSTOXCID;
-	}
-
-	private String CAS;
+    private String CAS;
+    private String preferredName;
     private String backgroundColor;
     private String similarityCoefficient;
-    private String expVal;
-    private String predVal;
+    private Double expVal;
+    private Double predVal;
     private String imageUrl;
 
 
@@ -56,6 +42,16 @@ public class SimilarChemical {
         this.CAS = CAS;
     }
 
+    
+    public String getDSSTOXCID() {
+		return DSSTOXCID;
+	}
+
+	public void setDSSTOXCID(String dSSTOXCID) {
+		DSSTOXCID = dSSTOXCID;
+	}
+    
+    
     public String getBackgroundColor() {
         return backgroundColor;
     }
@@ -72,19 +68,19 @@ public class SimilarChemical {
         this.similarityCoefficient = similarityCoefficient;
     }
 
-    public String getExpVal() {
+    public Double getExpVal() {
         return expVal;
     }
 
-    public void setExpVal(String expVal) {
+    public void setExpVal(Double expVal) {
         this.expVal = expVal;
     }
 
-    public String getPredVal() {
+    public Double getPredVal() {
         return predVal;
     }
 
-    public void setPredVal(String predVal) {
+    public void setPredVal(Double predVal) {
         this.predVal = predVal;
     }
 
@@ -121,8 +117,16 @@ public class SimilarChemical {
 		
 		lhm.put("Similarity", similarityCoefficient);
 		lhm.put("Experimental value", expVal);
-		lhm.put("Predicted value", predVal);
+		lhm.put("Predicted value", FormatUtils.setSignificantDigits(predVal,3));
 		lhm.put("backgroundColor", backgroundColor);
 		return lhm;
+	}
+
+	public String getPreferredName() {
+		return preferredName;
+	}
+
+	public void setPreferredName(String preferredName) {
+		this.preferredName = preferredName;
 	}
 }

@@ -4,17 +4,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import ToxPredictor.Application.TESTConstants;
 
+import java.util.HashMap;
 import java.util.Vector;
 
 public class PredictionResults {
 
 	private String version;
     private String CAS;//test chemical CAS (chemical being predicted)
+    private String name;//test chemical name (chemical being predicted)
     private String DTXSID;//test chemical CAS (chemical being predicted)
 	private String DTXCID;//test chemical CAS (chemical being predicted)
     private String Smiles;//test chemical CAS (chemical being predicted)
     private String imageURL;//can be used for test chemical image for consensus table and similar chemicals tables
     private String error;
+    
 
     private String method;//method used to calculate endpoint
     private String endpoint; //endpoint being calculated
@@ -45,6 +48,8 @@ public class PredictionResults {
     
 	private String reportBase;
     private boolean createDetailedReport;
+	
+    private HashMap<String, Double> hmStats;
 
 	
 	public String getReportBase() {
@@ -159,59 +164,38 @@ public class PredictionResults {
         return predictionResultsPrimaryTable;
     }
     
-    public String getModelUnits () {
-    	
-    	String units=null;
-
-    	if(TESTConstants.isBinary(endpoint)) {
-    		units="binary";
-    	} else if(TESTConstants.isLogMolar(endpoint)) {
-			units=predictionResultsPrimaryTable.getMolarLogUnits();
-    	} else {
-			units=predictionResultsPrimaryTable.getMassUnits();
-		}
-    	
-    	return units;
-    }
+//    public String getModelUnits () {
+//    	
+//    	String units=null;
+//
+//    	if(TESTConstants.isBinary(endpoint)) {
+//    		units="binary";
+//    	} else if(TESTConstants.isLogMolar(endpoint)) {
+//			units=predictionResultsPrimaryTable.getMolarLogUnits();
+//    	} else {
+//			units=predictionResultsPrimaryTable.getMassUnits();
+//		}
+//    	
+//    	return units;
+//    }
+    
+    
     
     public Double getExpValueInModelUnits() {
     	
-    	Double exp=null;
-    	
-    	String strExp=null;
-    	if(TESTConstants.isLogMolar(endpoint)) {
-    		strExp=getPredictionResultsPrimaryTable().getExpToxValue();
-    	} else if(TESTConstants.isBinary(endpoint)) {
-    		strExp=getPredictionResultsPrimaryTable().getExpToxValueEndpoint();
+    	if(TESTConstants.isLogMolar(endpoint) || TESTConstants.isBinary(endpoint)) {
+    		return getPredictionResultsPrimaryTable().getExpToxValue();
     	} else {
-    		strExp=getPredictionResultsPrimaryTable().getExpToxValMass();
+    		return getPredictionResultsPrimaryTable().getExpToxValMass();
     	}
-
-    	try {
-    		exp=Double.parseDouble(strExp);
-    	} catch (Exception ex) {}
-    	return exp;
     }
     
-    
-
     public Double getPredValueInModelUnits() {
-    	
-    	Double pred=null;
-    	
-    	String strPred=null;
-    	if(TESTConstants.isLogMolar(endpoint)) {
-    		strPred=getPredictionResultsPrimaryTable().getPredToxValue();
-    	} else if(TESTConstants.isBinary(endpoint)) {
-    		strPred=getPredictionResultsPrimaryTable().getPredValueEndpoint();
+    	if(TESTConstants.isLogMolar(endpoint) || TESTConstants.isBinary(endpoint)) {
+    		return getPredictionResultsPrimaryTable().getPredToxValue();
     	} else {
-    		strPred=getPredictionResultsPrimaryTable().getPredToxValMass();
+    		return getPredictionResultsPrimaryTable().getPredToxValMass();
     	}
-
-    	try {
-    		pred=Double.parseDouble(strPred);
-    	} catch (Exception ex) {}
-    	return pred;
     }
 
     public void setPredictionResultsPrimaryTable(PredictionResultsPrimaryTable predictionResultsPrimaryTable) {
@@ -298,5 +282,23 @@ public class PredictionResults {
 	public void setError(String error) {
 		this.error = error;
 	}
+
+
+	public HashMap<String, Double> getHmStats() {
+		return hmStats;
+	}
+
+	public void setHmStats(HashMap<String, Double> hmStats) {
+		this.hmStats = hmStats;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 
 }

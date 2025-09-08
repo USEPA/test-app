@@ -476,7 +476,7 @@ public class TaskCalculations2 {
 
 			
 		} catch (Exception ex) {
-			logger.error("Error running chemical{}",ex.getMessage());
+			logger.error("Error running chemical {}",ex.getMessage());
 			return ac;
 		}
 				

@@ -72,9 +72,8 @@ public class Lookup {
 		
 		
 
-		for (int i = 0; i < trainingDataSet.numInstances(); i++) {
+		for (Instance chemicali:trainingDataSet.getInstances()) {
 
-			Instance chemicali = trainingDataSet.instance(i);
 			double SimCoeff = CalculateCosineCoefficient(chemical, chemicali, Mean, StdDev);
 
 			System.out.println(chemicali.getName() + "\t" + SimCoeff);
@@ -89,49 +88,38 @@ public class Lookup {
 	}
 
 	public class ExpRecord {
-		public double expToxValue;
+		public Double expToxValue;
 		public String expCAS;
 		public String expSet;
 		public double MW;
 		public String expMOA;
 	}
 
-	public double LookupExpValByCAS(String CAS, Instances trainingDataSet) {
+	public Double LookupExpValByCAS(String CAS, Instances trainingDataSet) {
 
+		int instanceNumber=trainingDataSet.getInstanceNumber(CAS);
+		if(instanceNumber==-1) return null;
+		Instance instance=trainingDataSet.instance(instanceNumber);
+		return instance.classValue();
 		
-		for (int i = 0; i < trainingDataSet.numInstances(); i++) {
-			Instance chemicali = trainingDataSet.instance(i);
-			if (chemicali.getName().equals(CAS)) {
-				return chemicali.classValue();
-			}
-		}
-
-		return -9999;
 	}
 	
 	public ExpRecord LookupExpRecordByCAS(String CAS, Instances trainingDataSet) {
 
 		ExpRecord er=new ExpRecord();	
-		er.expToxValue=-9999;
 		er.expSet="";
 		er.expCAS="";
 
+		int instanceNumber=trainingDataSet.getInstanceNumber(CAS);
+		if(instanceNumber==-1) return er;
 		
-		for (int i = 0; i < trainingDataSet.numInstances(); i++) {
-
-			Instance chemicali = trainingDataSet.instance(i);
-			String CASi=chemicali.getName();
-//			System.out.println(CASi);
-			
-			if (CASi.equals(CAS)) {
-				er.expToxValue=chemicali.classValue();
-				er.MW=chemicali.value("MW");
-				er.expCAS=CAS;
-//				System.out.println(CAS+"\t"+er.expToxValue+"\t"+er.MW);
-				break;
-			}
-		}
+		Instance instance=trainingDataSet.instance(instanceNumber);
+		
+		er.expToxValue=instance.classValue();
+		er.MW=instance.value("MW");
+		er.expCAS=CAS;
 		return er;
+		
 	}
 
 	public ExpRecord LookupExpValByStructure(Instance chemical,
@@ -141,14 +129,12 @@ public class Lookup {
 		double[] StdDev = trainingDataSet.getStdDevs();
 
 		ExpRecord e = new ExpRecord();
-		e.expToxValue=-9999;
+//		e.expToxValue=-9999;
 		e.expSet="";
 		e.expCAS="";
 
-
-		for (int i = 0; i < trainingDataSet.numInstances(); i++) {
-
-			Instance chemicali = trainingDataSet.instance(i);
+		for (Instance chemicali:trainingDataSet.getInstances()) {
+			
 			double SimCoeff = CalculateCosineCoefficient(chemical, chemicali,
 					Mean, StdDev);
 
@@ -170,9 +156,8 @@ public class Lookup {
 		double[] StdDev = trainingDataSet.getStdDevs();
 
 
-		for (int i = 0; i < trainingDataSet.numInstances(); i++) {
-
-			Instance chemicali = trainingDataSet.instance(i);
+		for (Instance chemicali:trainingDataSet.getInstances()) {
+			
 			double SimCoeff = CalculateCosineCoefficient(chemical, chemicali,
 					Mean, StdDev);
 
@@ -254,7 +239,7 @@ public class Lookup {
 
 	}
 
-	public static double LookUpToxVal(String srchCAS, int ToxColumn,
+	public static Double LookUpToxVal(String srchCAS, int ToxColumn,
 			String filename, String delimiter) {
 
 		String Line="";
@@ -276,7 +261,7 @@ public class Lookup {
 
 				if (Line==null) {
 					br.close();					
-					return -9999;
+					return null;
 				}
 				
 
@@ -313,7 +298,7 @@ public class Lookup {
 
 		}
 
-		return -9999;
+		return null;
 
 	}
 
@@ -326,7 +311,7 @@ public class Lookup {
 	 * @param delimiter
 	 * @return
 	 */
-	public double LookUpToxVal2(String srchCAS, int ToxColumn, String filename,
+	public Double LookUpToxVal2(String srchCAS, int ToxColumn, String filename,
 			String delimiter) {
 
 		try {
@@ -348,7 +333,7 @@ public class Lookup {
 
 				if (!(Line instanceof String)) {
 					br.close();
-					return -9999;
+					return null;
 				}
 
 				List<String> list = Utilities.Parse(Line, delimiter);
@@ -371,11 +356,11 @@ public class Lookup {
 
 		}
 
-		return 0;
+		return null;
 
 	}
 
-	public static double LookUpExpKow(String CAS) {
+	public static Double LookUpExpKow(String CAS) {
 
 		File myFile = new File("ToxPredictor/system/EXPKOW.txt");
 
@@ -401,10 +386,10 @@ public class Lookup {
 			}
 
 			br.close();
-			return -999;
+			return null;
 			
 		} catch (Exception e) {
-			return -999;
+			return null;
 		}
 
 	}
@@ -591,7 +576,7 @@ public class Lookup {
 	 * @param delimiter
 	 * @return
 	 */
-	public String LookUpValueConsensusValueOmitFDAInJarFile(String filename, String keyValue,
+	public Double LookUpValueConsensusValueOmitFDAInJarFile(String filename, String keyValue,
 			String keyColumnName, String delimiter) {
 		try {
 
@@ -641,19 +626,19 @@ public class Lookup {
 						
 					}
 					
-					if (npreds<WebTEST4.minPredCount) return "-9999";
+					if (npreds<WebTEST4.minPredCount) return null;
 					else {
 						predConsensus/=(double)npreds;						
-						return predConsensus+"";						
+						return predConsensus;						
 					}
 				}
 			}
 
 			br.close();
-			return "N/A";
+			return null;
 
 		} catch (Exception e) {
-			return "N/A";
+			return null;
 		}
 
 	}
@@ -673,7 +658,7 @@ public class Lookup {
 	 * 
 	 * 
 	 */
-	public double CalculateMAE(String filename, String expColumnName,
+	public Double CalculateMAE(String filename, String expColumnName,
 			String methodColumnName, String delimiter) {
 		try {
 
@@ -727,7 +712,7 @@ public class Lookup {
 			return MAE;
 
 		} catch (Exception e) {
-			return -9999;
+			return null;
 		}
 
 	}
