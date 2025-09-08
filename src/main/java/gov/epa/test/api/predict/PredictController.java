@@ -10,25 +10,22 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.Calculations.PredictToxicityWebPageCreatorFromJSON;
 import ToxPredictor.Application.Calculations.TaskStructureSearch;
 import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles;
-import ToxPredictor.Application.model.IndividualPredictionsForConsensus;
 import ToxPredictor.Application.model.PredictionResults;
-import ToxPredictor.Application.model.IndividualPredictionsForConsensus.PredictionIndividualMethod;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.Database.ResolverDb2;
 
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Vector;
 
 
 /**
@@ -214,12 +211,15 @@ public class PredictController {
     		List<String>endpoints=Arrays.asList(TESTConstants.getFullEndpoint(endpointAbbrev));
     		listResults=RunFromSmiles.runEndpointsAsList(ac, endpoints, method, true, false);
     	} else {
-        	listResults=RunFromSmiles.runEndpointsAsList(ac, endpoints, method, true, false);
+        	listResults=RunFromSmiles.runEndpointsAsList(ac, this.endpoints, method, true, false);
     	}
 //    	System.out.println("In controller,listResults:"+gson.toJson(listResults));
 
     	if(format.equals("json")) {
-    		Gson gson=new Gson();//gives one line json
+    		 Gson gson = new GsonBuilder()
+    	                .serializeSpecialFloatingPointValues()
+    	                .create();
+    		
         	return gson.toJson(listResults);    		
     	
     	} else if (format.equals("html")) {

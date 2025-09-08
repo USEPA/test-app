@@ -30,9 +30,9 @@ public class PredictToxicityRandomForrestCaesar {
 
 	int chemicalNameIndex = 0;
 
-	double expToxVal = -9999;
-	public double predToxVal = -9999;
-	double predToxUnc = -9999;
+	Double expToxVal = null;
+	public Double predToxVal = null;
+	Double predToxUnc = null;
 
 	ToxPredictor.misc.Lookup lookup = new ToxPredictor.misc.Lookup();
 
@@ -92,7 +92,7 @@ public class PredictToxicityRandomForrestCaesar {
 
 			PredictToxicityWebPageCreator p = new PredictToxicityWebPageCreator();
 
-			double Tox = -1;
+			Double Tox = null;
 
 			cmdt.calculateDevTox(htDescriptors);
 
@@ -100,7 +100,7 @@ public class PredictToxicityRandomForrestCaesar {
 												// descriptors are outside the
 												// range of the training set
 												// descriptors
-				cmdt.Tox = -9999;
+				cmdt.Tox = null;
 			}
 
 			// System.out.println(cmdt.Tox);
@@ -109,9 +109,9 @@ public class PredictToxicityRandomForrestCaesar {
 			Instance chemical = evalInstances2d.firstInstance();
 
 			TestChemical tc = new TestChemical(chemical);
-			tc.setPredictedValue(cmdt.Tox);
-
-			predToxVal = cmdt.Tox;
+			
+			predToxVal = Double.valueOf(cmdt.Tox);			
+			tc.setPredictedValue(predToxVal);
 
 			if (OutputFolder == null)
 				return 0;

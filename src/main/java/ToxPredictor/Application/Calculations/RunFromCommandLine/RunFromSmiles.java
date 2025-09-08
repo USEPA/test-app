@@ -70,6 +70,7 @@ public class RunFromSmiles {
 	public static final String strCID = "DTXCID";
 	public static final String strCAS = "CASRN";
 	public static final String strSmiles = "SMILES";// ?
+	public static final String strName = "NAME";// ?
 
 	private static final Logger logger = LogManager.getLogger(RunFromSmiles.class);
 
@@ -92,7 +93,7 @@ public class RunFromSmiles {
 			.create();
 	
 	
-	private static SmilesParser sp  = new SmilesParser(DefaultChemObjectBuilder.getInstance());
+//	private static SmilesParser sp  = new SmilesParser(DefaultChemObjectBuilder.getInstance());
 
 	
 	public class ReportCreator {
@@ -767,24 +768,31 @@ public class RunFromSmiles {
 			} catch (CDKException e) {
 			}
 		}
-
-		
 		ac.setProperty(DSSToxRecord.strSmiles, SMILES);
 		
+		String NAME=null;
+		if (ac.getProperty(strName)!=null) NAME=ac.getProperty(strName);
+		else if (ac.getProperty(DSSToxRecord.strName)!=null) NAME=ac.getProperty(DSSToxRecord.strName);
+		ac.setProperty(DSSToxRecord.strCID, DTXCID);
 		
+		
+		if (ac.getProperty("DSSToxRecord")!=null) {
+			DSSToxRecord rec = ac.getProperty("DSSToxRecord");
+			if (DTXSID == null && rec != null )	DTXSID = rec.sid;
+			if (DTXCID == null && rec != null )	DTXCID = rec.cid;
+			if (CASRN == null && rec != null )CASRN=rec.cas;
+			if (SMILES== null && rec != null)SMILES=rec.smiles;
+			if (NAME== null && rec != null)NAME=rec.name;
+		}
+			
 
-		
-		DSSToxRecord rec = ac.getProperty("DSSToxRecord");
-		if (DTXSID == null && rec != null )	DTXSID = rec.sid;
-		if (DTXCID == null && rec != null )	DTXCID = rec.cid;
-		if (CASRN == null && rec != null )CASRN=rec.cas;
-		if (SMILES== null && rec != null)SMILES=rec.smiles;
 		
 		//			status=ac.getProperty(DSSToxRecord.strSmiles)+"";
 		//			System.out.println((i+1)+"\t"+ac.getProperty(DSSToxRecord.strSmiles)+"");
 
 		
 		ac=calculate(ac,endpoints,method);
+		
 		List<PredictionResults> resultsArray=getResultsArray(ac,method);
 
 		
@@ -812,6 +820,9 @@ public class RunFromSmiles {
 			pr.setDTXSID(DTXSID);
 			pr.setDTXCID(DTXCID);
 			pr.setSmiles(SMILES);
+			pr.setName(NAME);
+			
+//			System.out.println("pr.getName()="+pr.getName());
 			
 			if(pr.getError()==null)
 				pr.setError(error);			
@@ -925,13 +936,14 @@ public class RunFromSmiles {
 	// }
 
 	public static IAtomContainer calculate(IAtomContainer ac,List<String>endpoints,String method) {
-		String error=(String) ac.getProperty("Error");
 		List<TESTPredictedValue>listTPV=null;
 
 		DescriptorData dd=null;
 
 		try {
 
+//			System.out.println("Enter RunFromSmiles calculate");
+			
 			//Note: descriptor calculations for each chemical are the most time consuming. One could run calculations using the same descriptors and run all endpoints
 			dd=WebTEST4.goDescriptors(ac);
 			
@@ -954,13 +966,15 @@ public class RunFromSmiles {
 				System.out.println("Cant set ID for DescriptorData: no CAS,SID,or CID");
 			
 
-			error=(String) ac.getProperty("Error");
+//			String error=(String) ac.getProperty("Error");
 
 			CalculationParameters params=new CalculationParameters();
 			params.endpoints=endpoints;			
 			params.methods= Arrays.asList(method);
 
 			listTPV=WebTEST4.doPredictions(ac,dd,params);
+			
+//			System.out.println("Here 999, listTPV="+gson.toJson(listTPV));
 
 		} catch (Exception ex) {
 			System.out.println("Error running "+ac.getProperty("smiles"));
@@ -1334,22 +1348,22 @@ public class RunFromSmiles {
 					|| pd.property_name.contentEquals(TESTConstants.ChoiceDM_LC50)
 					|| pd.property_name.contentEquals(TESTConstants.ChoiceTP_IGC50)
 					|| pd.property_name.contains("Water solubility")) {
-				pd.prediction_value = Math.pow(10.0, -Double.parseDouble(pt.getPredToxValue()));
+				pd.prediction_value = Math.pow(10.0, -pt.getPredToxValue());
 				pd.prediction_units = "M";
 			} else if (pd.property_name.contentEquals("Oral rat LD50")) {
-				pd.prediction_value = Math.pow(10.0, -Double.parseDouble(pt.getPredToxValue()));
+				pd.prediction_value = Math.pow(10.0, -pt.getPredToxValue());
 				pd.prediction_units = "mol/kg";
 			} else if (pd.property_name.contentEquals(TESTConstants.ChoiceBCF)) {
-				pd.prediction_value = Math.pow(10.0, Double.parseDouble(pt.getPredToxValue()));
+				pd.prediction_value = Math.pow(10.0, pt.getPredToxValue());
 				pd.prediction_units = "L/kg";
 			} else if (pd.property_name.contains("Vapor pressure")) {
-				pd.prediction_value = Math.pow(10.0, Double.parseDouble(pt.getPredToxValue()));
+				pd.prediction_value = Math.pow(10.0, pt.getPredToxValue());
 				pd.prediction_units = "mmHg";
 			} else if (pd.property_name.contains("Viscosity")) {
-				pd.prediction_value = Math.pow(10.0, Double.parseDouble(pt.getPredToxValue()));
+				pd.prediction_value = Math.pow(10.0, pt.getPredToxValue());
 				pd.prediction_units = "cP";
 			} else if (pd.property_name.contentEquals("Estrogen Receptor RBA")) {
-				pd.prediction_value = Math.pow(10.0, Double.parseDouble(pt.getPredToxValue()));
+				pd.prediction_value = Math.pow(10.0, pt.getPredToxValue());
 				pd.prediction_units = "Dimensionless";
 			} else {
 				System.out.println("convertLogMolarUnits, Not handled:\t" + pd.property_name);
@@ -1439,9 +1453,9 @@ public class RunFromSmiles {
 							if (pt.getPredToxValue().equals("N/A")) {
 								pd.prediction_error = pt.getMessage();
 							} else {
-								pd.prediction_value = Double.parseDouble(pt.getPredToxValue());
+								pd.prediction_value = pt.getPredToxValue();
 								pd.prediction_units = "Binary";
-								pd.prediction_string = pt.getPredValueEndpoint();
+								pd.prediction_string = pt.getPredValueConclusion();
 							}
 		
 						} else if (pr.isLogMolarEndpoint()) {
@@ -1452,7 +1466,7 @@ public class RunFromSmiles {
 								if (convertPredictionMolarUnits)
 									convertLogMolarUnits(pd, pt);
 								else {
-									pd.prediction_value = Double.parseDouble(pt.getPredToxValue());
+									pd.prediction_value = pt.getPredToxValue();
 									pd.prediction_units = pt.getMolarLogUnits();
 								}
 		
@@ -1463,7 +1477,7 @@ public class RunFromSmiles {
 								pd.prediction_error = pt.getMessage();
 							} else {
 		
-								pd.prediction_value = Double.parseDouble(pt.getPredToxValMass());
+								pd.prediction_value = pt.getPredToxValMass();
 		
 								if (pt.getMassUnits().equals("g/cm³")) {
 									pd.prediction_units = "g/cm3";
@@ -1703,3 +1717,4 @@ public class RunFromSmiles {
 	}
 
 }
+

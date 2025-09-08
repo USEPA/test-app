@@ -16,14 +16,14 @@ public class PredictionResultsPrimaryTable {
 
     private boolean writePredictionInterval;//whether or not to output a prediction confidence interval
 
-    private String expToxValue;//experimental value (usually in molar units)
-    private String predToxValue;//predicted value (usually in molar units)
+    private Double expToxValue;//experimental value (usually in molar units)
+    private Double predToxValue;//predicted value (usually in molar units)
     
-    private String expToxValMass;//experimental value in mass units
-    private String predToxValMass;//predicted value in mass units
+    private Double expToxValMass;//experimental value in mass units
+    private Double predToxValMass;//predicted value in mass units
 
-    private String expToxValueEndpoint;//used for binary endpoint
-    private String predValueEndpoint;//used for binary endpoint
+    private String expToxValueConclusion;//used for binary endpoint conclusion
+    private String predValueConclusion;//used for binary endpoint conclusion
 
     private String molarLogUnits;//molar units for the endpoint
     private String massUnits;//mass units for the endpoint
@@ -123,19 +123,19 @@ public class PredictionResultsPrimaryTable {
         this.molarLogUnits = molarLogUnits;
     }
 
-    public String getExpToxValue() {
+    public Double getExpToxValue() {
         return expToxValue;
     }
 
-    public void setExpToxValue(String expToxValue) {
+    public void setExpToxValue(Double expToxValue) {
         this.expToxValue = expToxValue;
     }
 
-    public String getPredToxValue() {
+    public Double getPredToxValue() {
         return predToxValue;
     }
 
-    public void setPredToxValue(String predToxVal) {
+    public void setPredToxValue(Double predToxVal) {
         this.predToxValue = predToxVal;
     }
 
@@ -172,19 +172,19 @@ public class PredictionResultsPrimaryTable {
         this.massUnits = endpointMassUnits;
     }
 
-    public String getExpToxValMass() {
+    public Double getExpToxValMass() {
         return expToxValMass;
     }
 
-    public void setExpToxValMass(String expToxValMass) {
+    public void setExpToxValMass(Double expToxValMass) {
         this.expToxValMass = expToxValMass;
     }
 
-    public String getPredToxValMass() {
+    public Double getPredToxValMass() {
         return predToxValMass;
     }
 
-    public void setPredToxValMass(String predToxValMass) {
+    public void setPredToxValMass(Double predToxValMass) {
         this.predToxValMass = predToxValMass;
     }
 
@@ -212,21 +212,6 @@ public class PredictionResultsPrimaryTable {
         this.message = message;
     }
 
-    public String getExpToxValueEndpoint() {
-        return expToxValueEndpoint;
-    }
-
-    public void setExpToxValueEndpoint(String expToxValueEndpoint) {
-        this.expToxValueEndpoint = expToxValueEndpoint;
-    }
-
-    public String getPredValueEndpoint() {
-        return predValueEndpoint;
-    }
-
-    public void setPredValueEndpoint(String predValueEndpoint) {
-        this.predValueEndpoint = predValueEndpoint;
-    }
 
     public String getEndpointSubscripted() {
         return endpointSubscripted;
@@ -235,4 +220,20 @@ public class PredictionResultsPrimaryTable {
     public void setEndpointSubscripted(String endpointSubscripted) {
         this.endpointSubscripted = endpointSubscripted;
     }
+
+	public String getExpToxValueConclusion() {
+		return expToxValueConclusion;
+	}
+
+	public void setExpToxValueConclusion(String expToxValueConclusion) {
+		this.expToxValueConclusion = expToxValueConclusion;
+	}
+
+	public String getPredValueConclusion() {
+		return predValueConclusion;
+	}
+
+	public void setPredValueConclusion(String predValueConclusion) {
+		this.predValueConclusion = predValueConclusion;
+	}
 }

@@ -17,9 +17,9 @@ public class PredictToxicityNearestNeighbor {
 
 	private static final Logger logger = LogManager.getLogger(PredictToxicityNearestNeighbor.class);
 
-	double expToxVal = -9999;
-	public double predToxVal = -9999;
-	public double predToxUnc = -9999;
+	Double expToxVal = null;
+	public Double predToxVal = null;
+	public Double predToxUnc = null;
 	public String msg;
 
 	NearestNeighborMethod nn;
@@ -74,7 +74,7 @@ public class PredictToxicityNearestNeighbor {
 			predToxVal = nn.predToxicValue;
 
 			// predToxUnc=nn.predToxicUnc;
-			predToxUnc = 1;
+			predToxUnc = null;
 			// TODO: add routine to calculate uncertainty
 
 			if (OutputFolder == null)
@@ -124,10 +124,11 @@ public class PredictToxicityNearestNeighbor {
 			TestChemical chemical = (TestChemical) testData.firstInstance();
 			this.SetNNOptions(descriptorSet);
 			nn.initialize(instancesTrain);
-						
+			
 			msg = nn.predictToxicity(chemical, "");
+			
 			predToxVal = nn.predToxicValue;
-			predToxUnc = 1;
+			predToxUnc = null;
 			// TODO: add routine to calculate uncertainty
 			return 0;
 

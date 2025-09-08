@@ -25,8 +25,8 @@ public class PredictToxicityHierarchical {
 	Validation2 v2;
 
 	// double expToxVal=-9999;
-	public double predToxVal = -9999;
-	public double predToxUnc = -9999;
+	public Double predToxVal =null;
+	public Double predToxUnc =null;
 	public String msg;
 	
 	public Vector <OptimalResults> resultsVector=null;
@@ -150,8 +150,8 @@ public class PredictToxicityHierarchical {
 				if (diff > 0.1) {
 					// System.out.println(MW+"\t"+MW_frag);
 					v2.message = PredictToxicityWebPageCreator.messageMissingFragments;
-					chemical.setPredictedValue(-9999);
-					chemical.setPredictedUncertainty(-9999);
+					chemical.setPredictedValue(null);
+					chemical.setPredictedUncertainty(null);
 				}
 			}
 
@@ -239,8 +239,8 @@ public class PredictToxicityHierarchical {
 				if (diff > 0.1) {
 					// System.out.println(MW+"\t"+MW_frag);
 					v2.message = PredictToxicityWebPageCreator.messageMissingFragments;
-					chemical.setPredictedValue(-9999);
-					chemical.setPredictedUncertainty(-9999);
+					chemical.setPredictedValue(null);
+					chemical.setPredictedUncertainty(null);
 				}
 			}
 

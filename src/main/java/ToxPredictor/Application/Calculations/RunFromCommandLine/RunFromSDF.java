@@ -298,7 +298,7 @@ public class RunFromSDF {
 							molecule.htProperties.get("SMILES"));
 
 
-				List<PredictionResults>results=TestApi.runPrediction(molecule.toString(), server, port);
+				List<PredictionResults>results=TestApi.runPredictionFromMolFileString(molecule.toString(), server, port);
 				
 				if(results==null)continue;
 				

@@ -987,7 +987,7 @@ public class WebTEST5 {
 							Lookup.ExpRecord er = WebTEST.LookupExpVal(CAS, trainingDataSet2d, testDataSet2d);
 
 							v=WebTEST.getTESTPredictedValue(endpoint, method, CAS, er.expToxValue,
-									-9999, er.MW, "", TESTConstants.isBinary(endpoint));							
+									null, er.MW, "", TESTConstants.isBinary(endpoint));							
 							v.error = error;
 							v.errorCode = errorCode;
 

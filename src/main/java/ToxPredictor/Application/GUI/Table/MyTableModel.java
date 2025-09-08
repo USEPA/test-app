@@ -18,11 +18,12 @@ import javax.swing.table.TableColumnModel;
 import org.apache.logging.log4j.util.Strings;
 
 import ToxPredictor.Application.TESTConstants;
-import ToxPredictor.Application.Calculations.PredictToxicityJSONCreator;
-import ToxPredictor.Application.GUI.Table.MyTableModel.ColumnListener;
+
+
 import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableHeaderRenderer;
 //import ToxPredictor.Application.GUI.PanelResults.mouseAdapter;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
+import ToxPredictor.Utilities.FormatUtils;
 import ToxPredictor.Utilities.TESTPredictedValue;
 
 public class MyTableModel extends AbstractTableModel {
@@ -214,10 +215,10 @@ public class MyTableModel extends AbstractTableModel {
 				
 		if (tpv.predictionResults!=null) {
 			PredictionResultsPrimaryTable pt=tpv.predictionResults.getPredictionResultsPrimaryTable();
-			values.add(pt.getExpToxValue());
-			values.add(pt.getPredToxValue());
-			values.add(pt.getExpToxValueEndpoint());
-			values.add(pt.getPredValueEndpoint());
+			values.add(pt.getExpToxValue()+"");
+			values.add(pt.getPredToxValue()+"");
+			values.add(pt.getExpToxValueConclusion());
+			values.add(pt.getPredValueConclusion());
 
 		} else {//Does this happen?
 			if (TESTConstants.isLogMolar(endpoint)) {
@@ -249,12 +250,12 @@ public class MyTableModel extends AbstractTableModel {
 			PredictionResultsPrimaryTable p=tpv.predictionResults.getPredictionResultsPrimaryTable();
 	
 			if (TESTConstants.isLogMolar(endpoint)) {
-				values.add(p.getExpToxValue());
-				values.add(p.getPredToxValue());
+				values.add(FormatUtils.setSignificantDigits(p.getExpToxValue(),3));
+				values.add(FormatUtils.setSignificantDigits(p.getPredToxValue(),3));
 			}
 		
-			values.add(p.getExpToxValMass());
-			values.add(p.getPredToxValMass());
+			values.add(FormatUtils.setSignificantDigits(p.getExpToxValMass(),3));
+			values.add(FormatUtils.setSignificantDigits(p.getPredToxValMass(),3));
 			
 			if (method.equals(TESTConstants.ChoiceLDA)) {
 				values.add(p.getExpMOA());
@@ -266,13 +267,13 @@ public class MyTableModel extends AbstractTableModel {
 				if (tpv.expValLogMolar.isNaN()) {
 					values.add("N/A");
 				} else {
-					values.add(tpv.expValLogMolar+"");
+					values.add(FormatUtils.setSignificantDigits(tpv.expValLogMolar,3));
 				}
 				values.add("N/A");
 			}
 		
-			String strExpValMass=PredictToxicityJSONCreator.getToxValMass(TESTConstants.isLogMolar(endpoint), tpv.expValMass);
-			values.add(strExpValMass);
+			
+			values.add(FormatUtils.setSignificantDigits(tpv.expValMass,3));
 			values.add("N/A");//predValMass
 			
 			if (method.equals(TESTConstants.ChoiceLDA)) {

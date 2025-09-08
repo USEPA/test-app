@@ -85,7 +85,7 @@ public class NearestNeighborMethod{
     double [] weights;
     
    private double expToxicValue;
-   public double predToxicValue;
+   public Double predToxicValue;
    public double SCAvg;
    
    //**********************************************************************
@@ -597,7 +597,7 @@ public class NearestNeighborMethod{
 
 		int CurrentMaxChemicals = this.minimumClusterSize;
 
-		boolean ValidPrediction = true;
+//		boolean ValidPrediction = true;
 
 //		int MaxOverSCmin = this.GetCountExceedingSCmin(chemical);
 
@@ -605,22 +605,19 @@ public class NearestNeighborMethod{
 				SCmin);
 		
 		if (cc==null || cc.numInstances() < this.absoluteMinimumClusterSize) {
-
 			String msg = "Insufficient chemicals exceeding the minimum similarity coefficient were found";
-			this.predToxicValue = -9999;
-
+			this.predToxicValue = null;
 			return msg;
 		}
 
 
-		if (NearestNeighborMethod.MustExceedSCmin) {
-			if (cc == null
-					|| cc.numInstances() < this.absoluteMinimumClusterSize) {
-				String msg = "Insufficient chemicals exceeding the minimum similarity coefficient were found";
-				this.predToxicValue = -9999;
-				return msg;
-			}
-		}
+//		if (NearestNeighborMethod.MustExceedSCmin) {
+//			if (cc == null || cc.numInstances() < this.absoluteMinimumClusterSize) {
+//				String msg = "Insufficient chemicals exceeding the minimum similarity coefficient were found";
+//				this.predToxicValue = null;
+//				return msg;
+//			}
+//		}
 
 		if (this.Standardize) {
 			// unstandardize w.r.t. to overall trainingset:
@@ -630,10 +627,10 @@ public class NearestNeighborMethod{
 
 		}
 
-		if (!ValidPrediction) {
-			this.predToxicValue = -9999;
-			return "invalid  prediction (minimum cluster size exceeds specified maximum cluster size)";
-		}
+//		if (!ValidPrediction) {
+//			this.predToxicValue = -9999;
+//			return "invalid  prediction (minimum cluster size exceeds specified maximum cluster size)";
+//		}
 
 		if (this.PredictionMethod.equals("Median")) {
 			predToxicValue = this.calculateMedianValue(cc);

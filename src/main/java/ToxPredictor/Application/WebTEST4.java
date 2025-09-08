@@ -641,10 +641,11 @@ public class WebTEST4 {
 
 	}
 
-	private static double runConsensus(DataForPredictionRun d, List<TESTPredictedValue> res, Instances evalInstances2d,
+	private static Double runConsensus(DataForPredictionRun d, List<TESTPredictedValue> res, Instances evalInstances2d,
 			Instances trainingDataSet2d, AllResults allResults, Instances evalInstancesFrag,
 			Instances trainingDataSetFrag, AllResults allResultsFrag, long descriptorCalculationTime,
 			ReportOptions options) {
+
 
 		long timeStartPredictions = System.currentTimeMillis();
 
@@ -656,6 +657,7 @@ public class WebTEST4 {
 				options, createDetailedReports);
 		predictedToxicities.add(ptH.predToxVal);
 		predictedUncertainties.add(ptH.predToxUnc);
+		
 
 		// Single Model
 		if (TESTConstants.haveSingleModelMethod(d.endpoint)) {
@@ -667,6 +669,7 @@ public class WebTEST4 {
 			res.add(WebTEST.getTESTPredictionError(d.endpoint, TESTConstants.ChoiceSingleModelMethod, d.CAS,
 					"Single model method is unavailable for this endpoint", ERROR_CODE_APPLICABILITY_DOMAIN_ERROR));
 		}
+		
 
 //		System.out.println(TESTConstants.haveGroupContributionMethod(d.endpoint));
 
@@ -682,21 +685,21 @@ public class WebTEST4 {
 					ERROR_CODE_APPLICABILITY_DOMAIN_ERROR));
 		}
 		
-
 		
+
 		// Nearest neighbor:
 		runNN(d, res, d.DescriptorSet, trainingDataSet2d, evalInstances2d, options, createDetailedReports);
+		
+				
 		predictedToxicities.add(ptNN.predToxVal);
 		predictedUncertainties.add(ptNN.predToxUnc);
 		
-
-		double predToxVal = WebTEST.calculateConsensusToxicity(predictedToxicities);
+		Double predToxVal = WebTEST.calculateConsensusToxicity(predictedToxicities);
 		predictedToxicities.add(predToxVal);
 //		double predToxUnc = 1;// TODO: add code to calculate this
 		
 //		System.out.println("predToxVal="+predToxVal);
 		
-
 
 		String method = TESTConstants.ChoiceConsensus;
 
@@ -708,7 +711,7 @@ public class WebTEST4 {
 		tpv.message = "OK";
 		int predCount = 0;
 		for (int i = 0; i < predictedToxicities.size(); i++) {
-			if ((Double) predictedToxicities.get(i) != -9999)
+			if (predictedToxicities.get(i) != null)
 				predCount++;
 		}
 
@@ -839,25 +842,26 @@ public class WebTEST4 {
 	private static void runNN(DataForPredictionRun d, List<TESTPredictedValue> res, String descriptorSet,
 			Instances instancesTrain, Instances instancesEval, ReportOptions options, boolean createReports) {
 		
+		
 		ptNN.CalculateToxicity2(descriptorSet, instancesTrain, instancesEval);
 		
-		double predToxVal = ptNN.predToxVal;
+		
+//		double predToxVal = ptNN.predToxVal;
 //		double predToxUnc=ptNN.predToxUnc;//TODO		
-
 		
 		
 //		System.out.println("name of test instance="+instancesEval.instance(0).getName());
 		
 		String method = TESTConstants.ChoiceNearestNeighborMethod;
 
-		TESTPredictedValue v = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, d.er.expToxValue, predToxVal,
+		TESTPredictedValue v = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, d.er.expToxValue, ptNN.predToxVal,
 				d.MW, "", d.isBinaryEndpoint);
-
+		
 		v.message = ptNN.msg;
 
-		v.predictionResults = jsonCreator.generatePredictionResultsNearestNeighbor(d, v, predToxVal, options,
+		v.predictionResults = jsonCreator.generatePredictionResultsNearestNeighbor(d, v, ptNN.predToxVal, options,
 				createReports);
-
+		
 		if (generateWebpages && createReports) {
 			writeResultsFiles(d,v,method);
 		}
@@ -979,7 +983,7 @@ public class WebTEST4 {
 
 							Lookup.ExpRecord er = WebTEST.LookupExpVal(CAS, trainingDataSet2d, testDataSet2d);
 
-							v = WebTEST.getTESTPredictedValue(endpoint, method, CAS, er.expToxValue, -9999, er.MW, "",
+							v = WebTEST.getTESTPredictedValue(endpoint, method, CAS, er.expToxValue, null, er.MW, "",
 									TESTConstants.isBinary(endpoint));
 							v.error = error;
 							v.errorCode = errorCode;

@@ -681,7 +681,7 @@ public class runTEST_From_Command_Line2 {
 
 			// ******************************************************
 
-			double predToxVal = -9999;
+			Double predToxVal = null;
 			double predToxUnc=1;//TODO: add code to calculate this
 
 			ReportOptions options = new ReportOptions();
@@ -841,20 +841,20 @@ public class runTEST_From_Command_Line2 {
 
 	}
 	
-private double calculateConsensusToxicity(ArrayList <Double>preds) {
+private Double calculateConsensusToxicity(ArrayList <Double>preds) {
 		
 		double pred=0;
 		
 		int predcount=0;
 		
 		for (int i=0;i<preds.size();i++) {
-			if (preds.get(i)>-9999) {
+			if (preds.get(i)!=null) {
 				predcount++;
 				pred+=preds.get(i);
 			}
 		}
 		
-		if (predcount<minPredCount) return -9999;
+		if (predcount<minPredCount) return null;
 		
 		pred/=(double)predcount;
 //		System.out.println(pred);
@@ -871,7 +871,7 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 		// lookup first in training set based on CAS
 		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d);
 //		System.out.println(er.expToxValue);
-		if (er.expToxValue != -9999) {			
+		if (er.expToxValue != null) {			
 			er.expSet = "Training";			
 			return er;
 		}
@@ -880,14 +880,14 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 		// next lookup in external test set based on CAS:
 		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d);
 //		System.out.println(er.expToxValue);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Test";
 			return er;
 		}
 
 		// ******************************************************
 		er = lookup.new ExpRecord();
-		er.expToxValue = -9999;
+		er.expToxValue = null;
 		er.expSet = "";
 		er.expCAS = "";
 
@@ -930,21 +930,21 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 
 	}
 	
-	void WriteToxicityResultsForChemical(FileWriter fw2,String endpoint,String method,int index,String CAS,double ExpToxVal,double PredToxVal,double MW,String d,String error) {
+	void WriteToxicityResultsForChemical(FileWriter fw2,String endpoint,String method,int index,String CAS,Double ExpToxVal,Double PredToxVal,double MW,String d,String error) {
 		try {
 	
 			java.text.DecimalFormat d2=new java.text.DecimalFormat("0.00");
 			java.text.DecimalFormat d2exp=new java.text.DecimalFormat("0.00E00");
 
-			double ExpToxValMass=-9999;
-			double PredToxValMass=-9999;
+			Double ExpToxValMass=null;
+			Double PredToxValMass=null;
 
 			if (isLogMolar(endpoint)) {
-				if (PredToxVal!=-9999) {
+				if (PredToxVal!=null) {
 					PredToxValMass=PredictToxicityWebPageCreator.getToxValMass(endpoint,PredToxVal,MW);
 				}
 			
-				if (ExpToxVal!=-9999) {
+				if (ExpToxVal!=null) {
 					ExpToxValMass=PredictToxicityWebPageCreator.getToxValMass(endpoint,ExpToxVal,MW); 
 				}
 			} else {
@@ -982,14 +982,14 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 			//Molar values
 
 			if (isLogMolar(endpoint)) {
-				if (ExpToxVal == -9999) {
+				if (ExpToxVal == null) {
 //					fw.write("<td>N/A</td>\n");
 					fw2.write("N/A" + d);
 				} else {
 //					fw.write("<td>" + d2.format(ExpToxVal) + "</td>\n");
 					fw2.write(d2.format(ExpToxVal) + d);
 				}
-				if (PredToxVal == -9999) {
+				if (PredToxVal == null) {
 //					fw.write("<td>N/A</td>\n");
 					fw2.write("N/A" + d);
 				} else {
@@ -1000,7 +1000,7 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 			
 			// ********************************************************
 			//Mass values
-			if (ExpToxVal ==-9999) {
+			if (ExpToxVal ==null) {
 //				fw.write("<td align=\"center\">N/A</td>\n");//mass
 				fw2.write("N/A"+d);
 			} else {
@@ -1013,7 +1013,7 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 				}
 			}
 			
-			if (PredToxVal==-9999) {
+			if (PredToxVal==null) {
 //				fw.write("<td align=\"center\">N/A</td>\n"); //mass units
 				fw2.write("N/A");
 			} else { 
@@ -1080,12 +1080,12 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 
 						if (!isBinary(endpoint)) {
 							this.WriteToxicityResultsForChemical(fw,endpoint,method,
-									index, CAS, er.expToxValue, -9999,
+									index, CAS, er.expToxValue, null,
 									er.MW, del, error);
 							
 						}else {
 							this.WriteBinaryToxResultsForChemical(fw, endpoint,method,
-									index, CAS, er.expToxValue, -9999,
+									index, CAS, er.expToxValue, null,
 									er.MW, del, error);
 						}
 						
@@ -1116,7 +1116,7 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 			ex.printStackTrace();
 		}
 	}
-	void WriteBinaryToxResultsForChemical(FileWriter fw2,String endpoint,String method,int index,String CAS,double ExpToxVal,double PredToxVal,double MW,String d,String error) {
+	void WriteBinaryToxResultsForChemical(FileWriter fw2,String endpoint,String method,int index,String CAS,Double ExpToxVal,Double PredToxVal,double MW,String d,String error) {
 		
 		try {
 			
@@ -1151,14 +1151,14 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 			
 			
 			
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 //				fw.write("<td>N/A</td>\n");
 				fw2.write("N/A"+d);
 			} else {
 //				fw.write("<td>" + d2.format(ExpToxVal) + "</td>\n");
 				fw2.write(d2.format(ExpToxVal)+d);
 			}
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 //				fw.write("<td>N/A</td>\n");
 				fw2.write("N/A"+d);
 			} else {
@@ -1169,7 +1169,7 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 			
 //			System.out.println(ExpToxVal+"\t"+PredToxVal);
 			
-			if (ExpToxVal ==-9999) {
+			if (ExpToxVal ==null) {
 //				fw.write("<td align=\"center\">N/A</td>\n");//mass
 				fw2.write("N/A"+d);
 			} else {
@@ -1202,7 +1202,7 @@ private double calculateConsensusToxicity(ArrayList <Double>preds) {
 				}
 			}
 			
-			if (PredToxVal==-9999) {
+			if (PredToxVal==null) {
 //				fw.write("<td align=\"center\">N/A</td>\n"); //mass units
 				fw2.write("N/A");
 			} else { 

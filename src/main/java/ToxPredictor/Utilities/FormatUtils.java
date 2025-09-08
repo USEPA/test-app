@@ -1,5 +1,8 @@
 package ToxPredictor.Utilities;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.text.DecimalFormat;
 
 public class FormatUtils {
@@ -7,6 +10,25 @@ public class FormatUtils {
     static DecimalFormat d2 = new DecimalFormat("0.00");
     static DecimalFormat d1 = new DecimalFormat("0.0");
 	static DecimalFormat ds = new DecimalFormat("0.0##E0#");
+	
+	
+	public static String setSignificantDigits(Double value, int significantDigits) {
+	    if (significantDigits < 0) throw new IllegalArgumentException();
+	    
+	    
+	    if(value==null) return "N/A";
+
+	    // this is more precise than simply doing "new BigDecimal(value);"
+	    BigDecimal bd = new BigDecimal(value, MathContext.DECIMAL64);
+	    bd = bd.round(new MathContext(significantDigits, RoundingMode.HALF_UP));
+	    final int precision = bd.precision();
+	    if (precision < significantDigits)
+	    bd = bd.setScale(bd.scale() + (significantDigits-precision));
+	    return bd.toPlainString();
+	}    
+
+	
+	
 	
 	static public String asString(Double f)
 	{

@@ -99,7 +99,7 @@ public class GetTrainingTestSetPredictions {
 			
 			htDatasetPredictions.put(abbrev,mps);
 			
-			logger.info("Loaded predictions for "+abbrev+"\t for "+casrns.size()+" casrns");
+//			logger.info("Loaded predictions for "+abbrev+"\t for "+casrns.size()+" casrns");
 			
 		}
 		
@@ -164,7 +164,7 @@ public class GetTrainingTestSetPredictions {
     }
 	
 	
-	private static List<ModelPrediction> getModelPredictions(String jsonFilePath,boolean insideJar) {
+	public static List<ModelPrediction> getModelPredictions(String jsonFilePath,boolean insideJar) {
 		
 //		String jsonFilePath = "/Datasets/training_and_test_set_predictions.json"; // Adjust the path based on your JAR structure
 
@@ -258,21 +258,19 @@ public class GetTrainingTestSetPredictions {
 			
 			for(String CAS:htNewPredictions.keySet()) {
 				PredictionResults pr=htNewPredictions.get(CAS);
-				String strPred=pr.getPredictionResultsPrimaryTable().getPredToxValue();
-				String strPredJar=lookup.LookUpValueConsensusValueOmitFDAInJarFile(predfilename, CAS, "CAS","\t");
+				Double pred=pr.getPredictionResultsPrimaryTable().getPredToxValue();
+				Double predJar=lookup.LookUpValueConsensusValueOmitFDAInJarFile(predfilename, CAS, "CAS","\t");
 				
-				if(strPred.equals("N/A")) strPred="-9999";
 				
-				if(strPred.equals("N/A") || strPredJar.equals("N/A")) {
-					System.out.println("\t"+CAS+"\t"+strPred+"\t"+strPredJar);
+				if(pred==null || predJar==null) {
+					System.out.println("\t"+CAS+"\t"+pred+"\t"+predJar);
 					continue;
 				}
 			
-				Double dpred=Double.parseDouble(strPred);
-				Double dpredjar=Double.parseDouble(strPredJar);
 				
-				if(Math.abs(dpred-dpredjar)>0.05) 
-					System.out.println("\t"+CAS+"\t"+df.format(dpred)+"\t"+df.format(dpredjar));
+				
+				if(Math.abs(pred-predJar)>0.05) 
+					System.out.println("\t"+CAS+"\t"+df.format(pred)+"\t"+df.format(predJar));
 				
 				
 //				System.out.println("\t"+CAS+"\t"+strPred+"\t"+strPredJar);
@@ -388,22 +386,16 @@ public class GetTrainingTestSetPredictions {
 				
 
 				try {
-					double pred=Double.parseDouble(p.pred);
-					double exp=Double.parseDouble(p.exp);
-					MAE+=Math.abs(exp-pred);
+					MAE+=Math.abs(p.exp-p.pred);
 					count++;
 				} catch (Exception ex) {
 				}
 				
 				try {
-					double pred=Double.parseDouble(p2.pred);
-					double exp=Double.parseDouble(p2.exp);
-					MAE2+=Math.abs(exp-pred);
+					MAE2+=Math.abs(p2.exp-p2.pred);
 					count2++;
 				} catch (Exception ex) {
 				}
-
-				
 			}
 			
 			MAE/=count;
@@ -418,8 +410,8 @@ public class GetTrainingTestSetPredictions {
 	
 	class Prediction {
 		String casrn;
-		String exp;
-		String pred;
+		Double exp;
+		Double pred;
 	}
 	
 	
@@ -493,19 +485,14 @@ public class GetTrainingTestSetPredictions {
 			String methodAbbrev=TESTConstants.getAbbrevMethod(pim.getMethod());
 			
 		
-			Double pred=null;
-			
-			try {
-				pred=Double.parseDouble(pim.getPrediction());
-			} catch (Exception ex) {}
-			
+			Double pred=pim.getPrediction();
 			
 			ModelPrediction mp=new ModelPrediction(CAS,exp,pred,split,methodAbbrev);
 			
 			mps.add(mp);
 			
-			if(!pim.getPrediction().equals("N/A")) {
-				preds.add(Double.parseDouble(pim.getPrediction()));
+			if(pim.getPrediction()!=null) {
+				preds.add(pim.getPrediction());
 			}
 		}
 

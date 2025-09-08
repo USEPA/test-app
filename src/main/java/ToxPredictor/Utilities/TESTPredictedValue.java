@@ -15,12 +15,12 @@ public class TESTPredictedValue {
 
 	public String smiles;
 
-	public Double expValLogMolar = Double.NaN;
-	public Double expValMass = Double.NaN;
+	public Double expValLogMolar;
+	public Double expValMass;
 	public Boolean expActive;
 	
-	public Double predValLogMolar = Double.NaN;
-	public Double predValMass = Double.NaN;
+	public Double predValLogMolar;
+	public Double predValMass;
 	public Boolean predActive;
 	
 	public String dtxsid;

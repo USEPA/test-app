@@ -166,7 +166,7 @@ public class TaskCalculations {
 		return methods;
 	}
 
-	private void WriteBinaryToxResultsForChemical(FileWriter fw, FileWriter fw2, int index, String CAS, double ExpToxVal, double PredToxVal, double MW, String d, String error) {
+	private void WriteBinaryToxResultsForChemical(FileWriter fw, FileWriter fw2, int index, String CAS, Double ExpToxVal, Double PredToxVal, double MW, String d, String error) {
 
 		try {
 
@@ -194,14 +194,14 @@ public class TaskCalculations {
 
 			fw2.write(index + d + CAS + d);
 
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 				fw.write("<td>N/A</td>\n");
 				fw2.write("N/A" + d);
 			} else {
 				fw.write("<td>" + d2.format(ExpToxVal) + "</td>\n");
 				fw2.write(d2.format(ExpToxVal) + d);
 			}
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 				fw.write("<td>N/A</td>\n");
 				fw2.write("N/A" + d);
 			} else {
@@ -211,7 +211,7 @@ public class TaskCalculations {
 
 			// System.out.println(ExpToxVal+"\t"+PredToxVal);
 
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 				fw.write("<td align=\"center\">N/A</td>\n");// mass
 				fw2.write("N/A" + d);
 			} else {
@@ -244,7 +244,7 @@ public class TaskCalculations {
 				}
 			}
 
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 				fw.write("<td align=\"center\">N/A</td>\n"); // mass units
 				fw2.write("N/A");
 			} else {
@@ -461,35 +461,35 @@ public class TaskCalculations {
 
 	}
 
-	private void WriteToxicityResultsForChemicalAllMethods(FileWriter fw3, int index, String CAS, double ExpToxVal, List<String> methods, List<Double> preds, double MW, String d,
+	private void WriteToxicityResultsForChemicalAllMethods(FileWriter fw3, int index, String CAS, Double ExpToxVal, List<String> methods, List<Double> preds, double MW, String d,
 			String error) {
 		try {
 
 			java.text.DecimalFormat d2 = new java.text.DecimalFormat("0.00");
 			java.text.DecimalFormat d2exp = new java.text.DecimalFormat("0.00E00");
 
-			double ExpToxValMass = -9999;
+			Double ExpToxValMass = null;
 
 			ArrayList<Double> predsMass = new ArrayList<Double>();
 
 			if (preds != null) {
 				for (int i = 0; i < preds.size(); i++) {
-					double PredToxVal = preds.get(i);
+					Double PredToxVal = preds.get(i);
 
-					if (PredToxVal == -9999) {
-						predsMass.add(-9999.0);
+					if (PredToxVal == null) {
+						predsMass.add(null);
 					}
 
 					if (isLogMolarEndpoint) {
-						if (ExpToxVal != -9999) {
+						if (ExpToxVal != null) {
 							ExpToxValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, ExpToxVal, MW);
 						}
-						if (PredToxVal != -9999) {
+						if (PredToxVal != null) {
 							predsMass.add(PredictToxicityWebPageCreator.getToxValMass(endpoint, PredToxVal, MW));
 						}
 
 					} else {
-						if (PredToxVal != -9999) {
+						if (PredToxVal != null) {
 							predsMass.add(PredToxVal);
 						}
 						ExpToxValMass = ExpToxVal;
@@ -503,16 +503,16 @@ public class TaskCalculations {
 			// Molar values
 
 			if (isLogMolarEndpoint) {
-				if (ExpToxVal == -9999) {
+				if (ExpToxVal == null) {
 					fw3.write("N/A" + d);
 				} else {
 					fw3.write(d2.format(ExpToxVal) + d);
 				}
 				if (preds != null) {
 					for (int i = 0; i < preds.size(); i++) {
-						double PredToxVal = preds.get(i);
+						Double PredToxVal = preds.get(i);
 
-						if (PredToxVal == -9999) {
+						if (PredToxVal == null) {
 							fw3.write("N/A");
 						} else {
 							fw3.write(d2.format(PredToxVal));
@@ -534,7 +534,7 @@ public class TaskCalculations {
 				}
 			} else {// not molar endpoint:
 
-				if (ExpToxVal == -9999) {
+				if (ExpToxVal == null) {
 					fw3.write("N/A" + d);
 				} else {
 					if (Math.abs(ExpToxValMass) < 0.1) {
@@ -546,9 +546,9 @@ public class TaskCalculations {
 
 				if (preds != null) {
 					for (int i = 0; i < preds.size(); i++) {
-						double PredToxValMass = predsMass.get(i);
+						Double PredToxValMass = predsMass.get(i);
 
-						if (PredToxValMass == -9999) {
+						if (PredToxValMass == null) {
 							fw3.write("N/A");
 						} else {
 							if (Math.abs(PredToxValMass) < 0.1) {
@@ -581,31 +581,31 @@ public class TaskCalculations {
 		}
 	}
 
-	private void WriteToxicityResultsForChemical(FileWriter fw, FileWriter fw2, int index, String CAS, double ExpToxVal, double PredToxVal, double MW, String d, String error, String experimentalMOA,
+	private void WriteToxicityResultsForChemical(FileWriter fw, FileWriter fw2, int index, String CAS, Double ExpToxVal, Double PredToxVal, double MW, String d, String error, String experimentalMOA,
 			String bestMOA, double maxScore) {
 		try {
 
 			java.text.DecimalFormat d2 = new java.text.DecimalFormat("0.00");
 			java.text.DecimalFormat d2exp = new java.text.DecimalFormat("0.00E00");
 
-			double ExpToxValMass = -9999;
-			double PredToxValMass = -9999;
+			Double ExpToxValMass = null;
+			Double PredToxValMass = null;
 
-			// if (PredToxVal!=-9999) {
+			// if (PredToxVal!=null) {
 			// PredToxValMass=PredictToxicityWebPageCreator.getToxValMass(endpoint,
 			// PredToxVal, MW);
 			// }
-			// if (ExpToxVal!=-9999) {
+			// if (ExpToxVal!=null) {
 			// ExpToxValMass=PredictToxicityWebPageCreator.getToxValMass(endpoint,
 			// ExpToxVal, MW);
 			// }
 
 			if (isLogMolarEndpoint) {
-				if (PredToxVal != -9999) {
+				if (PredToxVal != null) {
 					PredToxValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, PredToxVal, MW);
 				}
 
-				if (ExpToxVal != -9999) {
+				if (ExpToxVal != null) {
 					ExpToxValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, ExpToxVal, MW);
 				}
 			} else {
@@ -639,14 +639,14 @@ public class TaskCalculations {
 			// Molar values
 
 			if (isLogMolarEndpoint) {
-				if (ExpToxVal == -9999) {
+				if (ExpToxVal == null) {
 					fw.write("<td>N/A</td>\n");
 					fw2.write("N/A" + d);
 				} else {
 					fw.write("<td>" + d2.format(ExpToxVal) + "</td>\n");
 					fw2.write(d2.format(ExpToxVal) + d);
 				}
-				if (PredToxVal == -9999) {
+				if (PredToxVal == null) {
 					fw.write("<td>N/A</td>\n");
 					fw2.write("N/A" + d);
 				} else {
@@ -657,7 +657,7 @@ public class TaskCalculations {
 
 			// ********************************************************
 			// Mass values
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 				fw.write("<td align=\"center\">N/A</td>\n");// mass
 				fw2.write("N/A" + d);
 			} else {
@@ -670,7 +670,7 @@ public class TaskCalculations {
 				}
 			}
 
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 				fw.write("<td align=\"center\">N/A</td>\n"); // mass units
 				fw2.write("N/A");
 			} else {
@@ -714,21 +714,21 @@ public class TaskCalculations {
 		}
 	}
 
-	private double calculateConsensusToxicity(List<Double> preds) {
+	private Double calculateConsensusToxicity(List<Double> preds) {
 
 		double pred = 0;
 
 		int predcount = 0;
 
 		for (int i = 0; i < preds.size(); i++) {
-			if (preds.get(i) > -9999) {
+			if (preds.get(i) != null) {
 				predcount++;
 				pred += preds.get(i);
 			}
 		}
 
 		if (predcount < minPredCount)
-			return -9999;
+			return null;
 
 		pred /= (double) predcount;
 		// System.out.println(pred);
@@ -746,7 +746,7 @@ public class TaskCalculations {
 
 		// lookup in training set based on CAS
 		er.expToxValue = lookup.LookupExpValByCAS(CAS, trainingDataSet2d);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expCAS = CAS;
 			er.expSet = "Training";
 			return er;
@@ -755,7 +755,7 @@ public class TaskCalculations {
 		// ******************************************************
 		// lookup in external test set based on CAS:
 		er.expToxValue = lookup.LookupExpValByCAS(CAS, testDataSet2d);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expCAS = CAS;
 			er.expSet = "Test";
 			return er;
@@ -764,7 +764,7 @@ public class TaskCalculations {
 		// ******************************************************
 		// lookup in training set based on structure: 
 		er = lookup.LookupExpValByStructure(chemical, trainingDataSet2d);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Training";
 			return er;
 		}
@@ -772,14 +772,14 @@ public class TaskCalculations {
 		// ******************************************************
 		// lookup in test set based on structure:
 		er = lookup.LookupExpValByStructure(chemical, testDataSet2d);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Test";
 			return er;
 		}
 
 		// ******************************************************
 		er = lookup.new ExpRecord();
-		er.expToxValue = -9999;
+		er.expToxValue = null;
 		er.expSet = "";
 		er.expCAS = "";
 
@@ -796,7 +796,7 @@ public class TaskCalculations {
 
 		// lookup in training set based on CAS
 		er.expToxValue = lookup.LookupExpValByCAS(CAS, trainingDataSet2d);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expCAS = CAS;
 			er.expSet = "Training";
 			return er;
@@ -805,7 +805,7 @@ public class TaskCalculations {
 		// ******************************************************
 		// lookup in external test set based on CAS:
 		er.expToxValue = lookup.LookupExpValByCAS(CAS, testDataSet2d);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expCAS = CAS;
 			er.expSet = "Test";
 			return er;
@@ -813,7 +813,6 @@ public class TaskCalculations {
 
 		// ******************************************************
 		er = lookup.new ExpRecord();
-		er.expToxValue = -9999;
 		er.expSet = "";
 		er.expCAS = "";
 
@@ -826,7 +825,7 @@ public class TaskCalculations {
 		Lookup lookup = new Lookup();
 
 		Lookup.ExpRecord er = lookup.new ExpRecord();
-		er.expToxValue = -9999;
+		er.expToxValue = null;
 		er.expSet = "";
 		er.expCAS = "";
 		er.expMOA = "";
@@ -877,14 +876,14 @@ public class TaskCalculations {
 		// Lookup LC50 value from training and prediction sets:
 
 		er.expToxValue = lookup.LookupExpValByCAS(er.expCAS, ccTrainingMOA);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Training";
 		}
 
-		if (er.expToxValue == -9999) {
+		if (er.expToxValue == null) {
 			er.expToxValue = lookup.LookupExpValByCAS(er.expCAS, ccPredictionMOA);
 
-			if (er.expToxValue != -9999) {
+			if (er.expToxValue != null) {
 				er.expSet = "Test";
 			}
 		}
@@ -910,7 +909,7 @@ public class TaskCalculations {
 		Lookup lookup = new Lookup();
 
 		Lookup.ExpRecord er = lookup.new ExpRecord();
-		er.expToxValue = -9999;
+		er.expToxValue = null;
 		er.expSet = "";
 		er.expCAS = "";
 		er.expMOA = "";
@@ -920,15 +919,15 @@ public class TaskCalculations {
 		// Lookup LC50 value from training and prediction sets:
 
 		er.expToxValue = lookup.LookupExpValByCAS(CAS, ccTrainingMOA);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expCAS=CAS;
 			er.expSet = "Training";
 		}
 
-		if (er.expToxValue == -9999) {
+		if (er.expToxValue == null) {
 			er.expToxValue = lookup.LookupExpValByCAS(CAS, ccPredictionMOA);
 
-			if (er.expToxValue != -9999) {
+			if (er.expToxValue != null) {
 				er.expCAS=CAS;
 				er.expSet = "Test";
 			}
@@ -1021,7 +1020,7 @@ public class TaskCalculations {
 		// lookup first in training set based on CAS
 		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d);
 		// System.out.println(er.expToxValue);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Training";
 			return er;
 		}
@@ -1030,14 +1029,14 @@ public class TaskCalculations {
 		// next lookup in external test set based on CAS:
 		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d);
 		// System.out.println(er.expToxValue);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Test";
 			return er;
 		}
 
 		// ******************************************************
 		er = lookup.new ExpRecord();
-		er.expToxValue = -9999;
+		er.expToxValue = null;
 		er.expSet = "";
 		er.expCAS = "";
 
@@ -1450,7 +1449,7 @@ public class TaskCalculations {
 
 			// ******************************************************
 
-			double predToxVal = -9999;
+			Double predToxVal = null;
 			double predToxUnc = 1;// TODO: add code to calculate this
 
 			ReportOptions options = new ReportOptions();
@@ -1919,10 +1918,10 @@ public class TaskCalculations {
 
 						if (taskType == TESTConstants.typeTaskBatch) {
 							if (!isBinaryEndpoint) {
-								WriteToxicityResultsForChemical(fw, fw2, index, CAS, er.expToxValue, -9999, er.MW, del, error, er.expMOA, "", -1);
+								WriteToxicityResultsForChemical(fw, fw2, index, CAS, er.expToxValue, null, er.MW, del, error, er.expMOA, "", -1);
 
 							} else {
-								WriteBinaryToxResultsForChemical(fw, fw2, index, CAS, er.expToxValue, -9999, er.MW, del, error);
+								WriteBinaryToxResultsForChemical(fw, fw2, index, CAS, er.expToxValue, null, er.MW, del, error);
 							}
 
 							if (method.equals(TESTConstants.ChoiceConsensus)) {

@@ -783,7 +783,7 @@ public class WebTEST {
 	 * 
 	 * // ******************************************************
 	 * 
-	 * double predToxVal = -9999; double predToxUnc = 1;// TODO: add code to
+	 * double predToxVal = null; double predToxUnc = 1;// TODO: add code to
 	 * calculate this
 	 * 
 	 * // if (method.equals(TESTConstants.ChoiceFDAMethod)) { // result =
@@ -1086,7 +1086,7 @@ public class WebTEST {
 
 		// ******************************************************
 
-		double predToxVal = -9999;
+		Double predToxVal = null;
 		double predToxUnc = 1;// TODO: add code to calculate this
 
 		// if (method.equals(TESTConstants.ChoiceFDAMethod)) {
@@ -1539,7 +1539,7 @@ public class WebTEST {
 
 			// ******************************************************
 
-			double predToxVal = -9999;
+			Double predToxVal = null;
 			double predToxUnc = 1;// TODO: add code to calculate this
 
 			// if (method.equals(TESTConstants.ChoiceFDAMethod)) {
@@ -1818,19 +1818,19 @@ public class WebTEST {
 
 	}
 
-	static double calculateConsensusToxicity(List<Double> preds) {
+	static Double calculateConsensusToxicity(List<Double> preds) {
 		double pred = 0;
 		int predcount = 0;
 
 		for (int i = 0; i < preds.size(); i++) {
-			if (preds.get(i) > -9999) {
+			if (preds.get(i) != null) {
 				predcount++;
 				pred += preds.get(i);
 			}
 		}
 
 		if (predcount < minPredCount)
-			return -9999;
+			return null;
 
 		pred /= (double) predcount;
 		// System.out.println(pred);
@@ -1847,7 +1847,7 @@ public class WebTEST {
 		// lookup first in training set based on CAS
 		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d);
 		// System.out.println(er.expToxValue);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Training";
 			return er;
 		}
@@ -1856,14 +1856,14 @@ public class WebTEST {
 		// next lookup in external test set based on CAS:
 		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d);
 		// System.out.println(er.expToxValue);
-		if (er.expToxValue != -9999) {
+		if (er.expToxValue != null) {
 			er.expSet = "Test";
 			return er;
 		}
 
 		// ******************************************************
 		er = lookup.new ExpRecord();
-		er.expToxValue = -9999;
+		er.expToxValue = null;
 		er.expSet = "";
 		er.expCAS = "";
 
@@ -1906,8 +1906,8 @@ public class WebTEST {
 		return v;
 	}
 
-	public static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, double ExpToxVal,
-			double PredToxVal, double MW, String error, boolean isBinary) {
+	public static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, Double ExpToxVal,
+			Double PredToxVal, double MW, String error, boolean isBinary) {
 		if (!isBinary) {
 			return getTESTPredictedValue(endpoint, method, CAS, ExpToxVal, PredToxVal, MW, error);
 		} else {
@@ -1915,25 +1915,25 @@ public class WebTEST {
 		}
 	}
 
-	static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, double ExpToxVal,
-			double PredToxVal, double MW, String error) {
+	static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, Double ExpToxVal,
+			Double PredToxVal, double MW, String error) {
 
 		TESTPredictedValue v = new TESTPredictedValue(CAS, endpoint, method);
-		if (Math.abs(ExpToxVal - (-9999)) > 0.001)
-			v.expValLogMolar = ExpToxVal;
-		if (Math.abs(PredToxVal - (-9999)) > 0.001)
-			v.predValLogMolar = PredToxVal;
+		
+		
+		v.expValLogMolar = ExpToxVal;
+		v.predValLogMolar = PredToxVal;
 
 		try {
-			double ExpToxValMass = -9999;
-			double PredToxValMass = -9999;
+			Double ExpToxValMass = null;
+			Double PredToxValMass = null;
 			if (TESTConstants.isLogMolar(endpoint)) {
-				if (PredToxVal != -9999) {
+				if (PredToxVal != null) {
 					PredToxValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, PredToxVal, MW);
 					v.predValMass = PredToxValMass;
 				}
 
-				if (ExpToxVal != -9999) {
+				if (ExpToxVal != null) {
 					ExpToxValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, ExpToxVal, MW);
 					v.expValMass = ExpToxValMass;
 				}
@@ -1955,24 +1955,23 @@ public class WebTEST {
 	}
 
 	static TESTPredictedValue WriteToxicityResultsForChemical(Writer fw2, String endpoint, String method, int index,
-			String CAS, double ExpToxVal, double PredToxVal, double MW, String d, String error, String errorCode) {
+			String CAS, Double ExpToxVal, Double PredToxVal, double MW, String d, String error, String errorCode) {
 
 		TESTPredictedValue v = new TESTPredictedValue(CAS, endpoint, method);
-		if (Math.abs(ExpToxVal - (-9999)) > 0.001)
-			v.expValLogMolar = ExpToxVal;
-		if (Math.abs(PredToxVal - (-9999)) > 0.001)
-			v.predValLogMolar = PredToxVal;
+
+		v.expValLogMolar = ExpToxVal;
+		v.predValLogMolar = PredToxVal;
 
 		try {
-			double ExpToxValMass = -9999;
-			double PredToxValMass = -9999;
+			Double ExpToxValMass = null;
+			Double PredToxValMass = null;
 			if (TESTConstants.isLogMolar(endpoint)) {
-				if (PredToxVal != -9999) {
+				if (PredToxVal != null) {
 					PredToxValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, PredToxVal, MW);
 					v.predValMass = PredToxValMass;
 				}
 
-				if (ExpToxVal != -9999) {
+				if (ExpToxVal != null) {
 					ExpToxValMass = PredictToxicityWebPageCreator.getToxValMass(endpoint, ExpToxVal, MW);
 					v.expValMass = ExpToxValMass;
 				}
@@ -1989,12 +1988,12 @@ public class WebTEST {
 			// ********************************************************
 			// Molar values
 			if (TESTConstants.isLogMolar(endpoint)) {
-				if (ExpToxVal == -9999) {
+				if (ExpToxVal == null) {
 					fw2.write("N/A" + d);
 				} else {
 					fw2.write(FormatUtils.toD2(ExpToxVal) + d);
 				}
-				if (PredToxVal == -9999) {
+				if (PredToxVal == null) {
 					fw2.write("N/A" + d);
 				} else {
 					fw2.write(FormatUtils.toD2(PredToxVal) + d);
@@ -2003,7 +2002,7 @@ public class WebTEST {
 
 			// ********************************************************
 			// Mass values
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 				fw2.write("N/A" + d);
 			} else {
 				if (Math.abs(ExpToxValMass) < 0.1) {
@@ -2013,7 +2012,7 @@ public class WebTEST {
 				}
 			}
 
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 				fw2.write("N/A");
 			} else {
 				if (Math.abs(PredToxValMass) < 0.1) {
@@ -2125,8 +2124,8 @@ public class WebTEST {
 	 * trainingDataSet2d, testDataSet2d);
 	 * 
 	 * if (!TESTConstants.isBinary(endpoint)) { v = getTESTPredictedValue(endpoint,
-	 * method, CAS, er.expToxValue, -9999, er.MW, del, error); } else { v =
-	 * getTESTPredictedValueBinary(endpoint, method, CAS, er.expToxValue, -9999,
+	 * method, CAS, er.expToxValue, null, er.MW, del, error); } else { v =
+	 * getTESTPredictedValueBinary(endpoint, method, CAS, er.expToxValue, null,
 	 * er.MW, del, error); }
 	 * 
 	 * } else { // this.WriteDescriptorResultsForChemicalToWebPage(fw, //
@@ -2276,10 +2275,10 @@ public class WebTEST {
 
 									if (!TESTConstants.isBinary(endpoint)) {
 										v = WriteToxicityResultsForChemical(fws[j], endpoint, method, index, CAS,
-												er.expToxValue, -9999, er.MW, del, error, errorCode);
+												er.expToxValue, null, er.MW, del, error, errorCode);
 									} else {
 										v = WriteBinaryToxResultsForChemical(fws[j], endpoint, method, index, CAS,
-												er.expToxValue, -9999, er.MW, del, error, errorCode);
+												er.expToxValue, null, er.MW, del, error, errorCode);
 									}
 
 									// if (method.equals(TESTConstants.ChoiceConsensus)) {
@@ -2368,21 +2367,21 @@ public class WebTEST {
 		}
 	}
 
-	static TESTPredictedValue getTESTPredictedValueBinary(String endpoint, String method, String CAS, double ExpToxVal,
-			double PredToxVal, double MW, String error) {
+	static TESTPredictedValue getTESTPredictedValueBinary(String endpoint, String method, String CAS, Double ExpToxVal,
+			Double PredToxVal, double MW, String error) {
 		TESTPredictedValue v = new TESTPredictedValue(CAS, endpoint, method);
 		try {
 
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 			} else {
 				v.expValLogMolar = ExpToxVal;
 			}
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 			} else {
 				v.predValLogMolar = PredToxVal;
 			}
 
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 			} else {
 				if (ExpToxVal < 0.5) {
 					if (endpoint.equals(TESTConstants.ChoiceReproTox)) {
@@ -2405,7 +2404,7 @@ public class WebTEST {
 				}
 			}
 
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 			} else {
 				if (PredToxVal < 0.5) {
 					if (endpoint.equals(TESTConstants.ChoiceReproTox)) {
@@ -2439,12 +2438,12 @@ public class WebTEST {
 	}
 
 	static TESTPredictedValue WriteBinaryToxResultsForChemical(Writer fw2, String endpoint, String method, int index,
-			String CAS, double ExpToxVal, double PredToxVal, double MW, String d, String error, String errorCode) {
+			String CAS, Double ExpToxVal, Double PredToxVal, double MW, String d, String error, String errorCode) {
 		TESTPredictedValue v = new TESTPredictedValue(CAS, endpoint, method);
 		try {
 			fw2.write(index + d + CAS + d);
 
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 				// fw.write("<td>N/A</td>\n");
 				fw2.write("N/A" + d);
 			} else {
@@ -2452,7 +2451,7 @@ public class WebTEST {
 				fw2.write(FormatUtils.toD2(ExpToxVal) + d);
 				v.expValLogMolar = ExpToxVal;
 			}
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 				// fw.write("<td>N/A</td>\n");
 				fw2.write("N/A" + d);
 			} else {
@@ -2463,7 +2462,7 @@ public class WebTEST {
 
 			// System.out.println(ExpToxVal+"\t"+PredToxVal);
 
-			if (ExpToxVal == -9999) {
+			if (ExpToxVal == null) {
 				// fw.write("<td align=\"center\">N/A</td>\n");//mass
 				fw2.write("N/A" + d);
 			} else {
@@ -2508,7 +2507,7 @@ public class WebTEST {
 				}
 			}
 
-			if (PredToxVal == -9999) {
+			if (PredToxVal == null) {
 				// fw.write("<td align=\"center\">N/A</td>\n"); //mass units
 				fw2.write("N/A");
 			} else {

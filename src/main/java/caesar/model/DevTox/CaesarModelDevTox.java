@@ -63,7 +63,7 @@ public class CaesarModelDevTox  {
     private ModelDataset modelDataset;
 //    private Matrix Descriptors;
     
-    public double Tox=-1;
+    public Integer Tox=null;
     public String Warning="";
 
     private Boolean SetupAvailable;

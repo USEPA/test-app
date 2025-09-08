@@ -11,31 +11,32 @@ import org.apache.logging.log4j.util.Strings;
 public class TESTConstants {
 	public static String SoftwareVersion = "5.1.3";
 	public static String SoftwareTitle = "T.E.S.T (Toxicity Estimation Software Tool)";
+
+	public static final String degreesCelsius = "°C";
+
 	
 	//*add endpoint* 01
-	public static final String ChoiceFHM_LC50="Fathead minnow LC50 (96 hr)";
-	public static final String ChoiceDM_LC50="Daphnia magna LC50 (48 hr)";
-	public static final String ChoiceTP_IGC50="T. pyriformis IGC50 (48 hr)";
-	public static final String ChoiceRat_LD50="Oral rat LD50";
-	public static final String ChoiceGA_EC50="Green algae EC50 (96 hr)";
-//	public static final String ChoiceBCF="Bioaccumulation factor";
-	public static final String ChoiceBCF="Bioconcentration factor";//TMM 3/30/18
+	public static final String ChoiceFHM_LC50="96 Hour Fathead Minnow LC50";
+	public static final String ChoiceDM_LC50="48 Hour Daphnia Magna LC50";
+	public static final String ChoiceTP_IGC50="48 Hour Tetrahymena Pyriformis IGC50";
+	public static final String ChoiceRat_LD50="Oral Rat LD50";
+	public static final String ChoiceGA_EC50="63 Hour Green Algae EC50";
+	public static final String ChoiceBCF="Bioconcentration Factor";//TMM 3/30/18
 	public static final String ChoiceReproTox="Developmental Toxicity";
-	public static final String ChoiceMutagenicity="Mutagenicity";
-	public static final String ChoiceEstrogenReceptorRelativeBindingAffinity="Estrogen Receptor RBA";//mg/L
+	public static final String ChoiceMutagenicity="Ames Mutagenicity";
+	public static final String ChoiceEstrogenReceptorRelativeBindingAffinity="Estrogen Receptor Relative Binding Affinity";//mg/L
 	public static final String ChoiceEstrogenReceptor="Estrogen Receptor Binding";//mg/L
 	
-	public static final String degreesCelsius = "°C";
-	
-	public static final String ChoiceBoilingPoint="Normal boiling point"; //(°C)
-	public static final String ChoiceVaporPressure="Vapor pressure at 25"+degreesCelsius; //mmHg
-	public static final String ChoiceMeltingPoint="Melting point"; //(°C)
-	public static final String ChoiceFlashPoint="Flash point";// (°C)
-	public static final String ChoiceDensity="Density"; // (g/cm³)
-	public static final String ChoiceSurfaceTension="Surface tension at 25"+degreesCelsius;//  (dyn/cm)
-	public static final String ChoiceThermalConductivity="Thermal conductivity at 25"+degreesCelsius;// (mW/mK)
-	public static final String ChoiceViscosity="Viscosity at 25"+degreesCelsius;//(cP)
-	public static final String ChoiceWaterSolubility="Water solubility at 25"+degreesCelsius;//mg/L
+	public static final String ChoiceBoilingPoint="Normal Boiling Point";
+	public static final String ChoiceMeltingPoint="Melting Point"; 
+	public static final String ChoiceFlashPoint="Flash Point";
+
+	public static final String ChoiceVaporPressure="Vapor Pressure at 25"+degreesCelsius; 
+	public static final String ChoiceDensity="Density at 25"+degreesCelsius;
+	public static final String ChoiceSurfaceTension="Surface Tension at 25"+degreesCelsius;
+	public static final String ChoiceThermalConductivity="Thermal Conductivity at 25"+degreesCelsius;
+	public static final String ChoiceViscosity="Viscosity at 25"+degreesCelsius;
+	public static final String ChoiceWaterSolubility="Water Solubility at 25"+degreesCelsius;
 	
 	public static final String ChoiceDescriptors="Descriptors";
 	
@@ -669,7 +670,7 @@ public class TESTConstants {
 		} else if (endpoint.equals(TESTConstants.ChoiceSurfaceTension)) {
 			return "dyn/cm";
 		} else if (endpoint.equals(TESTConstants.ChoiceThermalConductivity)) {
-			return "mW/mK";
+			return "mW/(m*K)";
 		} else if (endpoint.equals(TESTConstants.ChoiceViscosity)) {
 			return "cP";
 		} else if (endpoint.equals(TESTConstants.ChoiceVaporPressure)) {
@@ -678,33 +679,123 @@ public class TESTConstants {
 			return "?";
 		}
 	}
+	
+	
+	
 
 	public static String getMolarLogUnits(String endpoint) {
 		if (endpoint.equals(TESTConstants.ChoiceFHM_LC50) || endpoint.equals(TESTConstants.ChoiceTP_IGC50) || endpoint.equals(TESTConstants.ChoiceDM_LC50)
 				|| endpoint.equals(TESTConstants.ChoiceGA_EC50) || endpoint.equals(TESTConstants.ChoiceWaterSolubility)) {
-			return "-Log10(mol/L)";
+			return "-log10(mol/L)";
 		} else if (endpoint.equals(TESTConstants.ChoiceRat_LD50)) {
-			return "-Log10(mol/kg)";
+			return "-log10(mol/kg)";
 		} else if (endpoint.equals(TESTConstants.ChoiceBCF)) {
-			
-			 return "Log10(L/kg)";
-			// return "Log<sub>10</sub>";
-//			return "Log10";
-			 
+			 return "log10(L/kg)";
 		} else if (endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
-			return "Log10";
+			return "log10(Dimensionless)";
 		} else if (endpoint.equals(TESTConstants.ChoiceViscosity)) {
 			// return "Log<sub>10</sub>(cP)";
-			return "Log10(cP)";
+			return "log10(cP)";
 			// return "ln(cP)";
 		} else if (endpoint.equals(TESTConstants.ChoiceReproTox) || endpoint.equals(TESTConstants.ChoiceMutagenicity) || endpoint.equals(TESTConstants.ChoiceEstrogenReceptor)) {
 			return "";
 		} else if (endpoint.equals(TESTConstants.ChoiceVaporPressure)) {
-			return "Log10(mmHg)";
+			return "log10(mmHg)";
 		} else if (endpoint.indexOf("Score") > -1) {
 			return "";
 		} else {
 			return "?";
 		}
 	}
+	
+	
+	public static String getModelUnits(String endpoint) {
+		
+		if(isBinary(endpoint)) {
+			return "Binary 0/1";
+		} else if(isLogMolar(endpoint)) {
+			return getMolarLogUnits(endpoint);
+		} else {
+			return getMassUnits(endpoint);
+		}
+		
+	}
+	
+	
+	public static String getDashboardUnits(String endpoint) {
+		if (endpoint.equals(TESTConstants.ChoiceFHM_LC50) || endpoint.equals(TESTConstants.ChoiceTP_IGC50) || endpoint.equals(TESTConstants.ChoiceDM_LC50)
+				|| endpoint.equals(TESTConstants.ChoiceGA_EC50) || endpoint.equals(TESTConstants.ChoiceWaterSolubility)) {
+			return "mol/L";
+		} else if (endpoint.equals(TESTConstants.ChoiceRat_LD50)) {
+			return "mol/kg";
+		} else if (endpoint.equals(TESTConstants.ChoiceBCF)) {
+			 return "L/kg";
+		} else if (endpoint.equals(TESTConstants.ChoiceDensity)) {
+			return "g/cm³";
+		} else if (endpoint.equals(TESTConstants.ChoiceSurfaceTension)) {
+			return "dyn/cm";
+		} else if (endpoint.equals(TESTConstants.ChoiceThermalConductivity)) {
+			return "mW/mK";
+		} else if (endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
+			return "Dimensionless";
+		} else if (endpoint.equals(TESTConstants.ChoiceViscosity)) {
+			return "cP";
+		} else if (endpoint.equals(TESTConstants.ChoiceReproTox) || endpoint.equals(TESTConstants.ChoiceMutagenicity) || endpoint.equals(TESTConstants.ChoiceEstrogenReceptor)) {
+			return "Binary 0/1";
+		} else if (endpoint.equals(TESTConstants.ChoiceVaporPressure)) {
+			return "mmHg";
+		} else if (endpoint.equals(TESTConstants.ChoiceBoilingPoint) || endpoint.equals(TESTConstants.ChoiceFlashPoint) || endpoint.equals(TESTConstants.ChoiceMeltingPoint)) {
+			return degreesCelsius;
+		} else if (endpoint.indexOf("Score") > -1) {
+			return "";
+		} else {
+			return "?";
+		}
+	}
+
+	
+	
+	public static String getPropertyNameDB(String propertyName) {
+		
+		if (propertyName.equals(TESTConstants.ChoiceBoilingPoint))
+			return "Boiling point";
+		else if (propertyName.equals(TESTConstants.ChoiceMeltingPoint))
+			return "Melting point";
+		else if (propertyName.equals(TESTConstants.ChoiceFlashPoint))
+			return "Flash point";
+		else if (propertyName.equals(TESTConstants.ChoiceVaporPressure))
+			return "Vapor pressure";
+		else if (propertyName.equals(TESTConstants.ChoiceDensity))
+			return "Density";
+		else if (propertyName.equals(TESTConstants.ChoiceSurfaceTension))
+			return "Surface tension";
+		else if (propertyName.equals(TESTConstants.ChoiceThermalConductivity))
+			return "Thermal conductivity";
+		else if (propertyName.equals(TESTConstants.ChoiceViscosity))
+			return "Viscosity";
+		else if (propertyName.equals(TESTConstants.ChoiceWaterSolubility))
+			return "Water solubility";
+		else if (propertyName.equals(TESTConstants.ChoiceFHM_LC50))
+			return "96 hour fathead minnow LC50";
+		else if (propertyName.equals(TESTConstants.ChoiceDM_LC50))
+			return "48 hour Daphnia magna LC50";
+		else if (propertyName.equals(TESTConstants.ChoiceTP_IGC50))
+			return "48 hour Tetrahymena pyriformis IGC50";
+		else if (propertyName.equals(TESTConstants.ChoiceBCF))
+			return "Bioconcentration factor";
+		else if (propertyName.equals(TESTConstants.ChoiceRat_LD50))
+			return "Oral rat LD50";
+		else if (propertyName.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity))
+			return "Estrogen receptor relative binding affinity";
+		else if (propertyName.equals(TESTConstants.ChoiceEstrogenReceptor))
+			return "Estrogen receptor binding";
+		else if (propertyName.equals(TESTConstants.ChoiceMutagenicity))
+			return "Ames Mutagenicity";
+		else if (propertyName.equals(TESTConstants.ChoiceReproTox))
+			return "Developmental toxicity";
+		else
+			return null;
+				
+	}
+
 }

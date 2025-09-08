@@ -19,6 +19,7 @@ import AADashboard.Application.MySQL_DB;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
 import ToxPredictor.Application.Calculations.PredictToxicityJSONCreator;
+import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.misc.Lookup;
 
 /**
@@ -26,7 +27,12 @@ import ToxPredictor.misc.Lookup;
 */
 public class GetDTXSIDLookup {
 	
-	
+
+	/**
+	 * Following method is to get CAS to dtxsid lookup. For GUI, use getDsstoxRecordLookupByCAS() instead
+	 * 
+	 * @return
+	 */
 	public static Hashtable<String, String> getDtxsidLookupByCAS() {
 		
 		String jsonFilePath = "gov/epa/webtest/dtxsid_lookup_from_cas.json"; // Adjust the path based on your JAR structure
@@ -41,6 +47,37 @@ public class GetDTXSIDLookup {
             // Parse the JSON file into a Hashtable
             Gson gson = new Gson();
             Hashtable<String, String> hashtable = gson.fromJson(reader, hashtableType);
+
+            // Print the hashtable contents
+//            hashtable.forEach((key, value) -> System.out.println("Key: " + key + ", Value: " + value));
+
+            return hashtable;
+            
+            
+        } catch (Exception e) {
+        	System.out.println("Failed to load "+jsonFilePath);
+            e.printStackTrace();
+            return null;
+        }
+    }
+	
+	
+
+
+	public static Hashtable<String, DSSToxRecord> getDsstoxRecordLookupByCAS() {
+		
+		String jsonFilePath = "gov/epa/webtest/DsstoxRecord_lookup_from_cas.json"; // Adjust the path based on your JAR structure
+
+        // Read the JSON file from the JAR
+        try (InputStream inputStream = GetDTXSIDLookup.class.getClassLoader().getResourceAsStream(jsonFilePath);
+             InputStreamReader reader = new InputStreamReader(inputStream)) {
+
+            // Define the type of the hashtable
+            Type hashtableType = new TypeToken<Hashtable<String, DSSToxRecord>>(){}.getType();
+
+            // Parse the JSON file into a Hashtable
+            Gson gson = new Gson();
+            Hashtable<String, DSSToxRecord> hashtable = gson.fromJson(reader, hashtableType);
 
             // Print the hashtable contents
 //            hashtable.forEach((key, value) -> System.out.println("Key: " + key + ", Value: " + value));
@@ -123,7 +160,7 @@ public class GetDTXSIDLookup {
 	
 
 	
-	void createDTXSIDLookupFromCAS() {
+	public void createDTXSIDLookupFromCAS() {
 		
 		List<String>endpoints=TESTConstants.getFullEndpoints(null);
 		
@@ -165,6 +202,7 @@ public class GetDTXSIDLookup {
 			}
 		}
 		
+		//Do what's left:
 		Hashtable<String,String>htCAS_to_sid=queryDatabaseGenericSubstances(conn, casBatch);
 		htCAS_to_SID.putAll(htCAS_to_sid);
 		casBatch.clear();
@@ -181,14 +219,12 @@ public class GetDTXSIDLookup {
 		htCAS_to_sid=queryDatabaseOtherCAS(conn, casBatch);
 		htCAS_to_SID.putAll(htCAS_to_sid);
 
-
 		for (String casrn:casrns) {
 			if(!htCAS_to_SID.containsKey(casrn)) {
 				System.out.println(casrn);
 			}
 		}
 
-		
 //		long t2=System.currentTimeMillis();
 		 
 		try {
@@ -202,9 +238,6 @@ public class GetDTXSIDLookup {
 		}
 		
 		System.out.println(casrns.size()+"\t"+htCAS_to_SID.size());
-		
-		
-		
 	}
 	
 	

@@ -24,6 +24,7 @@ import ToxPredictor.Application.Calculations.TaskCalculations2;
 import ToxPredictor.Application.GUI.Table.Renderer.MultiLineTableHeaderRenderer;
 import ToxPredictor.Application.model.IndividualPredictionsForConsensus.PredictionIndividualMethod;
 import ToxPredictor.Application.model.PredictionResultsPrimaryTable;
+import ToxPredictor.Utilities.FormatUtils;
 import ToxPredictor.Utilities.TESTPredictedValue;
 
 public class MyTableModelAllQSARMethods extends AbstractTableModel {
@@ -221,20 +222,20 @@ public class MyTableModelAllQSARMethods extends AbstractTableModel {
 			PredictionResultsPrimaryTable pt=tpv.predictionResults.getPredictionResultsPrimaryTable();
 			
 			if (TESTConstants.isLogMolar(tpv.endpoint) || TESTConstants.isBinary(tpv.endpoint)) {
-				values.add(pt.getExpToxValue());
+				values.add(FormatUtils.setSignificantDigits(pt.getExpToxValue(),3));
 			} else {
-				values.add(pt.getExpToxValMass());
+				values.add(FormatUtils.setSignificantDigits(pt.getExpToxValMass(),3));
 			}
 		
 			
 			for (PredictionIndividualMethod pred:vecResults) {
-				values.add(pred.getPrediction());
+				values.add(FormatUtils.setSignificantDigits(pred.getPrediction(),3));
 			}
 			
 			if (TESTConstants.isLogMolar(tpv.endpoint) || TESTConstants.isBinary(tpv.endpoint)) {
-				values.add(pt.getPredToxValue());				
+				values.add(FormatUtils.setSignificantDigits(pt.getPredToxValue(),3));				
 			} else {
-				values.add(pt.getPredToxValMass());
+				values.add(FormatUtils.setSignificantDigits(pt.getPredToxValMass(),3));
 			}
 
 			

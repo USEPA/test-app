@@ -24,8 +24,8 @@ public class PredictToxicityLDA {
 	LDAMethod lm = new LDAMethod();
 
 	// double expToxVal=-9999;
-	public double predToxVal = -9999;
-	public double predToxUnc=-9999;
+	public Double predToxVal = null;
+	public Double predToxUnc=null;
 
 	public String bestMOA;
 
@@ -144,7 +144,7 @@ public class PredictToxicityLDA {
 			// !bestMOA_LC50_Error.equals("OK") ||
 			// !bestMOA_LDA_Error.equals("OK")) {
 			if (bestMOA.equals("") || maxScore < lm.minPosScore || !bestMOA_LC50_Error.equals("OK")) {
-				this.predToxVal = -9999;
+				this.predToxVal = null;
 			} else {
 				String resultPredLC50 = predArrayLC50[vecMOA.indexOf(bestMOA)];
 				java.util.LinkedList<String> l = ToxPredictor.Utilities.Utilities.Parse(resultPredLC50, "\t");
@@ -245,7 +245,7 @@ public class PredictToxicityLDA {
 			chemical = (TestChemical) lm.testData.instance(0);
 
 			if (bestMOA.equals("") || maxScore < lm.minPosScore || !bestMOA_LC50_Error.equals("OK")) {
-				this.predToxVal = -9999;
+				this.predToxVal = null;
 			} else {
 				String resultPredLC50 = predArrayLC50[vecMOA.indexOf(bestMOA)];
 				java.util.LinkedList<String> l = ToxPredictor.Utilities.Utilities.Parse(resultPredLC50, "\t");
