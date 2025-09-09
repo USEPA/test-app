@@ -113,7 +113,6 @@ public class WebTEST4 {
 	private static final String descriptorSet = "2d";
 
 
-
 	public static int minPredCount = 2;// minimum number of predictions needed
 										// for consensus pred
 //	private static String del = "\t";
@@ -703,7 +702,11 @@ public class WebTEST4 {
 
 		String method = TESTConstants.ChoiceConsensus;
 
-		TESTPredictedValue tpv = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, d.er.expToxValue, predToxVal,
+		Double expToxValue=null;
+		if(d.er!=null) expToxValue=d.er.expToxValue;
+
+		
+		TESTPredictedValue tpv = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, expToxValue, predToxVal,
 				d.MW, "", d.isBinaryEndpoint);
 
 		res.add(0, tpv);
@@ -736,7 +739,7 @@ public class WebTEST4 {
 
 		
 		if(printEachPrediction)
-			logger.info("{}\t{}\t{}\t\t{}\t{}\t{}", d.CAS, FormatUtils.toD3(d.er.expToxValue), FormatUtils.toD3(predToxVal),
+			logger.info("{}\t{}\t{}\t\t{}\t{}\t{}", d.CAS, FormatUtils.toD3(expToxValue), FormatUtils.toD3(predToxVal),
 				descriptorCalculationTime, predictionGenerationTime, d.endpoint);
 		
 		return predToxVal;
@@ -767,7 +770,11 @@ public class WebTEST4 {
 		ptH.CalculateToxicity2(method, d.useFragmentsConstraint, d.isBinaryEndpoint, d.MW, d.MW_Frag,
 				instancesEval, instancesTrain, allResults);
 
-		TESTPredictedValue tpv = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, d.er.expToxValue,
+		
+		Double expToxValue=null;
+		if(d.er!=null)expToxValue=d.er.expToxValue;
+		
+		TESTPredictedValue tpv = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, expToxValue,
 				ptH.predToxVal, d.MW, "", d.isBinaryEndpoint);
 		tpv.message = ptH.msg;
 
@@ -854,7 +861,11 @@ public class WebTEST4 {
 		
 		String method = TESTConstants.ChoiceNearestNeighborMethod;
 
-		TESTPredictedValue v = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, d.er.expToxValue, ptNN.predToxVal,
+		
+		Double expToxValue=null;
+		if(d.er!=null)expToxValue=d.er.expToxValue;
+		
+		TESTPredictedValue v = WebTEST.getTESTPredictedValue(d.endpoint, method, d.CAS, expToxValue, ptNN.predToxVal,
 				d.MW, "", d.isBinaryEndpoint);
 		
 		v.message = ptNN.msg;

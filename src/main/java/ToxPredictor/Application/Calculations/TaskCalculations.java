@@ -24,6 +24,7 @@ import wekalite.*;
 import ToxPredictor.Utilities.Utilities;
 //import ToxPredictor.generate3Dcoordinates.*;
 import ToxPredictor.misc.Lookup;
+import ToxPredictor.misc.Lookup.ExpRecord;
 import ToxPredictor.Application.ReportOptions;
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.GUI.Miscellaneous.SwingWorker;
@@ -745,45 +746,27 @@ public class TaskCalculations {
 		Lookup.ExpRecord er = lookup.new ExpRecord();
 
 		// lookup in training set based on CAS
-		er.expToxValue = lookup.LookupExpValByCAS(CAS, trainingDataSet2d);
-		if (er.expToxValue != null) {
-			er.expCAS = CAS;
-			er.expSet = "Training";
-			return er;
-		}
+		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d,"Training");
+		if (er != null) return er;
 
 		// ******************************************************
 		// lookup in external test set based on CAS:
-		er.expToxValue = lookup.LookupExpValByCAS(CAS, testDataSet2d);
-		if (er.expToxValue != null) {
-			er.expCAS = CAS;
-			er.expSet = "Test";
-			return er;
-		}
+		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d,"Test");
+		if (er != null) return er;
 
 		// ******************************************************
 		// lookup in training set based on structure: 
-		er = lookup.LookupExpValByStructure(chemical, trainingDataSet2d);
-		if (er.expToxValue != null) {
-			er.expSet = "Training";
-			return er;
-		}
+		er = lookup.LookupExpValByStructure(chemical, trainingDataSet2d,"Training");
+		if (er != null) return er;
 
 		// ******************************************************
 		// lookup in test set based on structure:
-		er = lookup.LookupExpValByStructure(chemical, testDataSet2d);
-		if (er.expToxValue != null) {
-			er.expSet = "Test";
-			return er;
-		}
+		er = lookup.LookupExpValByStructure(chemical, testDataSet2d,"Test");
+		if (er != null) return er;
 
 		// ******************************************************
-		er = lookup.new ExpRecord();
-		er.expToxValue = null;
-		er.expSet = "";
-		er.expCAS = "";
 
-		return er;
+		return null;
 
 	}
 
@@ -792,31 +775,19 @@ public class TaskCalculations {
 		// trainingDataSet2d.setClassIndex(classIndex);
 		// testDataSet2d.setClassIndex(classIndex);
 
-		Lookup.ExpRecord er = lookup.new ExpRecord();
+		Lookup.ExpRecord er = null;
 
 		// lookup in training set based on CAS
-		er.expToxValue = lookup.LookupExpValByCAS(CAS, trainingDataSet2d);
-		if (er.expToxValue != null) {
-			er.expCAS = CAS;
-			er.expSet = "Training";
-			return er;
-		}
+		er = lookup.LookupExpValByCAS(CAS, trainingDataSet2d,"Training");
+		if (er != null) return er;
 
 		// ******************************************************
 		// lookup in external test set based on CAS:
-		er.expToxValue = lookup.LookupExpValByCAS(CAS, testDataSet2d);
-		if (er.expToxValue != null) {
-			er.expCAS = CAS;
-			er.expSet = "Test";
-			return er;
-		}
+		er = lookup.LookupExpValByCAS(CAS, testDataSet2d,"Test");
+		if (er != null) return er;
 
 		// ******************************************************
-		er = lookup.new ExpRecord();
-		er.expSet = "";
-		er.expCAS = "";
-
-		return er;
+		return null;
 
 	}
 
@@ -824,11 +795,7 @@ public class TaskCalculations {
 
 		Lookup lookup = new Lookup();
 
-		Lookup.ExpRecord er = lookup.new ExpRecord();
-		er.expToxValue = null;
-		er.expSet = "";
-		er.expCAS = "";
-		er.expMOA = "";
+		ExpRecord er=lookup.new ExpRecord();
 
 		String structureCAS = lookup.LookupCASByStructure(chemical, ccTrainingMOA);// first
 																					// look
@@ -866,6 +833,8 @@ public class TaskCalculations {
 
 		// System.out.println(structureCAS);
 
+		
+		
 		if (!structureCAS.equals("")) {
 			er.expCAS = structureCAS;
 		} else {
@@ -876,16 +845,9 @@ public class TaskCalculations {
 		// Lookup LC50 value from training and prediction sets:
 
 		er.expToxValue = lookup.LookupExpValByCAS(er.expCAS, ccTrainingMOA);
-		if (er.expToxValue != null) {
-			er.expSet = "Training";
-		}
 
 		if (er.expToxValue == null) {
 			er.expToxValue = lookup.LookupExpValByCAS(er.expCAS, ccPredictionMOA);
-
-			if (er.expToxValue != null) {
-				er.expSet = "Test";
-			}
 		}
 
 		// **********************************************************************************

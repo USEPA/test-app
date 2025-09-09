@@ -2,6 +2,7 @@ package ToxPredictor.Utilities;
 
 import java.util.*;
 import java.util.List;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -59,6 +60,33 @@ public class Utilities {
 		String json=gson.toJson(object);			
 		return json;
 	}
+	
+	
+	public static String toJsonFile(Object object,String filepath) {
+		GsonBuilder builder = new GsonBuilder();
+		builder.serializeSpecialFloatingPointValues();//allow NaN values for chemicals that have no prediction
+		builder.setPrettyPrinting();			
+		Gson gson = builder.create();
+		String json=gson.toJson(object);			
+		
+		try (FileWriter fw=new FileWriter(filepath)) {
+			fw.write(json);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+		return json;
+	}
+	
+	public static void toFile(String strObject,String filepath,Charset charset) {
+		try (FileWriter fw=new FileWriter(filepath,charset)) {
+			fw.write(strObject);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+
   
   public static LinkedList<String> Parse(String Line, String Delimiter) {
     // parses a delimited string into a list

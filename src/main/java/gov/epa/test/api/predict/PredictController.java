@@ -252,7 +252,7 @@ public class PredictController {
 	
 
 	
-	private String getMultiEndpointHtml(List<PredictionResults> listResults) {
+	public String getMultiEndpointHtml(List<PredictionResults> listResults) {
 		StringBuffer sb=new StringBuffer();
 		
 		sb.append(getHeader());

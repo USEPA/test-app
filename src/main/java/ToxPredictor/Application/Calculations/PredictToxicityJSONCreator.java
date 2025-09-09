@@ -318,8 +318,11 @@ public class PredictToxicityJSONCreator {
 
 //		long t1=System.currentTimeMillis();
 		
-		if (createReports) writeSimilarChemicals(pr,"test",d.htTestMatch, d.abbrev, d.er.expToxValue, predToxVal, d.reportOptions);
-		if (createReports) writeSimilarChemicals(pr,"training",d.htTrainMatch, d.abbrev, d.er.expToxValue, predToxVal, d.reportOptions);
+		Double expToxValue=null;
+		if(d.er!=null)expToxValue=d.er.expToxValue;
+		
+		if (createReports) writeSimilarChemicals(pr,"test",d.htTestMatch, d.abbrev, expToxValue, predToxVal, d.reportOptions);
+		if (createReports) writeSimilarChemicals(pr,"training",d.htTrainMatch, d.abbrev, expToxValue, predToxVal, d.reportOptions);
 
 //		long t2=System.currentTimeMillis();
 
@@ -612,33 +615,30 @@ public class PredictToxicityJSONCreator {
 		// ************************************************
 		// Header row
 
-		if (er.expToxValue != null) {
+		if (er != null) {
 			predictionResultsPrimaryTable.setExpCAS(er.expCAS);
+			predictionResultsPrimaryTable.setExpSet(er.expSet);
 			predictionResultsPrimaryTable.setSource(PredictToxicityWebPageCreator.getSourceTag(endpoint));
-		}
 
-		predictionResultsPrimaryTable.setExpSet(er.expSet);
-
-		if (er.expSet.equals("Training") || er.expSet.equals("Test")) {
 			String predictedValue = "a";
 
 			if (!message.equals("OK")) {
 				predictedValue += ",b";
 			}
 			predictionResultsPrimaryTable.setPredictedValueSuperscript(predictedValue);
+
 		} else {
 			if (!message.equals("OK")) {
 				predictionResultsPrimaryTable.setPredictedValueSuperscript("b");
 			}
 		}
-		
 
 		// ************************************************************
 		// Molar units row
 		if (pr.isLogMolarEndpoint()) {
 			predictionResultsPrimaryTable.setMolarLogUnits(TESTConstants.getMolarLogUnits(endpoint));
 
-			if (er.expToxValue != null) {
+			if (er != null) {
 				predictionResultsPrimaryTable.setExpToxValue(er.expToxValue);
 			}
 
@@ -702,22 +702,25 @@ public class PredictToxicityJSONCreator {
 		}
 
 		// ************************************************************
+		
+		if(er!=null && er.expSet!=null) {
+			if (er.expSet.equals("Training")) {
+				String trainingExpSetText = "Note: the test chemical was present in the training set.";
 
-		if (er.expSet.equals("Training")) {
-			String trainingExpSetText = "Note: the test chemical was present in the training set.";
-
-			if (predToxVal != null) {
-				if (method.equals(TESTConstants.ChoiceFDAMethod) || method.equals(TESTConstants.ChoiceNearestNeighborMethod)) {
-					trainingExpSetText += "  However, the prediction <i>does</i> represent an external prediction.";
-				} else {
-					trainingExpSetText += "  The prediction <i>does not</i> represent an external prediction.";
+				if (predToxVal != null) {
+					if (method.equals(TESTConstants.ChoiceFDAMethod) || method.equals(TESTConstants.ChoiceNearestNeighborMethod)) {
+						trainingExpSetText += "  However, the prediction <i>does</i> represent an external prediction.";
+					} else {
+						trainingExpSetText += "  The prediction <i>does not</i> represent an external prediction.";
+					}
 				}
-			}
 
-			predictionResultsPrimaryTable.setPredictedValueNote(trainingExpSetText);
-		} else if (er.expSet.equals("Test")) {
-			predictionResultsPrimaryTable.setPredictedValueNote("Note: the test chemical was present in the external test set.");
+				predictionResultsPrimaryTable.setPredictedValueNote(trainingExpSetText);
+			} else if (er.expSet.equals("Test")) {
+				predictionResultsPrimaryTable.setPredictedValueNote("Note: the test chemical was present in the external test set.");
+			}
 		}
+		
 
 		// System.out.println(message);
 		if (!message.equals("OK")) {
@@ -1336,14 +1339,11 @@ public class PredictToxicityJSONCreator {
 		// ************************************************
 		// Header row
 
-		if (er.expToxValue != null) {
+		if (er != null) {
 			predictionResultsPrimaryTable.setExpCAS(er.expCAS);
 			predictionResultsPrimaryTable.setSource(PredictToxicityWebPageCreator.getSourceTag(endpoint));
-		}
-
-		predictionResultsPrimaryTable.setExpSet(er.expSet);
-
-		if (er.expSet.equals("Training") || er.expSet.equals("Test")) {
+			predictionResultsPrimaryTable.setExpSet(er.expSet);
+			
 			String predictedValueSuperscript = "a";
 
 			if (!message.equals("OK")) {
@@ -1356,10 +1356,14 @@ public class PredictToxicityJSONCreator {
 			}
 		}
 
+		
+//		System.out.println("er.expSet="+er.expSet);
+//		System.out.println("er.expToxValue="+er.expToxValue);
+		
 		// ************************************************************
 		// Value row
 
-		if (er.expToxValue != null) {
+		if (er != null) {
 			predictionResultsPrimaryTable.setExpToxValue(er.expToxValue);
 		}
 
@@ -1372,7 +1376,7 @@ public class PredictToxicityJSONCreator {
 		// result row:
 
 
-		if (er.expToxValue == null) {
+		if (er == null) {
 			predictionResultsPrimaryTable.setExpToxValueConclusion("N/A");
 		} else if (er.expToxValue < bound1) {
 			// *add endpoint*
@@ -1414,19 +1418,21 @@ public class PredictToxicityJSONCreator {
 
 		// ************************************************************
 
-		if (er.expSet.equals("Training")) {
-			String trainingExpSetText = "Note: the test chemical was present in the training set.";
+		if(er!=null) {
+			if (er.expSet.equals("Training")) {
+				String trainingExpSetText = "Note: the test chemical was present in the training set.";
 
-			if (method.equals(TESTConstants.ChoiceConsensus) || method.equals(TESTConstants.ChoiceHierarchicalMethod) || method.equals(TESTConstants.ChoiceGroupContributionMethod)
-					|| method.equals(TESTConstants.ChoiceSingleModelMethod) || method.equals(TESTConstants.ChoiceRandomForrestCaesar)) {
-				trainingExpSetText += "  The prediction " + "does not represent an external prediction.";
-			} else {
-				trainingExpSetText += "  However, the prediction does represent an external prediction.";
+				if (method.equals(TESTConstants.ChoiceConsensus) || method.equals(TESTConstants.ChoiceHierarchicalMethod) || method.equals(TESTConstants.ChoiceGroupContributionMethod)
+						|| method.equals(TESTConstants.ChoiceSingleModelMethod) || method.equals(TESTConstants.ChoiceRandomForrestCaesar)) {
+					trainingExpSetText += "  The prediction " + "does not represent an external prediction.";
+				} else {
+					trainingExpSetText += "  However, the prediction does represent an external prediction.";
+				}
+
+				predictionResultsPrimaryTable.setPredictedValueNote(trainingExpSetText);
+			} else if (er.expSet.equals("Test")) {
+				predictionResultsPrimaryTable.setPredictedValueNote("Note: the test chemical was present in the external test set.");
 			}
-
-			predictionResultsPrimaryTable.setPredictedValueNote(trainingExpSetText);
-		} else if (er.expSet.equals("Test")) {
-			predictionResultsPrimaryTable.setPredictedValueNote("Note: the test chemical was present in the external test set.");
 		}
 
 		// System.out.println(message);

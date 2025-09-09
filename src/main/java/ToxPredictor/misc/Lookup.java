@@ -104,34 +104,27 @@ public class Lookup {
 		
 	}
 	
-	public ExpRecord LookupExpRecordByCAS(String CAS, Instances trainingDataSet) {
-
-		ExpRecord er=new ExpRecord();	
-		er.expSet="";
-		er.expCAS="";
+	public ExpRecord LookupExpRecordByCAS(String CAS, Instances trainingDataSet,String set) {
 
 		int instanceNumber=trainingDataSet.getInstanceNumber(CAS);
-		if(instanceNumber==-1) return er;
+		if(instanceNumber==-1) return null;
 		
 		Instance instance=trainingDataSet.instance(instanceNumber);
 		
+		ExpRecord er=new ExpRecord();
 		er.expToxValue=instance.classValue();
 		er.MW=instance.value("MW");
 		er.expCAS=CAS;
+		er.expSet=set;
 		return er;
 		
 	}
 
 	public ExpRecord LookupExpValByStructure(Instance chemical,
-			Instances trainingDataSet) {
+			Instances trainingDataSet,String set) {
 
 		double [] Mean = trainingDataSet.getMeans();
 		double[] StdDev = trainingDataSet.getStdDevs();
-
-		ExpRecord e = new ExpRecord();
-//		e.expToxValue=-9999;
-		e.expSet="";
-		e.expCAS="";
 
 		for (Instance chemicali:trainingDataSet.getInstances()) {
 			
@@ -139,14 +132,16 @@ public class Lookup {
 					Mean, StdDev);
 
 			if (SimCoeff > 0.999) {
+				ExpRecord e = new ExpRecord();
 				e.expToxValue = chemicali.classValue();
 				e.expCAS = chemicali.getName();
 				e.MW=chemicali.value("MW");
+				e.expSet=set;
 				return e;
 			}
 		}
 
-		return e;
+		return null;
 	}
 	
 	public String LookupCASByStructure(Instance chemical,
