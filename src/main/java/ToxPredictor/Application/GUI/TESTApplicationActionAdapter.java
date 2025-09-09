@@ -1431,7 +1431,7 @@ public	class TESTApplicationActionAdapter implements java.awt.event.ActionListen
 			set=set.replace("test", "prediction");//need to change test to prediction since that's how it is stored in jar file
 			set=set.replace(" ", "_");
 			set+=".sdf";
-			set=endpointabbrev+"/"+set;
+			set="gov/epa/webtest/"+endpointabbrev+"/"+set;
 		}
 
 
