@@ -2,6 +2,7 @@ package ToxPredictor.Application.GUI.Table;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -213,10 +214,28 @@ public class MyTableModel extends AbstractTableModel {
 
 		String endpoint=tpv.endpoint;
 				
+		DecimalFormat df=new DecimalFormat("0.00");
+		
+		
 		if (tpv.predictionResults!=null) {
 			PredictionResultsPrimaryTable pt=tpv.predictionResults.getPredictionResultsPrimaryTable();
-			values.add(pt.getExpToxValue()+"");
-			values.add(pt.getPredToxValue()+"");
+			
+			if(pt.getExpToxValue()==null) {
+				values.add("N/A");
+			} else {
+				values.add(df.format(pt.getExpToxValue()));
+			}
+			
+
+			if(pt.getPredToxValue()==null) {
+				values.add("N/A");
+			} else {
+				values.add(df.format(pt.getPredToxValue()));
+			}
+			
+//			values.add(FormatUtils.setSignificantDigits(pt.getExpToxValue(),3));
+//			values.add(FormatUtils.setSignificantDigits(pt.getPredToxValue(),3));
+			
 			values.add(pt.getExpToxValueConclusion());
 			values.add(pt.getPredValueConclusion());
 
