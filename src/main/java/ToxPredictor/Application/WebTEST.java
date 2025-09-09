@@ -1845,29 +1845,18 @@ public class WebTEST {
 		Lookup.ExpRecord er;
 
 		// lookup first in training set based on CAS
-		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d);
+		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d,"Training");
 		// System.out.println(er.expToxValue);
-		if (er.expToxValue != null) {
-			er.expSet = "Training";
-			return er;
-		}
-
+		if (er != null) return er;
+		
 		// ******************************************************
 		// next lookup in external test set based on CAS:
-		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d);
+		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d,"Test");
 		// System.out.println(er.expToxValue);
-		if (er.expToxValue != null) {
-			er.expSet = "Test";
-			return er;
-		}
+		if (er != null) return er;
 
 		// ******************************************************
-		er = lookup.new ExpRecord();
-		er.expToxValue = null;
-		er.expSet = "";
-		er.expCAS = "";
-
-		return er;
+		return null;
 
 	}
 
