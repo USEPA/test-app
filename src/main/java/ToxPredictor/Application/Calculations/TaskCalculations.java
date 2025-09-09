@@ -778,12 +778,12 @@ public class TaskCalculations {
 		Lookup.ExpRecord er = null;
 
 		// lookup in training set based on CAS
-		er = lookup.LookupExpValByCAS(CAS, trainingDataSet2d,"Training");
+		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d,"Training");
 		if (er != null) return er;
 
 		// ******************************************************
 		// lookup in external test set based on CAS:
-		er = lookup.LookupExpValByCAS(CAS, testDataSet2d,"Test");
+		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d,"Test");
 		if (er != null) return er;
 
 		// ******************************************************
@@ -974,37 +974,7 @@ public class TaskCalculations {
 
 	}
 
-	public static Lookup.ExpRecord LookupExpValOld(String CAS, Instances trainingDataSet2d, Instances testDataSet2d) {
-		Lookup lookup = new Lookup();
-
-		Lookup.ExpRecord er;
-
-		// lookup first in training set based on CAS
-		er = lookup.LookupExpRecordByCAS(CAS, trainingDataSet2d);
-		// System.out.println(er.expToxValue);
-		if (er.expToxValue != null) {
-			er.expSet = "Training";
-			return er;
-		}
-
-		// ******************************************************
-		// next lookup in external test set based on CAS:
-		er = lookup.LookupExpRecordByCAS(CAS, testDataSet2d);
-		// System.out.println(er.expToxValue);
-		if (er.expToxValue != null) {
-			er.expSet = "Test";
-			return er;
-		}
-
-		// ******************************************************
-		er = lookup.new ExpRecord();
-		er.expToxValue = null;
-		er.expSet = "";
-		er.expCAS = "";
-
-		return er;
-
-	}
+	
 
 //	public static void CreateStructureImage(String CAS, String DestFolder) {
 //
