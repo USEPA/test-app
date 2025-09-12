@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,6 +30,7 @@ import org.openscience.cdk.smiles.SmilesParser;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 
 import ToxPredictor.Application.TESTConstants;
 import ToxPredictor.Application.WebTEST4;
@@ -38,6 +40,8 @@ import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles.Re
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Database.DSSToxRecord;
 import ToxPredictor.MyDescriptors.DescriptorFactory;
+import ToxPredictor.Utilities.Utilities;
+import gov.epa.test.api.predict.PredictController;
 import gov.epa.test.api.predict.PredictController.PostInput;
 import gov.epa.test.api.predict.TestApi;
 import kong.unirest.core.HttpResponse;
@@ -225,9 +229,14 @@ public class RunFromSDF {
 
 	}
 
-	public static void runSDF_all_endpoints_write_continuously_use_api(String SDFFilePath, String destJsonPath,
+	public void runSDF_all_endpoints_write_continuously_use_api(String SDFFilePath, String destJsonPath,
 			boolean skipMissingSID, int maxCount, boolean removeAlreadyRan, String server, int port) {
 
+		Gson gson=new Gson();
+		
+	    long beforeUsedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+
+		
 		//TODO make the api implement these as variables in the api input
 //		String method = TESTConstants.ChoiceConsensus;// what QSAR method being used (default- runs all methods and
 //		boolean createReports = true;// whether to store report
@@ -261,11 +270,25 @@ public class RunFromSDF {
 					if (debug)
 						System.out.println(countRan + " removed since already ran");
 				}
-				fw = new FileWriter(destJsonPath, destFile.exists());
+				fw = new FileWriter(destJsonPath, Charset.forName("UTF-8"),destFile.exists());
 			} else {
 				fw = new FileWriter(destJsonPath);
 			}
 
+			
+			System.gc(); // Request garbage collection to get a more accurate 'after' reading
+		    long afterUsedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
+		    long memoryUsedByObject = afterUsedMemory - beforeUsedMemory;
+		    
+		    
+            double memoryInMB =memoryUsedByObject / (1024 * 1024);
+            
+            System.out.println("Memory usage:"+memoryInMB+" MB");
+
+			
+//			if(true)return;
+			
+			
 			if (debug)
 				System.out.println("atom container count to run=" + molecules.size());
 
@@ -288,8 +311,13 @@ public class RunFromSDF {
 		
 			int counter=0;
 		
-			for (APIMolecule molecule:molecules) {
+			while (molecules.size()>0) {
+			
+//			for (APIMolecule molecule:molecules) {
 
+				APIMolecule molecule=molecules.remove(0);
+				
+				
 				// if (debug)
 				// System.out.println((i+countRan)+"\t"+destFile.getName()+"\t"+ac.getProperty("SMILES")+"");
 
@@ -304,7 +332,7 @@ public class RunFromSDF {
 				
 				for (PredictionResults pr : results) {
 
-					fw.write(gsonNotPretty.toJson(pr) + "\r\n");
+					fw.write(gson.toJson(pr) + "\r\n");
 
 					// if(pr.getPredictionResultsPrimaryTable()!=null ) {
 					// if(pr.getPredictionResultsPrimaryTable().getExpToxValue()!=null) {
@@ -326,33 +354,68 @@ public class RunFromSDF {
 
 	}
 
-	private static int removeAlreadyRanChemicals(String destJsonPath, List<APIMolecule> molecules) {
+	private int removeAlreadyRanChemicals(String destJsonPath, List<APIMolecule> molecules) {
 		System.out.println(destJsonPath);
 
 		Hashtable<String, Integer> htCountByDTXCID = new Hashtable<>();
 
 		try {
 
+			File file=new File(destJsonPath);
+			
 			BufferedReader br = new BufferedReader(new FileReader(destJsonPath));
 
+			
+			int counter=0;
+			
 			while (true) {
 				String line = br.readLine();
 
 				if (line == null)
 					break;
 
-				PredictionResults pr = gsonNotPretty.fromJson(line, PredictionResults.class);
+				counter++;
+				
+				try {
+				
+//					PredictionResults pr = gsonNotPretty.fromJson(line, PredictionResults.class);
+//
+//					if (pr.getDTXCID() == null)
+//						continue;
+					
+					if(!line.contains("DTXCID")) continue;
+					
+					
+					String dtxcid = getFieldFromJson(line, "DTXCID");
+					String error = getFieldFromJson(line, "error");
+					
+					if(!line.contains("Q2_Test") && !line.contains("SP_Test") && error.equals("")) {
+						//if doesnt have the stats then it didnt finish writing the line
+						System.out.println(destJsonPath+"\t"+dtxcid+"\t"+line);
+						continue;
+					}
 
-				if (pr.getDTXCID() == null)
-					continue;
+					if(counter%100000==0) System.out.println("\t"+file.getName()+"\t"+counter);
+					
+					// System.out.println(pr.getDTXCID());
 
-				// System.out.println(pr.getDTXCID());
+//					if (htCountByDTXCID.containsKey(pr.getDTXCID())) {
+//						htCountByDTXCID.put(pr.getDTXCID(), htCountByDTXCID.get(pr.getDTXCID()) + 1);
+//					} else {
+//						htCountByDTXCID.put(pr.getDTXCID(), 1);
+//					}
+					
+					if (htCountByDTXCID.containsKey(dtxcid)) {
+						htCountByDTXCID.put(dtxcid, htCountByDTXCID.get(dtxcid) + 1);
+					} else {
+						htCountByDTXCID.put(dtxcid, 1);
+					}
 
-				if (htCountByDTXCID.containsKey(pr.getDTXCID())) {
-					htCountByDTXCID.put(pr.getDTXCID(), htCountByDTXCID.get(pr.getDTXCID()) + 1);
-				} else {
-					htCountByDTXCID.put(pr.getDTXCID(), 1);
+				} catch (Exception ex) {
+//					JsonObject jo = gsonNotPretty.fromJson(line, JsonObject.class);
+//					System.out.println(Utilities.toJson(jo));
 				}
+
 			}
 
 			br.close();
@@ -572,6 +635,9 @@ public class RunFromSDF {
 				Hashtable<String,Object>htProperties=MoleculeCreator.getPropertiesHashtable(br);
 				if(strStructure==null || htProperties==null) break;
 				molecules.add(new APIMolecule(strStructure,htProperties));
+				
+				if(molecules.size()==count)break;
+				
 			}
 		} catch(Exception ex) {
 			ex.printStackTrace();
@@ -790,14 +856,17 @@ public class RunFromSDF {
 	 * 
 	 * 
 	 */
-	public void runSDF() {
+	public void runSDF(int num) {
 		
 		debug=true;
 		
 		boolean removeAlreadyRan = true;
 		boolean useServer=true;
 		
-		int num = 1;
+		int maxCount = -1;// set to -1 to run all in sdf
+//		int maxCount = 100;// set to -1 to run all in sdf
+
+		
 		int port = 8081 + num - 1;		
 		
 		String server="http://v2626umcth882.rtord.epa.gov";
@@ -819,12 +888,14 @@ public class RunFromSDF {
 
 		String filenameJson = filenameSDF.replace(".sdf", ".json");
 
-		int maxCount = -1;// set to -1 to run all in sdf
+		
 		boolean skipMissingSID = true;
 
 		String sdfPath = folderSrc + filenameSDF;
 		String destJsonPath = folderDest + filenameJson;
 
+		System.out.println("num="+num+",fileName="+filenameSDF);
+		
 		if(useServer) {
 			runSDF_all_endpoints_write_continuously_use_api(sdfPath, destJsonPath, skipMissingSID, maxCount, removeAlreadyRan,server,port);
 		} else {
@@ -1141,6 +1212,248 @@ public class RunFromSDF {
 		ReportCreator.createWebPagesForDTXSID(filePathJson, dtxsid);
 	}
  	
+	
+	
+	
+	String createSampleMol() {
+		return 	"\r\n"
+				+ "  Mrv1805 04221910482D          \r\n"
+				+ "\r\n"
+				+ "  0  0  0     0  0            999 V3000\r\n"
+				+ "M  V30 BEGIN CTAB\r\n"
+				+ "M  V30 COUNTS 12 16 0 0 0\r\n"
+				+ "M  V30 BEGIN ATOM\r\n"
+				+ "M  V30 1 C 1.7781 -1.54 0 0\r\n"
+				+ "M  V30 2 C 2.6671 0 0 0\r\n"
+				+ "M  V30 3 C 4.004 -0.77 0 0\r\n"
+				+ "M  V30 4 C 4.004 -2.31 0 0\r\n"
+				+ "M  V30 5 C 2.6671 -3.0801 0 0\r\n"
+				+ "M  V30 6 C 1.3371 -2.31 0 0\r\n"
+				+ "M  V30 7 C 1.3371 -0.77 0 0\r\n"
+				+ "M  V30 8 O 0 -1.54 0 0\r\n"
+				+ "M  V30 9 C 5.4671 -2.7861 0 0\r\n"
+				+ "M  V30 10 C 6.3701 -1.54 0 0\r\n"
+				+ "M  V30 11 C 5.4671 -0.294 0 0\r\n"
+				+ "M  V30 12 O 7.0001 -0.133 0 0\r\n"
+				+ "M  V30 END ATOM\r\n"
+				+ "M  V30 BEGIN BOND\r\n"
+				+ "M  V30 1 1 1 2\r\n"
+				+ "M  V30 2 1 1 5\r\n"
+				+ "M  V30 3 1 2 3\r\n"
+				+ "M  V30 4 1 2 7\r\n"
+				+ "M  V30 5 1 3 4\r\n"
+				+ "M  V30 6 1 3 11\r\n"
+				+ "M  V30 7 1 4 5\r\n"
+				+ "M  V30 8 1 4 9\r\n"
+				+ "M  V30 9 1 5 6\r\n"
+				+ "M  V30 10 1 6 7\r\n"
+				+ "M  V30 11 1 6 8\r\n"
+				+ "M  V30 12 1 7 8\r\n"
+				+ "M  V30 13 1 9 10\r\n"
+				+ "M  V30 14 1 10 11\r\n"
+				+ "M  V30 15 1 10 12\r\n"
+				+ "M  V30 16 1 11 12\r\n"
+				+ "M  V30 END BOND\r\n"
+				+ "M  V30 END CTAB\r\n"
+				+ "M  END\r\n"
+				+ "\r\n"
+				+ "\r\n"
+				+ "><DTXSID>\r\n"
+				+ "DTXSID4020452\r\n"
+				+ "\r\n"
+				+ "><DTXCID>\r\n"
+				+ "DTXCID00452\r\n"
+				+ "\r\n"
+				+ "><PREFERRED_NAME>\r\n"
+				+ "Dicyclopentadiene dioxide\r\n"
+				+ "\r\n"
+				+ "><CASRN>\r\n"
+				+ "81-21-0\r\n"
+				+ "\r\n"
+				+ "><INCHIKEY>\r\n"
+				+ "BQQUFAMSJAKLNB-UHFFFAOYNA-N\r\n"
+				+ "\r\n"
+				+ "><INCHI_STRING>\r\n"
+				+ "InChI=1/C10H12O2/c1-4-3-2-6-10(11-6)7(3)5(1)9-8(4)12-9/h3-10H,1-2H2\r\n"
+				+ "AuxInfo=1/0/N:1,9,4,5,2,10,3,6,7,11,12,8/rA:12CCCCCCCOCCCO/rB:s1;s2;s3;s1s4;s5;s2s6;s6s7;s4;s9;s3s10;s10s11;/rC:1.7781,-1.54,0;2.6671,0,0;4.004,-.77,0;4.004,-2.31,0;2.6671,-3.0801,0;1.3371,-2.31,0;1.3371,-.77,0;0,-1.54,0;5.4671,-2.7861,0;6.3701,-1.54,0;5.4671,-.294,0;7.0001,-.133,0;\r\n"
+				+ "\r\n"
+				+ "\r\n"
+				+ "><SMILES>\r\n"
+				+ "C1C2OC2C2C3CC(C4OC34)C12\r\n"
+				+ "\r\n"
+				+ "><IUPAC_NAME>\r\n"
+				+ "Octahydro-1aH-2,4-methanoindeno[1,2-b:5,6-b']bisoxirene\r\n"
+				+ "\r\n"
+				+ "><MOLECULAR_FORMULA>\r\n"
+				+ "C10H12O2\r\n"
+				+ "\r\n"
+				+ "><AVERAGE_MASS>\r\n"
+				+ "164.204\r\n"
+				+ "\r\n"
+				+ "><MONOISOTOPIC_MASS>\r\n"
+				+ "164.083729626\r\n"
+				+ "\r\n"
+				+ "$$$$";
+				
+	}
+	
+	void convertPredictionResultsToWebPages() {
+
+		int num=1;
+//		String casrn="75-07-0";
+		String dtxsid="DTXSID5039224";
+		Charset charset=Charset.forName("UTF-8");
+		
+		String snapshot = "snapshot-2025-07-30";
+		
+		String folderMain = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\";
+		String folderDest = folderMain + "data\\TEST5.1.3\\reports\\" + snapshot + "\\";
+		int from = 1 + 50000 * (num - 1);
+		String filenameSDF = "50k_chunk_from_" + from + ".sdf";
+		String filenameJson = filenameSDF.replace(".sdf", ".json");
+		String destJsonPath = folderDest + filenameJson;
+		String filenameHTML = dtxsid+".html";
+		String destHtmlPath=folderDest+filenameHTML;
+		
+		Gson gson=new Gson();
+		
+		List<PredictionResults>prList=new ArrayList<>();
+		
+		try (BufferedReader br=new BufferedReader(new FileReader(destJsonPath,charset))) {
+			
+			while (true) {
+				String line=br.readLine();
+				if(line==null) break;
+				PredictionResults pr = gson.fromJson(line, PredictionResults.class);
+				if(pr.getDTXSID().equals(dtxsid)) prList.add(pr);
+			}
+			
+			PredictController pc=new PredictController();
+			String html=pc.getMultiEndpointHtml(prList);
+			
+			
+			Utilities.toFile(html, destHtmlPath,charset);
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+		
+	}
+	
+	
+	void getCountsPerJson() {
+		String folder="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\data\\TEST5.1.3\\reports\\snapshot-2025-07-30";
+
+		int total=0;
+		
+		for (File file:new File(folder).listFiles()) {
+			if(!file.getName().contains(".json")) continue;
+			
+			try {
+
+				BufferedReader br = new BufferedReader(new FileReader(file));
+
+				HashSet<String>dtxcids=new HashSet<>();
+				
+//				System.out.println(br.readLine());
+				int counter=0;
+				
+				while (true) {
+					
+					String line = br.readLine();
+					
+					if (line == null)
+						break;
+
+//					System.out.println(line);
+					
+					counter++;
+					
+					if(counter%100000==0) System.out.println("\t"+file.getName()+"\t"+counter);
+					
+					if(!line.contains("\"DTXCID\"")){
+						continue;
+					}
+					
+//					if(!line.contains("DTXCID")) continue;
+					
+					String dtxcid = getFieldFromJson(line, "DTXCID");
+					String error = getFieldFromJson(line, "error");
+					if(!line.contains("Q2_Test") && !line.contains("SP_Test") && error.equals("")) {
+						System.out.println(file.getName()+"\t"+dtxcid+"\t"+line);
+						continue;
+					}
+					dtxcids.add(dtxcid);
+					
+//					try {
+//						PredictionResults pr = gsonNotPretty.fromJson(line, PredictionResults.class);
+//						dtxcids.add(pr.getDTXCID());	
+//					} catch (Exception ex) {
+//						String dtxcid = getFieldFromJson(line, "DTXCID");
+//						System.out.println(file.getName()+"\t"+dtxcid+"\t"+line);
+//					}
+					
+//					System.out.println(dtxcid);
+//					"DTXCID":"DTXCID101","Smiles"
+					
+					
+
+				}
+				
+				br.close();
+				
+				total+=dtxcids.size();
+				
+				System.out.println(file.getName()+"\t"+dtxcids.size());
+
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		System.out.println("total\t"+total);
+		
+	}
+
+	private String getFieldFromJson(String line, String fieldName) {
+		String value=line.substring(line.indexOf("\""+fieldName+"\":\""),line.length());
+		value=value.substring(fieldName.length()+4,value.length());
+		value=value.substring(0,value.indexOf("\""));
+		
+//		System.out.println(value);
+//		
+//		value=value.substring(0,value.indexOf("\""));
+		return value;
+	}
+	
+	
+	class MyRunnableTask implements Runnable {
+	    private int num;
+
+	    public MyRunnableTask(int num) {
+	        this.num = num;
+	    }
+
+	    @Override
+	    public void run() {
+	        System.out.println("num "+num + " is running in thread: " + Thread.currentThread().getName());
+	        runSDF(num);
+	    }
+	}
+	
+	
+	void runWithThreads() {
+		
+		for (int i = 1; i <= 9; i++) {
+            MyRunnableTask task = this.new MyRunnableTask(i);
+            Thread thread = new Thread(task, "Thread-" + i);
+            thread.start(); // Starts the thread, which calls the run() method
+        }
+		
+		
+	}
+	
 	/*
 	 * TODO:
 	 * - Check if descriptors match previous release of TEST- they match for FHM LC50 training set for installed version of TEST 5.1.3
@@ -1152,9 +1465,25 @@ public class RunFromSDF {
 	 */
 	
 	public static void main(String[] args) {
+		
 		RunFromSDF r=new RunFromSDF();
-//		r.runSDF();
-		r.displayWebpages("DTXSID5039224");
+		
+//		r.runSDF(1);
+		r.runWithThreads();
+		r.getCountsPerJson();
+		
+//		r.displayWebpages("DTXSID5039224");
+		
+
+//		int num = 1;
+//		int port = 8081 + num - 1;		
+//		String server="http://v2626umcth882.rtord.epa.gov";
+//		List<PredictionResults>results=TestApi.runPredictionFromMolFileString(r.createSampleMol(), server, port);
+//		System.out.println(Utilities.toJson(results));
+//		Utilities.toJsonFile(results, "bob.json");
+		
+//		r.convertPredictionResultsToWebPages();
+		
 		
 	}
 

@@ -17,7 +17,8 @@ public class PredictionResults {
     private String Smiles;//test chemical CAS (chemical being predicted)
     private String imageURL;//can be used for test chemical image for consensus table and similar chemicals tables
     private String error;
-    
+    private Double molWeight;
+    private String inchiKey;
 
     private String method;//method used to calculate endpoint
     private String endpoint; //endpoint being calculated
@@ -298,6 +299,22 @@ public class PredictionResults {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public Double getMolWeight() {
+		return molWeight;
+	}
+
+	public void setMolWeight(Double molWeight) {
+		this.molWeight = molWeight;
+	}
+
+	public String getInchiKey() {
+		return inchiKey;
+	}
+
+	public void setInchiKey(String inchiKey) {
+		this.inchiKey = inchiKey;
 	}
 
 

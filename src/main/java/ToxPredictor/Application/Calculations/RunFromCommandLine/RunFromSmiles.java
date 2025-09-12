@@ -729,6 +729,9 @@ public class RunFromSmiles {
 	 */
 	public static List<PredictionResults> runEndpointsAsList(IAtomContainer ac, List<String> endpoints,String method,boolean createReports,boolean createDetailedReports) {				
 
+		
+//		System.out.println("enter runEndpointsAsList()");
+		
 		DescriptorFactory.debug=false;
 		WebTEST4.createDetailedReports=createDetailedReports;
 		WebTEST4.createReports=createReports;
@@ -775,6 +778,16 @@ public class RunFromSmiles {
 		else if (ac.getProperty(DSSToxRecord.strName)!=null) NAME=ac.getProperty(DSSToxRecord.strName);
 		ac.setProperty(DSSToxRecord.strCID, DTXCID);
 		
+		Double MOLWEIGHT=null;
+		if (ac.getProperty(DSSToxRecord.strMolWeight)!=null) MOLWEIGHT=Double.parseDouble(ac.getProperty(DSSToxRecord.strMolWeight));
+		
+		String INCHIKEY=null;
+		if (ac.getProperty(DSSToxRecord.strInchiKey)!=null) INCHIKEY=ac.getProperty(DSSToxRecord.strInchiKey);
+		
+		
+		
+//		System.out.println("here1, inchiKey="+INCHIKEY+"\tmolWeight="+MOLWEIGHT);
+		
 		
 		if (ac.getProperty("DSSToxRecord")!=null) {
 			DSSToxRecord rec = ac.getProperty("DSSToxRecord");
@@ -816,11 +829,14 @@ public class RunFromSmiles {
 			}
 
 			pr.setVersion(TESTConstants.SoftwareVersion);
+			
 			pr.setCAS(CASRN);	
 			pr.setDTXSID(DTXSID);
 			pr.setDTXCID(DTXCID);
 			pr.setSmiles(SMILES);
 			pr.setName(NAME);
+			pr.setInchiKey(INCHIKEY);
+			pr.setMolWeight(MOLWEIGHT);
 			
 //			System.out.println("pr.getName()="+pr.getName());
 			

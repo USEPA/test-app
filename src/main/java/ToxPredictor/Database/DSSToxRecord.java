@@ -29,6 +29,7 @@ public class DSSToxRecord {
 	public static String strInchiKey = "inchiKey";
 	public static String strInchiKey1 = "inchiKey1";
 	public static String strMol = "mol";
+	public static String strMolWeight = "molWeight";
 
 	public static String[] fieldNames = { strCAS, strName, strCID, strSID, strGSID, strSmiles, strInchi, strInchiKey,
 			strInchiKey1 ,strMol};
