@@ -20,6 +20,8 @@ import com.google.gson.reflect.TypeToken;
 import ToxPredictor.Application.model.PredictionResults;
 import ToxPredictor.Database.DSSToxRecord;
 import gov.epa.test.api.predict.TestApi;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
 
 /**
 * @author TMARTI02
@@ -36,8 +38,8 @@ public class RunFromCompoundsJson {
 	    private String jchemInchikey;
 	    private String indigoInchikey;
 	    private String molFile;
-	    private boolean molImagePNGAvailable;
-	    private double molWeight;
+	    private Boolean molImagePNGAvailable;
+	    private Double molWeight;
 	    private String smiles;
 	    private GenericSubstanceCompound genericSubstanceCompound;
 
@@ -62,9 +64,15 @@ public class RunFromCompoundsJson {
 			htProperties.put(DSSToxRecord.strSID,this.genericSubstanceCompound.genericSubstance.dsstoxSubstanceId);
 			htProperties.put(DSSToxRecord.strCAS,this.genericSubstanceCompound.genericSubstance.casrn);
 			htProperties.put(DSSToxRecord.strName,this.genericSubstanceCompound.genericSubstance.preferredName);
-			htProperties.put(DSSToxRecord.strSmiles,smiles);
-			htProperties.put(DSSToxRecord.strMolWeight,molWeight);
-			htProperties.put(DSSToxRecord.strInchiKey,indigoInchikey);
+			
+			if(smiles!=null)
+				htProperties.put(DSSToxRecord.strSmiles,smiles);
+			
+			if(molWeight!=null)
+				htProperties.put(DSSToxRecord.strMolWeight,molWeight);
+			
+			if (indigoInchikey!=null)
+				htProperties.put(DSSToxRecord.strInchiKey,indigoInchikey);
 			
 			for(String property:htProperties.keySet()) {
 				strMolecule+="> <"+property+">\n";
@@ -108,8 +116,8 @@ public class RunFromCompoundsJson {
 		
 		int port = 8081 + num - 1;		
 		
-//		String server="http://v2626umcth882.rtord.epa.gov";
-		String server="http://localhost";
+		String server="http://v2626umcth882.rtord.epa.gov";
+//		String server="http://localhost";
 
 		String snapshot = "snapshot-2025-07-30";
 
@@ -122,8 +130,9 @@ public class RunFromCompoundsJson {
 		new File(folderDest).mkdirs();
 
 		
-		int from = 1 + 50000 * (num - 1);
-		String filenameSrcJson = "prod_compounds1.json";
+//		int from = 1 + 50000 * (num - 1);
+		
+		String filenameSrcJson = "prod_compounds"+num+".json";
 
 		String filenameDestJson = filenameSrcJson;
 
@@ -255,7 +264,7 @@ public class RunFromCompoundsJson {
 			List<DsstoxCompound>compounds=gson.fromJson(new FileReader(srcJsonPath), listOfMyClassObject);
 
 			if (debug)
-				System.out.println("atom container count in sdf=" + compounds.size());
+				System.out.println("atom container count in json=" + compounds.size());
 
 
 			File destFile = new File(destJsonPath);
@@ -345,11 +354,29 @@ public class RunFromCompoundsJson {
 	}
 
 
+	void healthCheck() {
+		
+		for (int i = 1; i <= 11; i++) {
+			int port = 8081 + i - 1;		
+			
+			try {
+			
+				HttpResponse<String> response = Unirest.get("http://v2626umcth882.rtord.epa.gov:"+port+"/hello?name=todddddd")
+				      .asString();
+				System.out.println(i+"\t"+port+"\t"+response.getBody());
+			
+			} catch (Exception ex) {
+				System.out.println("Error for i="+i+", port"+port);
+			}
+				    
+		}
+	}
+	
 
 
 	void runWithThreads() {
 		
-		for (int i = 1; i <= 9; i++) {
+		for (int i = 1; i <= 11; i++) {
             MyRunnableTask task = this.new MyRunnableTask(i);
             Thread thread = new Thread(task, "Thread-" + i);
             thread.start(); // Starts the thread, which calls the run() method
@@ -361,7 +388,9 @@ public class RunFromCompoundsJson {
 	public static void main(String[] args) {
 
 		RunFromCompoundsJson r=new RunFromCompoundsJson();
-		r.runFromJson(2);
+//		r.runFromJson(2);
+		r.runWithThreads();
+//		r.healthCheck();
 
 	}
 

@@ -65,6 +65,9 @@ import java.util.Vector;
 public class WebTEST4 {
 	
 	
+	public static int calculationCount=0;
+	
+	
 	public static String dataFolder="gov/epa/webtest";
 	
 	public static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().serializeSpecialFloatingPointValues().create();
@@ -1038,6 +1041,15 @@ public class WebTEST4 {
 				(System.currentTimeMillis() - start) / 1000d, totalDescriptorCalculationTime / 1000d,
 				totalPredictionGenerationTime / 1000d, totalReportGenerationTime / 1000d);
 
+		
+		calculationCount++;
+		
+		if(calculationCount%100==0) {//avoid memory bleed
+//			System.out.print("Running gc...");
+			System.gc();
+//			System.out.print("done");
+		}
+		
 		return result;
 	}
 

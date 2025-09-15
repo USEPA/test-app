@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.openscience.cdk.AtomContainer;
 import org.openscience.cdk.AtomContainerSet;
 import org.openscience.cdk.DefaultChemObjectBuilder;
@@ -28,6 +30,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 
+import ToxPredictor.Application.WebTEST4;
+
 //import com.mashape.unirest.http.HttpResponse;
 
 //import com.mashape.unirest.http.Unirest;
@@ -38,6 +42,8 @@ import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSDF;
 import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles;
 import ToxPredictor.Application.Calculations.RunFromCommandLine.RunFromSmiles.MoleculeCreator;
 import ToxPredictor.Application.model.PredictionResults;
+import ToxPredictor.Database.DSSToxRecord;
+import ToxPredictor.Utilities.FormatUtils;
 import gov.epa.test.api.predict.PredictController.PostInput;
 
 
@@ -51,6 +57,10 @@ import kong.unirest.core.Unirest;
  */
 public class TestApi {
 
+	private static final Logger logger = LogManager.getLogger(TestApi.class);
+
+	
+	
 	public static Gson gsonPretty = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping()
 			.serializeSpecialFloatingPointValues().create();
 
@@ -204,12 +214,11 @@ public class TestApi {
 
 	public static List<PredictionResults> runPredictionFromMolFileString(String molFile,String server, int port) {
 		
+		
 		try {
 			
 			
 //			System.out.println(molFile);
-			
-			IAtomContainer ac=MoleculeCreator.readFromMolFileString(molFile);
 			
 //			if(ac.getAtomCount()==0)
 //				System.out.println(smiles+"\t"+sid+"\t"+ac.getAtomCount());
@@ -236,8 +245,20 @@ public class TestApi {
 			return listResults;
 			
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+
+//			e.printStackTrace();
+			
+			IAtomContainer ac=null;
+			ac=MoleculeCreator.readFromMolFileString(molFile);
+			
+			if(ac!=null) {
+				String dtxsid=ac.getProperty(DSSToxRecord.strSID);
+				logger.error("Error getting response for "+dtxsid+" for port="+port);
+			} else {
+				logger.error("Null molecule:"+ molFile);
+			}
+			
+			
 			return null;
 		} 
 		
