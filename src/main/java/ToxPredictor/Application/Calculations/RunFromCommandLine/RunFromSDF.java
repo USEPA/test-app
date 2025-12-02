@@ -1469,8 +1469,27 @@ public class RunFromSDF {
 		RunFromSDF r=new RunFromSDF();
 		
 //		r.runSDF(1);
-		r.runWithThreads();
-		r.getCountsPerJson();
+//		r.runWithThreads();
+//		r.getCountsPerJson();
+		
+		String path="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\ghs-data-gathering\\data\\experimental\\EpisuiteISIS\\EPI_SDF_Data\\EPI_PCKOC_Data_SDF.sdf";
+		List<APIMolecule>mols=RunFromSDF.readSDF_to_API_Molecules(path, -1, false);
+		
+		
+		HashSet<String>srcs=new HashSet<>();
+		for(APIMolecule mol:mols) {
+			for(String key:mol.htProperties.keySet()) {
+				if(key.contains("KocRef")) {
+					srcs.add(mol.htProperties.get(key)+"");
+				}
+			}
+		}
+		
+		for(String src:srcs) {
+			System.out.println(src);	
+		}
+		
+		
 		
 //		r.displayWebpages("DTXSID5039224");
 		

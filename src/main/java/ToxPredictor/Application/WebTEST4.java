@@ -996,8 +996,15 @@ public class WebTEST4 {
 							Instances testDataSet2d = ht_ccPrediction.get(endpoint);
 
 							Lookup.ExpRecord er = WebTEST.LookupExpVal(CAS, trainingDataSet2d, testDataSet2d);
-
-							v = WebTEST.getTESTPredictedValue(endpoint, method, CAS, er.expToxValue, null, er.MW, "",
+							Double expToxValue=null;
+							Double MW=null;
+							
+							if(er!=null) {
+								expToxValue=er.expToxValue;
+								MW=er.MW;
+							}
+							
+							v = WebTEST.getTESTPredictedValue(endpoint, method, CAS, expToxValue, null, MW, "",
 									TESTConstants.isBinary(endpoint));
 							v.error = error;
 							v.errorCode = errorCode;
@@ -1045,9 +1052,7 @@ public class WebTEST4 {
 		calculationCount++;
 		
 		if(calculationCount%100==0) {//avoid memory bleed
-//			System.out.print("Running gc...");
 			System.gc();
-//			System.out.print("done");
 		}
 		
 		return result;

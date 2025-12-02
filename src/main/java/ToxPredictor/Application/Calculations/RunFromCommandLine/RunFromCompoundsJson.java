@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -105,8 +107,6 @@ public class RunFromCompoundsJson {
 
 	private void runFromJson(int num) {
 
-		
-		
 		boolean removeAlreadyRan = true;
 		boolean useServer=true;
 		
@@ -114,7 +114,9 @@ public class RunFromCompoundsJson {
 //		int maxCount = 100;// set to -1 to run all in sdf
 
 		
-		int port = 8081 + num - 1;		
+		int port = 8081 + num - 1;	
+		
+		if(num>11) port-=11;
 		
 		String server="http://v2626umcth882.rtord.epa.gov";
 //		String server="http://localhost";
@@ -143,6 +145,43 @@ public class RunFromCompoundsJson {
 		String destJsonPath = folderDest + filenameDestJson;
 
 		System.out.println("num="+num+",fileName="+filenameSrcJson);
+		
+		if(useServer) {
+			runJson_all_endpoints_write_continuously_use_api(srcJsonPath, destJsonPath, skipMissingSID, maxCount, removeAlreadyRan,server,port);
+		} else {
+//			runJson_all_endpoints_write_continuously(sdfPath, destJsonPath, skipMissingSID, maxCount, removeAlreadyRan);
+		}
+		
+		
+	}
+	
+	
+	private void runFromJson() {
+
+		String filenameSrcJson = "prod_compounds_no_test_prediction.json";
+		String snapshot = "snapshot-2025-07-30";
+		
+		String folderMain = "C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\hibernate_qsar_model_building\\";
+		String folderSrc = folderMain + "data\\dsstox\\" + snapshot + "\\json filter\\";
+		String folderDest = folderMain + "data\\TEST5.1.3\\reports\\" + snapshot + "\\";
+
+		
+		boolean removeAlreadyRan = true;
+		boolean useServer=true;
+		
+		int maxCount = -1;// set to -1 to run all in sdf
+//		int maxCount = 100;// set to -1 to run all in sdf
+
+		int port = 8081;	
+		String server="http://v2626umcth882.rtord.epa.gov";
+//		String server="http://localhost";
+		new File(folderDest).mkdirs();
+
+		String filenameDestJson = filenameSrcJson;
+		boolean skipMissingSID = true;
+		String srcJsonPath = folderSrc + filenameSrcJson;
+		String destJsonPath = folderDest + filenameDestJson;
+		System.out.println("fileName="+filenameSrcJson);
 		
 		if(useServer) {
 			runJson_all_endpoints_write_continuously_use_api(srcJsonPath, destJsonPath, skipMissingSID, maxCount, removeAlreadyRan,server,port);
@@ -253,6 +292,9 @@ public class RunFromCompoundsJson {
 	private void runJson_all_endpoints_write_continuously_use_api(String srcJsonPath, String destJsonPath,
 			boolean skipMissingSID, int maxCount, boolean removeAlreadyRan, String server, int port) {
 
+		
+//		List<String>skipDtxsids=Arrays.asList("DTXSID90332347","DTXSID101484125","DTXSID801336080");
+		List<String>skipDtxsids=new ArrayList<>();		
 
 		Gson gson=new Gson();
 		long beforeUsedMemory = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
@@ -314,7 +356,13 @@ public class RunFromCompoundsJson {
 
 				DsstoxCompound dc=compounds.remove(0);
 
-
+				
+				if(skipDtxsids.contains(dc.genericSubstanceCompound.genericSubstance.dsstoxSubstanceId)) {
+					System.out.println("Skipping "+dc.genericSubstanceCompound.genericSubstance.dsstoxSubstanceId);
+					continue;
+				}
+					
+				
 				// if (debug)
 				// System.out.println((i+countRan)+"\t"+destFile.getName()+"\t"+ac.getProperty("SMILES")+"");
 
@@ -376,8 +424,9 @@ public class RunFromCompoundsJson {
 
 	void runWithThreads() {
 		
-		for (int i = 1; i <= 11; i++) {
-            MyRunnableTask task = this.new MyRunnableTask(i);
+//		for (int i = 1; i <= 11; i++) {
+		for (int i = 12; i <= 22; i++) {
+			MyRunnableTask task = this.new MyRunnableTask(i);
             Thread thread = new Thread(task, "Thread-" + i);
             thread.start(); // Starts the thread, which calls the run() method
         }
@@ -388,8 +437,9 @@ public class RunFromCompoundsJson {
 	public static void main(String[] args) {
 
 		RunFromCompoundsJson r=new RunFromCompoundsJson();
+		r.runFromJson();
 //		r.runFromJson(2);
-		r.runWithThreads();
+//		r.runWithThreads();
 //		r.healthCheck();
 
 	}

@@ -50,6 +50,10 @@ public class RunFromJava {
 
 		String endpoint=TESTConstants.abbrevChoiceFHM_LC50;//or just use "LC50"; 		
 		String method=TESTConstants.abbrevChoiceConsensus;//or just use "consensus";
+		
+		for(String id:ids) System.out.println(id);
+		
+		if(true)return;
 
 		for (String id:ids) {
 			TESTPredictedValue tpv=WebTEST4.run(id, endpoint, method);	
@@ -82,6 +86,7 @@ public class RunFromJava {
 		
 	static void runDescriptors() {
 		String id="benzene";
+		
 		DescriptorData dd=WebTEST4.runDescriptors(id);
 		//System.out.println(Utilities.toJson(dd));//display descriptors as Json
 		

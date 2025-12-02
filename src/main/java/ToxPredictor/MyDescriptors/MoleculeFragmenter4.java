@@ -392,7 +392,7 @@ public class MoleculeFragmenter4 {
 		this.getCount("AS", "S", "Aromatic", "Any", "S", "SaaS", "", "Any");
 
 		this.getCount("=O [other]", "O", "Any", "Any", "O", "SdO", "", "Any");
-		this.getCount("=S [other]", "S", "Any", "Any", "O", "SdS", "", "Any");
+		this.getCount("=S [other]", "S", "Any", "Any", "S", "SdS", "", "Any");//TMM:11/25/2025 attach atom changed to S
 		this.getCount("-[O-]", "[O-]", "Any", "Any", "O", "SsOm", "", "Any");
 		this.getCount("-O- [aliphatic attach]", "O", "Any", "Any", "O", "SssO", "", "Any");
 		this.getCount("-S- [aliphatic attach]", "S", "Any", "Any", "S", "SssS", "", "Any");

@@ -673,7 +673,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 //		System.out.println(chemical.name+"\t"+chemical.CAS+"\t"+tpv.endpoint);
 		
 		
-		if (!tpv.expValMass.equals(Double.NaN)) {
+		if (tpv.expValMass!=null && !tpv.expValMass.equals(Double.NaN)) {
 			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.source = ScoreRecord.sourceTEST_Experimental;
 			sr.name=chemical.name;
@@ -703,7 +703,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		}
 		
 
-		if (!tpv.predValMass.equals(Double.NaN)) {
+		if (tpv.predValMass!=null && !tpv.predValMass.equals(Double.NaN)) {
 			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.name=chemical.name;
 			sr.source = ScoreRecord.sourceTEST_Predicted;
@@ -752,7 +752,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 	private void createRecordBinary(Chemical chemical, TESTPredictedValue tpv, Score score) {
 //		System.out.println(tpv.endpoint+"\t"+tpv.expValLogMolar+"\t"+tpv.predValLogMolar);
 		
-		if (!tpv.expValLogMolar.equals(Double.NaN)) {
+		if (tpv.expValLogMolar!=null && !tpv.expValLogMolar.equals(Double.NaN)) {
 
 			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.source = ScoreRecord.sourceTEST_Experimental;
@@ -778,7 +778,7 @@ public static TESTRecord getTESTRecord(Statement stat,String tableName,String ke
 		}
 		
 
-		if (!tpv.predValLogMolar.equals(Double.NaN)) {
+		if (tpv.predValLogMolar!=null && !tpv.predValLogMolar.equals(Double.NaN)) {
 			ScoreRecord sr = new ScoreRecord(score.hazard_name,chemical.CAS,chemical.name);
 			sr.source = ScoreRecord.sourceTEST_Predicted;
 			sr.name=chemical.name;

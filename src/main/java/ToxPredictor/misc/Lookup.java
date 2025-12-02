@@ -91,7 +91,7 @@ public class Lookup {
 		public Double expToxValue;
 		public String expCAS;
 		public String expSet;
-		public double MW;
+		public Double MW;
 		public String expMOA;
 	}
 

@@ -157,6 +157,10 @@ public class TestApi {
 		
 		String json=responseGet.getBody().toString();
 		
+		if(json.contains("not found")) {
+			return null;
+		}
+		
 //		System.out.println(json);
 		
 		List<PredictionResults>listResults=getResultsFromJson(json);
@@ -368,6 +372,7 @@ public class TestApi {
 	public static List<PredictionResults> getResultsFromJson(String json) {
 		Type type = new TypeToken<List<PredictionResults>>(){}.getType();
 		Gson gson = new Gson();
+		
 		return  gson.fromJson(json, type);
 
 	}

@@ -4164,13 +4164,16 @@ public class PredictToxicityWebPageCreator {
 		fc.WriteImageToFile(filename, DestFolder);
 	}
 
-	public static double getToxValMass(String endpoint, double toxValMolar, double MW) {
+	public static Double getToxValMass(String endpoint, double toxValMolar, Double MW) {
 
 		// *add endpoint*
 		if (endpoint.equals(TESTConstants.ChoiceBCF) || endpoint.equals(TESTConstants.ChoiceViscosity) || endpoint.equals(TESTConstants.ChoiceVaporPressure)
 				|| endpoint.equals(TESTConstants.ChoiceEstrogenReceptorRelativeBindingAffinity)) {
 			return Math.pow(10, toxValMolar);
 		} else {
+			
+			if(MW==null)return null;
+			
 			return Math.pow(10, -toxValMolar) * MW * 1000.0;
 		}
 	}

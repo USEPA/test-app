@@ -837,6 +837,10 @@ public class PredictToxicityWebPageCreatorFromJSON {
 		
 		fw.write("<p><p>");
 		
+		
+		fw.write("<table cellpadding=\"3\" cellspacing=\"0\"><tr><td>\n");
+		
+		
 		fw.write("<table border=\"1\" cellpadding=\"3\" cellspacing=\"0\">\n");
 		fw.write("<caption>Predictions</caption>\r\n");
 
@@ -867,7 +871,21 @@ public class PredictToxicityWebPageCreatorFromJSON {
 			fw.write("<td>" + strPred + "</td>\n");
 			fw.write("</tr>\n");
 		}
-		fw.write("</table>\n");
+		fw.write("</table></td>\n");
+		
+		PredictionResults pr=listPredictionResults.get(0);
+		
+		fw.write("<td><a href=\""+pr.getImageURL()+"\">"+
+				"<img src=\"" +pr.getImageURL() 
+				+ "\" width=" + 200+ " border=0></a><br>"
+				+"DTXSID: "+pr.getDTXSID()+"<br>"
+				+"CASRN: "+pr.getCAS()+"<br>"
+				+"Name: "+pr.getName()+"<br>"
+				+"Smiles: "+pr.getSmiles()+"<br>"
+				+ "</td>\n");
+
+		
+		fw.write("</tr></table>\n");
 		
 		return fw.toString();
 		

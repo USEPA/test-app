@@ -1896,16 +1896,16 @@ public class WebTEST {
 	}
 
 	public static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, Double ExpToxVal,
-			Double PredToxVal, double MW, String error, boolean isBinary) {
+			Double PredToxVal, Double MW, String error, boolean isBinary) {
 		if (!isBinary) {
 			return getTESTPredictedValue(endpoint, method, CAS, ExpToxVal, PredToxVal, MW, error);
 		} else {
-			return getTESTPredictedValueBinary(endpoint, method, CAS, ExpToxVal, PredToxVal, MW, error);
+			return getTESTPredictedValueBinary(endpoint, method, CAS, ExpToxVal, PredToxVal, error);
 		}
 	}
 
 	static TESTPredictedValue getTESTPredictedValue(String endpoint, String method, String CAS, Double ExpToxVal,
-			Double PredToxVal, double MW, String error) {
+			Double PredToxVal, Double MW, String error) {
 
 		TESTPredictedValue v = new TESTPredictedValue(CAS, endpoint, method);
 		
@@ -2357,7 +2357,7 @@ public class WebTEST {
 	}
 
 	static TESTPredictedValue getTESTPredictedValueBinary(String endpoint, String method, String CAS, Double ExpToxVal,
-			Double PredToxVal, double MW, String error) {
+			Double PredToxVal, String error) {
 		TESTPredictedValue v = new TESTPredictedValue(CAS, endpoint, method);
 		try {
 
