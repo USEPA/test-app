@@ -92,7 +92,7 @@ public class PredictController {
     		Document doc = Jsoup.parse(sw.toString());
     		doc.outputSettings().indentAmount(2);
     		
-    		//TODO make tabbed dialog with all reports
+    		//TODO make tabbed dialog with all reports as was done in predictGetDB()
 
     		
     		return doc.toString();

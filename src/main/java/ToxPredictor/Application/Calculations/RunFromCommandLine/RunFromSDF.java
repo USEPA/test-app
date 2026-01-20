@@ -1472,6 +1472,25 @@ public class RunFromSDF {
 //		r.runWithThreads();
 //		r.getCountsPerJson();
 		
+//		readEpisuiteKocFile();
+//		r.displayWebpages("DTXSID5039224");
+		
+
+//		int num = 1;
+//		int port = 8081 + num - 1;		
+//		String server="http://v2626umcth882.rtord.epa.gov";
+//		List<PredictionResults>results=TestApi.runPredictionFromMolFileString(r.createSampleMol(), server, port);
+//		System.out.println(Utilities.toJson(results));
+//		Utilities.toJsonFile(results, "bob.json");
+		
+//		r.convertPredictionResultsToWebPages();
+		
+		
+	}
+	
+	
+
+	private static void readEpisuiteKocFile() {
 		String path="C:\\Users\\TMARTI02\\OneDrive - Environmental Protection Agency (EPA)\\0 java\\0 model_management\\ghs-data-gathering\\data\\experimental\\EpisuiteISIS\\EPI_SDF_Data\\EPI_PCKOC_Data_SDF.sdf";
 		List<APIMolecule>mols=RunFromSDF.readSDF_to_API_Molecules(path, -1, false);
 		
@@ -1488,22 +1507,6 @@ public class RunFromSDF {
 		for(String src:srcs) {
 			System.out.println(src);	
 		}
-		
-		
-		
-//		r.displayWebpages("DTXSID5039224");
-		
-
-//		int num = 1;
-//		int port = 8081 + num - 1;		
-//		String server="http://v2626umcth882.rtord.epa.gov";
-//		List<PredictionResults>results=TestApi.runPredictionFromMolFileString(r.createSampleMol(), server, port);
-//		System.out.println(Utilities.toJson(results));
-//		Utilities.toJsonFile(results, "bob.json");
-		
-//		r.convertPredictionResultsToWebPages();
-		
-		
 	}
 
 }
